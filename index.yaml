@@ -19,6 +19,6 @@ entries:
     sources:
     - https://github.com/opstree/k8s-vault-webhook
     urls:
-    - https://ot-container-kit.github.io/helm-charts/k8s-vault-webhook-0.1.tgz
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/v1.0/k8s-vault-webhook-0.1.tgz
     version: "0.1"
 generated: "2021-04-11T16:19:26.448268401+05:30"
