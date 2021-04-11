@@ -45,6 +45,8 @@ metadata:
 {{- end }}
 webhooks:
 - name: pods.{{ template "k8s-vault-webhook.name" . }}.admission.opstree.com
+  sideEffects: {{ .Values.apiSideEffectValue }}
+  admissionReviewVersions: ["v1beta1"]
   clientConfig:
     service:
       namespace: {{ .Release.Namespace }}
@@ -85,13 +87,9 @@ webhooks:
       values:
       - skip
 {{- end }}
-{{- if and (ge (int $major) 1) (ge (int $minor) 12) }}
-  sideEffects: {{ .Values.apiSideEffectValue }}
-{{- else }}
-  sideEffects: None
-{{- end }}
-  admissionReviewVersions: ["v1", "v1beta1"]
 - name: secrets.{{ template "k8s-vault-webhook.name" . }}.admission
+  sideEffects: {{ .Values.apiSideEffectValue }}
+  admissionReviewVersions: ["v1beta1"]
   clientConfig:
     service:
       namespace: {{ .Release.Namespace }}
@@ -122,12 +120,6 @@ webhooks:
       operator: NotIn
       values:
       - {{ .Release.Namespace }}
-{{- if and (ge (int $major) 1) (ge (int $minor) 12) }}
-  sideEffects: {{ .Values.apiSideEffectValue }}
-{{- else }}
-  sideEffects: None
-{{- end }}
-  admissionReviewVersions: ["v1", "v1beta1"]
 {{- if .Values.configMapMutation }}
 - name: configmaps.{{ template "k8s-vault-webhook.name" . }}.admission
   clientConfig:
@@ -163,7 +155,4 @@ webhooks:
 {{- end }}
 {{- if and (ge (int $major) 1) (ge (int $minor) 12) }}
   sideEffects: {{ .Values.apiSideEffectValue }}
-{{- else }}
-  sideEffects: None
 {{- end }}
-  admissionReviewVersions: ["v1", "v1beta1"]
