@@ -1,0 +1,154 @@
+{{- $tlsCrt := "" }}
+{{- $tlsKey := "" }}
+{{- $caCrt := "" }}
+{{- if .Values.certificate.generate }}
+{{- $ca := genCA "svc-cat-ca" 3650 }}
+{{- $svcName := include "k8s-vault-webhook.fullname" . }}
+{{- $cn := printf "%s.%s.svc" $svcName .Release.Namespace }}
+{{- $altName1 := printf "%s.cluster.local" $cn }}
+{{- $altName2 := printf "%s" $cn }}
+{{- $server := genSignedCert $cn nil (list $altName1 $altName2) 365 $ca }}
+{{- $tlsCrt = b64enc $server.Cert }}
+{{- $tlsKey = b64enc $server.Key }}
+{{- $caCrt =  b64enc $ca.Cert }}
+{{- else if .Values.certificate.useCertManager }}
+{{/* do nothing with certs here. Cert-manager will handle it all */}}
+{{/* all clientConfig.caBundle will be overridden by cert-manager */}}
+{{- else }}
+{{- $tlsCrt = required "Required when certificate.generate is false" .Values.certificate.server.tls.crt }}
+{{- $tlsKey = required "Required when certificate.generate is false" .Values.certificate.server.tls.key }}
+{{- $caCrt = required "Required when certificate.generate is false" .Values.certificate.ca.crt }}
+{{- end }}
+{{- $major := .Capabilities.KubeVersion.Major -}}
+{{- $minor := .Capabilities.KubeVersion.Minor -}}
+
+{{- if (eq .Values.certificate.useCertManager false) }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ template "k8s-vault-webhook.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+data:
+  tls.crt: {{ $tlsCrt }}
+  tls.key: {{ $tlsKey }}
+  ca.crt:  {{ $caCrt }}
+{{- end }}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ template "k8s-vault-webhook.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+{{- if .Values.certificate.useCertManager }}
+  annotations:
+    cert-manager.io/inject-ca-from: "{{ .Release.Namespace }}/{{ include "k8s-vault-webhook.servingCertificate" . }}"
+{{- end }}
+webhooks:
+- name: pods.{{ template "k8s-vault-webhook.name" . }}.admission.banzaicloud.com
+  clientConfig:
+    service:
+      namespace: {{ .Release.Namespace }}
+      name: {{ template "k8s-vault-webhook.fullname" . }}
+      path: /pods
+    caBundle: {{ $caCrt }}
+  rules:
+  - operations:
+    - CREATE
+    apiGroups:
+    - "*"
+    apiVersions:
+    - "*"
+    resources:
+    - pods
+  failurePolicy: {{ .Values.podsFailurePolicy }}
+  namespaceSelector:
+  {{- if .Values.namespaceSelector.matchLabels }}
+    matchLabels:
+{{ toYaml .Values.namespaceSelector.matchLabels | indent 6 }}
+  {{- end }}
+    matchExpressions:
+    {{- if .Values.namespaceSelector.matchExpressions }}
+{{ toYaml .Values.namespaceSelector.matchExpressions | indent 4 }}
+    {{- end }}
+    - key: name
+      operator: NotIn
+      values:
+      - {{ .Release.Namespace }}
+{{- if and (eq (int $major) 1) (ge (int $minor) 15) }}
+  objectSelector:
+    matchExpressions:
+    {{- if .Values.objectSelector.matchExpressions }}
+{{ toYaml .Values.objectSelector.matchExpressions | indent 4 }}
+    {{- end }}
+    - key: security.secrets-consumer/mutate
+      operator: NotIn
+      values:
+      - skip
+{{- end }}
+- name: secrets.{{ template "k8s-vault-webhook.name" . }}.admission
+  clientConfig:
+    service:
+      namespace: {{ .Release.Namespace }}
+      name: {{ template "k8s-vault-webhook.fullname" . }}
+      path: /secrets
+    caBundle: {{ $caCrt }}
+  rules:
+  - operations:
+    - CREATE
+    - UPDATE
+    apiGroups:
+    - "*"
+    apiVersions:
+    - "*"
+    resources:
+    - secrets
+  failurePolicy: {{ .Values.secretsFailurePolicy }}
+  namespaceSelector:
+  {{- if .Values.namespaceSelector.matchLabels }}
+    matchLabels:
+{{ toYaml .Values.namespaceSelector.matchLabels | indent 6 }}
+  {{- end }}
+    matchExpressions:
+    {{- if .Values.namespaceSelector.matchExpressions }}
+{{ toYaml .Values.namespaceSelector.matchExpressions | indent 4 }}
+    {{- end }}
+    - key: name
+      operator: NotIn
+      values:
+      - {{ .Release.Namespace }}
+{{- if .Values.configMapMutation }}
+- name: configmaps.{{ template "k8s-vault-webhook.name" . }}.admission
+  clientConfig:
+    service:
+      namespace: {{ .Release.Namespace }}
+      name: {{ template "k8s-vault-webhook.fullname" . }}
+      path: /configmaps
+    caBundle: {{ $caCrt }}
+  rules:
+    - operations:
+        - CREATE
+        - UPDATE
+      apiGroups:
+        - "*"
+      apiVersions:
+        - "*"
+      resources:
+        - configmaps
+  failurePolicy: {{ .Values.configmapFailurePolicy }}
+  namespaceSelector:
+  {{- if .Values.namespaceSelector.matchLabels }}
+    matchLabels:
+{{ toYaml .Values.namespaceSelector.matchLabels | indent 6 }}
+  {{- end }}
+    matchExpressions:
+  {{- if .Values.namespaceSelector.matchExpressions }}
+{{ toYaml .Values.namespaceSelector.matchExpressions | indent 4 }}
+  {{- end }}
+    - key: name
+      operator: NotIn
+      values:
+      - {{ .Release.Namespace }}
+{{- end }}
+{{- if and (ge (int $major) 1) (ge (int $minor) 12) }}
+  sideEffects: {{ .Values.apiSideEffectValue }}
+{{- end }}
