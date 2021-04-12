@@ -2,9 +2,9 @@ apiVersion: v1
 entries:
   k8s-vault-webhook:
   - apiVersion: v1
-    created: "2021-04-11T16:19:26.449826388+05:30"
+    created: "2021-04-12T19:08:40.603235143+05:30"
     description: Provides easy setup of vault webhook inside Kubernetes cluster
-    digest: 0dd510a4cf274acda32300b3a04688791b84e7ff7f5a208bb293c12e1fab33de
+    digest: 638d52c78212c10bf60d258634561977007a1b1a07f962536190e761e192ca1f
     home: https://github.com/opstree/k8s-vault-webhook
     icon: https://vectr.com/iamabhishek-dubey/cdDqkelIy.svg?width=183.33&height=190.51&select=adu1SDnVV,b2k1geAiEE,bDWOWW7bs,b1ZDhIHlP1&source=selection
     keywords:
@@ -21,4 +21,49 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/v1.0/k8s-vault-webhook-0.1.tgz
     version: "0.1"
-generated: "2021-04-11T16:19:26.448268401+05:30"
+  redis-operator:
+  - apiVersion: v2
+    appVersion: 0.4.0
+    created: "2021-04-12T19:08:40.60461137+05:30"
+    description: Provides easy redis setup definitions for Kubernetes services, and deployment.
+    digest: 3d1eb061ecfd762a99df557a20c9bd5fb49b304f0eed4d9b636443539122529d
+    home: https://github.com/OT-CONTAINER-KIT/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    maintainers:
+    - name: Abhishek Dubey
+    - name: Sandeep Rawat
+    name: redis-operator
+    sources:
+    - https://github.com/OT-CONTAINER-KIT/redis-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/v1.0/redis-operator-0.4.0.tgz
+    version: 0.4.0
+  redis-setup:
+  - apiVersion: v1
+    created: "2021-04-12T19:08:40.605059395+05:30"
+    description: Provides easy redis setup definitions for Kubernetes services, and deployment.
+    digest: b6200f530c8343ffcfa727538413b5b475e57b23cefbc41e10775a8e73752c41
+    home: https://github.com/ot-container-kit/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    - redis-exporter
+    maintainers:
+    - name: Opstree Solutions
+    name: redis-setup
+    sources:
+    - https://github.com/ot-container-kit/redis-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/v1.0/redis-setup-0.4.0.tgz
+    version: 0.4.0
+generated: "2021-04-12T19:08:40.60199896+05:30"
