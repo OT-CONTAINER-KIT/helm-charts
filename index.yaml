@@ -46,6 +46,7 @@ entries:
     version: 0.4.0
   redis-setup:
   - apiVersion: v1
+    appVersion: 0.4.0
     created: "2021-04-12T19:08:40.605059395+05:30"
     description: Provides easy redis setup definitions for Kubernetes services, and deployment.
     digest: b6200f530c8343ffcfa727538413b5b475e57b23cefbc41e10775a8e73752c41
