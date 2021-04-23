@@ -2,33 +2,33 @@ global:
   pdb:
     minAvailable: 1
   name:
-    appName: mysql
+    appName: redis
     appLabel:
-      app: mysql
+      app: redis
       environment: prod
-    namespace: mysql
+    namespace: redis
   replicaCount: 1
   containers:
-    - name: mysql
-      image: mysql
-      tag: "8.0"
+    - name: redis
+      image: redis
+      tag: "6.2.2"
       pullPolicy: Always
       # command:
       #   - "--default-authentication-plugin=mysql_native_password"
       ports:
        - name: client
-         port: 3306
-      env:
-        - name: MYSQL_ROOT_PASSWORD
-          value: "test"
-        - name: MYSQL_DATABASE
-          value: admin
-        - name: MYSQL_USER
-          value: admin
-        - name: MYSQL_PASSWORD
-          value: admin
-        - name: MYSQL_ALLOW_EMPTY_PASSWORD
-          value: "no"
+         port: 6379
+      # env:
+      #   - name: MYSQL_ROOT_PASSWORD
+      #     value: "test"
+      #   - name: MYSQL_DATABASE
+      #     value: admin
+      #   - name: MYSQL_USER
+      #     value: admin
+      #   - name: MYSQL_PASSWORD
+      #     value: admin
+      #   - name: MYSQL_ALLOW_EMPTY_PASSWORD
+      #     value: "no"
 
       resources:
         limits:
@@ -39,16 +39,16 @@ global:
           cpu: "1"
       livenessProbe:
         tcpSocket:
-           port: 3306
+           port: 6379
       readinessProbe:
         tcpSocket:
-          port: 3306
+          port: 6379
 
       volumeMounts:
       - name: tz-config
         mountPath: /etc/localtime
       - name: data
-        mountPath: /var/lib/mysql
+        mountPath: /data
       
   volumeClaim:
     name: data
@@ -61,14 +61,14 @@ global:
       weight: 100
       key: app
       values:
-      - mysql
+      - redis
       topologyKey: kubernetes.io/hostname
   service:
     type: ClusterIP
     headless: true
     ports:
-      - port: 3306
-        targetPort: 3306
+      - port: 6379
+        targetPort: 6379
   volumes:
     - name: tz-config
       hostPath:

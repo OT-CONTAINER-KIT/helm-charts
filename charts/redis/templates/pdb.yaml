@@ -1,0 +1,14 @@
+{{- if .Values.global.pdb }}
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.global.name.appName }}
+  namespace: {{ .Values.global.name.namespace }}
+  labels:
+    {{- toYaml .Values.global.name.appLabel | nindent 8 }}
+spec:
+  minAvailable: {{ .Values.global.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      {{- toYaml .Values.global.name.appLabel | nindent 8 }}
+{{- end }}

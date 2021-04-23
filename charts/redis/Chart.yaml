@@ -1,6 +1,6 @@
 apiVersion: v2
-name: mysql
-description: A Helm chart for Kubernetes to deploy mysql.
+name: redis
+description: A Helm chart for Kubernetes to deploy redis.
 maintainers:
   - name: Opstree Solutions
 type: application
@@ -9,4 +9,3 @@ appVersion: 1.16.0
 keywords:
 - kubernetes
 - opstree
-

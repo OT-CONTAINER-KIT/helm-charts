@@ -1,0 +1,196 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.global.name.appName }}
+  namespace: {{ .Values.global.name.namespace }}
+  labels:
+    {{- toYaml .Values.global.name.appLabel | nindent 8 }}
+spec:
+  serviceName: {{ .Values.global.name.appName }}
+  replicas: {{ required "A value given must be required!" .Values.global.replicaCount }}
+  updateStrategy:
+    type: {{ .Values.global.deploymentStrategy | default "RollingUpdate" }}
+  selector:
+    matchLabels:
+      {{- toYaml .Values.global.name.appLabel | nindent 8 }}
+  template:
+    metadata:
+      labels:
+        {{- toYaml .Values.global.name.appLabel | nindent 8 }}
+      {{- if .Values.global.name.annotations }}
+      annotations:
+        {{- toYaml .Values.global.name.annotations | nindent 8 }}
+      {{ end }}
+    spec:
+      {{- if .Values.priorityClass }}
+      priorityClassName: {{ .Values.priorityClass }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.global.terminationGracePeriodSeconds | default 1800 }}
+      {{- if .Values.global.podSecurityContext }}
+      securityContext:
+        {{- toYaml .Values.global.podSecurityContext | nindent 8 }}
+      {{- end }}
+      {{- if .Values.global.serviceAccountName }}
+      serviceAccountName: {{ .Values.global.serviceAccountName }}
+      {{- end }}
+      containers:
+      {{- range $images := .Values.global.containers }}
+      - name: {{ $images.name }}
+        image: "{{ $images.image }}:{{ $images.tag }}"
+        imagePullPolicy: {{ $images.pullPolicy | default "IfNotPresent" }}
+        {{- if $images.lifecycle }}
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              {{- toYaml $images.lifecycle.command | nindent 16 }}
+        {{- end }}
+        {{- if $images.command }}
+        command:
+        {{- toYaml $images.command | nindent 10 }}
+        {{- end }}
+        {{- if $images.env }}
+        env:
+          {{- toYaml $images.env | nindent 10 }}
+        {{- end }}        
+        ports:
+          {{- range $ports := $images.ports }}
+          - name: {{ $ports.name }}
+            containerPort: {{ int $ports.port }}
+            protocol: "TCP"
+          {{ end }}
+        {{- if $images.resources }}
+        resources:
+            {{- toYaml $images.resources | nindent 10 -}}
+        {{- end }}
+        {{- if $images.livenessProbe }}    
+        livenessProbe:
+          {{- if $images.livenessProbe.http }}
+          httpGet:
+            path: {{ $images.livenessProbe.http.healthCheck }}
+            port: {{ int $images.livenessProbe.http.port }}
+          {{- end }}
+          {{- if $images.livenessProbe.tcpSocket }}
+          tcpSocket:
+            port: {{ int $images.livenessProbe.tcpSocket.port }}
+          {{- end }}
+          {{- if $images.livenessProbe.command }}
+          exec:
+            command:            
+              {{- toYaml $images.livenessProbe.command | nindent 14 }}
+          {{- end }}
+          initialDelaySeconds: {{ int $images.livenessProbe.initialDelaySeconds | default 1 }}
+          timeoutSeconds: {{ int $images.livenessProbe.timeoutSeconds | default 15 }}
+          failureThreshold: {{ int $images.livenessProbe.failureThreshold | default 2 }}
+          successThreshold: {{ int $images.livenessProbe.successThreshold | default 1 }}
+        {{- end }}
+        {{- if $images.readinessProbe }}
+        readinessProbe:
+          {{- if $images.readinessProbe.http }}
+          httpGet:
+            path: {{ $images.readinessProbe.http.healthCheck }}
+            port: {{ $images.readinessProbe.http.port }}
+          {{- end }}
+          {{- if $images.readinessProbe.tcpSocket }}
+          tcpSocket:
+            port: {{ $images.readinessProbe.tcpSocket.port }}
+          {{- end }}
+          {{- if $images.readinessProbe.command }}
+          exec:
+            command:            
+              {{- toYaml $images.readinessProbe.command | nindent 14 }}
+          {{- end }}
+          initialDelaySeconds: {{ int $images.readinessProbe.initialDelaySeconds | default 1}}
+          timeoutSeconds: {{ int $images.readinessProbe.timeoutSeconds | default 1 }}
+          failureThreshold: {{ int $images.readinessProbe.failureThreshold | default 2 }}
+          successThreshold: {{ int $images.readinessProbe.successThreshold | default 1 }}
+        {{- end }}
+    {{- if $images.volumeMounts }}
+        volumeMounts:
+        {{- range $volume:= $images.volumeMounts }}
+          - name: {{ $volume.name }}
+            mountPath: {{ $volume.mountPath }}
+        {{- end }}
+    {{- end}}
+      {{- end }}
+      {{- if .Values.initContainers }}
+      initContainers:
+        {{- range $initContainers := .Values.global.initContainers }}
+        - name: {{ $initContainers.name }}
+          image: {{ $initContainers.image }}
+          command: {{ $initContainers.command }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.global.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.global.nodeSelector | nindent 8 }}
+      {{- end }}
+
+    {{- if .Values.global.affinity }}
+      affinity:
+        {{- if .Values.global.affinity.podAffinity }}
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: {{ .Values.global.affinity.podAffinity.key }}
+                operator: In
+                values: 
+                {{- toYaml .Values.global.affinity.podAffinity.values | nindent 20 }}
+        {{- end }}
+        {{- if .Values.global.affinity.podAntiAffinity }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: {{ int .Values.global.affinity.podAntiAffinity.weight }}
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: {{ .Values.global.affinity.podAntiAffinity.key }}
+                  operator: In
+                  values:
+                  {{- toYaml .Values.global.affinity.podAntiAffinity.values | nindent 20 }}
+              topologyKey: {{ .Values.global.affinity.podAntiAffinity.topologyKey }}
+        {{- end }}
+        {{- if .Values.global.affinity.nodeAffinity }}
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: {{ int .Values.global.affinity.nodeAffinity.weight }}
+            preference:
+              labelSelector:
+                matchExpressions:
+                - key: 
+                    {{ .Values.global.affinity.nodeAffinity.key | quote }}
+                  operator: In
+                  values:
+          {{- toYaml .Values.global.affinity.nodeAffinity.values | nindent 20 }}
+        {{- end }}
+        {{- if .Values.global.affinity.nodeAntiAffinity }}
+        nodeAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: {{ int .Values.global.affinity.nodeAntiAffinity.weight }}
+            nodeAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: {{ .Values.global.affinity.nodeAntiAffinity.key }}
+                  operator: In
+                  values:
+                  {{- toYaml .Values.global.affinity.nodeAntiAffinity.values | nindent 20 }}
+        {{- end }}
+    {{- end }}
+    {{- with .Values.global.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      {{- if .Values.global.volumes }}
+      volumes:
+        {{- toYaml .Values.global.volumes | nindent 8 }}
+      {{- end }}
+  volumeClaimTemplates: 
+    - metadata: 
+        name: {{ .Values.global.volumeClaim.name }}
+      spec:
+        accessModes:
+        {{- toYaml .Values.global.volumeClaim.accessModes | nindent 8 }}
+        resources:
+          requests:
+            storage: {{ .Values.global.volumeClaim.storage | quote }}
