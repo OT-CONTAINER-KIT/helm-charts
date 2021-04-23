@@ -2,9 +2,9 @@ apiVersion: v1
 entries:
   k8s-vault-webhook:
   - apiVersion: v1
-    created: "2021-04-12T19:08:40.603235143+05:30"
+    created: "2021-04-23T12:18:56.83441772+05:30"
     description: Provides easy setup of vault webhook inside Kubernetes cluster
-    digest: 638d52c78212c10bf60d258634561977007a1b1a07f962536190e761e192ca1f
+    digest: 5725c482434400d7935404d232e63745bc13a212a790af9069a238f2572fee78
     home: https://github.com/opstree/k8s-vault-webhook
     icon: https://vectr.com/iamabhishek-dubey/cdDqkelIy.svg?width=183.33&height=190.51&select=adu1SDnVV,b2k1geAiEE,bDWOWW7bs,b1ZDhIHlP1&source=selection
     keywords:
@@ -21,12 +21,26 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/v1.0/k8s-vault-webhook-0.1.tgz
     version: "0.1"
+  mysql:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2021-04-23T12:18:56.836013037+05:30"
+    description: Provides easy setup of MYsql
+    digest: c9cd4c19af429996ee920f7246bad1848dae96deeea6f4c29c22e917e5fab222
+    maintainers:
+    - name: Deepak Gupta
+    - name: Opstree Solutions
+    name: mysql
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/v1.0/mysql-0.1.0.tgz
+    version: 0.1.0
   redis-operator:
   - apiVersion: v2
     appVersion: 0.4.0
-    created: "2021-04-12T19:08:40.60461137+05:30"
+    created: "2021-04-23T12:18:56.837614003+05:30"
     description: Provides easy redis setup definitions for Kubernetes services, and deployment.
-    digest: 3d1eb061ecfd762a99df557a20c9bd5fb49b304f0eed4d9b636443539122529d
+    digest: 00cf10357c761e6399c4443f8f905fdd2a4f580f67544ce51c1dc732e04702f9
     home: https://github.com/OT-CONTAINER-KIT/redis-operator
     icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
     keywords:
@@ -46,9 +60,10 @@ entries:
     version: 0.4.0
   redis-setup:
   - apiVersion: v1
-    created: "2021-04-12T19:08:40.605059395+05:30"
+    appVersion: 0.4.0
+    created: "2021-04-23T12:18:56.838048779+05:30"
     description: Provides easy redis setup definitions for Kubernetes services, and deployment.
-    digest: b6200f530c8343ffcfa727538413b5b475e57b23cefbc41e10775a8e73752c41
+    digest: c8ff4081500c1d4b9c1510aff8b269ec36eb2340ea4e1aa7aedd264bb4439cdf
     home: https://github.com/ot-container-kit/redis-operator
     icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
     keywords:
@@ -66,4 +81,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/v1.0/redis-setup-0.4.0.tgz
     version: 0.4.0
-generated: "2021-04-12T19:08:40.60199896+05:30"
+generated: "2021-04-23T12:18:56.832840552+05:30"
