@@ -72,7 +72,7 @@ spec:
         env:
         {{- if .Values.mysqlAllowEmptyPassword }}
         - name: MYSQL_ALLOW_EMPTY_PASSWORD
-          value: "true"
+          value: "false"
         {{- end }}
         {{- if not (and .Values.allowEmptyRootPassword (not .Values.mysqlRootPassword)) }}
         - name: MYSQL_ROOT_PASSWORD
@@ -81,7 +81,7 @@ spec:
               name: {{ template "mysql.secretName" . }}
               key: mysql-root-password
               {{- if .Values.mysqlAllowEmptyPassword }}
-              optional: true
+              optional: false
               {{- end }}
         {{- end }}
         {{- if not (and .Values.allowEmptyRootPassword (not .Values.mysqlPassword)) }}
@@ -91,7 +91,7 @@ spec:
               name: {{ template "mysql.secretName" . }}
               key: mysql-password
               {{- if or .Values.mysqlAllowEmptyPassword (empty .Values.mysqlUser) }}
-              optional: true
+              optional: false
               {{- end }}
         {{- end }}
         - name: MYSQL_USER

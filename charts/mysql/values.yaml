@@ -12,13 +12,13 @@ strategy:
 ## Specify password for root user
 ##
 ## Default: random 10 character string
-# mysqlRootPassword: testing
+mysqlRootPassword: testing
 
 ## Create a database user
 ##
-# mysqlUser:
+#mysqlUser: test
 ## Default: random 10 character string
-mysqlPassword: password
+#mysqlPassword: password
 
 ## Allow unauthenticated access, uncomment to enable
 ##
