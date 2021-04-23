@@ -1,0 +1,14 @@
+apiVersion: v2
+name: mysql
+description: Provides easy setup of MYsql
+type: application
+version: 0.1.0
+appVersion: 1.16.0
+maintainers:
+  - name: Deepak Gupta
+  - name: Opstree Solutions
+
+source:
+  - https://ot-container-kit.github.io/helm-charts/
+
+
