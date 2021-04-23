@@ -8,6 +8,7 @@ name: redis-setup
 sources:
   - https://github.com/ot-container-kit/redis-operator
 version: 0.4.0
+appVersion: "0.4.0"
 home: https://github.com/ot-container-kit/redis-operator
 keywords:
 - operator
