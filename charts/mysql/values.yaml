@@ -19,7 +19,7 @@ global:
         - name: MYSQL_ROOT_PASSWORD
           value: "test"
         - name: MYSQL_DATABASE
-          value: admin
+          value: employeedb
         - name: MYSQL_USER
           value: admin
         - name: MYSQL_PASSWORD
