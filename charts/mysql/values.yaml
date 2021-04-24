@@ -1,6 +1,4 @@
 global:
-  pdb:
-    minAvailable: 1
   name:
     appName: mysql
     appLabel:
@@ -8,7 +6,7 @@ global:
       environment: prod
   replicaCount: 1
   containers:
-    - name: mysql
+   -  name: mysql
       image: mysql
       tag: "8.0"
       pullPolicy: Always
@@ -35,7 +33,7 @@ global:
           cpu: "1"
         requests:
           memory: "1Gi"
-          cpu: "1"
+          cpu: "0.5"
       livenessProbe:
         tcpSocket:
            port: 3306
@@ -46,14 +44,7 @@ global:
       volumeMounts:
       - name: tz-config
         mountPath: /etc/localtime
-      - name: data
-        mountPath: /var/lib/mysql
       
-  volumeClaim:
-    name: data
-    accessModes:
-      - "ReadWriteOnce"
-    storage: 10Gi
 
   affinity:
     podAntiAffinity:

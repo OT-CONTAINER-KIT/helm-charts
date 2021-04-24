@@ -1,14 +1,11 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: {{ .Values.global.name.appName }}
   labels:
     {{- toYaml .Values.global.name.appLabel | nindent 8 }}
 spec:
-  serviceName: {{ .Values.global.name.appName }}
   replicas: {{ required "A value given must be required!" .Values.global.replicaCount }}
-  updateStrategy:
-    type: {{ .Values.global.deploymentStrategy | default "RollingUpdate" }}
   selector:
     matchLabels:
       {{- toYaml .Values.global.name.appLabel | nindent 8 }}
@@ -78,7 +75,7 @@ spec:
             command:            
               {{- toYaml $images.livenessProbe.command | nindent 14 }}
           {{- end }}
-          initialDelaySeconds: {{ int $images.livenessProbe.initialDelaySeconds | default 1 }}
+          initialDelaySeconds: {{ int $images.livenessProbe.initialDelaySeconds | default 30 }}
           timeoutSeconds: {{ int $images.livenessProbe.timeoutSeconds | default 15 }}
           failureThreshold: {{ int $images.livenessProbe.failureThreshold | default 2 }}
           successThreshold: {{ int $images.livenessProbe.successThreshold | default 1 }}
@@ -99,7 +96,7 @@ spec:
             command:            
               {{- toYaml $images.readinessProbe.command | nindent 14 }}
           {{- end }}
-          initialDelaySeconds: {{ int $images.readinessProbe.initialDelaySeconds | default 1}}
+          initialDelaySeconds: {{ int $images.readinessProbe.initialDelaySeconds | default 30 }}
           timeoutSeconds: {{ int $images.readinessProbe.timeoutSeconds | default 1 }}
           failureThreshold: {{ int $images.readinessProbe.failureThreshold | default 2 }}
           successThreshold: {{ int $images.readinessProbe.successThreshold | default 1 }}
@@ -184,12 +181,3 @@ spec:
       volumes:
         {{- toYaml .Values.global.volumes | nindent 8 }}
       {{- end }}
-  volumeClaimTemplates: 
-    - metadata: 
-        name: {{ .Values.global.volumeClaim.name }}
-      spec:
-        accessModes:
-        {{- toYaml .Values.global.volumeClaim.accessModes | nindent 8 }}
-        resources:
-          requests:
-            storage: {{ .Values.global.volumeClaim.storage | quote }}
