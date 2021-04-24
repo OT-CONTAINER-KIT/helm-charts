@@ -55,7 +55,7 @@ global:
       topologyKey: kubernetes.io/hostname
   service:
     type: ClusterIP
-    headless: true
+    headless: false
     ports:
       - port: 3306
         targetPort: 3306
