@@ -35,6 +35,22 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/v1.0/mysql-0.1.0.tgz
     version: 0.1.0
+  redis:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2021-04-24T09:44:15.324080608Z"
+    description: A Helm chart for Kubernetes to deploy redis.
+    digest: abd5c62a289c1bbfe7753a3849e9b07259fd877efd70dcaedf128301a6c873bd
+    keywords:
+    - kubernetes
+    - opstree
+    maintainers:
+    - name: Opstree Solutions
+    name: redis
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/v1.0/redis-0.1.0.tgz
+    version: 0.1.0
   redis-operator:
   - apiVersion: v2
     appVersion: 0.4.0
