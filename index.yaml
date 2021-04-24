@@ -35,11 +35,28 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/v1.0/mysql-0.1.0.tgz
     version: 0.1.0
+  redis:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2021-04-24T09:44:15.324080608Z"
+    description: A Helm chart for Kubernetes to deploy redis.
+    digest: abd5c62a289c1bbfe7753a3849e9b07259fd877efd70dcaedf128301a6c873bd
+    keywords:
+    - kubernetes
+    - opstree
+    maintainers:
+    - name: Opstree Solutions
+    name: redis
+    type: application
+    urls:
+    - https://ot-container-kit.github.io/helm-charts/charts/redis-0.1.0.tgz
+    version: 0.1.0
   redis-operator:
   - apiVersion: v2
     appVersion: 0.4.0
     created: "2021-04-23T12:18:56.837614003+05:30"
-    description: Provides easy redis setup definitions for Kubernetes services, and deployment.
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
     digest: 00cf10357c761e6399c4443f8f905fdd2a4f580f67544ce51c1dc732e04702f9
     home: https://github.com/OT-CONTAINER-KIT/redis-operator
     icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
@@ -62,7 +79,8 @@ entries:
   - apiVersion: v1
     appVersion: 0.4.0
     created: "2021-04-23T12:18:56.838048779+05:30"
-    description: Provides easy redis setup definitions for Kubernetes services, and deployment.
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
     digest: c8ff4081500c1d4b9c1510aff8b269ec36eb2340ea4e1aa7aedd264bb4439cdf
     home: https://github.com/ot-container-kit/redis-operator
     icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
@@ -81,4 +99,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/v1.0/redis-setup-0.4.0.tgz
     version: 0.4.0
-generated: "2021-04-23T12:18:56.832840552+05:30"
+generated: "2021-04-24T09:44:15.322737139Z"
