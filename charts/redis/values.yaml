@@ -6,7 +6,6 @@ global:
     appLabel:
       app: redis
       environment: prod
-    namespace: redis
   replicaCount: 1
   containers:
     - name: redis

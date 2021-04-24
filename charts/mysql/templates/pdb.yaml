@@ -3,7 +3,6 @@ apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
   name: {{ .Values.global.name.appName }}
-  namespace: {{ .Values.global.name.namespace }}
   labels:
     {{- toYaml .Values.global.name.appLabel | nindent 8 }}
 spec:
