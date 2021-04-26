@@ -65,7 +65,7 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/v1.0/redis-0.1.0.tgz
     version: 0.1.0
-   redis:
+  redis:
   - apiVersion: v2
     appVersion: 1.16.1
     created: "2021-04-24T09:44:15.324080608Z"
