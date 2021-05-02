@@ -1,13 +1,23 @@
 ---
-name: redis-cluster
+name: redis
 
 setupMode: standalone
   
-cluster: {}
+cluster:
+  size: 3
+  master:
+    serviceType: ClusterIP
+  slave:
+    serviceType: ClusterIP
+
+existingPasswordSecret:
+  enabled: false
+  name: redis-secret
+  key: password
 
 global:
   image: quay.io/opstree/redis
-  tag: v2.0
+  tag: v6.2
   imagePullPolicy: IfNotPresent
   password: "Opstree@1234"
   resources: {}
@@ -58,3 +68,9 @@ affinity: {}
   #         operator: In
   #         values:
   #         - ssd
+
+tolerations: []
+  # - key: "key1"
+  #   operator: "Equal"
+  #   value: "value1"
+  #   effect: "NoSchedule"

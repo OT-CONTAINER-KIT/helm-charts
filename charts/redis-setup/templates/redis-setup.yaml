@@ -18,8 +18,12 @@ spec:
   global:
     image: "{{ .Values.global.image }}:{{ .Values.global.tag }}"
     imagePullPolicy: "{{ .Values.global.imagePullPolicy }}"
-{{- if .Values.global.password }}
+{{- if and (.Values.global.password) (eq .Values.existingPasswordSecret.enabled false) }}
     password: {{ .Values.global.password | quote }}
+{{- else if (eq .Values.existingPasswordSecret.enabled true) }}
+    existingPasswordSecret:
+      name: {{ .Values.existingPasswordSecret.name }}
+      key: {{ .Values.existingPasswordSecret.key }}
 {{- end }}
 {{- if .Values.global.resources }}
     resources:
@@ -66,4 +70,8 @@ spec:
 {{- if .Values.securityContext }}
   securityContext:
 {{ toYaml .Values.securityContext | indent 4 }}
+{{- end }}
+{{- if .Values.tolerations }}
+  tolerations:
+{{ toYaml .Values.tolerations | indent 4 }}
 {{- end }}
