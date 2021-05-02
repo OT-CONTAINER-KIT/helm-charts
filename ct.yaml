@@ -1,0 +1,11 @@
+---
+remote: origin
+target-branch: main
+chart-dirs:
+  - charts
+chart-repos:
+  - ot-helm=https://ot-container-kit.github.io/helm-charts
+helm-extra-args: --timeout 600s
+excluded-charts:
+  - redis
+  - mysql
