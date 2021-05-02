@@ -13,3 +13,11 @@ helm repo add ot-helm https://ot-container-kit.github.io/helm-charts
 ```
 
 You can then run `helm search repo ot-helm` to see the charts.
+
+### Helm Charts List
+
+Currently supported helm charts are:-
+
+- [Redis Operator](./charts/redis-operator)
+- [Redis Setup](./charts/redis-setup)
+- [K8s Vault Webhook](./charts/k8s-vault-webhook)
