@@ -1,0 +1,104 @@
+apiVersion: v1
+entries:
+  k8s-vault-webhook:
+  - apiVersion: v1
+    created: "2021-05-02T18:07:03.311253828Z"
+    description: Provides easy setup of vault webhook inside Kubernetes cluster
+    digest: 6a817d99d8d0b16387e1f7096903fcf1d1c7da8a22af4357d54dd191b7b32f20
+    home: https://github.com/opstree/k8s-vault-webhook
+    icon: https://vectr.com/iamabhishek-dubey/cdDqkelIy.svg?width=183.33&height=190.51&select=adu1SDnVV,b2k1geAiEE,bDWOWW7bs,b1ZDhIHlP1&source=selection
+    keywords:
+    - vault
+    - kubernetes
+    - webhook
+    - security
+    - secret-manager
+    maintainers:
+    - name: Opstree Solutions
+    name: k8s-vault-webhook
+    sources:
+    - https://github.com/opstree/k8s-vault-webhook
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/k8s-vault-webhook-0.1/k8s-vault-webhook-0.1.tgz
+    version: "0.1"
+  mysql:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2021-05-02T18:07:03.433608697Z"
+    description: A Helm chart for Kubernetes to deploy mysql.
+    digest: ed18de0d65b130541a1dc8889cf113d9357b018b4594e47d00d47102518b927d
+    keywords:
+    - kubernetes
+    - opstree
+    maintainers:
+    - name: Opstree Solutions
+    name: mysql
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/mysql-0.1.0/mysql-0.1.0.tgz
+    version: 0.1.0
+  redis:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2021-05-02T18:07:03.573154986Z"
+    description: A Helm chart for Kubernetes to deploy redis.
+    digest: 6756b411579cf16333b200e4387beba3eb5bc94433738651dda2aca1186a5ce6
+    keywords:
+    - kubernetes
+    - opstree
+    maintainers:
+    - name: Opstree Solutions
+    name: redis
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-0.1.0/redis-0.1.0.tgz
+    version: 0.1.0
+  redis-operator:
+  - apiVersion: v2
+    appVersion: 0.5.0
+    created: "2021-05-02T18:07:03.700245916Z"
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: d5e93e3699ee421b7a5597564886003fb3b87d6d219cce6812869a3cef91a07c
+    home: https://github.com/OT-CONTAINER-KIT/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    maintainers:
+    - name: Abhishek Dubey
+    - name: Sandeep Rawat
+    name: redis-operator
+    sources:
+    - https://github.com/OT-CONTAINER-KIT/redis-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-operator-0.5.0/redis-operator-0.5.0.tgz
+    version: 0.5.0
+  redis-setup:
+  - apiVersion: v1
+    appVersion: 0.5.0
+    created: "2021-05-02T18:07:03.85111875Z"
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: 2c2bf7d72d4f85465fe0d97c173fc9cd4d18dece816bcca91e90c641d460f2e0
+    home: https://github.com/ot-container-kit/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    - redis-exporter
+    maintainers:
+    - name: Opstree Solutions
+    name: redis-setup
+    sources:
+    - https://github.com/ot-container-kit/redis-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-setup-0.5.0/redis-setup-0.5.0.tgz
+    version: 0.5.0
+generated: "2021-05-02T18:07:03.141004445Z"
