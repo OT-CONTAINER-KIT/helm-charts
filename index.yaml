@@ -53,7 +53,7 @@ entries:
     version: 0.1.0
   redis-operator:
   - apiVersion: v2
-    appVersion: 0.4.0
+    appVersion: 0.5.0
     created: "2021-04-23T12:18:56.837614003+05:30"
     description: Provides easy redis setup definitions for Kubernetes services, and
       deployment.
@@ -73,11 +73,11 @@ entries:
     sources:
     - https://github.com/OT-CONTAINER-KIT/redis-operator
     urls:
-    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/v1.0/redis-operator-0.4.0.tgz
-    version: 0.4.0
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/v1.0/redis-operator-0.5.0.tgz
+    version: 0.5.0
   redis-setup:
   - apiVersion: v1
-    appVersion: 0.4.0
+    appVersion: 0.5.0
     created: "2021-04-23T12:18:56.838048779+05:30"
     description: Provides easy redis setup definitions for Kubernetes services, and
       deployment.
@@ -97,6 +97,6 @@ entries:
     sources:
     - https://github.com/ot-container-kit/redis-operator
     urls:
-    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/v1.0/redis-setup-0.4.0.tgz
-    version: 0.4.0
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/v1.0/redis-setup-0.5.0.tgz
+    version: 0.5.0
 generated: "2021-04-24T09:44:15.322737139Z"
