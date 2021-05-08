@@ -2,6 +2,26 @@ apiVersion: v1
 entries:
   k8s-vault-webhook:
   - apiVersion: v1
+    created: "2021-05-08T12:42:35.711946529Z"
+    description: Provides easy setup of vault webhook inside Kubernetes cluster
+    digest: 0db99085763607fa847c6b12cb958fe1e51197875e71539be9ac04fefb949ed9
+    home: https://github.com/opstree/k8s-vault-webhook
+    icon: https://vectr.com/iamabhishek-dubey/cdDqkelIy.svg?width=183.33&height=190.51&select=adu1SDnVV,b2k1geAiEE,bDWOWW7bs,b1ZDhIHlP1&source=selection
+    keywords:
+    - vault
+    - kubernetes
+    - webhook
+    - security
+    - secret-manager
+    maintainers:
+    - name: Opstree Solutions
+    name: k8s-vault-webhook
+    sources:
+    - https://github.com/opstree/k8s-vault-webhook
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/k8s-vault-webhook-0.2/k8s-vault-webhook-0.2.tgz
+    version: "0.2"
+  - apiVersion: v1
     created: "2021-05-02T18:07:03.311253828Z"
     description: Provides easy setup of vault webhook inside Kubernetes cluster
     digest: 6a817d99d8d0b16387e1f7096903fcf1d1c7da8a22af4357d54dd191b7b32f20
