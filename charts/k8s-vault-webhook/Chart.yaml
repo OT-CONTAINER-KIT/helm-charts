@@ -7,7 +7,7 @@ maintainers:
 name: k8s-vault-webhook
 sources:
   - https://github.com/opstree/k8s-vault-webhook
-version: "0.1"
+version: "0.2"
 home: https://github.com/opstree/k8s-vault-webhook
 keywords:
 - vault
