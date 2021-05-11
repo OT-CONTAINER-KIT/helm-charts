@@ -4,7 +4,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: mongodb
-  namespace: default
+  namespace: non-prod
   labels:
     app.kubernetes.io/name: mongodb
     helm.sh/chart: mongodb-10.15.2
@@ -18,7 +18,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: mongodb
-  namespace: default
+  namespace: non-prod
   labels:
     app.kubernetes.io/name: mongodb
     helm.sh/chart: mongodb-10.15.2
@@ -27,14 +27,14 @@ metadata:
     app.kubernetes.io/component: mongodb
 type: Opaque
 data:
-  mongodb-root-password: "WlJVNUxGb284UQ=="
+  mongodb-root-password: "N3A5RFRYMHl5aw=="
 ---
 # Source: mongodb/templates/standalone/svc.yaml
 apiVersion: v1
 kind: Service
 metadata:
   name: mongodb
-  namespace: default
+  namespace: non-prod
   labels:
     app.kubernetes.io/name: mongodb
     helm.sh/chart: mongodb-10.15.2
@@ -58,7 +58,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mongodb
-  namespace: default
+  namespace: non-prod
   labels:
     app.kubernetes.io/name: mongodb
     helm.sh/chart: mongodb-10.15.2
@@ -97,7 +97,7 @@ spec:
                     app.kubernetes.io/instance: mongodb
                     app.kubernetes.io/component: mongodb
                 namespaces:
-                  - "default"
+                  - "non-prod"
                 topologyKey: kubernetes.io/hostname
               weight: 1
         nodeAffinity:
@@ -178,4 +178,3 @@ spec:
         resources:
           requests:
             storage: "8Gi"
-
