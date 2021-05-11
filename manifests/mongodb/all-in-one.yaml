@@ -27,7 +27,7 @@ metadata:
     app.kubernetes.io/component: mongodb
 type: Opaque
 data:
-  mongodb-root-password: "N3A5RFRYMHl5aw=="
+  mongodb-root-password: "SnZOOGtYYTF4Mg=="
 ---
 # Source: mongodb/templates/standalone/svc.yaml
 apiVersion: v1
@@ -162,8 +162,12 @@ spec:
             successThreshold: 1
             failureThreshold: 6
           resources:
-            limits: {}
-            requests: {}
+            limits:
+              cpu: 200m
+              memory: 1024Mi
+            requests:
+              cpu: 200m
+              memory: 1024Mi
           volumeMounts:
             - name: datadir
               mountPath: /bitnami/mongodb
