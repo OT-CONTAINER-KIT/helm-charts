@@ -212,7 +212,7 @@ spec:
             failureThreshold: 6
           volumeMounts:
           resources:
-            limit:
+            limits:
               cpu: 500m
               memory: 512Mi
             requests:
@@ -347,7 +347,7 @@ spec:
             - name: datadir
               mountPath: /bitnami/mongodb
           resources:
-            limit:
+            limits:
               cpu: 500m
               memory: 512Mi
             requests:
@@ -498,7 +498,7 @@ spec:
             - name: datadir
               mountPath: /bitnami/mongodb
           resources:
-            limit:
+            limits:
               cpu: 500m
               memory: 512Mi
             requests:
@@ -649,7 +649,7 @@ spec:
             - name: datadir
               mountPath: /bitnami/mongodb
           resources:
-            limit:
+            limits:
               cpu: 500m
               memory: 512Mi
             requests:
@@ -800,7 +800,7 @@ spec:
             - name: datadir
               mountPath: /bitnami/mongodb
           resources:
-            limit:
+            limits:
               cpu: 500m
               memory: 512Mi
             requests:
