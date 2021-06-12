@@ -4,7 +4,7 @@ description: Provides easy redis setup definitions for Kubernetes services, and 
 engine: gotpl
 maintainers:
   - name: Opstree Solutions
-name: redis-setup
+name: redis
 sources:
   - https://github.com/ot-container-kit/redis-operator
 version: 0.6.0
