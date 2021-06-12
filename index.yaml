@@ -93,6 +93,29 @@ entries:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/mysql-0.1.0/mysql-0.1.0.tgz
     version: 0.1.0
   redis:
+  - apiVersion: v1
+    appVersion: 0.6.0
+    created: "2021-06-12T12:20:03.983626341Z"
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: 077bc7d8bd89efb6881fed49866964ca3571db7eb6bb673a534bd3e3fae81920
+    home: https://github.com/ot-container-kit/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    - redis-exporter
+    maintainers:
+    - name: Opstree Solutions
+    name: redis
+    sources:
+    - https://github.com/ot-container-kit/redis-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-0.6.0/redis-0.6.0.tgz
+    version: 0.6.0
   - apiVersion: v2
     appVersion: 1.16.0
     created: "2021-05-02T18:07:03.573154986Z"
@@ -108,6 +131,30 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-0.1.0/redis-0.1.0.tgz
     version: 0.1.0
+  redis-cluster:
+  - apiVersion: v1
+    appVersion: 0.6.0
+    created: "2021-06-12T12:20:04.168991787Z"
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: 928619b7d6602aba3f390c8b87eea23c36fefc985ba28afe2be08783d0cef91a
+    home: https://github.com/ot-container-kit/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    - redis-exporter
+    maintainers:
+    - name: Opstree Solutions
+    name: redis-cluster
+    sources:
+    - https://github.com/ot-container-kit/redis-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-cluster-0.6.0/redis-cluster-0.6.0.tgz
+    version: 0.6.0
   redis-operator:
   - apiVersion: v2
     appVersion: 0.5.0
