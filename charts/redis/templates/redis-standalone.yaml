@@ -1,0 +1,52 @@
+---
+apiVersion: redis.redis.opstreelabs.in/v1beta1
+kind: Redis
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: middleware
+spec:
+  redisExporter:
+    enabled: {{ .Values.redisExporter.enabled }}
+    image: "{{ .Values.redisExporter.image }}:{{ .Values.redisExporter.tag }}"
+    imagePullPolicy: "{{ .Values.redisExporter.imagePullPolicy }}"
+    resources:
+{{ toYaml .Values.redisExporter.resources | indent 6 }}
+  kubernetesConfig:
+    image: "{{ .Values.redisOperator.image }}:{{ .Values.redisOperator.tag }}"
+    imagePullPolicy: "{{ .Values.redisOperator.imagePullPolicy }}"
+    resources:
+{{ toYaml .Values.redisOperator.resources | indent 6 }}
+    redisSecret:
+      name: "{{ .Values.redisOperator.secretName }}"
+      key: "{{ .Values.redisOperator.secretKey }}"
+    serviceType: "{{ .Values.redisOperator.serviceType }}"
+  redisConfig: {}
+{{- if .Values.storageSpec }}
+  storage:
+{{ toYaml .Values.storageSpec | indent 4 }}
+{{- end }}
+{{- if .Values.priorityClassName }}
+  priorityClassName: "{{ .Values.priorityClassName }}"
+{{- end }}
+{{- if .Values.nodeSelector }}
+  nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 4 }}
+{{- end }}
+{{- if .Values.affinity }}
+  affinity:
+{{ toYaml .Values.affinity | indent 4 }}
+{{- end }}
+{{- if .Values.securityContext }}
+  securityContext:
+{{ toYaml .Values.securityContext | indent 4 }}
+{{- end }}
+{{- if .Values.tolerations }}
+  tolerations:
+{{ toYaml .Values.tolerations | indent 4 }}
+{{- end }}

@@ -1,65 +1,56 @@
-global:
-  name:
-    appName: redis
-    appLabel:
-      app: redis
-      environment: prod
-  replicaCount: 1
-  containers:
-    - name: redis
-      image: redis
-      tag: "6.2.2"
-      pullPolicy: Always
-      # command:
-      #   - "--default-authentication-plugin=mysql_native_password"
-      ports:
-       - name: client
-         port: 6379
-      # env:
-      #   - name: MYSQL_ROOT_PASSWORD
-      #     value: "test"
-      #   - name: MYSQL_DATABASE
-      #     value: admin
-      #   - name: MYSQL_USER
-      #     value: admin
-      #   - name: MYSQL_PASSWORD
-      #     value: admin
-      #   - name: MYSQL_ALLOW_EMPTY_PASSWORD
-      #     value: "no"
+---
+redisOperator:
+  image: quay.io/opstree/redis
+  tag: v6.2
+  imagePullPolicy: IfNotPresent
+  secretName: redis-secret
+  secretKey: password
+  resources: {}
+  serviceType: ClusterIP
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
 
+redisExporter:
+  enabled: true
+  image: quay.io/opstree/redis-exporter
+  tag: "1.0"
+  imagePullPolicy: IfNotPresent
+  resources: {}
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+# priorityClassName: "-"
+
+nodeSelector: {}
+  # memory: medium
+
+storageSpec:
+  volumeClaimTemplate:
+    spec:
+      # storageClassName: standard
+      accessModes: ["ReadWriteOnce"]
       resources:
-        limits:
-          memory: "1Gi"
-          cpu: "1"
         requests:
-          memory: "1Gi"
-          cpu: "0.5"
-      livenessProbe:
-        tcpSocket:
-           port: 6379
-      readinessProbe:
-        tcpSocket:
-          port: 6379
+          storage: 1Gi
+  #   selector: {}
 
-      volumeMounts:
-      - name: tz-config
-        mountPath: /etc/localtime
-      
+securityContext: {}
+  # runAsUser: 1000
 
-  affinity:
-    podAntiAffinity:
-      weight: 100
-      key: app
-      values:
-      - redis
-      topologyKey: kubernetes.io/hostname
-  service:
-    type: ClusterIP
-    headless: false
-    ports:
-      - port: 6379
-        targetPort: 6379
-  volumes:
-    - name: tz-config
-      hostPath:
-         path: /usr/share/zoneinfo/Asia/Kolkata
+affinity: {}
+  # nodeAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #     nodeSelectorTerms:
+  #     - matchExpressions:
+  #       - key: disktype
+  #         operator: In
+  #         values:
+  #         - ssd

@@ -1,11 +1,20 @@
-apiVersion: v2
-name: redis
-description: A Helm chart for Kubernetes to deploy redis.
+---
+apiVersion: v1
+description: Provides easy redis setup definitions for Kubernetes services, and deployment.
+engine: gotpl
 maintainers:
   - name: Opstree Solutions
-type: application
-version: 0.1.0
-appVersion: 1.16.0
+name: redis-setup
+sources:
+  - https://github.com/ot-container-kit/redis-operator
+version: 0.6.0
+appVersion: "0.6.0"
+home: https://github.com/ot-container-kit/redis-operator
 keywords:
-- kubernetes
+- operator
+- redis
 - opstree
+- kubernetes
+- openshift
+- redis-exporter
+icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
