@@ -1,26 +1,14 @@
 ---
-name: redis
-
-setupMode: standalone
-  
-cluster:
-  size: 3
-  master:
-    serviceType: ClusterIP
-  slave:
-    serviceType: ClusterIP
-
-existingPasswordSecret:
-  enabled: false
-  name: redis-secret
-  key: password
-
-global:
+redisCluster:
+  clusterSize: 3
   image: quay.io/opstree/redis
   tag: v6.2
   imagePullPolicy: IfNotPresent
-  password: "Opstree@1234"
+  secretName: redis-secret
+  secretKey: password
   resources: {}
+  leaderServiceType: ClusterIP
+  followerServiceType: ClusterIP
     # requests:
     #   cpu: 100m
     #   memory: 128Mi
@@ -28,10 +16,10 @@ global:
     #   cpu: 100m
     #   memory: 128Mi
 
-exporter:
+redisExporter:
   enabled: true
   image: quay.io/opstree/redis-exporter
-  tag: "2.0"
+  tag: "1.0"
   imagePullPolicy: IfNotPresent
   resources: {}
     # requests:
@@ -46,14 +34,14 @@ exporter:
 nodeSelector: {}
   # memory: medium
 
-storageSpec: {}
-  # volumeClaimTemplate:
-  #   spec:
-  #     storageClassName: standard
-  #     accessModes: ["ReadWriteOnce"]
-  #     resources:
-  #       requests:
-  #         storage: 1Gi
+storageSpec:
+  volumeClaimTemplate:
+    spec:
+      # storageClassName: standard
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
   #   selector: {}
 
 securityContext: {}
@@ -68,9 +56,3 @@ affinity: {}
   #         operator: In
   #         values:
   #         - ssd
-
-tolerations: []
-  # - key: "key1"
-  #   operator: "Equal"
-  #   value: "value1"
-  #   effect: "NoSchedule"

@@ -1,5 +1,5 @@
 ---
-redisOperator:
+redisStandalone:
   image: quay.io/opstree/redis
   tag: v6.2
   imagePullPolicy: IfNotPresent
