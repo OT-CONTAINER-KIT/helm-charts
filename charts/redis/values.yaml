@@ -5,8 +5,8 @@ redisStandalone:
   imagePullPolicy: IfNotPresent
   secretName: redis-secret
   secretKey: password
-  resources: {}
   serviceType: ClusterIP
+  resources: {}
     # requests:
     #   cpu: 100m
     #   memory: 128Mi

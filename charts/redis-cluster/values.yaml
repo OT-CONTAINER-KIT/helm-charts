@@ -6,9 +6,9 @@ redisCluster:
   imagePullPolicy: IfNotPresent
   secretName: redis-secret
   secretKey: password
-  resources: {}
   leaderServiceType: ClusterIP
   followerServiceType: ClusterIP
+  resources: {}
     # requests:
     #   cpu: 100m
     #   memory: 128Mi
