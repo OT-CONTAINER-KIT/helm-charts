@@ -27,9 +27,11 @@ spec:
     imagePullPolicy: "{{ .Values.redisCluster.imagePullPolicy }}"
     resources:
 {{ toYaml .Values.redisCluster.resources | indent 6 }}
+{{- if .Values.redisCluster.redisSecret }}
     redisSecret:
-      name: "{{ .Values.redisCluster.secretName }}"
-      key: "{{ .Values.redisCluster.secretKey }}"
+      name: "{{ .Values.redisCluster.redisSecret.secretName }}"
+      key: "{{ .Values.redisCluster.redisSecret.secretKey }}"
+{{- end }}
     serviceType: ClusterIP
 {{- if .Values.storageSpec }}
   storage:

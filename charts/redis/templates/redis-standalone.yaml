@@ -22,9 +22,11 @@ spec:
     imagePullPolicy: "{{ .Values.redisStandalone.imagePullPolicy }}"
     resources:
 {{ toYaml .Values.redisStandalone.resources | indent 6 }}
+{{- if .Values.redisCluster.redisSecret }}
     redisSecret:
-      name: "{{ .Values.redisStandalone.secretName }}"
-      key: "{{ .Values.redisStandalone.secretKey }}"
+      name: "{{ .Values.redisCluster.redisSecret.secretName }}"
+      key: "{{ .Values.redisCluster.redisSecret.secretKey }}"
+{{- end }}
     serviceType: "{{ .Values.redisStandalone.serviceType }}"
   redisConfig: {}
 {{- if .Values.storageSpec }}
