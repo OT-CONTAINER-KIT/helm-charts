@@ -17,6 +17,19 @@ redisCluster:
     #   cpu: 100m
     #   memory: 128Mi
 
+externalService:
+  enabled: false
+  # annotations:
+  #   foo: bar
+  serviceType: LoadBalancer
+  port: 6379
+
+serviceMonitor:
+  enabled: false
+  interval: 30s
+  scrapeTimeout: 10s
+  namespace: monitoring
+
 redisExporter:
   enabled: true
   image: quay.io/opstree/redis-exporter
