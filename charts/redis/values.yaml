@@ -14,6 +14,18 @@ redisStandalone:
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
+externalService:
+  enabled: false
+  # annotations:
+  #   foo: bar
+  serviceType: NodePort
+  port: 6379
+
+serviceMonitor:
+  enabled: false
+  interval: 30s
+  scrapeTimeout: 10s
+  namespace: monitoring
 
 redisExporter:
   enabled: true
@@ -27,8 +39,24 @@ redisExporter:
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
+  # env:
+  # - name: REDIS_EXPORTER_INCL_SYSTEM_METRICS
+  #   value: "true"
+  # - name: UI_PROPERTIES_FILE_NAME
+  #   valueFrom:
+  #     configMapKeyRef:
+  #       name: game-demo
+  #       key: ui_properties_file_name
+  # - name: SECRET_USERNAME
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: mysecret
+  #       key: username
 
 # priorityClassName: "-"
+
+# imagePullSecrets:
+#  - name: regcred
 
 nodeSelector: {}
   # memory: medium

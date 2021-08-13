@@ -17,17 +17,27 @@ spec:
     imagePullPolicy: "{{ .Values.redisExporter.imagePullPolicy }}"
     resources:
 {{ toYaml .Values.redisExporter.resources | indent 6 }}
+{{- if .Values.redisExporter.env }}
+    env:
+{{ toYaml .Values.redisExporter.env | indent 4 }}
+{{- end }}
   kubernetesConfig:
     image: "{{ .Values.redisStandalone.image }}:{{ .Values.redisStandalone.tag }}"
     imagePullPolicy: "{{ .Values.redisStandalone.imagePullPolicy }}"
     resources:
 {{ toYaml .Values.redisStandalone.resources | indent 6 }}
-{{- if .Values.redisCluster.redisSecret }}
+{{- if .Values.redisStandalone.redisSecret }}
     redisSecret:
-      name: "{{ .Values.redisCluster.redisSecret.secretName }}"
-      key: "{{ .Values.redisCluster.redisSecret.secretKey }}"
+      name: "{{ .Values.redisStandalone.redisSecret.secretName }}"
+      key: "{{ .Values.redisStandalone.redisSecret.secretKey }}"
 {{- end }}
     serviceType: "{{ .Values.redisStandalone.serviceType }}"
+{{- if .Values.imagePullSecrets }}
+    imagePullSecrets:
+{{- range $imageSecrets := .Values.imagePullSecrets }}
+    - name: {{ $imageSecrets.name }}
+{{- end }}
+{{- end }}
   redisConfig: {}
 {{- if .Values.storageSpec }}
   storage:
