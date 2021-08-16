@@ -44,6 +44,6 @@ Please refer to the [Quick Start guide](https://helm.sh/docs/intro/quickstart/) 
 
 Useful Helm Client Commands:
 
-- View available charts: helm search repo
-- Install a chart: helm install my-release ot-helm/<package-name>
-- Upgrade your application: helm upgrade
+- View available charts: `helm search repo`
+- Install a chart: `helm install my-release ot-helm/<package-name>`
+- Upgrade your application: `helm upgrade`
