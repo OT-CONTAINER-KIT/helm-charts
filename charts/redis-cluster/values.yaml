@@ -2,13 +2,33 @@
 redisCluster:
   clusterSize: 3
   image: quay.io/opstree/redis
-  tag: v6.2
+  tag: v6.2.5
   imagePullPolicy: IfNotPresent
   # redisSecret:
   #   secretName: redis-secret
   #   secretKey: password
-  leaderServiceType: ClusterIP
-  followerServiceType: ClusterIP
+  leader:
+    serviceType: ClusterIP
+    affinity: {}
+      # nodeAffinity:
+      #   requiredDuringSchedulingIgnoredDuringExecution:
+      #     nodeSelectorTerms:
+      #     - matchExpressions:
+      #       - key: disktype
+      #         operator: In
+      #         values:
+      #         - ssd
+  follower:
+    serviceType: ClusterIP
+    affinity: {}
+      # nodeAffinity:
+      #   requiredDuringSchedulingIgnoredDuringExecution:
+      #     nodeSelectorTerms:
+      #     - matchExpressions:
+      #       - key: disktype
+      #         operator: In
+      #         values:
+      #         - ssd
   resources: {}
     # requests:
     #   cpu: 100m
