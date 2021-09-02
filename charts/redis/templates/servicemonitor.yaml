@@ -14,9 +14,9 @@ metadata:
 spec:
   selector:
     matchLabels:
-    app: {{ .Release.Name }}
-    redis_setup_type: standalone
-    role: standalone
+      app: {{ .Release.Name }}
+      redis_setup_type: standalone
+      role: standalone
   endpoints:
   - port: redis-exporter
     interval: {{ .Values.serviceMonitor.interval }}

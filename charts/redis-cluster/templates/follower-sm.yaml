@@ -14,9 +14,9 @@ metadata:
 spec:
   selector:
     matchLabels:
-    app: {{ .Release.Name }}-follower
-    redis_setup_type: follower
-    role: follower
+      app: {{ .Release.Name }}-follower
+      redis_setup_type: cluster
+      role: follower
   endpoints:
   - port: redis-exporter
     interval: {{ .Values.serviceMonitor.interval }}
