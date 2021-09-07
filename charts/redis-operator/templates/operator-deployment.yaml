@@ -18,8 +18,15 @@ spec:
       name: {{ .Values.redisOperator.name }}
   template:
     metadata:
+      annotations:
+      {{- with .Values.redisOperator.podAnnotations }}
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
         name: {{ .Values.redisOperator.name }}
+      {{- with .Values.redisOperator.podLabels }}
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       containers:
       - name: "{{ .Values.redisOperator.name }}"
