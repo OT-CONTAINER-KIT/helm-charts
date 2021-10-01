@@ -19,7 +19,7 @@ spec:
   type: {{ .Values.externalService.serviceType }}
   selector:
     app: {{ .Release.Name }}-follower
-    redis_setup_type: follower
+    redis_setup_type: cluster
     role: follower
   ports:
     - protocol: TCP
