@@ -9,6 +9,12 @@ redisCluster:
   #   secretKey: password
   leader:
     serviceType: ClusterIP
+    externalService:
+      enabled: false
+      # annotations:
+      #   foo: bar
+      serviceType: LoadBalancer
+      port: 6379
     affinity: {}
       # nodeAffinity:
       #   requiredDuringSchedulingIgnoredDuringExecution:
@@ -20,6 +26,12 @@ redisCluster:
       #         - ssd
   follower:
     serviceType: ClusterIP
+    externalService:
+      enabled: false
+      # annotations:
+      #   foo: bar
+      serviceType: LoadBalancer
+      port: 6379
     affinity: {}
       # nodeAffinity:
       #   requiredDuringSchedulingIgnoredDuringExecution:
@@ -36,13 +48,6 @@ redisCluster:
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
-
-externalService:
-  enabled: false
-  # annotations:
-  #   foo: bar
-  serviceType: LoadBalancer
-  port: 6379
 
 serviceMonitor:
   enabled: false

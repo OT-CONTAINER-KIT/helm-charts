@@ -1,12 +1,12 @@
-{{- if eq .Values.externalService.enabled true }}
+{{- if eq .Values.redisCluster.follower.externalService.enabled true }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Release.Name }}-follower-external-service
-{{- if .Values.externalService.annotations }}
+{{- if .Values.redisCluster.follower.externalService.annotations }}
   annotations:
-{{ toYaml .Values.externalService.annotations | indent 4 }}
+{{ toYaml .Values.redisCluster.follower.externalService.annotations | indent 4 }}
 {{- end }}
   labels:
     app.kubernetes.io/name: {{ .Release.Name }}
@@ -16,14 +16,14 @@ metadata:
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/component: middleware
 spec:
-  type: {{ .Values.externalService.serviceType }}
+  type: {{ .Values.redisCluster.follower.externalService.serviceType }}
   selector:
     app: {{ .Release.Name }}-follower
     redis_setup_type: cluster
     role: follower
   ports:
     - protocol: TCP
-      port: {{ .Values.externalService.port }}
+      port: {{ .Values.redisCluster.follower.externalService.port }}
       targetPort: 6379
       name: client
 {{- end }}

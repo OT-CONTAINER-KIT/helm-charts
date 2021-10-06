@@ -40,10 +40,14 @@ $ helm delete <my-release> --namespace <namespace>
 |`redisCluster.imagePullPolicy` | IfNotPresent | Image Pull Policy of the redis image |
 |`redisCluster.leaderServiceType` | ClusterIP | Kubernetes service type for Redis Leader |
 |`redisCluster.followerServiceType` | ClusterIP | Kubernetes service type for Redis Follower |
-|`externalService.enabled`| false | If redis service needs to be exposed using LoadBalancer or NodePort |
-|`externalService.annotations`| {} | Kubernetes service related annotations |
-|`externalService.serviceType` | NodePort | Kubernetes service type for exposing service, values - ClusterIP, NodePort, and LoadBalancer |
-|`externalService.port` | 6379 | Port number on which redis external service should be exposed |
+|`redisCluster.follower.externalService.enabled`| false | If redis follower service needs to be exposed using LoadBalancer or NodePort |
+|`redisCluster.follower.externalService.annotations`| {} | Kubernetes follower service related annotations |
+|`redisCluster.follower.externalService.serviceType` | NodePort | Kubernetes follower service type for exposing service, values - ClusterIP, NodePort, and LoadBalancer |
+|`redisCluster.follower.externalService.port` | 6379 | Port number on which redis follower external service should be exposed |
+|`redisCluster.leader.externalService.enabled`| false | If redis leader service needs to be exposed using LoadBalancer or NodePort |
+|`redisCluster.leader.externalService.annotations`| {} | Kubernetes leader service related annotations |
+|`redisCluster.leader.externalService.serviceType` | NodePort | Kubernetes leader service type for exposing service, values - ClusterIP, NodePort, and LoadBalancer |
+|`redisCluster.leader.externalService.port` | 6379 | Port number on which redis leader external service should be exposed |
 |`serviceMonitor.enabled` | false | Servicemonitor to monitor redis with Prometheus |
 |`serviceMonitor.interval` | 30s | Interval at which metrics should be scraped. |
 |`serviceMonitor.scrapeTimeout` | 10s | Timeout after which the scrape is ended |

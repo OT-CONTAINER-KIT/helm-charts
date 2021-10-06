@@ -1,12 +1,12 @@
-{{- if eq .Values.externalService.enabled true }}
+{{- if eq .Values.redisCluster.leader.externalService.enabled true }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Release.Name }}-leader-external-service
-{{- if .Values.externalService.annotations }}
+{{- if .Values.redisCluster.leader.externalService.annotations }}
   annotations:
-{{ toYaml .Values.externalService.annotations | indent 4 }}
+{{ toYaml .Values.redisCluster.leader.externalService.annotations | indent 4 }}
 {{- end }}
   labels:
     app.kubernetes.io/name: {{ .Release.Name }}
@@ -16,14 +16,14 @@ metadata:
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/component: middleware
 spec:
-  type: {{ .Values.externalService.serviceType }}
+  type: {{ .Values.redisCluster.leader.externalService.serviceType }}
   selector:
     app: {{ .Release.Name }}-leader
     redis_setup_type: cluster
     role: leader
   ports:
     - protocol: TCP
-      port: {{ .Values.externalService.port }}
+      port: {{ .Values.redisCluster.leader.externalService.port }}
       targetPort: 6379
       name: client
 {{- end }}
