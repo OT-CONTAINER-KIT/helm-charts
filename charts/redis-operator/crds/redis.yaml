@@ -684,11 +684,8 @@ spec:
                           to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
                     type: object
-                  serviceType:
-                    type: string
                 required:
                 - image
-                - serviceType
                 type: object
               nodeSelector:
                 additionalProperties:
@@ -697,8 +694,10 @@ spec:
               priorityClassName:
                 type: string
               redisConfig:
-                additionalProperties:
-                  type: string
+                description: RedisConfig defines the external configuration of Redis
+                properties:
+                  additionalRedisConfig:
+                    type: string
                 type: object
               redisExporter:
                 description: RedisExporter interface will have the information for
@@ -1256,7 +1255,6 @@ spec:
                 type: array
             required:
             - kubernetesConfig
-            - redisConfig
             type: object
           status:
             description: RedisStatus defines the observed state of Redis
@@ -1940,11 +1938,8 @@ spec:
                               More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                             type: object
                         type: object
-                      serviceType:
-                        type: string
                     required:
                     - image
-                    - serviceType
                     type: object
                   nodeSelector:
                     additionalProperties:
@@ -1953,8 +1948,11 @@ spec:
                   priorityClassName:
                     type: string
                   redisConfig:
-                    additionalProperties:
-                      type: string
+                    description: RedisConfig defines the external configuration of
+                      Redis
+                    properties:
+                      additionalRedisConfig:
+                        type: string
                     type: object
                   redisExporter:
                     description: RedisExporter interface will have the information
@@ -2532,7 +2530,6 @@ spec:
                     type: array
                 required:
                 - kubernetesConfig
-                - redisConfig
                 type: object
             type: object
         required:
