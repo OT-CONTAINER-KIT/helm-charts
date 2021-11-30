@@ -16,6 +16,8 @@ rules:
   resources:
   - rediss
   - redisclusters
+  - redis
+  - rediscluster
   verbs:
   - create
   - delete
