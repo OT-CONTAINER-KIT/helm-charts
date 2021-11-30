@@ -8,6 +8,7 @@ redisCluster:
   #   secretName: redis-secret
   #   secretKey: password
   leader:
+    replicas: 3
     serviceType: ClusterIP
     affinity: {}
       # nodeAffinity:
@@ -19,6 +20,7 @@ redisCluster:
       #         values:
       #         - ssd
   follower:
+    replicas: 0
     serviceType: ClusterIP
     affinity: {}
       # nodeAffinity:

@@ -13,17 +13,17 @@ metadata:
 spec:
   clusterSize: {{ .Values.redisCluster.clusterSize }}
   redisLeader:
-    serviceType: "{{ .Values.redisCluster.leader.serviceType }}"
 {{- if .Values.redisCluster.leader.affinity }}
     affinity:
   {{ toYaml .Values.redisCluster.leader.affinity | indent 6 }}
 {{- end }}
+    replicas: {{ .Values.redisCluster.leader.replicas }}
   redisFollower:
-    serviceType: "{{ .Values.redisCluster.follower.serviceType }}"
 {{- if .Values.redisCluster.follower.affinity }}
     affinity:
   {{ toYaml .Values.redisCluster.follower.affinity | indent 6 }}
 {{- end }}
+    replicas: {{ .Values.redisCluster.follower.replicas }}
   redisExporter:
     enabled: {{ .Values.redisExporter.enabled }}
     image: "{{ .Values.redisExporter.image }}:{{ .Values.redisExporter.tag }}"
@@ -40,7 +40,6 @@ spec:
       name: "{{ .Values.redisCluster.redisSecret.secretName }}"
       key: "{{ .Values.redisCluster.redisSecret.secretKey }}"
 {{- end }}
-    serviceType: ClusterIP
 {{- if .Values.storageSpec }}
   storage:
 {{ toYaml .Values.storageSpec | indent 4 }}

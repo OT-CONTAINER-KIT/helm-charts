@@ -1,4 +1,4 @@
-{{- if eq .Values.serviceMonitor.enabled true }}
+{{- if and (eq .Values.serviceMonitor.enabled true) (gt (int .Values.redisCluster.leader.replicas) 0) }}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
