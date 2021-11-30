@@ -1,3 +1,4 @@
+{{- if .Values.externalService.enabled -}}
 {{- if (gt (int .Values.redisCluster.leader.replicas) 0) }}
 ---
 apiVersion: v1
@@ -26,4 +27,5 @@ spec:
       port: {{ .Values.externalService.port }}
       targetPort: 6379
       name: client
+{{- end }}
 {{- end }}
