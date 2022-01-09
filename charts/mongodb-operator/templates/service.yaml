@@ -1,0 +1,23 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    control-plane: "{{ .Release.Name }}"
+    app.kubernetes.io/name: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - name: operator
+      port: {{ .Values.mongoDBOperator.port }}
+      protocol: TCP
+      targetPort: {{ .Values.mongoDBOperator.port }}
+  selector:
+    name: {{ .Release.Name }}
+  sessionAffinity: None
+  type: ClusterIP

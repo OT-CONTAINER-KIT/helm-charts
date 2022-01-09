@@ -1,0 +1,104 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    control-plane: "{{ .Release.Name }}"
+    app.kubernetes.io/name: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+rules:
+- apiGroups:
+    - ""
+  resources:
+    - configmaps
+    - events
+    - secrets
+    - services
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - apps
+  resources:
+    - statefulsets
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - coordination.k8s.io
+  resources:
+    - leases
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - opstreelabs.in
+  resources:
+    - mongodbclusters
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - opstreelabs.in
+  resources:
+    - mongodbclusters/finalizers
+  verbs:
+    - update
+- apiGroups:
+    - opstreelabs.in
+  resources:
+    - mongodbclusters/status
+  verbs:
+    - get
+    - patch
+    - update
+- apiGroups:
+    - opstreelabs.in
+  resources:
+    - mongodbs
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - opstreelabs.in
+  resources:
+    - mongodbs/finalizers
+  verbs:
+    - update
+- apiGroups:
+    - opstreelabs.in
+  resources:
+    - mongodbs/status
+  verbs:
+    - get
+    - patch
+    - update

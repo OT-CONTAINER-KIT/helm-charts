@@ -1,0 +1,38 @@
+---
+mongoDBOperator:
+  imageName: quay.io/opstree/mongodb-operator
+  imageTag: v0.1.0
+  imagePullPolicy: Always
+  port: 8081
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 600Mi
+  requests:
+    cpu: 200m
+    memory: 600Mi
+
+replicas: 1
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: 8081
+  initialDelaySeconds: 15
+  periodSeconds: 20
+
+readinessProbe:
+  httpGet:
+    path: /readyz
+    port: 8081
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+serviceAccountName: mongodb-operator
+
+priorityClassName: ""
+nodeSelector: {}
+tolerateAllTaints: false
+tolerations: []
+affinity: {}
