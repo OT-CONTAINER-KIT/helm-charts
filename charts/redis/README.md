@@ -50,6 +50,7 @@ $ helm delete <my-release> --namespace <namespace>
 |`redisExporter.tag` | v6.2 | Tag of the redis exporter image |
 |`redisExporter.imagePullPolicy` | IfNotPresent | Image Pull Policy of the redis exporter image |
 |`redisExporter.env` | [] | Extra environment variables which needs to be added in redis exporter|
+|`sidecars` | [] | Sidecar for redis pods |
 |`nodeSelector` | {} | NodeSelector for redis statefulset |
 |`priorityClassName`| "" | Priority class name for the redis statefulset |
 |`storageSpec` | {} | Storage configuration for redis setup |

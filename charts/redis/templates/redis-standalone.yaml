@@ -62,3 +62,7 @@ spec:
   tolerations:
 {{ toYaml .Values.tolerations | indent 4 }}
 {{- end }}
+{{- if .Values.sidecars }}
+  sidecars:
+{{ toYaml .Values.sidecars | indent 4 }}
+{{- end }}
