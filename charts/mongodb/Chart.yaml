@@ -1,29 +1,20 @@
-annotations:
-  category: Database
-apiVersion: v2
-appVersion: 4.4.6
-dependencies:
-- name: common
-  repository: https://charts.bitnami.com/bitnami
-  tags:
-  - bitnami-common
-  version: 1.x.x
-description: NoSQL document-oriented database that stores JSON-like documents with
-  dynamic schemas, simplifying the integration of data in content-driven applications.
-home: https://github.com/bitnami/charts/tree/master/bitnami/mongodb
-icon: https://bitnami.com/assets/stacks/mongodb/img/mongodb-stack-220x234.png
-keywords:
-- mongodb
-- database
-- nosql
-- cluster
-- replicaset
-- replication
+---
+apiVersion: v1
+description: Provides easy mongodb setup definitions for Kubernetes services, and deployment.
+engine: gotpl
 maintainers:
-- email: containers@bitnami.com
-  name: Bitnami
+  - name: Opstree Solutions
 name: mongodb
 sources:
-- https://github.com/bitnami/bitnami-docker-mongodb
-- https://mongodb.org
-version: 10.15.2
+  - https://github.com/ot-container-kit/mongodb-operator
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://github.com/ot-container-kit/mongodb-operator
+keywords:
+- operator
+- MongoDB
+- opstree
+- kubernetes
+- openshift
+- mongodb-exporter
+icon: https://github.com/OT-CONTAINER-KIT/mongodb-operator/raw/main/static/mongodb-operator-logo.svg

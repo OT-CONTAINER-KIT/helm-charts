@@ -1,29 +1,27 @@
-{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
+{{- if eq .Values.serviceMonitor.enabled true }}
+---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "mongodb.fullname" . }}
-  namespace: {{ include "mongodb.serviceMonitor.namespace" . }}
-  labels: {{- include "common.labels.standard" . | nindent 4 }}
-    {{- if .Values.metrics.serviceMonitor.additionalLabels }}
-    {{- include "common.tplvalues.render" (dict "value" .Values.metrics.serviceMonitor.additionalLabels "context" $) | nindent 4 }}
-    {{- end }}
-  {{- if .Values.commonAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
-  {{- end }}
+  name: {{ .Release.Name }}-prometheus-monitoring
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: middleware
 spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      mongodb_setup: standalone
+      role: standalone
   endpoints:
-    - port: http-metrics
-      {{- if .Values.metrics.serviceMonitor.interval }}
-      interval: {{ .Values.metrics.serviceMonitor.interval }}
-      {{- end }}
-      {{- if .Values.metrics.serviceMonitor.scrapeTimeout }}
-      scrapeTimeout: {{ .Values.metrics.serviceMonitor.scrapeTimeout }}
-      {{- end }}
+  - port: metrics
+    interval: {{ .Values.serviceMonitor.interval }}
+    scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout }}
   namespaceSelector:
     matchNames:
-      - "{{ include "mongodb.namespace" . }}"
-  selector:
-    matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
-      app.kubernetes.io/component: metrics
+    - {{ .Values.serviceMonitor.namespace }}
 {{- end }}
