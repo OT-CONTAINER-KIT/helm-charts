@@ -42,40 +42,31 @@ entries:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/k8s-vault-webhook-0.1/k8s-vault-webhook-0.1.tgz
     version: "0.1"
   mongodb:
-  - annotations:
-      category: Database
-    apiVersion: v2
-    appVersion: 4.4.6
-    created: "2021-05-11T05:53:03.243616144Z"
-    dependencies:
-    - name: common
-      repository: https://charts.bitnami.com/bitnami
-      tags:
-      - bitnami-common
-      version: 1.x.x
-    description: NoSQL document-oriented database that stores JSON-like documents
-      with dynamic schemas, simplifying the integration of data in content-driven
-      applications.
-    digest: 3a671cc98304c5a8a0bfbfaf7bb57892626c0b260143541cac5afd58f661babc
-    home: https://github.com/bitnami/charts/tree/master/bitnami/mongodb
-    icon: https://bitnami.com/assets/stacks/mongodb/img/mongodb-stack-220x234.png
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2022-01-31T17:21:40.54396857Z"
+    description: Helm chart to deploy and manage MongoDB Standalone in Kubernetes.
+    digest: a7aa3f3b07daa1aaf631c6f891cc88baa34143737bd5285ef21d6c7ef5adbe5f
+    home: https://github.com/OT-CONTAINER-KIT/mongodb-operator
+    icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/mongodb-operator/main/static/mongodb-operator-logo.svg
     keywords:
+    - operator
     - mongodb
-    - database
-    - nosql
-    - cluster
-    - replicaset
-    - replication
+    - opstree
+    - kubernetes
+    - openshift
+    - backup
+    - restore
+    - mongodb-cluster
     maintainers:
-    - email: containers@bitnami.com
-      name: Bitnami
-    name: mongodb
+    - name: Abhishek Dubey
+    - name: Sandeep Rawat
+    name: mongodb-operator
     sources:
-    - https://github.com/bitnami/bitnami-docker-mongodb
-    - https://mongodb.org
+    - https://github.com/OT-CONTAINER-KIT/mongodb-operator
     urls:
-    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/mongodb-10.15.2/mongodb-10.15.2.tgz
-    version: 10.15.2
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/mongodb-0.1.0/mongodb-0.1.0.tgz
+    version: 0.1.0
   mongodb-operator:
   - apiVersion: v2
     appVersion: 0.1.0
