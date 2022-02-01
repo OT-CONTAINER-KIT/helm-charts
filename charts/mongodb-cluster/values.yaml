@@ -1,0 +1,41 @@
+---
+clusterSize: 3
+
+image:
+  name: quay.io/opstree/mongo
+  tag: v5.0
+  imagePullPolicy: IfNotPresent
+
+resources: {}
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+storage:
+  enabled: true
+  accessModes: ["ReadWriteOnce"]
+  storageSize: 1Gi
+  storageClass: csi-cephfs-sc
+
+mongoDBMonitoring:
+  enabled: true
+  image:
+    name: bitnami/mongodb-exporter
+    tag: 0.11.2-debian-10-r382
+    imagePullPolicy: IfNotPresent
+  resources: {}
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+serviceMonitor:
+  enabled: false
+  interval: 30s
+  scrapeTimeout: 10s
+  namespace: monitoring

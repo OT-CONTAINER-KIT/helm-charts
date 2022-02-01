@@ -1,0 +1,38 @@
+---
+apiVersion: opstreelabs.in/v1alpha1
+kind: MongoDBCluster
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: database
+spec:
+  clusterSize: {{ .Values.clusterSize }}
+  kubernetesConfig:
+    image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
+    imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+    resources:
+{{ toYaml .Values.resources | indent 6 }}
+{{- if .Values.storage.enabled }}
+  storage:
+    accessModes: {{ .Values.storage.accessModes }}
+    storageSize: {{ .Values.storage.storageSize }}
+    storageClass: {{ .Values.storage.storageClass }}
+{{- end }}
+  mongoDBSecurity:
+    mongoDBAdminUser: admin
+    secretRef:
+      name: {{ .Release.Name }}-secret
+      key: password
+{{- if .Values.mongoDBMonitoring.enabled }}
+  mongoDBMonitoring:
+    enableExporter: {{ .Values.mongoDBMonitoring.enabled }}
+    image: "{{ .Values.mongoDBMonitoring.image.name }}:{{ .Values.mongoDBMonitoring.image.tag }}"
+    imagePullPolicy: {{ .Values.mongoDBMonitoring.image.imagePullPolicy }}
+    resources:
+{{ toYaml .Values.mongoDBMonitoring.resources | indent 6 }}
+{{- end }}
