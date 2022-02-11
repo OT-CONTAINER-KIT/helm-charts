@@ -50,6 +50,7 @@ rules:
   - pods
   - services
   - configmaps
+  - events
   verbs:
   - create
   - delete
