@@ -19,6 +19,9 @@ redisCluster:
       #         operator: In
       #         values:
       #         - ssd
+      # redisConfig: |
+      #   appendonly off
+      #   save ""
   follower:
     replicas: 0
     serviceType: ClusterIP
@@ -31,6 +34,9 @@ redisCluster:
       #         operator: In
       #         values:
       #         - ssd
+      # redisConfig: |
+      #   appendonly off
+      #   save ""
   resources: {}
     # requests:
     #   cpu: 100m
