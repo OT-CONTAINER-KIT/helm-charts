@@ -99,3 +99,7 @@ affinity: {}
   #         operator: In
   #         values:
   #         - ssd
+
+# redisConfig: |
+#   appendonly off
+#   save ""

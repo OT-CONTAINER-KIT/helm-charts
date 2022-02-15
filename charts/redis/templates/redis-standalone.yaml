@@ -38,7 +38,10 @@ spec:
     - name: {{ $imageSecrets.name }}
 {{- end }}
 {{- end }}
-  redisConfig: {}
+{{- if hasKey .Values "redisConfig" }}
+  redisConfig:
+    additionalRedisConfig: {{ .Release.Name }}
+{{- end }}
 {{- if .Values.storageSpec }}
   storage:
 {{ toYaml .Values.storageSpec | indent 4 }}
