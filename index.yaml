@@ -42,6 +42,29 @@ entries:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/k8s-vault-webhook-0.1/k8s-vault-webhook-0.1.tgz
     version: "0.1"
   mongodb:
+  - apiVersion: v1
+    appVersion: 0.2.0
+    created: "2022-02-16T10:46:46.347649059Z"
+    description: Provides easy mongodb setup definitions for Kubernetes services,
+      and deployment.
+    digest: 502d8dd02af01e47e8979932960c738bdd4ed4a745d226dc6f49e5b8ddace800
+    home: https://github.com/ot-container-kit/mongodb-operator
+    icon: https://github.com/OT-CONTAINER-KIT/mongodb-operator/raw/main/static/mongodb-operator-logo.svg
+    keywords:
+    - operator
+    - MongoDB
+    - opstree
+    - kubernetes
+    - openshift
+    - mongodb-exporter
+    maintainers:
+    - name: Opstree Solutions
+    name: mongodb
+    sources:
+    - https://github.com/ot-container-kit/mongodb-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/mongodb-0.2.0/mongodb-0.2.0.tgz
+    version: 0.2.0
   - apiVersion: v2
     appVersion: 0.1.0
     created: "2022-01-31T17:21:40.54396857Z"
@@ -69,6 +92,30 @@ entries:
     version: 0.1.0
   mongodb-cluster:
   - apiVersion: v1
+    appVersion: 0.2.0
+    created: "2022-02-16T10:46:46.495836876Z"
+    description: Provides easy MongoDB cluster setup definitions for Kubernetes services,
+      and deployment.
+    digest: 8c9f14f249eee60e273281756c9e79fd0450076533d01dde6105b419d023d8d3
+    home: https://github.com/ot-container-kit/mongodb-operator
+    icon: https://github.com/OT-CONTAINER-KIT/mongodb-operator/raw/main/static/mongodb-operator-logo.svg
+    keywords:
+    - operator
+    - MongoDB
+    - opstree
+    - kubernetes
+    - openshift
+    - mongodb-exporter
+    - mongodb-cluster
+    maintainers:
+    - name: Opstree Solutions
+    name: mongodb-cluster
+    sources:
+    - https://github.com/ot-container-kit/mongodb-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/mongodb-cluster-0.2.0/mongodb-cluster-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v1
     appVersion: 0.1.0
     created: "2022-02-01T17:31:55.648275471Z"
     description: Provides easy MongoDB cluster setup definitions for Kubernetes services,
@@ -93,6 +140,31 @@ entries:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/mongodb-cluster-0.1.0/mongodb-cluster-0.1.0.tgz
     version: 0.1.0
   mongodb-operator:
+  - apiVersion: v2
+    appVersion: 0.2.0
+    created: "2022-02-16T10:46:46.623104649Z"
+    description: Helm chart to deploy and manage MongoDB operator in Kubernetes.
+    digest: 7eb6f2d13d709a07deeeb1e53acd2e70561aaa60558b66b227118f51009902b5
+    home: https://github.com/OT-CONTAINER-KIT/mongodb-operator
+    icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/mongodb-operator/main/static/mongodb-operator-logo.svg
+    keywords:
+    - operator
+    - mongodb
+    - opstree
+    - kubernetes
+    - openshift
+    - backup
+    - restore
+    - mongodb-cluster
+    maintainers:
+    - name: Abhishek Dubey
+    - name: Sandeep Rawat
+    name: mongodb-operator
+    sources:
+    - https://github.com/OT-CONTAINER-KIT/mongodb-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/mongodb-operator-0.2.0/mongodb-operator-0.2.0.tgz
+    version: 0.2.0
   - apiVersion: v2
     appVersion: 0.1.0
     created: "2022-01-10T17:21:40.54396857Z"
