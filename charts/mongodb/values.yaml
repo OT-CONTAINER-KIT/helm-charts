@@ -3,6 +3,22 @@ image:
   name: quay.io/opstree/mongo
   tag: v5.0
   imagePullPolicy: IfNotPresent
+  # pullSecret: regcred
+
+nodeSelector: {}
+#  memory: high
+
+#priorityClassName: "-"
+
+affinity: {}
+  # nodeAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #     nodeSelectorTerms:
+  #     - matchExpressions:
+  #       - key: disktype
+  #         operator: In
+  #         values:
+  #         - ssd
 
 resources: {}
   # requests:
@@ -11,6 +27,11 @@ resources: {}
   # limits:
   #   cpu: 100m
   #   memory: 128Mi
+
+tolerations: []
+#  - key: "example-key"
+#    operator: "Exists"
+#    effect: "NoSchedule"
 
 storage:
   enabled: true

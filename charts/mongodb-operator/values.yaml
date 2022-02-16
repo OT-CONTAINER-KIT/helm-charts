@@ -1,17 +1,17 @@
 ---
 mongoDBOperator:
   imageName: quay.io/opstree/mongodb-operator
-  imageTag: v0.1.0
+  imageTag: v0.2.0
   imagePullPolicy: Always
   port: 8081
 
 resources:
   limits:
-    cpu: 200m
-    memory: 600Mi
+    cpu: 300m
+    memory: 800Mi
   requests:
-    cpu: 200m
-    memory: 600Mi
+    cpu: 300m
+    memory: 800Mi
 
 replicas: 1
 
@@ -36,4 +36,3 @@ nodeSelector: {}
 tolerateAllTaints: false
 tolerations: []
 affinity: {}
-

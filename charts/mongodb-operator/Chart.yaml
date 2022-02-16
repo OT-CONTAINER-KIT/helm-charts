@@ -1,6 +1,6 @@
 ---
 apiVersion: v2
-appVersion: "0.1.0"
+appVersion: "0.2.0"
 description: Helm chart to deploy and manage MongoDB operator in Kubernetes.
 engine: gotpl
 maintainers:
@@ -9,7 +9,7 @@ maintainers:
 name: mongodb-operator
 sources:
   - https://github.com/OT-CONTAINER-KIT/mongodb-operator
-version: 0.9.0
+version: 0.2.0
 home: https://github.com/OT-CONTAINER-KIT/mongodb-operator
 icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/mongodb-operator/main/static/mongodb-operator-logo.svg
 keywords:

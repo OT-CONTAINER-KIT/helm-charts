@@ -7,8 +7,8 @@ maintainers:
 name: mongodb-cluster
 sources:
   - https://github.com/ot-container-kit/mongodb-operator
-version: 0.1.0
-appVersion: "0.1.0"
+version: 0.2.0
+appVersion: "0.2.0"
 home: https://github.com/ot-container-kit/mongodb-operator
 keywords:
 - operator

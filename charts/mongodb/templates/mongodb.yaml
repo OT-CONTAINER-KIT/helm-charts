@@ -14,6 +14,24 @@ spec:
   kubernetesConfig:
     image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
     imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+{{- if .Values.image.pullSecret }}
+    imagePullSecret: {{ .Values.image.pullSecret }}
+{{- end }}
+{{- if .Values.nodeSelector }}
+    nodeSelector:
+  {{ toYaml .Values.nodeSelector | indent 6 }}
+{{- end }}
+{{- if .Values.priorityClassName }}
+    priorityClassName: "{{ .Values.priorityClassName }}"
+{{- end }}
+{{- if .Values.affinity }}
+    affinity:
+  {{ toYaml .Values.affinity | indent 6 }}
+{{- end }}
+{{- if .Values.tolerations }}
+    tolerations:
+  {{ toYaml .Values.tolerations | indent 6 }}
+{{- end }}
     resources:
 {{ toYaml .Values.resources | indent 6 }}
 {{- if .Values.storage.enabled }}
