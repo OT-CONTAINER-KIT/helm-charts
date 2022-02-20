@@ -101,5 +101,5 @@ affinity: {}
   #         - ssd
 
 # redisConfig: |
-#   appendonly off
+#   appendonly no
 #   save ""

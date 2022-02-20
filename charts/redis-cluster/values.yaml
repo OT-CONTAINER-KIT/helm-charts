@@ -20,7 +20,7 @@ redisCluster:
       #         values:
       #         - ssd
       # redisConfig: |
-      #   appendonly off
+      #   appendonly no
       #   save ""
   follower:
     replicas: 0
@@ -35,7 +35,7 @@ redisCluster:
       #         values:
       #         - ssd
       # redisConfig: |
-      #   appendonly off
+      #   appendonly no
       #   save ""
   resources: {}
     # requests:
