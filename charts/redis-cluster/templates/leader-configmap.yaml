@@ -1,9 +1,9 @@
-{{- with .Values.redisCluster.follower.redisConfig }}
+{{- with .Values.redisCluster.leader.redisConfig }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ $.Release.Name }}-follower
+  name: {{ $.Release.Name }}-leader
   labels:
     app.kubernetes.io/name: {{ $.Release.Name }}
     helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
