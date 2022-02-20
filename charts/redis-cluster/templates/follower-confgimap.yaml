@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ $.Release.Service }}
     app.kubernetes.io/instance: {{ $.Release.Name }}
     app.kubernetes.io/version: {{ $.Chart.AppVersion }}
-spec:
+data:
   redis-external.conf: |
     {{- . | nindent 4 }}
 {{- end }}
