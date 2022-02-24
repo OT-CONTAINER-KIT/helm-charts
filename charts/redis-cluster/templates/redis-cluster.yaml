@@ -15,13 +15,13 @@ spec:
   redisLeader:
 {{- if .Values.redisCluster.leader.affinity }}
     affinity:
-  {{ toYaml .Values.redisCluster.leader.affinity | indent 6 }}
+      {{- toYaml .Values.redisCluster.leader.affinity | nindent 6 }}
 {{- end }}
     replicas: {{ .Values.redisCluster.leader.replicas }}
   redisFollower:
 {{- if .Values.redisCluster.follower.affinity }}
     affinity:
-  {{ toYaml .Values.redisCluster.follower.affinity | indent 6 }}
+      {{- toYaml .Values.redisCluster.follower.affinity | nindent 6 }}
 {{- end }}
     replicas: {{ .Values.redisCluster.follower.replicas }}
   redisExporter:
