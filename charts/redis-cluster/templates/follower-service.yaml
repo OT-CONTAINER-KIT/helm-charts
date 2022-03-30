@@ -1,4 +1,4 @@
-{{- if (gt (int .Values.redisCluster.follower.replicas) 0) }}
+{{- if and (gt (int .Values.redisCluster.follower.replicas) 0) (eq .Values.externalService.enabled true) }}
 ---
 apiVersion: v1
 kind: Service

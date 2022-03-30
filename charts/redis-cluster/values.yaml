@@ -39,6 +39,13 @@ redisCluster:
     #   cpu: 100m
     #   memory: 128Mi
 
+externalConfig:
+  enabled: false
+  data: |
+    tcp-keepalive 400
+    slowlog-max-len 158
+    stream-node-max-bytes 2048
+
 externalService:
   enabled: false
   # annotations:
