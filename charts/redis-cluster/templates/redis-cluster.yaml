@@ -18,12 +18,20 @@ spec:
       {{- toYaml .Values.redisCluster.leader.affinity | nindent 6 }}
 {{- end }}
     replicas: {{ .Values.redisCluster.leader.replicas }}
+{{- if eq .Values.externalConfig.enabled true }}
+    redisConfig:
+      additionalRedisConfig: {{ .Release.Name }}-ext-config
+{{- end }}
   redisFollower:
 {{- if .Values.redisCluster.follower.affinity }}
     affinity:
       {{- toYaml .Values.redisCluster.follower.affinity | nindent 6 }}
 {{- end }}
     replicas: {{ .Values.redisCluster.follower.replicas }}
+{{- if eq .Values.externalConfig.enabled true }}
+    redisConfig:
+      additionalRedisConfig: {{ .Release.Name }}-ext-config
+{{- end }}
   redisExporter:
     enabled: {{ .Values.redisExporter.enabled }}
     image: "{{ .Values.redisExporter.image }}:{{ .Values.redisExporter.tag }}"

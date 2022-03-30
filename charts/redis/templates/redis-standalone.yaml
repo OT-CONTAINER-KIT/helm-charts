@@ -11,6 +11,10 @@ metadata:
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/component: middleware
 spec:
+{{- if eq .Values.externalConfig.enabled true }}
+  redisConfig:
+    additionalRedisConfig: redis-external-config
+{{- end }}
   redisExporter:
     enabled: {{ .Values.redisExporter.enabled }}
     image: "{{ .Values.redisExporter.image }}:{{ .Values.redisExporter.tag }}"
