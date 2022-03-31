@@ -1,7 +1,7 @@
 ---
 mongoDBOperator:
   imageName: quay.io/opstree/mongodb-operator
-  imageTag: v0.2.0
+  imageTag: v0.3.0
   imagePullPolicy: Always
   port: 8081
 
