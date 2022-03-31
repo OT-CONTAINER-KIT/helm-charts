@@ -41,6 +41,9 @@ spec:
     storageSize: {{ .Values.storage.storageSize }}
     storageClass: {{ .Values.storage.storageClass }}
 {{- end }}
+{{- if .Values.mongoDBConfiguration }}
+  mongoDBAdditionalConfig: {{ .Release.Name }}-additional-config
+{{- end }}
   mongoDBSecurity:
     mongoDBAdminUser: admin
     secretRef:
