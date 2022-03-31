@@ -13,6 +13,8 @@ metadata:
 spec:
   kubernetesConfig:
     image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
+    securityContext:
+      fsGroup: 1001
     imagePullPolicy: {{ .Values.image.imagePullPolicy }}
 {{- if .Values.image.pullSecret }}
     imagePullSecret: {{ .Values.image.pullSecret }}
@@ -45,6 +47,9 @@ spec:
     secretRef:
       name: {{ .Release.Name }}-secret
       key: password
+{{- if .Values.mongoDBConfiguration }}
+  mongoDBAdditionalConfig: {{ .Release.Name }}-additional-config
+{{- end }}
 {{- if .Values.mongoDBMonitoring.enabled }}
   mongoDBMonitoring:
     enableExporter: {{ .Values.mongoDBMonitoring.enabled }}
