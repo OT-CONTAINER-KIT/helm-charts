@@ -141,6 +141,31 @@ entries:
     version: 0.1.0
   mongodb-operator:
   - apiVersion: v2
+    appVersion: 0.3.0
+    created: "2022-03-31T10:43:47.196068822Z"
+    description: Helm chart to deploy and manage MongoDB operator in Kubernetes.
+    digest: d3e7e62770e58d2d99db194c3725ab1d09ee9c1388d370165f3bb2e78e7baa75
+    home: https://github.com/OT-CONTAINER-KIT/mongodb-operator
+    icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/mongodb-operator/main/static/mongodb-operator-logo.svg
+    keywords:
+    - operator
+    - mongodb
+    - opstree
+    - kubernetes
+    - openshift
+    - backup
+    - restore
+    - mongodb-cluster
+    maintainers:
+    - name: Abhishek Dubey
+    - name: Sandeep Rawat
+    name: mongodb-operator
+    sources:
+    - https://github.com/OT-CONTAINER-KIT/mongodb-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/mongodb-operator-0.3.0/mongodb-operator-0.3.0.tgz
+    version: 0.3.0
+  - apiVersion: v2
     appVersion: 0.2.0
     created: "2022-02-16T10:46:46.623104649Z"
     description: Helm chart to deploy and manage MongoDB operator in Kubernetes.
