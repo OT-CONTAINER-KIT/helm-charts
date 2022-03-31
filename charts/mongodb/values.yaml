@@ -1,7 +1,7 @@
 ---
 image:
   name: quay.io/opstree/mongo
-  tag: v5.0
+  tag: v5.0.6
   imagePullPolicy: IfNotPresent
   # pullSecret: regcred
 
@@ -9,6 +9,9 @@ nodeSelector: {}
 #  memory: high
 
 #priorityClassName: "-"
+
+securityContext:
+  fsGroup: 1001
 
 affinity: {}
   # nodeAffinity:
@@ -52,6 +55,11 @@ mongoDBMonitoring:
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
+
+#mongoDBConfiguration: |-
+#  net:
+#    bindIp: 0.0.0.0
+#    port: 27017
 
 serviceMonitor:
   enabled: false
