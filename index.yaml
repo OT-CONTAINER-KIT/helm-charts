@@ -43,6 +43,29 @@ entries:
     version: "0.1"
   mongodb:
   - apiVersion: v1
+    appVersion: 0.3.0
+    created: "2022-03-31T12:13:49.797328172Z"
+    description: Provides easy mongodb setup definitions for Kubernetes services,
+      and deployment.
+    digest: bd16c8ba87453fc6774b21ec6bc4e832a56e071162ea0db0898f1f909ae7bce5
+    home: https://github.com/ot-container-kit/mongodb-operator
+    icon: https://github.com/OT-CONTAINER-KIT/mongodb-operator/raw/main/static/mongodb-operator-logo.svg
+    keywords:
+    - operator
+    - MongoDB
+    - opstree
+    - kubernetes
+    - openshift
+    - mongodb-exporter
+    maintainers:
+    - name: Opstree Solutions
+    name: mongodb
+    sources:
+    - https://github.com/ot-container-kit/mongodb-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/mongodb-0.3.0/mongodb-0.3.0.tgz
+    version: 0.3.0
+  - apiVersion: v1
     appVersion: 0.2.0
     created: "2022-02-16T10:46:46.347649059Z"
     description: Provides easy mongodb setup definitions for Kubernetes services,
@@ -91,6 +114,30 @@ entries:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/mongodb-0.1.0/mongodb-0.1.0.tgz
     version: 0.1.0
   mongodb-cluster:
+  - apiVersion: v1
+    appVersion: 0.3.0
+    created: "2022-03-31T12:13:49.961154021Z"
+    description: Provides easy MongoDB cluster setup definitions for Kubernetes services,
+      and deployment.
+    digest: d2ca6122ee82f8700fc2dccc1d1151c7c1ad7d6b41d981fa1f0343be06c0b1e7
+    home: https://github.com/ot-container-kit/mongodb-operator
+    icon: https://github.com/OT-CONTAINER-KIT/mongodb-operator/raw/main/static/mongodb-operator-logo.svg
+    keywords:
+    - operator
+    - MongoDB
+    - opstree
+    - kubernetes
+    - openshift
+    - mongodb-exporter
+    - mongodb-cluster
+    maintainers:
+    - name: Opstree Solutions
+    name: mongodb-cluster
+    sources:
+    - https://github.com/ot-container-kit/mongodb-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/mongodb-cluster-0.3.0/mongodb-cluster-0.3.0.tgz
+    version: 0.3.0
   - apiVersion: v1
     appVersion: 0.2.0
     created: "2022-02-16T10:46:46.495836876Z"
