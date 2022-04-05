@@ -35,7 +35,6 @@ spec:
       name: "{{ .Values.redisStandalone.redisSecret.secretName }}"
       key: "{{ .Values.redisStandalone.redisSecret.secretKey }}"
 {{- end }}
-    serviceType: "{{ .Values.redisStandalone.serviceType }}"
 {{- if .Values.imagePullSecrets }}
     imagePullSecrets:
 {{- range $imageSecrets := .Values.imagePullSecrets }}
