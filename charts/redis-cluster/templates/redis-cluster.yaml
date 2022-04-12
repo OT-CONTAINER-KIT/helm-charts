@@ -14,8 +14,7 @@ spec:
   clusterSize: {{ .Values.redisCluster.clusterSize }}
   redisLeader:
 {{- if .Values.redisCluster.leader.affinity }}
-    affinity:
-  {{ toYaml .Values.redisCluster.leader.affinity | indent 6 }}
+    affinity: {{ toYaml .Values.redisCluster.leader.affinity | nindent 6 }}
 {{- end }}
     replicas: {{ .Values.redisCluster.leader.replicas }}
 {{- if eq .Values.externalConfig.enabled true }}
@@ -24,8 +23,7 @@ spec:
 {{- end }}
   redisFollower:
 {{- if .Values.redisCluster.follower.affinity }}
-    affinity:
-  {{ toYaml .Values.redisCluster.follower.affinity | indent 6 }}
+    affinity: {{ toYaml .Values.redisCluster.follower.affinity | nindent 6 }}
 {{- end }}
     replicas: {{ .Values.redisCluster.follower.replicas }}
 {{- if eq .Values.externalConfig.enabled true }}
