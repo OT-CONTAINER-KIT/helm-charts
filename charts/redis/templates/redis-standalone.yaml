@@ -2,7 +2,7 @@
 apiVersion: redis.redis.opstreelabs.in/v1beta1
 kind: Redis
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Values.redisStandalone.nameOverride | default .Release.Name }}
   labels:
     app.kubernetes.io/name: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
