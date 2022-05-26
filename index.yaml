@@ -41,6 +41,35 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/k8s-vault-webhook-0.1/k8s-vault-webhook-0.1.tgz
     version: "0.1"
+  logging-operator:
+  - apiVersion: v2
+    appVersion: 0.3.0
+    created: "2022-05-26T19:56:23.77883088Z"
+    description: Helm chart to deploy and manage EFK stack in Kubernetes
+    digest: 79b49cff9cb6545976c6ade90be0ff19a2ed64dfffc8908b96c93896f5f8024d
+    home: https://github.com/OT-CONTAINER-KIT/logging-operator
+    icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/logging-operator/master/static/logging-operator-logo.svg
+    keywords:
+    - operator
+    - elasticsearch
+    - opstree
+    - kubernetes
+    - openshift
+    - backup
+    - restore
+    - fluentd
+    - kibana
+    - monitoring
+    - logging
+    maintainers:
+    - name: Abhishek Dubey
+    - name: Sandeep Rawat
+    name: logging-operator
+    sources:
+    - https://github.com/OT-CONTAINER-KIT/logging-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/logging-operator-0.3.0/logging-operator-0.3.0.tgz
+    version: 0.3.0
   mongodb:
   - apiVersion: v1
     appVersion: 0.3.0
