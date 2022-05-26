@@ -1,0 +1,38 @@
+---
+loggingOperator:
+  imageName: quay.io/opstree/logging-operator
+  imageTag: v0.3.1
+  imagePullPolicy: Always
+  port: 8081
+
+resources:
+  limits:
+    cpu: 300m
+    memory: 800Mi
+  requests:
+    cpu: 300m
+    memory: 800Mi
+
+replicas: 1
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: 8081
+  initialDelaySeconds: 15
+  periodSeconds: 20
+
+readinessProbe:
+  httpGet:
+    path: /readyz
+    port: 8081
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+serviceAccountName: logging-operator
+
+priorityClassName: ""
+nodeSelector: {}
+tolerateAllTaints: false
+tolerations: []
+affinity: {}

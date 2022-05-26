@@ -1,0 +1,26 @@
+---
+apiVersion: v2
+appVersion: "0.3.0"
+description: Helm chart to deploy and manage EFK stack in Kubernetes
+engine: gotpl
+maintainers:
+  - name: Abhishek Dubey
+  - name: Sandeep Rawat
+name: logging-operator
+sources:
+  - https://github.com/OT-CONTAINER-KIT/logging-operator
+version: 0.3.0
+home: https://github.com/OT-CONTAINER-KIT/logging-operator
+icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/logging-operator/master/static/logging-operator-logo.svg
+keywords:
+- operator
+- elasticsearch
+- opstree
+- kubernetes
+- openshift
+- backup
+- restore
+- fluentd
+- kibana
+- monitoring
+- logging

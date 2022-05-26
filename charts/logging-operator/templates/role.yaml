@@ -1,0 +1,233 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    control-plane: "{{ .Release.Name }}"
+    app.kubernetes.io/name: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+rules:
+- apiGroups:
+    - ""
+  resources:
+    - configmaps
+    - events
+    - secrets
+    - services
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - ""
+  resources:
+    - namespaces
+    - pods
+    - serviceaccounts
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - apps
+  resources:
+    - daemonsets
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - apps
+  resources:
+    - deployments
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - apps
+  resources:
+    - statefulsets
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - coordination.k8s.io
+  resources:
+    - leases
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - logging.logging.opstreelabs.in
+  resources:
+    - elasticsearches
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - logging.logging.opstreelabs.in
+  resources:
+    - elasticsearches/finalizers
+  verbs:
+    - update
+- apiGroups:
+    - logging.logging.opstreelabs.in
+  resources:
+    - elasticsearches/status
+  verbs:
+    - get
+    - patch
+    - update
+- apiGroups:
+    - logging.logging.opstreelabs.in
+  resources:
+    - fluentds
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - logging.logging.opstreelabs.in
+  resources:
+    - fluentds/finalizers
+  verbs:
+    - update
+- apiGroups:
+    - logging.logging.opstreelabs.in
+  resources:
+    - fluentds/status
+  verbs:
+    - get
+    - patch
+    - update
+- apiGroups:
+    - logging.logging.opstreelabs.in
+  resources:
+    - indexlifecycles
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - logging.logging.opstreelabs.in
+  resources:
+    - indexlifecycles/finalizers
+  verbs:
+    - update
+- apiGroups:
+    - logging.logging.opstreelabs.in
+  resources:
+    - indexlifecycles/status
+  verbs:
+    - get
+    - patch
+    - update
+- apiGroups:
+    - logging.logging.opstreelabs.in
+  resources:
+    - indextemplates
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - logging.logging.opstreelabs.in
+  resources:
+    - indextemplates/finalizers
+  verbs:
+    - update
+- apiGroups:
+    - logging.logging.opstreelabs.in
+  resources:
+    - indextemplates/status
+  verbs:
+    - get
+    - patch
+    - update
+- apiGroups:
+    - logging.logging.opstreelabs.in
+  resources:
+    - kibanas
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - logging.logging.opstreelabs.in
+  resources:
+    - kibanas/finalizers
+  verbs:
+    - update
+- apiGroups:
+    - logging.logging.opstreelabs.in
+  resources:
+    - kibanas/status
+  verbs:
+    - get
+    - patch
+    - update
+- apiGroups:
+    - rbac.authorization.k8s.io
+  resources:
+    - clusterrolebindings
+    - clusterroles
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
