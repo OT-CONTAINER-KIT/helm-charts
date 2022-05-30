@@ -4,7 +4,7 @@ description: Provides easy Elasticsearch cluster setup
 engine: gotpl
 maintainers:
   - name: Opstree Solutions
-name: logging-cluster
+name: elasticsearch
 sources:
   - https://github.com/ot-container-kit/logging-operator
 version: 0.3.0
