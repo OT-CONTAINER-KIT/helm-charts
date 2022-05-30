@@ -41,6 +41,31 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/k8s-vault-webhook-0.1/k8s-vault-webhook-0.1.tgz
     version: "0.1"
+  logging-cluster:
+  - apiVersion: v1
+    appVersion: 0.3.0
+    created: "2022-05-30T10:44:05.574719847Z"
+    description: Provides easy Elasticsearch cluster setup
+    digest: e45fea214ea01e1f786fbe46f30e3fb8fd381670d226557e05bb7b0a1f623891
+    home: https://github.com/ot-container-kit/logging-operator
+    icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/logging-operator/master/static/logging-operator-logo.svg
+    keywords:
+    - operator
+    - elasticsearch
+    - opstree
+    - kubernetes
+    - openshift
+    - logging-operator
+    - kibana
+    - fluentd
+    maintainers:
+    - name: Opstree Solutions
+    name: logging-cluster
+    sources:
+    - https://github.com/ot-container-kit/logging-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/logging-cluster-0.3.0/logging-cluster-0.3.0.tgz
+    version: 0.3.0
   logging-operator:
   - apiVersion: v2
     appVersion: 0.3.0
