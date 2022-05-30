@@ -1,5 +1,30 @@
 apiVersion: v1
 entries:
+  elasticsearch:
+  - apiVersion: v1
+    appVersion: 0.3.0
+    created: "2022-05-30T10:47:33.416344423Z"
+    description: Provides easy Elasticsearch cluster setup
+    digest: dd021ae665c5f16e3bd78bfd29aab4fba0aecdbc08659ecdc2bacd169882e13f
+    home: https://github.com/ot-container-kit/logging-operator
+    icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/logging-operator/master/static/logging-operator-logo.svg
+    keywords:
+    - operator
+    - elasticsearch
+    - opstree
+    - kubernetes
+    - openshift
+    - logging-operator
+    - kibana
+    - fluentd
+    maintainers:
+    - name: Opstree Solutions
+    name: elasticsearch
+    sources:
+    - https://github.com/ot-container-kit/logging-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/elasticsearch-0.3.0/elasticsearch-0.3.0.tgz
+    version: 0.3.0
   k8s-vault-webhook:
   - apiVersion: v1
     created: "2021-05-08T12:42:35.711946529Z"
