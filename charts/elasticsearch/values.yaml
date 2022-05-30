@@ -1,0 +1,74 @@
+---
+clusterName: "elastic-prod"
+esVersion: "7.17.0"
+
+
+#customConfiguration:
+#  cluster.routing.allocation.disk.watermark.low: "87%"
+
+esMaster:
+  replicas: 3
+  storage:
+    storageSize: 20Gi
+    accessModes: [ReadWriteOnce]
+    storageClass: "default"
+  jvmMaxMemory: 1g
+  jvmMinMemory: 1g
+  resources: {}
+    # requests:
+    #   cpu: 1000m
+    #   memory: 2048Mi
+    # limits:
+    #   cpu: 1000m
+    #   memory: 2048Mi
+  affinity: {}
+    # nodeAffinity:
+    #   requiredDuringSchedulingIgnoredDuringExecution:
+    #     nodeSelectorTerms:
+    #     - matchExpressions:
+    #       - key: disktype
+    #         operator: In
+    #         values:
+    #         - ssd
+  nodeSelector: {}
+  #  memory: high
+  tolerations: []
+  #  - key: "example-key"
+  #    operator: "Exists"
+  #    effect: "NoSchedule"
+#  priorityClassName: "-"
+
+esData:
+  replicas: 3
+  storage:
+    storageSize: 50Gi
+    accessModes: [ReadWriteOnce]
+    storageClass: "default"
+  jvmMaxMemory: 1g
+  jvmMinMemory: 1g
+  resources: {}
+    # requests:
+    #   cpu: 1000m
+    #   memory: 2048Mi
+    # limits:
+    #   cpu: 1000m
+  #   memory: 2048Mi
+  affinity: {}
+    # nodeAffinity:
+    #   requiredDuringSchedulingIgnoredDuringExecution:
+    #     nodeSelectorTerms:
+    #     - matchExpressions:
+    #       - key: disktype
+    #         operator: In
+    #         values:
+  #         - ssd
+  nodeSelector: {}
+  #  memory: high
+  tolerations: []
+  #  - key: "example-key"
+  #    operator: "Exists"
+  #    effect: "NoSchedule"
+#  priorityClassName: "-"
+
+esSecurity:
+  enabled: true

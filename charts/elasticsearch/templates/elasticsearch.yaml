@@ -1,0 +1,126 @@
+---
+apiVersion: logging.logging.opstreelabs.in/v1beta1
+kind: Elasticsearch
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: database
+spec:
+  esClusterName: {{ .Values.clusterName }}
+  esVersion: "{{ .Values.esVersion }}"
+  esMaster:
+    replicas: {{ .Values.esMaster.replicas }}
+    storage:
+      storageSize: {{ .Values.esMaster.storage.storageSize }}
+      accessModes: {{ .Values.esMaster.storage.accessModes }}
+      storageClass: {{ .Values.esMaster.storage.storageClass }}
+    jvmMaxMemory: "{{ .Values.esMaster.jvmMaxMemory }}"
+    jvmMinMemory: "{{ .Values.esMaster.jvmMinMemory }}"
+    kubernetesConfig:
+      resources:
+    {{ toYaml .Values.esMaster.resources | indent 8 }}
+{{- if .Values.esMaster.priorityClassName }}
+      priorityClassName: "{{ .Values.esMaster.priorityClassName }}"
+{{- end }}
+{{- if .Values.esMaster.affinity }}
+      affinity:
+    {{ toYaml .Values.esMaster.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.esMaster.tolerations }}
+      tolerations:
+    {{ toYaml .Values.esMaster.tolerations | indent 8 }}
+{{- end }}
+{{- if .Values.customConfiguration }}
+      customConfig: {{ .Release.Name }}-additional-config
+{{- end }}
+{{- if .Values.esData }}
+  esData:
+    replicas: {{ .Values.esData.replicas }}
+    storage:
+      storageSize: {{ .Values.esData.storage.storageSize }}
+      accessModes: {{ .Values.esData.storage.accessModes }}
+      storageClass: {{ .Values.esData.storage.storageClass }}
+    jvmMaxMemory: "{{ .Values.esData.jvmMaxMemory }}"
+    jvmMinMemory: "{{ .Values.esData.jvmMinMemory }}"
+    kubernetesConfig:
+      resources:
+    {{ toYaml .Values.esData.resources | indent 8 }}
+{{- if .Values.esData.priorityClassName }}
+      priorityClassName: "{{ .Values.esData.priorityClassName }}"
+{{- end }}
+{{- if .Values.esData.affinity }}
+      affinity:
+    {{ toYaml .Values.esData.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.esData.tolerations }}
+      tolerations:
+    {{ toYaml .Values.esData.tolerations | indent 8 }}
+{{- end }}
+{{- if .Values.customConfiguration }}
+      customConfig: {{ .Release.Name }}-additional-config
+{{- end }}
+{{- end }}
+{{- if .Values.esIngestion }}
+  esIngestion:
+    replicas: {{ .Values.esIngestion.replicas }}
+    storage:
+      storageSize: {{ .Values.esIngestion.storage.storageSize }}
+      accessModes: {{ .Values.esIngestion.storage.accessModes }}
+      storageClass: {{ .Values.esIngestion.storage.storageClass }}
+    jvmMaxMemory: "{{ .Values.esIngestion.jvmMaxMemory }}"
+    jvmMinMemory: "{{ .Values.esIngestion.jvmMinMemory }}"
+    kubernetesConfig:
+      resources:
+    {{ toYaml .Values.esIngestion.resources | indent 8 }}
+{{- if .Values.esIngestion.priorityClassName }}
+      priorityClassName: "{{ .Values.esIngestion.priorityClassName }}"
+{{- end }}
+{{- if .Values.esIngestion.affinity }}
+      affinity:
+    {{ toYaml .Values.esIngestion.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.esIngestion.tolerations }}
+      tolerations:
+    {{ toYaml .Values.esIngestion.tolerations | indent 8 }}
+{{- end }}
+{{- if .Values.customConfiguration }}
+      customConfig: {{ .Release.Name }}-additional-config
+{{- end }}
+{{- end }}
+{{- if .Values.esClient }}
+  esClient:
+    replicas: {{ .Values.esClient.replicas }}
+    storage:
+      storageSize: {{ .Values.esClient.storage.storageSize }}
+      accessModes: {{ .Values.esClient.storage.accessModes }}
+      storageClass: {{ .Values.esClient.storage.storageClass }}
+    jvmMaxMemory: "{{ .Values.esClient.jvmMaxMemory }}"
+    jvmMinMemory: "{{ .Values.esClient.jvmMinMemory }}"
+    kubernetesConfig:
+      resources:
+    {{ toYaml .Values.esClient.resources | indent 8 }}
+{{- if .Values.esClient.priorityClassName }}
+      priorityClassName: "{{ .Values.esClient.priorityClassName }}"
+{{- end }}
+{{- if .Values.esClient.affinity }}
+      affinity:
+    {{ toYaml .Values.esClient.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.esClient.tolerations }}
+      tolerations:
+    {{ toYaml .Values.esClient.tolerations | indent 8 }}
+{{- end }}
+{{- if .Values.customConfiguration }}
+      customConfig: {{ .Release.Name }}-additional-config
+{{- end }}
+{{- end }}
+{{- if .Values.esSecurity.enabled }}
+  esSecurity:
+    autoGeneratePassword: true
+    tlsEnabled: true
+{{- end }}

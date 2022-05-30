@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+description: Provides easy Elasticsearch cluster setup
+engine: gotpl
+maintainers:
+  - name: Opstree Solutions
+name: logging-cluster
+sources:
+  - https://github.com/ot-container-kit/logging-operator
+version: 0.3.0
+appVersion: "0.3.0"
+home: https://github.com/ot-container-kit/logging-operator
+keywords:
+  - operator
+  - elasticsearch
+  - opstree
+  - kubernetes
+  - openshift
+  - logging-operator
+  - kibana
+  - fluentd
+icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/logging-operator/master/static/logging-operator-logo.svg
