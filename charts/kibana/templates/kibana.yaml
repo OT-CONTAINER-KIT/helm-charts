@@ -2,7 +2,14 @@
 apiVersion: logging.logging.opstreelabs.in/v1beta1
 kind: Kibana
 metadata:
-  name: kibana
+  name: {{ .Release.Name }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: visualization
 spec:
   replicas: {{ .Values.replicas }}
   esCluster:

@@ -46,3 +46,13 @@ tolerations: []
 esSecurity:
   enabled: true
   elasticSearchPassword: elasticsearch-password
+
+externalService:
+  enabled: false
+
+ingress:
+  enabled: false
+  host: kibana.opstree.com
+  tls:
+    enabled: true
+    secret: tls-secret

@@ -4,13 +4,13 @@ Fluentd is a CNCF graduated project that provides the capability of log shipping
 
 ```shell
 $ helm repo add ot-helm https://ot-container-kit.github.io/helm-charts/
-$ helm install <my-release> ot-helm/fluentd --namespace <namespace>
+$ helm install <my-release> ot-helm/kibana --namespace <namespace>
 ```
 
 Fluentd setup can be upgraded by using `helm upgrade` command:-
 
 ```shell
-$ helm upgrade <my-release> ot-helm/fluentd --install --namespace <namespace>
+$ helm upgrade <my-release> ot-helm/kibana --install --namespace <namespace>
 ```
 
 For uninstalling the chart:-

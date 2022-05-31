@@ -27,16 +27,20 @@ $ helm delete <my-release> --namespace <namespace>
 
 ### Parameters
 
-| **Name**                         | **Value**                         | **Description**                                            |
-|----------------------------------|-----------------------------------|------------------------------------------------------------|
-| replicas                         | 1                                 | Number of deployment replicas for kibana                   |
-| esCluster.esURL                  | https://elasticsearch-master:9200 | Hostname or URL of the elasticsearch server                |
-| esCluster.esVersion              | 7.17.0                            | Version of the kibana in pair with elasticsearch           |
-| esCluster.clusterName            | elasticsearch                     | Name of the elasticsearch created by elasticsearch crd     |
-| resources                        | {}                                | Resources for kibana visualization pods                    |
-| nodeSelectors                    | {}                                | Nodeselectors map key-values for kibana visualization pods |
-| affinity                         | {}                                | Affinity and anit-affinity for kibana visualization pods   |
-| tolerations                      | {}                                | Tolerations and taints for kibana visualization pods       |
-| esSecurity.enabled               | true                              | To enabled the xpack security of kibana                    |
-| esSecurity.elasticSearchPassword | elasticsearch-password            | Credentials for elasticsearch authentication               |
-
+| **Name**                          | **Value**                         | **Description**                                            |
+|-----------------------------------|-----------------------------------|------------------------------------------------------------|
+| replicas                          | 1                                 | Number of deployment replicas for kibana                   |
+| esCluster.esURL                   | https://elasticsearch-master:9200 | Hostname or URL of the elasticsearch server                |
+| esCluster.esVersion               | 7.17.0                            | Version of the kibana in pair with elasticsearch           |
+| esCluster.clusterName             | elasticsearch                     | Name of the elasticsearch created by elasticsearch crd     |
+| resources                         | {}                                | Resources for kibana visualization pods                    |
+| nodeSelectors                     | {}                                | Nodeselectors map key-values for kibana visualization pods |
+| affinity                          | {}                                | Affinity and anit-affinity for kibana visualization pods   |
+| tolerations                       | {}                                | Tolerations and taints for kibana visualization pods       |
+| esSecurity.enabled                | true                              | To enabled the xpack security of kibana                    |
+| esSecurity.elasticSearchPassword  | elasticsearch-password            | Credentials for elasticsearch authentication               |
+| externalService.enabled           | false                             | To create a LoadBalancer service of kibana                 |
+| ingress.enabled                   | false                             | To enable the ingress resource for kibana                  |
+| ingress.host                      | kibana.opstree.com                | Hostname or URL on which kibana will be exposed            |
+| ingress.tls.enabled               | false                             | To enable SSL on kibana ingress resource                   |
+| ingress.tls.secret                | tls-secret                        | SSL certificate for kibana ingress resource                |
