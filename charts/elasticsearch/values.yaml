@@ -2,7 +2,6 @@
 clusterName: "elastic-prod"
 esVersion: "7.17.0"
 
-
 #customConfiguration:
 #  cluster.routing.allocation.disk.watermark.low: "87%"
 

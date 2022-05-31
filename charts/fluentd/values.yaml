@@ -1,0 +1,44 @@
+---
+elasticSearchHost: elasticsearch-master
+elasticSearchPassword: elasticsearch-password
+indexNameStrategy: namespace_name
+
+resources: {}
+#   requests:
+#     cpu: 1000m
+#     memory: 2048Mi
+#   limits:
+#     cpu: 1000m
+#     memory: 2048Mi
+
+affinity: {}
+  # nodeAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #     nodeSelectorTerms:
+  #     - matchExpressions:
+  #       - key: disktype
+  #         operator: In
+  #         values:
+  #         - ssd
+
+nodeSelector: {}
+#  memory: high
+
+tolerations: []
+#  - key: "example-key"
+#    operator: "Exists"
+#    effect: "NoSchedule"
+
+#priorityClassName: ""
+
+#customConfiguration:
+#  fluent.conf: |
+#    #####
+
+#additionalConfig:
+#  systemd.conf: |
+#    #####
+
+esSecurity:
+  enabled: true
+  elasticSearchPassword: elasticsearch-password

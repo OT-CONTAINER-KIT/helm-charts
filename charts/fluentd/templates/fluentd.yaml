@@ -1,0 +1,41 @@
+---
+apiVersion: logging.logging.opstreelabs.in/v1beta1
+kind: Fluentd
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: log-shipper
+spec:
+  esCluster:
+    host: {{ .Values.elasticSearchHost }}
+{{- if .Values.esSecurity }}
+  esSecurity:
+    tlsEnabled: {{ .Values.esSecurity.enabled }}
+    existingSecret: {{ .Values.esSecurity.elasticSearchPassword }}
+{{- end }}
+  indexNameStrategy: {{ .Values.indexNameStrategy }}
+  kubernetesConfig:
+    resources:
+  {{ toYaml .Values.resources | indent 6 }}
+{{- if .Values.priorityClassName }}
+    priorityClassName: {{ .Values.priorityClassName }}
+{{- end }}
+{{- if .Values.affinity }}
+    affinity:
+  {{ toYaml .Values.affinity | indent 6 }}
+{{- end }}
+{{- if .Values.tolerations }}
+    tolerations:
+  {{ toYaml .Values.tolerations | indent 6 }}
+{{- end }}
+{{- if .Values.customConfiguration }}
+    customConfig: {{ .Release.Name }}-custom-config
+{{- end }}
+{{- if .Values.additionalConfiguration }}
+    additionalConfig: {{ .Release.Name }}-additional-config
+{{- end }}
