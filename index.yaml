@@ -3,6 +3,30 @@ entries:
   elasticsearch:
   - apiVersion: v1
     appVersion: 0.3.0
+    created: "2022-05-31T06:51:31.438683012Z"
+    description: Provides easy Elasticsearch cluster setup
+    digest: 2bf68b9443b106fb0cccb032354010e69052ea7069c0e87d62417393cfb5091d
+    home: https://github.com/ot-container-kit/logging-operator
+    icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/logging-operator/master/static/logging-operator-logo.svg
+    keywords:
+    - operator
+    - elasticsearch
+    - opstree
+    - kubernetes
+    - openshift
+    - logging-operator
+    - kibana
+    - fluentd
+    maintainers:
+    - name: Opstree Solutions
+    name: elasticsearch
+    sources:
+    - https://github.com/ot-container-kit/logging-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/elasticsearch-0.3.1/elasticsearch-0.3.1.tgz
+    version: 0.3.1
+  - apiVersion: v1
+    appVersion: 0.3.0
     created: "2022-05-30T10:47:33.416344423Z"
     description: Provides easy Elasticsearch cluster setup
     digest: dd021ae665c5f16e3bd78bfd29aab4fba0aecdbc08659ecdc2bacd169882e13f
@@ -24,6 +48,31 @@ entries:
     - https://github.com/ot-container-kit/logging-operator
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/elasticsearch-0.3.0/elasticsearch-0.3.0.tgz
+    version: 0.3.0
+  fluentd:
+  - apiVersion: v1
+    appVersion: 0.3.0
+    created: "2022-05-31T06:51:31.564801234Z"
+    description: Provides easy Fluentd log-shipper setup
+    digest: 8942475d36b849f01f79ee9d3c622848763347ce745136f122acb395648fd39f
+    home: https://github.com/ot-container-kit/logging-operator
+    icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/logging-operator/master/static/logging-operator-logo.svg
+    keywords:
+    - operator
+    - elasticsearch
+    - opstree
+    - kubernetes
+    - openshift
+    - logging-operator
+    - kibana
+    - fluentd
+    maintainers:
+    - name: Opstree Solutions
+    name: fluentd
+    sources:
+    - https://github.com/ot-container-kit/logging-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/fluentd-0.3.0/fluentd-0.3.0.tgz
     version: 0.3.0
   k8s-vault-webhook:
   - apiVersion: v1
