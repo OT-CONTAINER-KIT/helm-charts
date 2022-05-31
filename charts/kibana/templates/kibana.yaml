@@ -1,0 +1,30 @@
+---
+apiVersion: logging.logging.opstreelabs.in/v1beta1
+kind: Kibana
+metadata:
+  name: kibana
+spec:
+  replicas: {{ .Values.replicas }}
+  esCluster:
+    host: {{ .Values.esCluster.esURL }}
+    esVersion: {{ .Values.esCluster.esVersion }}
+    clusterName: {{ .Values.esCluster.clusterName }}
+{{- if .Values.esSecurity }}
+  esSecurity:
+    tlsEnabled: {{ .Values.esSecurity.enabled }}
+    existingSecret: {{ .Values.esSecurity.elasticSearchPassword }}
+{{- end }}
+  kubernetesConfig:
+    resources:
+  {{ toYaml .Values.resources | indent 6 }}
+{{- if .Values.priorityClassName }}
+    priorityClassName: {{ .Values.priorityClassName }}
+{{- end }}
+{{- if .Values.affinity }}
+    affinity:
+  {{ toYaml .Values.affinity | indent 6 }}
+{{- end }}
+{{- if .Values.tolerations }}
+    tolerations:
+  {{ toYaml .Values.tolerations | indent 6 }}
+{{- end }}

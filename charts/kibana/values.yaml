@@ -1,0 +1,48 @@
+---
+
+replicas: 1
+
+esCluster:
+  esURL: https://elasticsearch-master:9200
+  esVersion: 7.17.0
+  clusterName: elasticsearch
+
+resources: {}
+#   requests:
+#     cpu: 1000m
+#     memory: 2048Mi
+#   limits:
+#     cpu: 1000m
+#     memory: 2048Mi
+
+affinity: {}
+  # nodeAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #     nodeSelectorTerms:
+  #     - matchExpressions:
+  #       - key: disktype
+  #         operator: In
+  #         values:
+#         - ssd
+
+nodeSelector: {}
+#  memory: high
+
+tolerations: []
+#  - key: "example-key"
+#    operator: "Exists"
+#    effect: "NoSchedule"
+
+#priorityClassName: ""
+
+#customConfiguration:
+#  fluent.conf: |
+#    #####
+
+#additionalConfig:
+#  systemd.conf: |
+#    #####
+
+esSecurity:
+  enabled: true
+  elasticSearchPassword: elasticsearch-password
