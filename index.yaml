@@ -52,6 +52,30 @@ entries:
   fluentd:
   - apiVersion: v1
     appVersion: 0.3.0
+    created: "2022-05-31T12:07:12.136459809Z"
+    description: Provides easy Fluentd log-shipper setup
+    digest: 2f510bf7af7b7f24bc55974d5909cb7ab6817fa899c8db99180ac1122579710d
+    home: https://github.com/ot-container-kit/logging-operator
+    icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/logging-operator/master/static/logging-operator-logo.svg
+    keywords:
+    - operator
+    - elasticsearch
+    - opstree
+    - kubernetes
+    - openshift
+    - logging-operator
+    - kibana
+    - fluentd
+    maintainers:
+    - name: Opstree Solutions
+    name: fluentd
+    sources:
+    - https://github.com/ot-container-kit/logging-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/fluentd-0.3.1/fluentd-0.3.1.tgz
+    version: 0.3.1
+  - apiVersion: v1
+    appVersion: 0.3.0
     created: "2022-05-31T06:51:31.564801234Z"
     description: Provides easy Fluentd log-shipper setup
     digest: 8942475d36b849f01f79ee9d3c622848763347ce745136f122acb395648fd39f
@@ -116,6 +140,30 @@ entries:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/k8s-vault-webhook-0.1/k8s-vault-webhook-0.1.tgz
     version: "0.1"
   kibana:
+  - apiVersion: v1
+    appVersion: 0.3.0
+    created: "2022-05-31T12:07:12.282084843Z"
+    description: Provides easy Kibana visualization setup
+    digest: 386eb1ba64611c18c4d59f6137d581b6b4afc0b8fbd83a0d5b8a5bda393b6afb
+    home: https://github.com/ot-container-kit/logging-operator
+    icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/logging-operator/master/static/logging-operator-logo.svg
+    keywords:
+    - operator
+    - elasticsearch
+    - opstree
+    - kubernetes
+    - openshift
+    - logging-operator
+    - kibana
+    - fluentd
+    maintainers:
+    - name: Opstree Solutions
+    name: kibana
+    sources:
+    - https://github.com/ot-container-kit/logging-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/kibana-0.3.1/kibana-0.3.1.tgz
+    version: 0.3.1
   - apiVersion: v1
     appVersion: 0.3.0
     created: "2022-05-31T08:25:09.667665824Z"
