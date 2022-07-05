@@ -84,3 +84,9 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+    - policy
+  resources:
+    - poddisruptionbudgets
+  verbs:
+    - get
