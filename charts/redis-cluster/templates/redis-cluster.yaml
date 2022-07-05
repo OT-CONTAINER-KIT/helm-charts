@@ -69,3 +69,9 @@ spec:
   sidecars:
 {{ toYaml .Values.sidecars | indent 4 }}
 {{- end }}
+{{- if eq .Values.pdb.enabled true }}
+  pdb:
+    enabled: {{ .Values.pdb.enabled }}
+    maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+    minAvailable: {{ .Values.pdb.minAvailable }}
+{{- end }}

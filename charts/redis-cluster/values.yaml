@@ -20,7 +20,7 @@ redisCluster:
       #         values:
       #         - ssd
   follower:
-    replicas: 0
+    replicas: 3
     serviceType: ClusterIP
     affinity: {}
       # nodeAffinity:
@@ -38,6 +38,11 @@ redisCluster:
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
+
+pdb:
+  enabled: true
+  maxUnavailable: 1
+  minAvailable: 1
 
 externalConfig:
   enabled: false
