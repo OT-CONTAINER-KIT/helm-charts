@@ -40,7 +40,7 @@ redisCluster:
     #   memory: 128Mi
 
 pdb:
-  enabled: true
+  enabled: false
   maxUnavailable: 1
   minAvailable: 1
 

@@ -7,7 +7,7 @@ maintainers:
 name: redis-cluster
 sources:
   - https://github.com/ot-container-kit/redis-operator
-version: 0.11.1
+version: 0.11.2
 appVersion: "0.11.0"
 home: https://github.com/ot-container-kit/redis-operator
 keywords:
