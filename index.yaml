@@ -659,6 +659,29 @@ entries:
   redis-cluster:
   - apiVersion: v1
     appVersion: 0.11.0
+    created: "2022-07-05T08:56:03.422319185Z"
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: 52f8ad6269a6865d93a765a1188f3cbd31585bbe6e51e8c3c177d077cefbb576
+    home: https://github.com/ot-container-kit/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    - redis-exporter
+    maintainers:
+    - name: Opstree Solutions
+    name: redis-cluster
+    sources:
+    - https://github.com/ot-container-kit/redis-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-cluster-0.11.1/redis-cluster-0.11.1.tgz
+    version: 0.11.1
+  - apiVersion: v1
+    appVersion: 0.11.0
     created: "2022-07-05T07:29:05.094688917Z"
     description: Provides easy redis setup definitions for Kubernetes services, and
       deployment.
@@ -796,6 +819,29 @@ entries:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-cluster-0.6.0/redis-cluster-0.6.0.tgz
     version: 0.6.0
   redis-operator:
+  - apiVersion: v2
+    appVersion: 0.11.0
+    created: "2022-07-05T08:56:03.719310181Z"
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: 052ab1e0c3e90153a9ab5cb76b2980182136e4ceecdce0343aa02f53209dd76b
+    home: https://github.com/OT-CONTAINER-KIT/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    maintainers:
+    - name: Abhishek Dubey
+    - name: Sandeep Rawat
+    name: redis-operator
+    sources:
+    - https://github.com/OT-CONTAINER-KIT/redis-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-operator-0.11.1/redis-operator-0.11.1.tgz
+    version: 0.11.1
   - apiVersion: v2
     appVersion: 0.11.0
     created: "2022-07-05T07:18:51.270585193Z"
