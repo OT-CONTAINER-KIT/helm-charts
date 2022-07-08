@@ -20,6 +20,8 @@ resources:
 
 replicas: 1
 
+namespace: "redis-operator"
+
 serviceAccountName: redis-operator
 
 priorityClassName: ""
