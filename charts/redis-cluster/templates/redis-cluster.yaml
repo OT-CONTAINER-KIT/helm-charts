@@ -10,6 +10,11 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/component: middleware
+{{- if .Values.labels }}
+{{- range $labelkey, $labelvalue := .Values.labels }}
+    {{ $labelkey}}: {{ $labelvalue }}
+{{- end }}
+{{- end }}
 spec:
   clusterSize: {{ .Values.redisCluster.clusterSize }}
   redisLeader:

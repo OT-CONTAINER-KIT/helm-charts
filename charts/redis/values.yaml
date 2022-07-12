@@ -15,6 +15,10 @@ redisStandalone:
     #   cpu: 100m
     #   memory: 128Mi
 
+#labels:
+#  foo: bar
+#  test: echo
+
 externalConfig:
   enabled: false
   data: |

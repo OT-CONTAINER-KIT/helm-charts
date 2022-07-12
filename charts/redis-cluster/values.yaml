@@ -39,6 +39,10 @@ redisCluster:
     #   cpu: 100m
     #   memory: 128Mi
 
+#labels:
+#  foo: bar
+#  test: echo
+
 pdb:
   enabled: false
   maxUnavailable: 1
