@@ -482,6 +482,29 @@ entries:
   redis:
   - apiVersion: v1
     appVersion: 0.11.0
+    created: "2022-07-12T13:55:20.662668551Z"
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: 450154804b85b7de8159cd1d2aac230e64108b91c9a1352660704ba88e887513
+    home: https://github.com/ot-container-kit/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    - redis-exporter
+    maintainers:
+    - name: Opstree Solutions
+    name: redis
+    sources:
+    - https://github.com/ot-container-kit/redis-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-0.11.3/redis-0.11.3.tgz
+    version: 0.11.3
+  - apiVersion: v1
+    appVersion: 0.11.0
     created: "2022-07-05T07:23:22.532317764Z"
     description: Provides easy redis setup definitions for Kubernetes services, and
       deployment.
@@ -657,6 +680,29 @@ entries:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-0.1.0/redis-0.1.0.tgz
     version: 0.1.0
   redis-cluster:
+  - apiVersion: v1
+    appVersion: 0.11.0
+    created: "2022-07-12T13:55:20.981970572Z"
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: 46f1ab9b979bc646adcd2c4b8e98471bb41b2ee80adfa33ef0077620f223ef5d
+    home: https://github.com/ot-container-kit/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    - redis-exporter
+    maintainers:
+    - name: Opstree Solutions
+    name: redis-cluster
+    sources:
+    - https://github.com/ot-container-kit/redis-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-cluster-0.11.3/redis-cluster-0.11.3.tgz
+    version: 0.11.3
   - apiVersion: v1
     appVersion: 0.11.0
     created: "2022-07-05T09:03:01.164997724Z"
