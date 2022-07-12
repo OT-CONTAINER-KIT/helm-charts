@@ -10,6 +10,8 @@ redisOperator:
   # Additional Pod labels (e.g. for filtering Pod by custom labels)
   podLabels: {}
 
+#watch_namespace: ot-operators
+
 resources:
   limits:
     cpu: 500m

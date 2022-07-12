@@ -36,6 +36,11 @@ spec:
         - /manager
         args:
         - --leader-elect
+{{- if .Values.watch_namespace }}
+        env:
+          - name: NAMESPACE
+            value: {{ .Values.watch_namespace }}
+{{- end }}
 {{- if .Values.resources }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
