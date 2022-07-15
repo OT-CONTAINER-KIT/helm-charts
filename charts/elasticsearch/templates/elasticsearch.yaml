@@ -23,17 +23,17 @@ spec:
     jvmMinMemory: "{{ .Values.esMaster.jvmMinMemory }}"
     kubernetesConfig:
       resources:
-    {{ toYaml .Values.esMaster.resources | indent 8 }}
+{{ toYaml .Values.esMaster.resources | indent 8 }}
 {{- if .Values.esMaster.priorityClassName }}
       priorityClassName: "{{ .Values.esMaster.priorityClassName }}"
 {{- end }}
 {{- if .Values.esMaster.affinity }}
       affinity:
-    {{ toYaml .Values.esMaster.affinity | indent 8 }}
+{{ toYaml .Values.esMaster.affinity | indent 8 }}
 {{- end }}
 {{- if .Values.esMaster.tolerations }}
       tolerations:
-    {{ toYaml .Values.esMaster.tolerations | indent 8 }}
+{{ toYaml .Values.esMaster.tolerations | indent 8 }}
 {{- end }}
 {{- if .Values.customConfiguration }}
       customConfig: {{ .Release.Name }}-additional-config
@@ -49,17 +49,17 @@ spec:
     jvmMinMemory: "{{ .Values.esData.jvmMinMemory }}"
     kubernetesConfig:
       resources:
-    {{ toYaml .Values.esData.resources | indent 8 }}
+{{ toYaml .Values.esData.resources | indent 8 }}
 {{- if .Values.esData.priorityClassName }}
       priorityClassName: "{{ .Values.esData.priorityClassName }}"
 {{- end }}
 {{- if .Values.esData.affinity }}
       affinity:
-    {{ toYaml .Values.esData.affinity | indent 8 }}
+{{ toYaml .Values.esData.affinity | indent 8 }}
 {{- end }}
 {{- if .Values.esData.tolerations }}
       tolerations:
-    {{ toYaml .Values.esData.tolerations | indent 8 }}
+{{ toYaml .Values.esData.tolerations | indent 8 }}
 {{- end }}
 {{- if .Values.customConfiguration }}
       customConfig: {{ .Release.Name }}-additional-config
@@ -76,17 +76,17 @@ spec:
     jvmMinMemory: "{{ .Values.esIngestion.jvmMinMemory }}"
     kubernetesConfig:
       resources:
-    {{ toYaml .Values.esIngestion.resources | indent 8 }}
+{{ toYaml .Values.esIngestion.resources | indent 8 }}
 {{- if .Values.esIngestion.priorityClassName }}
       priorityClassName: "{{ .Values.esIngestion.priorityClassName }}"
 {{- end }}
 {{- if .Values.esIngestion.affinity }}
       affinity:
-    {{ toYaml .Values.esIngestion.affinity | indent 8 }}
+{{ toYaml .Values.esIngestion.affinity | indent 8 }}
 {{- end }}
 {{- if .Values.esIngestion.tolerations }}
       tolerations:
-    {{ toYaml .Values.esIngestion.tolerations | indent 8 }}
+{{ toYaml .Values.esIngestion.tolerations | indent 8 }}
 {{- end }}
 {{- if .Values.customConfiguration }}
       customConfig: {{ .Release.Name }}-additional-config
@@ -103,17 +103,17 @@ spec:
     jvmMinMemory: "{{ .Values.esClient.jvmMinMemory }}"
     kubernetesConfig:
       resources:
-    {{ toYaml .Values.esClient.resources | indent 8 }}
+{{ toYaml .Values.esClient.resources | indent 8 }}
 {{- if .Values.esClient.priorityClassName }}
       priorityClassName: "{{ .Values.esClient.priorityClassName }}"
 {{- end }}
 {{- if .Values.esClient.affinity }}
       affinity:
-    {{ toYaml .Values.esClient.affinity | indent 8 }}
+{{ toYaml .Values.esClient.affinity | indent 8 }}
 {{- end }}
 {{- if .Values.esClient.tolerations }}
       tolerations:
-    {{ toYaml .Values.esClient.tolerations | indent 8 }}
+{{ toYaml .Values.esClient.tolerations | indent 8 }}
 {{- end }}
 {{- if .Values.customConfiguration }}
       customConfig: {{ .Release.Name }}-additional-config

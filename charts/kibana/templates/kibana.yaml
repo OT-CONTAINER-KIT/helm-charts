@@ -23,7 +23,7 @@ spec:
 {{- end }}
   kubernetesConfig:
     resources:
-  {{ toYaml .Values.resources | indent 6 }}
+{{ toYaml .Values.resources | indent 6 }}
 {{- if .Values.priorityClassName }}
     priorityClassName: {{ .Values.priorityClassName }}
 {{- end }}
