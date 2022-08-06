@@ -45,7 +45,7 @@ tolerations: []
 
 esSecurity:
   enabled: true
-  elasticSearchPassword: elasticsearch-password
+  elasticSearchPassword: elasticsearch-sa-token
 
 externalService:
   enabled: false

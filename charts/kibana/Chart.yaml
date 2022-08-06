@@ -7,8 +7,8 @@ maintainers:
 name: kibana
 sources:
   - https://github.com/ot-container-kit/logging-operator
-version: 0.3.2
-appVersion: "0.3.0"
+version: 0.3.3
+appVersion: "0.3.2"
 home: https://github.com/ot-container-kit/logging-operator
 keywords:
   - operator
