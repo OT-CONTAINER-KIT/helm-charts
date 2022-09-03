@@ -2,6 +2,30 @@ apiVersion: v1
 entries:
   elasticsearch:
   - apiVersion: v1
+    appVersion: 0.4.0
+    created: "2022-09-03T07:01:17.246935672Z"
+    description: Provides easy Elasticsearch cluster setup
+    digest: 4e239b632b39b6075bf4da0dd2849976c03c16713c985539f886dc65e2be010e
+    home: https://github.com/ot-container-kit/logging-operator
+    icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/logging-operator/master/static/logging-operator-logo.svg
+    keywords:
+    - operator
+    - elasticsearch
+    - opstree
+    - kubernetes
+    - openshift
+    - logging-operator
+    - kibana
+    - fluentd
+    maintainers:
+    - name: Opstree Solutions
+    name: elasticsearch
+    sources:
+    - https://github.com/ot-container-kit/logging-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/elasticsearch-0.4.0/elasticsearch-0.4.0.tgz
+    version: 0.4.0
+  - apiVersion: v1
     appVersion: 0.3.2
     created: "2022-08-06T20:45:09.022082203Z"
     description: Provides easy Elasticsearch cluster setup
@@ -98,6 +122,30 @@ entries:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/elasticsearch-0.3.0/elasticsearch-0.3.0.tgz
     version: 0.3.0
   fluentd:
+  - apiVersion: v1
+    appVersion: 0.4.0
+    created: "2022-09-03T07:01:17.386983186Z"
+    description: Provides easy Fluentd log-shipper setup
+    digest: e28157842a47919d4876bdd0ab8e3cf9777f98af2146bb1581619d1c911c60fb
+    home: https://github.com/ot-container-kit/logging-operator
+    icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/logging-operator/master/static/logging-operator-logo.svg
+    keywords:
+    - operator
+    - elasticsearch
+    - opstree
+    - kubernetes
+    - openshift
+    - logging-operator
+    - kibana
+    - fluentd
+    maintainers:
+    - name: Opstree Solutions
+    name: fluentd
+    sources:
+    - https://github.com/ot-container-kit/logging-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/fluentd-0.4.0/fluentd-0.4.0.tgz
+    version: 0.4.0
   - apiVersion: v1
     appVersion: 0.3.2
     created: "2022-08-06T20:45:09.14376844Z"
@@ -212,6 +260,30 @@ entries:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/k8s-vault-webhook-0.1/k8s-vault-webhook-0.1.tgz
     version: "0.1"
   kibana:
+  - apiVersion: v1
+    appVersion: 0.4.0
+    created: "2022-09-03T07:01:17.558885418Z"
+    description: Provides easy Kibana visualization setup
+    digest: 9974f823ad4770534a47a3dac181b410e07b626efbfd37067ee2e416d1d9132f
+    home: https://github.com/ot-container-kit/logging-operator
+    icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/logging-operator/master/static/logging-operator-logo.svg
+    keywords:
+    - operator
+    - elasticsearch
+    - opstree
+    - kubernetes
+    - openshift
+    - logging-operator
+    - kibana
+    - fluentd
+    maintainers:
+    - name: Opstree Solutions
+    name: kibana
+    sources:
+    - https://github.com/ot-container-kit/logging-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/kibana-0.4.0/kibana-0.4.0.tgz
+    version: 0.4.0
   - apiVersion: v1
     appVersion: 0.3.2
     created: "2022-08-06T20:45:09.269833103Z"
@@ -334,6 +406,34 @@ entries:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/logging-cluster-0.3.0/logging-cluster-0.3.0.tgz
     version: 0.3.0
   logging-operator:
+  - apiVersion: v2
+    appVersion: 0.4.0
+    created: "2022-09-03T07:01:17.723380957Z"
+    description: Helm chart to deploy and manage EFK stack in Kubernetes
+    digest: cd3f1b9220306d665e8e2a96a0f74b1ab45477ccccda580c38b47082121bf98a
+    home: https://github.com/OT-CONTAINER-KIT/logging-operator
+    icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/logging-operator/master/static/logging-operator-logo.svg
+    keywords:
+    - operator
+    - elasticsearch
+    - opstree
+    - kubernetes
+    - openshift
+    - backup
+    - restore
+    - fluentd
+    - kibana
+    - monitoring
+    - logging
+    maintainers:
+    - name: Abhishek Dubey
+    - name: Sandeep Rawat
+    name: logging-operator
+    sources:
+    - https://github.com/OT-CONTAINER-KIT/logging-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/logging-operator-0.4.0/logging-operator-0.4.0.tgz
+    version: 0.4.0
   - apiVersion: v2
     appVersion: 0.3.2
     created: "2022-08-06T20:45:09.412045765Z"
