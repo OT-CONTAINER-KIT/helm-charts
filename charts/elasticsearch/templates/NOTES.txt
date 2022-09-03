@@ -8,4 +8,4 @@ Get the list of pods by executing:
     kubectl get pods --namespace {{ .Release.Namespace }} -l 'role in (master,data,ingestion,client)'
 
 For getting the credential for admin user:
-    kubectl get secrets -n {{ .Release.Namespace }} {{ .Release.Name }} -o jsonpath="{.data.password}" | base64 -d
+    kubectl get secrets -n {{ .Release.Namespace }} {{ .Release.Name }}-password -o jsonpath="{.data.password}" | base64 -d

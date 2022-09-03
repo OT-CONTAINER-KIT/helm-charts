@@ -13,6 +13,12 @@ metadata:
 spec:
   esClusterName: {{ .Values.clusterName }}
   esVersion: "{{ .Values.esVersion }}"
+{{- if .Values.esPlugins }}
+  esPlugins: {{ .Values.esPlugins }}
+{{- end }}
+{{- if .Values.esKeystoreSecret }}
+  esKeystoreSecret: {{ .Values.esKeystoreSecret }}
+{{- end }}
   esMaster:
     replicas: {{ .Values.esMaster.replicas }}
     storage:

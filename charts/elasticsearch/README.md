@@ -2,6 +2,8 @@
 
 Elasticsearch is a poplular NoSQL database which gets used for multiple purpose like:- database, logging, searching, etc. his helm chart needs [Logging Operator](../logging-operator) inside Kubernetes cluster. The elasticsearch definition can be modified or changed by [values.yaml](./values.yaml).
 
+Documentation -> https://ot-logging-operator.netlify.app/
+
 ```shell
 $ helm repo add ot-helm https://ot-container-kit.github.io/helm-charts/
 $ helm install <my-release> ot-helm/elasticsearch --namespace <namespace>
@@ -31,6 +33,8 @@ $ helm delete <my-release> --namespace <namespace>
 |----------------------------------|-----------------|--------------------------------------------------------------------|
 | clusterName                      | elastic-prod    | Name of the elasticsearch cluster                                  |
 | esVersion                        | 7.17.0          | Major and minor version of elaticsearch                            |
+| esPlugins                        | []              | Plugins list to install inside elasticsearch                       |
+| esKeystoreSecret                 | -               | Keystore secret to include in elasticsearch cluster                |
 | customConfiguration              | {}              | Additional configuration parameters for elasticsearch              |
 | esSecurity.enabled               | true            | To enabled the xpack security of elasticsearch                     |
 | esMaster.replicas                | 3               | Number of replicas for elasticsearch master node                   |

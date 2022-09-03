@@ -1,6 +1,6 @@
 ---
 apiVersion: v2
-appVersion: "0.3.2"
+appVersion: "0.4.0"
 description: Helm chart to deploy and manage EFK stack in Kubernetes
 engine: gotpl
 maintainers:
@@ -9,7 +9,7 @@ maintainers:
 name: logging-operator
 sources:
   - https://github.com/OT-CONTAINER-KIT/logging-operator
-version: 0.3.1
+version: 0.4.0
 home: https://github.com/OT-CONTAINER-KIT/logging-operator
 icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/logging-operator/master/static/logging-operator-logo.svg
 keywords:

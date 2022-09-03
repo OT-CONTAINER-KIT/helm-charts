@@ -3630,6 +3630,8 @@ spec:
                         type: string
                     type: object
                 type: object
+              esKeystoreSecret:
+                type: string
               esMaster:
                 default:
                   jvmMaxMemory: 1g
@@ -4826,6 +4828,10 @@ spec:
                         type: string
                     type: object
                 type: object
+              esPlugins:
+                items:
+                  type: string
+                type: array
               esSecurity:
                 description: Security defines the security config of Elasticsearch
                 properties:

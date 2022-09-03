@@ -1,7 +1,7 @@
 ---
 loggingOperator:
   imageName: quay.io/opstree/logging-operator
-  imageTag: v0.3.2
+  imageTag: v0.4.0
   imagePullPolicy: Always
   port: 8081
 

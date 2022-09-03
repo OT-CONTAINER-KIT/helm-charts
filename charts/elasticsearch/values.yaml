@@ -5,6 +5,9 @@ esVersion: "7.17.0"
 #customConfiguration:
 #  cluster.routing.allocation.disk.watermark.low: "87%"
 
+#esPlugins: ["repository-s3"]
+#esKeystoreSecret: keystore-secret
+
 esMaster:
   replicas: 3
   storage:
