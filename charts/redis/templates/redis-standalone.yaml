@@ -18,7 +18,9 @@ metadata:
 spec:
 {{- if eq .Values.externalConfig.enabled true }}
   redisConfig:
-    additionalRedisConfig: redis-external-config
+    additionalRedisConfig: {{ .Release.Name }}-ext-config
+{{- else }}
+  redisConfig: {}
 {{- end }}
   redisExporter:
     enabled: {{ .Values.redisExporter.enabled }}
@@ -46,7 +48,6 @@ spec:
     - name: {{ $imageSecrets.name }}
 {{- end }}
 {{- end }}
-  redisConfig: {}
 {{- if .Values.storageSpec }}
   storage:
 {{ toYaml .Values.storageSpec | indent 4 }}
