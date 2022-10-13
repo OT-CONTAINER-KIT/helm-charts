@@ -1,7 +1,7 @@
 ---
 redisStandalone:
   image: quay.io/opstree/redis
-  tag: v6.2.5
+  tag: v7.0.5
   imagePullPolicy: IfNotPresent
   # redisSecret:
   #   secretName: redis-secret
@@ -98,8 +98,9 @@ storageSpec:
           storage: 1Gi
   #   selector: {}
 
-securityContext: {}
-  # runAsUser: 1000
+securityContext:
+   runAsUser: 1000
+   fsGroup: 1000
 
 affinity: {}
   # nodeAffinity:

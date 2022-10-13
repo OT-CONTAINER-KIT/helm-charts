@@ -2,7 +2,7 @@
 redisOperator:
   name: redis-operator
   imageName: quay.io/opstree/redis-operator
-  imageTag: v0.11.0
+  imageTag: v0.12.0
   imagePullPolicy: Always
 
   # Additional pod annotations

@@ -1,6 +1,8 @@
 ---
 redisCluster:
   clusterSize: 3
+  clusterVersion: v7
+  persistenceEnabled: true
   image: quay.io/opstree/redis
   tag: v6.2.5
   imagePullPolicy: IfNotPresent
@@ -44,7 +46,7 @@ redisCluster:
 #  test: echo
 
 pdb:
-  enabled: false
+  enabled: true
   maxUnavailable: 1
   minAvailable: 1
 
@@ -111,8 +113,9 @@ storageSpec:
           storage: 1Gi
   #   selector: {}
 
-securityContext: {}
-  # runAsUser: 1000
+securityContext:
+   runAsUser: 1000
+   fsGroup: 1000
 
 affinity: {}
   # nodeAffinity:

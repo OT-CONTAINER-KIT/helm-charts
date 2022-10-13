@@ -17,6 +17,8 @@ metadata:
 {{- end }}
 spec:
   clusterSize: {{ .Values.redisCluster.clusterSize }}
+  persistenceEnabled: {{ .Values.redisCluster.persistenceEnabled }}
+  clusterVersion: {{ .Values.redisCluster.clusterVersion }}
   redisLeader:
 {{- if .Values.redisCluster.leader.affinity }}
     affinity: {{ toYaml .Values.redisCluster.leader.affinity | nindent 6 }}
