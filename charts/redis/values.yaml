@@ -42,7 +42,7 @@ serviceMonitor:
 redisExporter:
   enabled: true
   image: quay.io/opstree/redis-exporter
-  tag: "1.0"
+  tag: "v1.44.0"
   imagePullPolicy: IfNotPresent
   resources: {}
     # requests:

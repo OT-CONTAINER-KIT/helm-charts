@@ -4,7 +4,7 @@ redisCluster:
   clusterVersion: v7
   persistenceEnabled: true
   image: quay.io/opstree/redis
-  tag: v6.2.5
+  tag: v7.0.5
   imagePullPolicy: IfNotPresent
   # redisSecret:
   #   secretName: redis-secret
@@ -73,7 +73,7 @@ serviceMonitor:
 redisExporter:
   enabled: true
   image: quay.io/opstree/redis-exporter
-  tag: "1.0"
+  tag: "v1.44.0"
   imagePullPolicy: IfNotPresent
   resources: {}
     # requests:
