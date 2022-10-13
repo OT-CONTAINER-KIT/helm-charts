@@ -1,24 +1,25 @@
-## Redis Cluster
+# Redis Cluster
 
 Redis is a key-value based distributed database, this helm chart is for redis cluster setup. This helm chart needs [Redis Operator](../redis-operator) inside Kubernetes cluster. The redis cluster definition can be modified or changed by [values.yaml](./values.yaml).
 
 ```shell
-$ helm repo add ot-helm https://ot-container-kit.github.io/helm-charts/
-$ helm install <my-release> ot-helm/redis-cluster \ 
+helm repo add ot-helm https://ot-container-kit.github.io/helm-charts/
+
+helm install <my-release> ot-helm/redis-cluster \
     --set redisCluster.clusterSize=3 --namespace <namespace>
 ```
 
 Redis setup can be upgraded by using `helm upgrade` command:-
 
 ```shell
-$ helm upgrade <my-release> ot-helm/redis-cluster --install \ 
+helm upgrade <my-release> ot-helm/redis-cluster --install \
     --set redisCluster.clusterSize=5 --namespace <namespace>
 ```
 
 For uninstalling the chart:-
 
 ```shell
-$ helm delete <my-release> --namespace <namespace>
+helm delete <my-release> --namespace <namespace>
 ```
 
 ### Pre-Requisities
