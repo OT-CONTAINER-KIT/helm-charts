@@ -41,9 +41,9 @@ redisCluster:
     #   cpu: 100m
     #   memory: 128Mi
 
-#labels:
-#  foo: bar
-#  test: echo
+# labels:
+#   foo: bar
+#   test: echo
 
 pdb:
   enabled: true
@@ -114,8 +114,8 @@ storageSpec:
   #   selector: {}
 
 securityContext:
-   runAsUser: 1000
-   fsGroup: 1000
+  runAsUser: 1000
+  fsGroup: 1000
 
 affinity: {}
   # nodeAffinity:
