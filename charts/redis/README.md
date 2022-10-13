@@ -19,13 +19,13 @@ For uninstalling the chart:-
 helm delete <my-release> --namespace <namespace>
 ```
 
-### Pre-Requisities
+## Pre-Requisities
 
 - Kubernetes 1.15+
 - Helm 3.X
 - Redis Operator 0.7.0
 
-### Parameters
+## Parameters
 
 |**Name**|**Value**|**Description**|
 |--------|-----------------|-------|
