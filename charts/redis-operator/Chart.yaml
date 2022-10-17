@@ -1,15 +1,15 @@
 ---
 apiVersion: v2
-appVersion: "0.11.0"
+appVersion: "0.12.0"
 description: Provides easy redis setup definitions for Kubernetes services, and deployment.
 engine: gotpl
 maintainers:
-  - name: Abhishek Dubey
-  - name: Sandeep Rawat
+  - name: iamabhishek-dubey
+  - name: sandy724
 name: redis-operator
 sources:
   - https://github.com/OT-CONTAINER-KIT/redis-operator
-version: 0.11.2
+version: 0.12.0
 home: https://github.com/OT-CONTAINER-KIT/redis-operator
 icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
 keywords:

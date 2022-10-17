@@ -2,7 +2,7 @@
 redisOperator:
   name: redis-operator
   imageName: quay.io/opstree/redis-operator
-  imageTag: v0.11.0
+  imageTag: v0.12.0
   imagePullPolicy: Always
 
   # Additional pod annotations
@@ -10,7 +10,7 @@ redisOperator:
   # Additional Pod labels (e.g. for filtering Pod by custom labels)
   podLabels: {}
 
-#watch_namespace: ot-operators
+# watch_namespace: ot-operators
 
 resources:
   limits:

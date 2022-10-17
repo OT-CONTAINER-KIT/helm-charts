@@ -1,8 +1,10 @@
 ---
 redisCluster:
   clusterSize: 3
+  clusterVersion: v7
+  persistenceEnabled: true
   image: quay.io/opstree/redis
-  tag: v6.2.5
+  tag: v7.0.5
   imagePullPolicy: IfNotPresent
   # redisSecret:
   #   secretName: redis-secret
@@ -39,12 +41,12 @@ redisCluster:
     #   cpu: 100m
     #   memory: 128Mi
 
-#labels:
-#  foo: bar
-#  test: echo
+# labels:
+#   foo: bar
+#   test: echo
 
 pdb:
-  enabled: false
+  enabled: true
   maxUnavailable: 1
   minAvailable: 1
 
@@ -71,7 +73,7 @@ serviceMonitor:
 redisExporter:
   enabled: true
   image: quay.io/opstree/redis-exporter
-  tag: "1.0"
+  tag: "v1.44.0"
   imagePullPolicy: IfNotPresent
   resources: {}
     # requests:
@@ -111,8 +113,9 @@ storageSpec:
           storage: 1Gi
   #   selector: {}
 
-securityContext: {}
-  # runAsUser: 1000
+securityContext:
+  runAsUser: 1000
+  fsGroup: 1000
 
 affinity: {}
   # nodeAffinity:
