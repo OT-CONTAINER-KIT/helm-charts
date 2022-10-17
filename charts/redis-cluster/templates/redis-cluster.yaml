@@ -28,6 +28,12 @@ spec:
     redisConfig:
       additionalRedisConfig: {{ .Release.Name }}-ext-config
 {{- end }}
+{{- if eq .Values.pdb.enabled true }}
+    pdb:
+      enabled: {{ .Values.pdb.enabled }}
+      maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+      minAvailable: {{ .Values.pdb.minAvailable }}
+{{- end }}
   redisFollower:
 {{- if .Values.redisCluster.follower.affinity }}
     affinity: {{ toYaml .Values.redisCluster.follower.affinity | nindent 6 }}
@@ -36,6 +42,12 @@ spec:
 {{- if eq .Values.externalConfig.enabled true }}
     redisConfig:
       additionalRedisConfig: {{ .Release.Name }}-ext-config
+{{- end }}
+{{- if eq .Values.pdb.enabled true }}
+    pdb:
+      enabled: {{ .Values.pdb.enabled }}
+      maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+      minAvailable: {{ .Values.pdb.minAvailable }}
 {{- end }}
   redisExporter:
     enabled: {{ .Values.redisExporter.enabled }}
@@ -75,10 +87,4 @@ spec:
 {{- if .Values.sidecars }}
   sidecars:
 {{ toYaml .Values.sidecars | indent 4 }}
-{{- end }}
-{{- if eq .Values.pdb.enabled true }}
-  pdb:
-    enabled: {{ .Values.pdb.enabled }}
-    maxUnavailable: {{ .Values.pdb.maxUnavailable }}
-    minAvailable: {{ .Values.pdb.minAvailable }}
 {{- end }}
