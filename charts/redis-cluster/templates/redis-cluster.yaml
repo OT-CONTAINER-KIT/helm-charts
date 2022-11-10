@@ -31,8 +31,12 @@ spec:
 {{- if eq .Values.pdb.enabled true }}
     pdb:
       enabled: {{ .Values.pdb.enabled }}
+      {{- if .Values.pdb.maxUnavailable }}
       maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+      {{- end  }}
+      {{- if .Values.pdb.minAvailable }}
       minAvailable: {{ .Values.pdb.minAvailable }}
+      {{- end  }}
 {{- end }}
   redisFollower:
 {{- if .Values.redisCluster.follower.affinity }}
@@ -46,8 +50,12 @@ spec:
 {{- if eq .Values.pdb.enabled true }}
     pdb:
       enabled: {{ .Values.pdb.enabled }}
+      {{- if .Values.pdb.maxUnavailable }}
       maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+      {{- end  }}
+      {{- if .Values.pdb.minAvailable }}
       minAvailable: {{ .Values.pdb.minAvailable }}
+      {{- end  }}
 {{- end }}
   redisExporter:
     enabled: {{ .Values.redisExporter.enabled }}
