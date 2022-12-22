@@ -16,6 +16,9 @@ metadata:
 {{- end }}
 {{- end }}
 spec:
+{{- if .Values.serviceAccountName }}
+  serviceAccountName: "{{ .Values.serviceAccountName }}"
+{{- end }} 
 {{- if eq .Values.externalConfig.enabled true }}
   redisConfig:
     additionalRedisConfig: redis-external-config
