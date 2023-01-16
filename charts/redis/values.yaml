@@ -111,3 +111,5 @@ affinity: {}
   #         operator: In
   #         values:
   #         - ssd
+
+# serviceAccountName: redis-sa

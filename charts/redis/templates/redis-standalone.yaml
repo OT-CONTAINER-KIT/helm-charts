@@ -46,7 +46,6 @@ spec:
     - name: {{ $imageSecrets.name }}
 {{- end }}
 {{- end }}
-  redisConfig: {}
 {{- if .Values.storageSpec }}
   storage:
 {{ toYaml .Values.storageSpec | indent 4 }}
@@ -73,4 +72,7 @@ spec:
 {{- if .Values.sidecars }}
   sidecars:
 {{ toYaml .Values.sidecars | indent 4 }}
+{{- end }}
+{{- if .Values.serviceAccountName }}
+  serviceAccountName: "{{ .Values.serviceAccountName }}"
 {{- end }}

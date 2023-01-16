@@ -21,7 +21,8 @@ spec:
   clusterVersion: {{ .Values.redisCluster.clusterVersion }}
   redisLeader:
 {{- if .Values.redisCluster.leader.affinity }}
-    affinity: {{ toYaml .Values.redisCluster.leader.affinity | nindent 6 }}
+    affinity:
+{{ toYaml .Values.redisCluster.leader.affinity | nindent 6 }}
 {{- end }}
     replicas: {{ .Values.redisCluster.leader.replicas }}
 {{- if eq .Values.externalConfig.enabled true }}
@@ -30,7 +31,8 @@ spec:
 {{- end }}
   redisFollower:
 {{- if .Values.redisCluster.follower.affinity }}
-    affinity: {{ toYaml .Values.redisCluster.follower.affinity | nindent 6 }}
+    affinity:
+{{ toYaml .Values.redisCluster.follower.affinity | nindent 6 }}
 {{- end }}
     replicas: {{ .Values.redisCluster.follower.replicas }}
 {{- if eq .Values.externalConfig.enabled true }}
@@ -81,4 +83,7 @@ spec:
     enabled: {{ .Values.pdb.enabled }}
     maxUnavailable: {{ .Values.pdb.maxUnavailable }}
     minAvailable: {{ .Values.pdb.minAvailable }}
+{{- end }}
+{{- if .Values.serviceAccountName }}
+  serviceAccountName: "{{ .Values.serviceAccountName }}"
 {{- end }}
