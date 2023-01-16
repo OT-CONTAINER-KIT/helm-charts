@@ -29,6 +29,16 @@ spec:
     redisConfig:
       additionalRedisConfig: {{ .Release.Name }}-ext-config
 {{- end }}
+{{- if eq .Values.pdb.enabled true }}
+    pdb:
+      enabled: {{ .Values.pdb.enabled }}
+      {{- if .Values.pdb.maxUnavailable }}
+      maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+      {{- end  }}
+      {{- if .Values.pdb.minAvailable }}
+      minAvailable: {{ .Values.pdb.minAvailable }}
+      {{- end  }}
+{{- end }}
   redisFollower:
 {{- if .Values.redisCluster.follower.affinity }}
     affinity:
@@ -38,6 +48,16 @@ spec:
 {{- if eq .Values.externalConfig.enabled true }}
     redisConfig:
       additionalRedisConfig: {{ .Release.Name }}-ext-config
+{{- end }}
+{{- if eq .Values.pdb.enabled true }}
+    pdb:
+      enabled: {{ .Values.pdb.enabled }}
+      {{- if .Values.pdb.maxUnavailable }}
+      maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+      {{- end  }}
+      {{- if .Values.pdb.minAvailable }}
+      minAvailable: {{ .Values.pdb.minAvailable }}
+      {{- end  }}
 {{- end }}
   redisExporter:
     enabled: {{ .Values.redisExporter.enabled }}
