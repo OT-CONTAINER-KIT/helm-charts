@@ -16,10 +16,12 @@ rules:
   resources:
   - rediss
   - redisclusters
+  - redisreplications
   - redis
   - rediscluster
   - redissentinel
   - redissentinels
+  - redisreplication
   verbs:
   - create
   - delete
@@ -46,6 +48,7 @@ rules:
   - redis/finalizers
   - rediscluster/finalizers
   - redissentinel/finalizers
+  - redisreplication/finalizers
   verbs:
   - update
 - apiGroups:
@@ -54,6 +57,7 @@ rules:
   - redis/status
   - rediscluster/status
   - redissentinel/status
+  - redisreplication/status
   verbs:
   - get
   - patch
