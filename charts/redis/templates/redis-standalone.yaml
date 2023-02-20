@@ -18,7 +18,7 @@ metadata:
 spec:
 {{- if eq .Values.externalConfig.enabled true }}
   redisConfig:
-    additionalRedisConfig: redis-external-config
+    additionalRedisConfig: {{ .Release.Name }}-ext-config
 {{- end }}
   redisExporter:
     enabled: {{ .Values.redisExporter.enabled }}
