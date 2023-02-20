@@ -46,7 +46,7 @@ redisCluster:
 #   test: echo
 
 pdb:
-  enabled: true
+  enabled: false
   maxUnavailable: 1
 
 externalConfig:
