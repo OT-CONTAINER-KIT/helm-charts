@@ -1,0 +1,83 @@
+---
+apiVersion: redis.redis.opstreelabs.in/v1beta1
+kind: RedisReplication
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: middleware
+{{- if .Values.labels }}
+{{- range $labelkey, $labelvalue := .Values.labels }}
+    {{ $labelkey}}: {{ $labelvalue }}
+{{- end }}
+{{- end }}
+spec:
+  clusterSize: {{ .Values.redisReplication.clusterSize }}  
+{{- if eq .Values.externalConfig.enabled true }}
+  redisConfig:
+    additionalRedisConfig: {{ .Release.Name }}-ext-config
+{{- end }}
+  redisExporter:
+    enabled: {{ .Values.redisExporter.enabled }}
+    image: "{{ .Values.redisExporter.image }}:{{ .Values.redisExporter.tag }}"
+    imagePullPolicy: "{{ .Values.redisExporter.imagePullPolicy }}"
+    resources:
+{{ toYaml .Values.redisExporter.resources | indent 6 }}
+{{- if .Values.redisExporter.env }}
+    env:
+{{ toYaml .Values.redisExporter.env | indent 4 }}
+{{- end }}
+  kubernetesConfig:
+    image: "{{ .Values.redisReplication.image }}:{{ .Values.redisReplication.tag }}"
+    imagePullPolicy: "{{ .Values.redisReplication.imagePullPolicy }}"
+    resources:
+{{ toYaml .Values.redisReplication.resources | indent 6 }}
+{{- if .Values.redisReplication.redisSecret }}
+    redisSecret:
+      name: "{{ .Values.redisReplication.redisSecret.secretName }}"
+      key: "{{ .Values.redisReplication.redisSecret.secretKey }}"
+{{- end }}
+{{- if .Values.imagePullSecrets }}
+    imagePullSecrets:
+{{- range $imageSecrets := .Values.imagePullSecrets }}
+    - name: {{ $imageSecrets.name }}
+{{- end }}
+{{- end }}
+{{- if .Values.storageSpec }}
+  storage:
+{{ toYaml .Values.storageSpec | indent 4 }}
+{{- end }}
+{{- if .Values.priorityClassName }}
+  priorityClassName: "{{ .Values.priorityClassName }}"
+{{- end }}
+{{- if .Values.nodeSelector }}
+  nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 4 }}
+{{- end }}
+{{- if .Values.affinity }}
+  affinity:
+{{ toYaml .Values.affinity | indent 4 }}
+{{- end }}
+{{- if .Values.securityContext }}
+  securityContext:
+{{ toYaml .Values.securityContext | indent 4 }}
+{{- end }}
+{{- if .Values.tolerations }}
+  tolerations:
+{{ toYaml .Values.tolerations | indent 4 }}
+{{- end }}
+{{- if .Values.TLS }}
+  TLS:
+{{ toYaml .Values.TLS | indent 4 }}
+{{- end}}
+{{- if .Values.sidecars }}
+  sidecars:
+{{ toYaml .Values.sidecars | indent 4 }}
+{{- end }}
+{{- if .Values.serviceAccountName }}
+  serviceAccountName: "{{ .Values.serviceAccountName }}"
+{{- end }}

@@ -1,0 +1,79 @@
+---
+apiVersion: redis.redis.opstreelabs.in/v1beta1
+kind: RedisSentinel
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: middleware
+{{- if .Values.labels }}
+{{- range $labelkey, $labelvalue := .Values.labels }}
+    {{ $labelkey}}: {{ $labelvalue }}
+{{- end }}
+{{- end }}
+spec:
+  clusterSize: {{ .Values.redisSentinel.clusterSize }}
+# Sentinel Config 
+  redisSentinelConfig:
+    redisReplicationName: {{ .Values.redisSentinelConfig.redisReplicationName}}
+    masterGroupName : {{ .Values.redisSentinelConfig.masterGroupName | default "myMaster" | quote}}
+    redisPort:  {{ .Values.redisSentinelConfig.redisPort | default "6379" | quote}}
+    quorum: {{ .Values.redisSentinelConfig.quorum | default "2" | quote}}
+    parallelSyncs: {{ .Values.redisSentinelConfig.parallelSyncs | default "1" | quote}}
+    failoverTimeout: {{ .Values.redisSentinelConfig.failoverTimeout | default "180000" | quote}}
+    downAfterMilliseconds:  {{ .Values.redisSentinelConfig.downAfterMilliseconds | default "30000" | quote}}
+{{- if eq .Values.externalConfig.enabled true }}
+    additionalSentinelConfig: {{ .Release.Name }}-ext-config
+{{- end }}
+# Kubernetes Config 
+  kubernetesConfig:
+    image: "{{ .Values.redisSentinel.image }}:{{ .Values.redisSentinel.tag }}"
+    imagePullPolicy: "{{ .Values.redisSentinel.imagePullPolicy }}"
+    resources:
+{{ toYaml .Values.redisSentinel.resources | indent 6 }}
+{{- if .Values.redisSentinel.redisSecret }}
+    redisSecret:
+      name: "{{ .Values.redisSentinel.redisSecret.secretName }}"
+      key: "{{ .Values.redisSentinel.redisSecret.secretKey }}"
+{{- end }}
+{{- if .Values.imagePullSecrets }}
+    imagePullSecrets:
+{{- range $imageSecrets := .Values.imagePullSecrets }}
+    - name: {{ $imageSecrets.name }}
+{{- end }}
+{{- end }}
+
+{{- if .Values.priorityClassName }}
+  priorityClassName: "{{ .Values.priorityClassName }}"
+{{- end }}
+{{- if .Values.nodeSelector }}
+  nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 4 }}
+{{- end }}
+{{- if .Values.affinity }}
+  affinity:
+{{ toYaml .Values.affinity | indent 4 }}
+{{- end }}
+{{- if .Values.securityContext }}
+  securityContext:
+{{ toYaml .Values.securityContext | indent 4 }}
+{{- end }}
+{{- if .Values.tolerations }}
+  tolerations:
+{{ toYaml .Values.tolerations | indent 4 }}
+{{- end }}
+{{- if .Values.TLS }}
+  TLS:
+{{ toYaml .Values.TLS | indent 4 }}
+{{- end}}
+{{- if .Values.sidecars }}
+  sidecars:
+{{ toYaml .Values.sidecars | indent 4 }}
+{{- end }}
+{{- if .Values.serviceAccountName }}
+  serviceAccountName: "{{ .Values.serviceAccountName }}"
+{{- end }}
