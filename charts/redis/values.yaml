@@ -20,7 +20,7 @@ redisStandalone:
 #   test: echo
 
 externalConfig:
-  enabled: false
+  enabled: true
   data: |
     tcp-keepalive 400
     slowlog-max-len 158
@@ -40,7 +40,7 @@ serviceMonitor:
   namespace: monitoring
 
 redisExporter:
-  enabled: true
+  enabled: false
   image: quay.io/opstree/redis-exporter
   tag: "v1.44.0"
   imagePullPolicy: IfNotPresent
@@ -113,3 +113,13 @@ affinity: {}
   #         - ssd
 
 # serviceAccountName: redis-sa
+
+
+# TLS:
+#   ca: ca.key
+#   cert: tls.crt
+#   key: tls.key
+#   secret:
+#     secretName: redis-tls-cert
+
+   
