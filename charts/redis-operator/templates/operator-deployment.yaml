@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: "{{ .Values.redisOperator.name }}"
-        image: "{{ .Values.redisOperator.imageName }}:{{ .Values.redisOperator.imageTag }}"
+        image: "{{ .Values.redisOperator.imageName }}:{{ .Values.redisOperator.imageTag | default (printf "v%s" .Chart.AppVersion) }}"
         imagePullPolicy: {{ .Values.redisOperator.imagePullPolicy }}
         command:
         - /manager
