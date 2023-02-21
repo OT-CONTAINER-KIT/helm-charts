@@ -127,3 +127,11 @@ affinity: {}
   #         - ssd
 
 # serviceAccountName: redis-sa
+
+
+# TLS:
+#   ca: ca.key
+#   cert: tls.crt
+#   key: tls.key
+#   secret:
+#     secretName: redis-tls-cert
