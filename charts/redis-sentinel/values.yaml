@@ -22,12 +22,12 @@ redisSentinel:
 
 redisSentinelConfig: 
   redisReplicationName : "redis-replication"
-  masterGroupName: 
-  redisPort: 
-  quorum:
-  parallelSyncs:
-  failoverTimeout:
-  downAfterMilliseconds:
+  # masterGroupName: 
+  # redisPort: 
+  # quorum:
+  # parallelSyncs:
+  # failoverTimeout: 
+  # downAfterMilliseconds: 
 
 externalConfig:
   enabled: false
@@ -49,12 +49,12 @@ serviceMonitor:
   scrapeTimeout: 10s
   namespace: monitoring
 
-redisExporter:
-  enabled: false
-  image: quay.io/opstree/redis-exporter
-  tag: "v1.44.0"
-  imagePullPolicy: IfNotPresent
-  resources: {}
+# redisExporter:
+#   enabled: false
+#   image: quay.io/opstree/redis-exporter
+#   tag: "v1.44.0"
+#   imagePullPolicy: IfNotPresent
+#   resources: {}
     # requests:
     #   cpu: 100m
     #   memory: 128Mi
