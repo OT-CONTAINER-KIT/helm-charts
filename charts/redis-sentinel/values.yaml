@@ -22,12 +22,12 @@ redisSentinel:
 
 redisSentinelConfig: 
   redisReplicationName: "redis-replication"
-  # masterGroupName: 
-  # redisPort: 
+  # masterGroupName:
+  # redisPort:
   # quorum:
   # parallelSyncs:
-  # failoverTimeout: 
-  # downAfterMilliseconds: 
+  # failoverTimeout:
+  # downAfterMilliseconds:
 
 externalConfig:
   enabled: false
