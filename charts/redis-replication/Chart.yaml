@@ -1,11 +1,14 @@
----
-apiVersion: v1
+apiVersion: v2
+name: redis-replication
 description: Provides easy redis setup definitions for Kubernetes services, and deployment.
+
+type: application
+
 engine: gotpl
 maintainers:
   - name: iamabhishek-dubey
   - name: sandy724
-name: redis
+  - name: shubham-cmyk
 sources:
   - https://github.com/ot-container-kit/redis-operator
 version: 0.14.2

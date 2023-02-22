@@ -1,6 +1,6 @@
 ---
 apiVersion: redis.redis.opstreelabs.in/v1beta1
-kind: Redis
+kind: RedisReplication
 metadata:
   name: {{ .Release.Name }}
   labels:
@@ -16,6 +16,7 @@ metadata:
 {{- end }}
 {{- end }}
 spec:
+  clusterSize: {{ .Values.redisReplication.clusterSize }}  
 {{- if eq .Values.externalConfig.enabled true }}
   redisConfig:
     additionalRedisConfig: {{ .Release.Name }}-ext-config
@@ -31,14 +32,14 @@ spec:
 {{ toYaml .Values.redisExporter.env | indent 4 }}
 {{- end }}
   kubernetesConfig:
-    image: "{{ .Values.redisStandalone.image }}:{{ .Values.redisStandalone.tag }}"
-    imagePullPolicy: "{{ .Values.redisStandalone.imagePullPolicy }}"
+    image: "{{ .Values.redisReplication.image }}:{{ .Values.redisReplication.tag }}"
+    imagePullPolicy: "{{ .Values.redisReplication.imagePullPolicy }}"
     resources:
-{{ toYaml .Values.redisStandalone.resources | indent 6 }}
-{{- if .Values.redisStandalone.redisSecret }}
+{{ toYaml .Values.redisReplication.resources | indent 6 }}
+{{- if .Values.redisReplication.redisSecret }}
     redisSecret:
-      name: "{{ .Values.redisStandalone.redisSecret.secretName }}"
-      key: "{{ .Values.redisStandalone.redisSecret.secretKey }}"
+      name: "{{ .Values.redisReplication.redisSecret.secretName }}"
+      key: "{{ .Values.redisReplication.redisSecret.secretKey }}"
 {{- end }}
 {{- if .Values.imagePullSecrets }}
     imagePullSecrets:
