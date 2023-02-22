@@ -5,7 +5,8 @@ engine: gotpl
 maintainers:
   - name: iamabhishek-dubey
   - name: sandy724
-name: redis
+  - name: shubham-cmyk
+name: redis-sentinel
 sources:
   - https://github.com/ot-container-kit/redis-operator
 version: 0.14.2

@@ -1,5 +1,6 @@
 ---
-redisStandalone:
+redisReplication:
+  clusterSize: 3
   image: quay.io/opstree/redis
   tag: v7.0.5
   imagePullPolicy: IfNotPresent
@@ -96,6 +97,15 @@ storageSpec:
       resources:
         requests:
           storage: 1Gi
+  # volumemount:
+  #   volume:
+  #     - name: example-config
+  #       configMap:
+  #         name: example-configmap
+  #   mount:
+  #     - mountPath: /config
+  #       name: example-config
+
   #   selector: {}
 
 securityContext:

@@ -1,7 +1,8 @@
 ---
-redisStandalone:
-  image: quay.io/opstree/redis
-  tag: v7.0.5
+redisSentinel:
+  clusterSize: 3
+  image: quay.io/opstree/redis-sentinel
+  tag: v7.0.7
   imagePullPolicy: IfNotPresent
   # redisSecret:
   #   secretName: redis-secret
@@ -19,6 +20,15 @@ redisStandalone:
 #   foo: bar
 #   test: echo
 
+redisSentinelConfig:
+  redisReplicationName: "redis-replication"
+  # masterGroupName:
+  # redisPort:
+  # quorum:
+  # parallelSyncs:
+  # failoverTimeout:
+  # downAfterMilliseconds:
+
 externalConfig:
   enabled: false
   data: |
@@ -31,7 +41,7 @@ externalService:
   # annotations:
   #   foo: bar
   serviceType: NodePort
-  port: 6379
+  port: 26379
 
 serviceMonitor:
   enabled: false
@@ -39,12 +49,12 @@ serviceMonitor:
   scrapeTimeout: 10s
   namespace: monitoring
 
-redisExporter:
-  enabled: false
-  image: quay.io/opstree/redis-exporter
-  tag: "v1.44.0"
-  imagePullPolicy: IfNotPresent
-  resources: {}
+# redisExporter:
+#   enabled: false
+#   image: quay.io/opstree/redis-exporter
+#   tag: "v1.44.0"
+#   imagePullPolicy: IfNotPresent
+#   resources: {}
     # requests:
     #   cpu: 100m
     #   memory: 128Mi
