@@ -20,7 +20,7 @@ redisSentinel:
 #   foo: bar
 #   test: echo
 
-redisSentinelConfig: 
+redisSentinelConfig:
   redisReplicationName: "redis-replication"
   # masterGroupName:
   # redisPort:
