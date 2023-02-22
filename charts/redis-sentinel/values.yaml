@@ -1,7 +1,7 @@
 ---
 redisSentinel:
   clusterSize: 3
-  image: quay.io/opstree/redis-sentinel 
+  image: quay.io/opstree/redis-sentinel
   tag: v7.0.7
   imagePullPolicy: IfNotPresent
   # redisSecret:

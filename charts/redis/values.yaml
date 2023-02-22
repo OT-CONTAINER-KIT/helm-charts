@@ -114,7 +114,6 @@ affinity: {}
 
 # serviceAccountName: redis-sa
 
-
 # TLS:
 #   ca: ca.key
 #   cert: tls.crt
