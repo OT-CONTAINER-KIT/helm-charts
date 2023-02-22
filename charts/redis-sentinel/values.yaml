@@ -21,7 +21,7 @@ redisSentinel:
 #   test: echo
 
 redisSentinelConfig: 
-  redisReplicationName : "redis-replication"
+  redisReplicationName: "redis-replication"
   # masterGroupName: 
   # redisPort: 
   # quorum:
