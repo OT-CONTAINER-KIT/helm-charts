@@ -10,98 +10,104 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/component: middleware
-{{- if .Values.labels }}
-{{- range $labelkey, $labelvalue := .Values.labels }}
-    {{ $labelkey}}: {{ $labelvalue }}
-{{- end }}
-{{- end }}
+    {{- with .Values.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   clusterSize: {{ .Values.redisCluster.clusterSize }}
   persistenceEnabled: {{ .Values.redisCluster.persistenceEnabled }}
   clusterVersion: {{ .Values.redisCluster.clusterVersion }}
+  {{- with .Values.redisCluster.leader }}
   redisLeader:
-{{- if .Values.redisCluster.leader.affinity }}
+    {{- with .affinity }}
     affinity:
-{{ toYaml .Values.redisCluster.leader.affinity | nindent 6 }}
-{{- end }}
-    replicas: {{ .Values.redisCluster.leader.replicas }}
-{{- if eq .Values.externalConfig.enabled true }}
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    replicas: {{ .replicas }}
+    {{- if $.Values.externalConfig.enabled }}
     redisConfig:
       additionalRedisConfig: {{ .Release.Name }}-ext-config
-{{- end }}
-{{- if eq .Values.pdb.enabled true }}
+    {{- end }}
+    {{- with $.Values.pdb }}
+    {{- if .enabled }}
     pdb:
-      enabled: {{ .Values.pdb.enabled }}
-      {{- if .Values.pdb.maxUnavailable }}
-      maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+      enabled: true
+      {{- with .maxUnavailable }}
+      maxUnavailable: {{ . }}
       {{- end  }}
-      {{- if .Values.pdb.minAvailable }}
-      minAvailable: {{ .Values.pdb.minAvailable }}
+      {{- with .minAvailable }}
+      minAvailable: {{ . }}
       {{- end  }}
-{{- end }}
+    {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- with .Values.redisCluster.follower }}
   redisFollower:
-{{- if .Values.redisCluster.follower.affinity }}
+    {{- with .affinity }}
     affinity:
-{{ toYaml .Values.redisCluster.follower.affinity | nindent 6 }}
-{{- end }}
-    replicas: {{ .Values.redisCluster.follower.replicas }}
-{{- if eq .Values.externalConfig.enabled true }}
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    replicas: {{ .replicas }}
+    {{- if $.Values.externalConfig.enabled }}
     redisConfig:
       additionalRedisConfig: {{ .Release.Name }}-ext-config
-{{- end }}
-{{- if eq .Values.pdb.enabled true }}
+    {{- end }}
+    {{- with $.Values.pdb }}
+    {{- if .enabled }}
     pdb:
-      enabled: {{ .Values.pdb.enabled }}
-      {{- if .Values.pdb.maxUnavailable }}
-      maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+      enabled: true
+      {{- with .maxUnavailable }}
+      maxUnavailable: {{ . }}
       {{- end  }}
-      {{- if .Values.pdb.minAvailable }}
-      minAvailable: {{ .Values.pdb.minAvailable }}
+      {{- with .minAvailable }}
+      minAvailable: {{ . }}
       {{- end  }}
-{{- end }}
+    {{- end }}
+    {{- end }}
+  {{- end }}
   redisExporter:
     enabled: {{ .Values.redisExporter.enabled }}
     image: "{{ .Values.redisExporter.image }}:{{ .Values.redisExporter.tag }}"
     imagePullPolicy: "{{ .Values.redisExporter.imagePullPolicy }}"
     resources:
-{{ toYaml .Values.redisExporter.resources | indent 6 }}
+      {{- toYaml .Values.redisExporter.resources | nindent 6 }}
   kubernetesConfig:
     image: "{{ .Values.redisCluster.image }}:{{ .Values.redisCluster.tag }}"
     imagePullPolicy: "{{ .Values.redisCluster.imagePullPolicy }}"
     resources:
-{{ toYaml .Values.redisCluster.resources | indent 6 }}
-{{- if .Values.redisCluster.redisSecret }}
+      {{- toYaml .Values.redisCluster.resources | nindent 6 }}
+    {{- with .Values.redisCluster.redisSecret }}
     redisSecret:
-      name: "{{ .Values.redisCluster.redisSecret.secretName }}"
-      key: "{{ .Values.redisCluster.redisSecret.secretKey }}"
-{{- end }}
-{{- if .Values.storageSpec }}
+      name: "{{ .secretName }}"
+      key: "{{ .secretKey }}"
+    {{- end }}
+  {{- with .Values.storageSpec }}
   storage:
-{{ toYaml .Values.storageSpec | indent 4 }}
-{{- end }}
-{{- if .Values.priorityClassName }}
-  priorityClassName: "{{ .Values.priorityClassName }}"
-{{- end }}
-{{- if .Values.nodeSelector }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.priorityClassName }}
+  priorityClassName: "{{ . }}"
+  {{- end }}
+  {{- with .Values.nodeSelector }}
   nodeSelector:
-{{ toYaml .Values.nodeSelector | indent 4 }}
-{{- end }}
-{{- if .Values.securityContext }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.securityContext }}
   securityContext:
-{{ toYaml .Values.securityContext | indent 4 }}
-{{- end }}
-{{- if .Values.tolerations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if .Values.tolerations }}
   tolerations:
-{{ toYaml .Values.tolerations | indent 4 }}
-{{- end }}
-{{- if .Values.TLS }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.TLS }}
   TLS:
-{{ toYaml .Values.TLS | indent 4 }}
-{{- end}}
-{{- if .Values.sidecars }}
+    {{ toYaml . | nindent 4 }}
+  {{- end}}
+  {{- with .Values.sidecars }}
   sidecars:
-{{ toYaml .Values.sidecars | indent 4 }}
-{{- end }}
-{{- if .Values.serviceAccountName }}
-  serviceAccountName: "{{ .Values.serviceAccountName }}"
-{{- end }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.serviceAccountName }}
+  serviceAccountName: "{{ . }}"
+  {{- end }}

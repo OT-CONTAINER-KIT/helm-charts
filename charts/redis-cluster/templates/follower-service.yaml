@@ -1,13 +1,9 @@
-{{- if and (gt (int .Values.redisCluster.follower.replicas) 0) (eq .Values.externalService.enabled true) }}
+{{- if and .Values.externalService.enabled (gt (int .Values.redisCluster.follower.replicas) 0) }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Release.Name }}-follower-external-service
-{{- if .Values.externalService.annotations }}
-  annotations:
-{{ toYaml .Values.externalService.annotations | indent 4 }}
-{{- end }}
   labels:
     app.kubernetes.io/name: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -15,6 +11,10 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/component: middleware
+  {{- with .Values.externalService.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.externalService.serviceType }}
   selector:

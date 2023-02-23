@@ -24,41 +24,42 @@ spec:
       {{- end }}
       labels:
         name: {{ .Values.redisOperator.name }}
-      {{- with .Values.redisOperator.podLabels }}
-      {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- with .Values.redisOperator.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       containers:
       - name: "{{ .Values.redisOperator.name }}"
         image: "{{ .Values.redisOperator.imageName }}:{{ .Values.redisOperator.imageTag | default (printf "v%s" .Chart.AppVersion) }}"
-        imagePullPolicy: {{ .Values.redisOperator.imagePullPolicy }}
+        imagePullPolicy: "{{ .Values.redisOperator.imagePullPolicy }}"
         command:
-        - /manager
+          - /manager
         args:
-        - --leader-elect
-{{- if .Values.watch_namespace }}
+          - "--leader-elect"
+        {{- with .Values.watch_namespace }}
         env:
           - name: NAMESPACE
-            value: {{ .Values.watch_namespace }}
-{{- end }}
-{{- if .Values.resources }}
+            value: "{{ . }}"
+        {{- end }}
+        {{- with .Values.resources }}
         resources:
-{{ toYaml .Values.resources | indent 10 }}
-{{- end }}
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
       nodeSelector:
-{{- with .Values.nodeSelector }}
-{{ toYaml . | indent 8 }}
-{{- end }}
+        {{- with .Values.nodeSelector }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       priorityClassName: {{ .Values.priorityClassName }}
-{{- with .Values.affinity }}
-      affinity: {{ toYaml . | nindent 8 }}
-{{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       tolerations:
-{{- if .Values.tolerateAllTaints }}
+        {{- if .Values.tolerateAllTaints }}
         - operator: Exists
-{{- end }}
-{{- with .Values.tolerations }}
-{{ toYaml . | indent 8 }}
-{{- end }}
+        {{- end }}
+        {{- with .Values.tolerations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       serviceAccountName: "{{ .Values.serviceAccountName }}"
       serviceAccount: "{{ .Values.serviceAccountName }}"
