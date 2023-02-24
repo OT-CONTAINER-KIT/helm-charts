@@ -1,6 +1,6 @@
 ---
 apiVersion: redis.redis.opstreelabs.in/v1beta1
-kind: Redis
+kind: RedisSentinel
 metadata:
   name: {{ .Release.Name }}
   labels:
@@ -16,29 +16,29 @@ metadata:
 {{- end }}
 {{- end }}
 spec:
+  clusterSize: {{ .Values.redisSentinel.clusterSize }}
+# Sentinel Config 
+  redisSentinelConfig:
+    redisReplicationName: {{ .Values.redisSentinelConfig.redisReplicationName}}
+    masterGroupName : {{ .Values.redisSentinelConfig.masterGroupName | default "myMaster" | quote}}
+    redisPort:  {{ .Values.redisSentinelConfig.redisPort | default "6379" | quote}}
+    quorum: {{ .Values.redisSentinelConfig.quorum | default "2" | quote}}
+    parallelSyncs: {{ .Values.redisSentinelConfig.parallelSyncs | default "1" | quote}}
+    failoverTimeout: {{ .Values.redisSentinelConfig.failoverTimeout | default "180000" | quote}}
+    downAfterMilliseconds:  {{ .Values.redisSentinelConfig.downAfterMilliseconds | default "30000" | quote}}
 {{- if eq .Values.externalConfig.enabled true }}
-  redisConfig:
-    additionalRedisConfig: {{ .Release.Name }}-ext-config
+    additionalSentinelConfig: {{ .Release.Name }}-ext-config
 {{- end }}
-  redisExporter:
-    enabled: {{ .Values.redisExporter.enabled }}
-    image: "{{ .Values.redisExporter.image }}:{{ .Values.redisExporter.tag }}"
-    imagePullPolicy: "{{ .Values.redisExporter.imagePullPolicy }}"
-    resources:
-{{ toYaml .Values.redisExporter.resources | indent 6 }}
-{{- if .Values.redisExporter.env }}
-    env:
-{{ toYaml .Values.redisExporter.env | indent 4 }}
-{{- end }}
+# Kubernetes Config 
   kubernetesConfig:
-    image: "{{ .Values.redisStandalone.image }}:{{ .Values.redisStandalone.tag }}"
-    imagePullPolicy: "{{ .Values.redisStandalone.imagePullPolicy }}"
+    image: "{{ .Values.redisSentinel.image }}:{{ .Values.redisSentinel.tag }}"
+    imagePullPolicy: "{{ .Values.redisSentinel.imagePullPolicy }}"
     resources:
-{{ toYaml .Values.redisStandalone.resources | indent 6 }}
-{{- if .Values.redisStandalone.redisSecret }}
+{{ toYaml .Values.redisSentinel.resources | indent 6 }}
+{{- if .Values.redisSentinel.redisSecret }}
     redisSecret:
-      name: "{{ .Values.redisStandalone.redisSecret.secretName }}"
-      key: "{{ .Values.redisStandalone.redisSecret.secretKey }}"
+      name: "{{ .Values.redisSentinel.redisSecret.secretName }}"
+      key: "{{ .Values.redisSentinel.redisSecret.secretKey }}"
 {{- end }}
 {{- if .Values.imagePullSecrets }}
     imagePullSecrets:
@@ -46,10 +46,7 @@ spec:
     - name: {{ $imageSecrets.name }}
 {{- end }}
 {{- end }}
-{{- if .Values.storageSpec }}
-  storage:
-{{ toYaml .Values.storageSpec | indent 4 }}
-{{- end }}
+
 {{- if .Values.priorityClassName }}
   priorityClassName: "{{ .Values.priorityClassName }}"
 {{- end }}
