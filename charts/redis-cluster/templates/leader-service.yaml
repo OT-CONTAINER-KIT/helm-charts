@@ -19,7 +19,7 @@ spec:
   type: {{ .Values.externalService.serviceType }}
   selector:
     app: {{ .Release.Name }}-leader
-    redis_setup_type: leader
+    redis_setup_type: cluster
     role: leader
   ports:
     - protocol: TCP
