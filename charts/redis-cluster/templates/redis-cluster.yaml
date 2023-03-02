@@ -38,6 +38,10 @@ spec:
       {{- if .Values.pdb.minAvailable }}
       minAvailable: {{ .Values.pdb.minAvailable }}
       {{- end  }}
+    {{- if .Values.redisCluster.leader.tolerations }}
+    tolerations:
+    {{ toYaml .Values.redisCluster.leader.tolerations | indent 6 }}
+    {{- end }}
 {{- end }}
   redisFollower:
 {{- if .Values.redisCluster.follower.affinity }}
@@ -58,6 +62,10 @@ spec:
       {{- if .Values.pdb.minAvailable }}
       minAvailable: {{ .Values.pdb.minAvailable }}
       {{- end  }}
+    {{- if .Values.redisCluster.follower.tolerations }}
+    tolerations:
+    {{ toYaml .Values.redisCluster.follower.tolerations | indent 6 }}
+    {{- end }}
 {{- end }}
   redisExporter:
     enabled: {{ .Values.redisExporter.enabled }}
@@ -89,10 +97,6 @@ spec:
 {{- if .Values.securityContext }}
   securityContext:
 {{ toYaml .Values.securityContext | indent 4 }}
-{{- end }}
-{{- if .Values.tolerations }}
-  tolerations:
-{{ toYaml .Values.tolerations | indent 4 }}
 {{- end }}
 {{- if .Values.TLS }}
   TLS:
