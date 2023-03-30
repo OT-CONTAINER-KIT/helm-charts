@@ -12,6 +12,6 @@ metadata:
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/component: middleware
 data:
-  redis-additional.conf: |
+  redis-sentinel-additional.conf: |
     {{ .Values.externalConfig.data | nindent 4 }}
 {{- end }}
