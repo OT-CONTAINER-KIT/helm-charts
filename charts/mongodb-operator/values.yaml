@@ -29,8 +29,6 @@ readinessProbe:
   initialDelaySeconds: 5
   periodSeconds: 10
 
-serviceAccountName: mongodb-operator
-
 priorityClassName: ""
 nodeSelector: {}
 tolerateAllTaints: false
