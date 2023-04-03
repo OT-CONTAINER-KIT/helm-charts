@@ -6,6 +6,7 @@ engine: gotpl
 maintainers:
   - name: Abhishek Dubey
   - name: Sandeep Rawat
+  - name: Shubham Gupta
 name: mongodb-operator
 sources:
   - https://github.com/OT-CONTAINER-KIT/mongodb-operator
