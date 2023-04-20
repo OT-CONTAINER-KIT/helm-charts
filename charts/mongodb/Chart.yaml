@@ -7,7 +7,7 @@ maintainers:
 name: mongodb
 sources:
   - https://github.com/ot-container-kit/mongodb-operator
-version: 0.3.0
+version: 0.3.1
 appVersion: "0.3.0"
 home: https://github.com/ot-container-kit/mongodb-operator
 keywords:

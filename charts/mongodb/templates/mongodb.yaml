@@ -40,7 +40,9 @@ spec:
   storage:
     accessModes: {{ .Values.storage.accessModes }}
     storageSize: {{ .Values.storage.storageSize }}
+{{- if .Values.storage.storageClass }}
     storageClass: {{ .Values.storage.storageClass }}
+{{- end }}
 {{- end }}
   mongoDBSecurity:
     mongoDBAdminUser: admin

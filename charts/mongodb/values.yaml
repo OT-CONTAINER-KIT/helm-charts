@@ -40,10 +40,10 @@ storage:
   enabled: true
   accessModes: ["ReadWriteOnce"]
   storageSize: 1Gi
-  storageClass: csi-cephfs-sc
+  storageClass:
 
 mongoDBMonitoring:
-  enabled: true
+  enabled: false
   image:
     name: bitnami/mongodb-exporter
     tag: 0.11.2-debian-10-r382
