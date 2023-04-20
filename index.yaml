@@ -493,6 +493,29 @@ entries:
   mongodb:
   - apiVersion: v1
     appVersion: 0.3.0
+    created: "2023-04-20T18:53:57.130251774Z"
+    description: Provides easy mongodb setup definitions for Kubernetes services,
+      and deployment.
+    digest: ffb80e2929dfe0314f276ec62cc7ddd7c12b309971655fb854f76888530a678c
+    home: https://github.com/ot-container-kit/mongodb-operator
+    icon: https://github.com/OT-CONTAINER-KIT/mongodb-operator/raw/main/static/mongodb-operator-logo.svg
+    keywords:
+    - operator
+    - MongoDB
+    - opstree
+    - kubernetes
+    - openshift
+    - mongodb-exporter
+    maintainers:
+    - name: Opstree Solutions
+    name: mongodb
+    sources:
+    - https://github.com/ot-container-kit/mongodb-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/mongodb-0.3.1/mongodb-0.3.1.tgz
+    version: 0.3.1
+  - apiVersion: v1
+    appVersion: 0.3.0
     created: "2022-03-31T12:13:49.797328172Z"
     description: Provides easy mongodb setup definitions for Kubernetes services,
       and deployment.
