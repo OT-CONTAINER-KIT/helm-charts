@@ -42,6 +42,10 @@ storage:
   storageSize: 1Gi
   storageClass:
 
+mongoDBSecurity:
+  mongoDBAdminUser: admin
+  mongoDBPassword: password  
+
 mongoDBMonitoring:
   enabled: false
   image:

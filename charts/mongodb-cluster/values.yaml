@@ -39,7 +39,7 @@ storage:
   enabled: true
   accessModes: ["ReadWriteOnce"]
   storageSize: 1Gi
-  storageClass: csi-cephfs-sc
+  storageClass: 
 
 mongoDBMonitoring:
   enabled: true
