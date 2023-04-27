@@ -45,7 +45,7 @@ spec:
 {{- end }}
 {{- end }}
   mongoDBSecurity:
-    mongoDBAdminUser: admin
+    mongoDBAdminUser: {{ .Values.mongoDBSecurity.mongoDBAdminUser }}
     secretRef:
       name: {{ .Release.Name }}-secret
       key: password
