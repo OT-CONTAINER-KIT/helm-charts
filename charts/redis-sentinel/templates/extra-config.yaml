@@ -1,4 +1,4 @@
-{{- if eq .Values.externalConfig.enabled true }}
+{{- if .Values.externalConfig.enabled }}
 ---
 apiVersion: v1
 kind: ConfigMap

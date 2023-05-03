@@ -10,70 +10,65 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/component: middleware
-{{- if .Values.labels }}
-{{- range $labelkey, $labelvalue := .Values.labels }}
-    {{ $labelkey}}: {{ $labelvalue }}
-{{- end }}
-{{- end }}
+    {{- with .Values.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   clusterSize: {{ .Values.redisSentinel.clusterSize }}
-# Sentinel Config 
+  # Sentinel Config 
   redisSentinelConfig:
-    redisReplicationName: {{ .Values.redisSentinelConfig.redisReplicationName}}
-    masterGroupName : {{ .Values.redisSentinelConfig.masterGroupName | default "myMaster" | quote}}
-    redisPort:  {{ .Values.redisSentinelConfig.redisPort | default "6379" | quote}}
-    quorum: {{ .Values.redisSentinelConfig.quorum | default "2" | quote}}
-    parallelSyncs: {{ .Values.redisSentinelConfig.parallelSyncs | default "1" | quote}}
-    failoverTimeout: {{ .Values.redisSentinelConfig.failoverTimeout | default "180000" | quote}}
-    downAfterMilliseconds:  {{ .Values.redisSentinelConfig.downAfterMilliseconds | default "30000" | quote}}
-{{- if eq .Values.externalConfig.enabled true }}
-    additionalSentinelConfig: {{ .Release.Name }}-ext-config
-{{- end }}
-# Kubernetes Config 
+    redisReplicationName: {{ .Values.redisSentinelConfig.redisReplicationName }}
+    masterGroupName: {{ .Values.redisSentinelConfig.masterGroupName | default "myMaster" | quote }}
+    redisPort:  {{ .Values.redisSentinelConfig.redisPort | default "6379" | quote }}
+    quorum: {{ .Values.redisSentinelConfig.quorum | default "2" | quote }}
+    parallelSyncs: {{ .Values.redisSentinelConfig.parallelSyncs | default "1" | quote }}
+    failoverTimeout: {{ .Values.redisSentinelConfig.failoverTimeout | default "180000" | quote }}
+    downAfterMilliseconds:  {{ .Values.redisSentinelConfig.downAfterMilliseconds | default "30000" | quote }}
+    {{- if .Values.externalConfig.enabled }}
+    additionalSentinelConfig: "{{ .Release.Name }}-ext-config"
+    {{- end }}
+  # Kubernetes Config 
   kubernetesConfig:
     image: "{{ .Values.redisSentinel.image }}:{{ .Values.redisSentinel.tag }}"
     imagePullPolicy: "{{ .Values.redisSentinel.imagePullPolicy }}"
     resources:
-{{ toYaml .Values.redisSentinel.resources | indent 6 }}
-{{- if .Values.redisSentinel.redisSecret }}
+      {{- toYaml .Values.redisSentinel.resources | nindent 6 }}
+    {{- with .Values.redisSentinel.redisSecret }}
     redisSecret:
-      name: "{{ .Values.redisSentinel.redisSecret.secretName }}"
-      key: "{{ .Values.redisSentinel.redisSecret.secretKey }}"
-{{- end }}
-{{- if .Values.imagePullSecrets }}
+      name: "{{ .secretName }}"
+      key: "{{ .secretKey }}"
+    {{- end }}
+    {{- with .Values.imagePullSecrets }}
     imagePullSecrets:
-{{- range $imageSecrets := .Values.imagePullSecrets }}
-    - name: {{ $imageSecrets.name }}
-{{- end }}
-{{- end }}
-
-{{- if .Values.priorityClassName }}
-  priorityClassName: "{{ .Values.priorityClassName }}"
-{{- end }}
-{{- if .Values.nodeSelector }}
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+  {{- with .Values.priorityClassName }}
+  priorityClassName: "{{ . }}"
+  {{- end }}
+  {{- with .Values.nodeSelector }}
   nodeSelector:
-{{ toYaml .Values.nodeSelector | indent 4 }}
-{{- end }}
-{{- if .Values.affinity }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.affinity }}
   affinity:
-{{ toYaml .Values.affinity | indent 4 }}
-{{- end }}
-{{- if .Values.securityContext }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.securityContext }}
   securityContext:
-{{ toYaml .Values.securityContext | indent 4 }}
-{{- end }}
-{{- if .Values.tolerations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.tolerations }}
   tolerations:
-{{ toYaml .Values.tolerations | indent 4 }}
-{{- end }}
-{{- if .Values.TLS }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.TLS }}
   TLS:
-{{ toYaml .Values.TLS | indent 4 }}
-{{- end}}
-{{- if .Values.sidecars }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.sidecars }}
   sidecars:
-{{ toYaml .Values.sidecars | indent 4 }}
-{{- end }}
-{{- if .Values.serviceAccountName }}
-  serviceAccountName: "{{ .Values.serviceAccountName }}"
-{{- end }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.serviceAccountName }}
+  serviceAccountName: "{{ . }}"
+  {{- end }}
