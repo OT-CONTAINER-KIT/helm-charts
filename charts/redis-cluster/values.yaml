@@ -21,6 +21,11 @@ redisCluster:
       #         operator: In
       #         values:
       #         - ssd
+    tolerations: []
+      # - key: "key"
+      #   operator: "Equal"
+      #   value: "value"
+      #   effect: "NoSchedule"
   follower:
     replicas: 3
     serviceType: ClusterIP
@@ -33,6 +38,11 @@ redisCluster:
       #         operator: In
       #         values:
       #         - ssd
+    tolerations: []
+      # - key: "key"
+      #   operator: "Equal"
+      #   value: "value"
+      #   effect: "NoSchedule"
   resources: {}
     # requests:
     #   cpu: 100m
