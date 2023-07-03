@@ -8,7 +8,7 @@ maintainers:
 name: redis
 sources:
   - https://github.com/ot-container-kit/redis-operator
-version: 0.15.1
+version: 0.15.2
 
 appVersion: "0.15.0"
 home: https://github.com/ot-container-kit/redis-operator
