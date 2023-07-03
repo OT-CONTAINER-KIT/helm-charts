@@ -2,15 +2,15 @@
 redisCluster:
   clusterSize: 3
   clusterVersion: v7
-  persistenceEnabled: false
-  image: shubham192001/redis
-  tag: persistence
+  persistenceEnabled: true
+  image: quay.io/opstree/redis
+  tag: v7.0.5
   imagePullPolicy: IfNotPresent
   # redisSecret:
   #   secretName: redis-secret
   #   secretKey: password
   leader:
-    replicas: 5
+    replicas: 3
     serviceType: ClusterIP
     affinity: {}
       # nodeAffinity:
@@ -22,7 +22,7 @@ redisCluster:
       #         values:
       #         - ssd
   follower:
-    replicas: 5
+    replicas: 3
     serviceType: ClusterIP
     affinity: {}
       # nodeAffinity:
@@ -70,7 +70,7 @@ serviceMonitor:
   namespace: monitoring
 
 redisExporter:
-  enabled: false
+  enabled: true
   image: quay.io/opstree/redis-exporter
   tag: "v1.44.0"
   imagePullPolicy: IfNotPresent
@@ -112,7 +112,7 @@ storageSpec:
           storage: 1Gi
   #   selector: {}
 
-podSecurityContext:
+securityContext:
   runAsUser: 1000
   fsGroup: 1000
 

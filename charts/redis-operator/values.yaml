@@ -1,9 +1,9 @@
 ---
 redisOperator:
   name: redis-operator
-  imageName: shubham192001/redis-operator
+  imageName: quay.io/opstree/redis-operator
   # Overrides the image tag whose default is the chart appVersion.
-  imageTag: clusterScaling
+  imageTag: ""
   imagePullPolicy: Always
 
   # Additional pod annotations
