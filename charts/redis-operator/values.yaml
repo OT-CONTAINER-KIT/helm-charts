@@ -10,9 +10,10 @@ redisOperator:
   podAnnotations: {}
   # Additional Pod labels (e.g. for filtering Pod by custom labels)
   podLabels: {}
-  
+
   # Additional arguments for redis-operator container
   extraArgs: []
+
   #  - -zap-log-level=error
 
 # watch_namespace: ot-operators
