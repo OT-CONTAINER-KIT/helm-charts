@@ -36,6 +36,9 @@ spec:
         - /manager
         args:
         - --leader-elect
+        {{- range $arg := .Values.redisOperator.extraArgs }}
+        - {{ $arg }}
+        {{- end }}
 {{- if .Values.watch_namespace }}
         env:
           - name: NAMESPACE

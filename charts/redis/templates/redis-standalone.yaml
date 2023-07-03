@@ -64,6 +64,7 @@ spec:
 {{- if .Values.podSecurityContext }}
   podSecurityContext:
 {{ toYaml .Values.podSecurityContext | indent 4 }}
+
 {{- end }}
 {{- if .Values.tolerations }}
   tolerations:
