@@ -108,7 +108,7 @@ storageSpec:
 
   #   selector: {}
 
-securityContext:
+podSecurityContext:
   runAsUser: 1000
   fsGroup: 1000
 
