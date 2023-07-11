@@ -1,17 +1,15 @@
----
-apiVersion: v1
+apiVersion: v2
+name: redis-cluster
 description: Provides easy redis setup definitions for Kubernetes services, and deployment.
-engine: gotpl
+version: 0.15.3
+appVersion: "0.15.0"
+home: https://github.com/ot-container-kit/redis-operator
+sources:
+  - https://github.com/ot-container-kit/redis-operator
 maintainers:
   - name: iamabhishek-dubey
   - name: sandy724
-name: redis-cluster
-sources:
-  - https://github.com/ot-container-kit/redis-operator
-version: 0.15.3
-
-appVersion: "0.15.0"
-home: https://github.com/ot-container-kit/redis-operator
+  - name: shubham-cmyk
 keywords:
 - operator
 - redis
@@ -20,3 +18,4 @@ keywords:
 - openshift
 - redis-exporter
 icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+type: application
