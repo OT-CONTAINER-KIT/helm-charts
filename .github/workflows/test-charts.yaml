@@ -1,0 +1,40 @@
+name: Install and Test Helm Chart
+
+on: pull_request
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Install Kind
+      uses: engineerd/setup-kind@v0.5.0
+
+    - name: Install Helm
+      uses: azure/setup-helm@v1
+      with:
+        version: '3.6.0'
+
+    - name: Create Kind Cluster
+      run: |
+        kind create cluster
+
+    - name: Install yq
+      run: |
+        sudo snap install yq
+
+    - name: Install and test Helm charts
+      run: |
+        kubectl cluster-info --context kind-kind
+        chart_dirs=$(ls ./charts/)
+        for dir in $chart_dirs
+        do
+          chart_version=$(yq e .version ./charts/$dir/Chart.yaml)
+          helm install $dir ./charts/$dir --version $chart_version
+          helm test $dir
+        done
+
+
