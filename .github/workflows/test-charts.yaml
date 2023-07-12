@@ -30,7 +30,7 @@ jobs:
       run: |
         kubectl cluster-info --context kind-kind
         chart_dirs=("redis-operator" "redis" "redis-cluster" "redis-replication" "redis-sentinel")
-        for dir in $chart_dirs
+        for dir in "${chart_dirs[@]}"
         do
           chart_version=$(yq e .version ./charts/$dir/Chart.yaml)
           echo "Installing $dir chart with version $chart_version..."
@@ -39,11 +39,4 @@ jobs:
         done
         echo "Listing installed Helm charts..."
         helm ls
-        for dir in $chart_dirs
-        do
-          echo "Getting logs for $dir..."
-          pod_name=$(kubectl get pods --namespace default -l "app.kubernetes.io/instance=$dir" -o jsonpath="{.items[0].metadata.name}")
-          kubectl logs $pod_name
-        done
-
 
