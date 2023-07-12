@@ -29,11 +29,11 @@ jobs:
     - name: Install and test Helm charts
       run: |
         kubectl cluster-info --context kind-kind
-        chart_dirs=$(ls ./charts/)
+        chart_dirs=("redis-operator" "redis" "redis-cluster" "redis-replication" "redis-sentinel")
         for dir in $chart_dirs
         do
           chart_version=$(yq e .version ./charts/$dir/Chart.yaml)
-          helm install $dir ./charts/$dir --version $chart_version
+          helm install $dir ./charts/$dir/ --version $chart_version
           helm test $dir
         done
 
