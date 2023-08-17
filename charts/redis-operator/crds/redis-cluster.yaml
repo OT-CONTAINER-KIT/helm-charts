@@ -10363,6 +10363,7 @@ spec:
   conversion:
     strategy: Webhook
     webhook:
+      conversionReviewVersions: ["v1beta1","v1beta2"]
       clientConfig:
         service:
           namespace: system
