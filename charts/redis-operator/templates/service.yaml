@@ -3,8 +3,7 @@ kind: Service
 metadata:
 # I would put labels here later - shubham
   name: {{ .Values.service.name }}
-  # The namespace to be changed to release namespace - shubham
-  namespace: {{ .Values.namespace }}
+  namespace:  {{ .Release.Namespace }}
 spec:
   ports:
     - port: 443

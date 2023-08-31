@@ -7,7 +7,8 @@ redisOperator:
   imagePullPolicy: Always
 
   # Additional pod annotations
-  podAnnotations: {}
+  podAnnotations: 
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ .Values.certificate.name }}
   # Additional Pod labels (e.g. for filtering Pod by custom labels)
   podLabels: {}
 
