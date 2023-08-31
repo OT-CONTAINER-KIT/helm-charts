@@ -1,7 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-# I would put labels here later - shubham
+  labels:
+    app.kubernetes.io/name : {{ .Values.redisOperator.name }}
+    helm.sh/chart : {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by : {{ .Release.Service }}
+    app.kubernetes.io/instance : {{ .Release.Name }}
+    app.kubernetes.io/version : {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/part-of : {{ .Release.Name }}
   name: {{ .Values.service.name }}
   namespace:  {{ .Release.Namespace }}
 spec:
@@ -10,4 +17,4 @@ spec:
       protocol: TCP
       targetPort: 9443
   selector:
-    control-plane: controller-manager
+    control-plane: "{{ .Values.redisOperator.name }}"
