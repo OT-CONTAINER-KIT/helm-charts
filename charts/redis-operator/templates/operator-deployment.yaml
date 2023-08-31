@@ -20,6 +20,7 @@ spec:
   template:
     metadata:
       annotations:
+        cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ .Values.certificate.name }}
       {{- with .Values.redisOperator.podAnnotations }}
       {{- toYaml . | nindent 8 }}
       {{- end }}
