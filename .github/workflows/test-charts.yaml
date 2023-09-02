@@ -56,4 +56,3 @@ jobs:
         done
         echo "Listing installed Helm charts..."
         helm ls
-

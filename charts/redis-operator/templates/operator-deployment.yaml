@@ -5,12 +5,13 @@ metadata:
   name: {{ .Values.redisOperator.name }}
   namespace: {{ .Release.Namespace }}
   labels:
-    control-plane: "{{ .Values.redisOperator.name }}"
-    app.kubernetes.io/name: {{ .Values.redisOperator.name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/name : {{ .Values.redisOperator.name }}
+    helm.sh/chart : {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by : {{ .Release.Service }}
+    app.kubernetes.io/instance : {{ .Release.Name }}
+    app.kubernetes.io/version : {{ .Chart.AppVersion }}
+    app.kubernetes.io/component : operator
+    app.kubernetes.io/part-of : {{ .Release.Name }}
 spec:
   replicas: {{ .Values.replicas }}
   selector:
@@ -19,6 +20,7 @@ spec:
   template:
     metadata:
       annotations:
+        cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ .Values.certificate.name }}
       {{- with .Values.redisOperator.podAnnotations }}
       {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -30,6 +32,14 @@ spec:
     spec:
       containers:
       - name: "{{ .Values.redisOperator.name }}"
+        ports:
+        - containerPort: 9443
+          name: webhook-server
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /tmp/k8s-webhook-server/serving-certs
+          name: cert
+          readOnly: true
         image: "{{ .Values.redisOperator.imageName }}:{{ .Values.redisOperator.imageTag | default (printf "v%s" .Chart.AppVersion) }}"
         imagePullPolicy: {{ .Values.redisOperator.imagePullPolicy }}
         command:
@@ -65,3 +75,8 @@ spec:
 {{- end }}
       serviceAccountName: "{{ .Values.serviceAccountName }}"
       serviceAccount: "{{ .Values.serviceAccountName }}"
+      volumes:
+      - name: cert
+        secret:
+          defaultMode: 420
+          secretName: {{ .Values.certificate.secretName }}

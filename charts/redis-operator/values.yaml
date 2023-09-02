@@ -35,3 +35,11 @@ nodeSelector: {}
 tolerateAllTaints: false
 tolerations: []
 affinity: {}
+
+service:
+  name: webhook-service
+  namespace: webhook-service
+
+certificate:
+  name: serving-cert
+  secretName: webhook-server-cert
