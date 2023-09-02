@@ -7612,7 +7612,7 @@ spec:
       conversionReviewVersions: ["v1beta1","v1beta2"]
       clientConfig:
         service:
-          namespace: system
+          namespace: redis-operator
           name: webhook-service
           path: /convert
 status:
