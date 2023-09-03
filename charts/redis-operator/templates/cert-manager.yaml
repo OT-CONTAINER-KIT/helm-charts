@@ -35,5 +35,5 @@ spec:
   - {{ .Values.service.name }}.{{ .Values.service.namespace }}.svc.cluster.local
   issuerRef:
     kind: Issuer
-    name: redis-operator
+    name: redis-operator-issuer
   secretName: {{ .Values.certificate.secretName }}
