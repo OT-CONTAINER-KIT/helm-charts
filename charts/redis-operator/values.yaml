@@ -38,7 +38,7 @@ affinity: {}
 
 service:
   name: webhook-service
-  # namespace: redis-operator
+  namespace: redis-operator
 
 certificate:
   name: serving-cert
