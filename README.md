@@ -47,3 +47,9 @@ Useful Helm Client Commands:
 - View available charts: `helm search repo`
 - Install a chart: `helm install my-release ot-helm/<package-name>`
 - Upgrade your application: `helm upgrade`
+
+## Contact Information
+
+This project is managed by [OpsTree Solutions](http://opstree.com). For any queries or suggestions, you can reach out to us at [opensource@opstree.com](mailto:opensource@opstree.com).
+
+Join our Slack Channel: [#redis-operator](https://opstree.slack.com/archives/C05MBRB50JG).
