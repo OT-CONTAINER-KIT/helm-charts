@@ -43,3 +43,6 @@ service:
 certificate:
   name: serving-cert
   secretName: webhook-server-cert
+
+cert-manager:
+  installCRDs: false
