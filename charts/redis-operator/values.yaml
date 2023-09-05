@@ -45,4 +45,5 @@ certificate:
   secretName: webhook-server-cert
 
 cert-manager:
-  installCRDs: false
+  enabled: true
+  installCRDs: true
