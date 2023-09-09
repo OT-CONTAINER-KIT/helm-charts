@@ -1,7 +1,8 @@
+{{ if ".Values.cert-manager.enabled" }}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
-  name: redis-operator-issuer
+  name: {{ .Values.issuer.name }}
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: {{ .Values.redisOperator.name }}
@@ -13,6 +14,15 @@ metadata:
     app.kubernetes.io/part-of: {{ .Release.Name }}
 spec:
   selfSigned: {}
+  # acme:
+  #   email: {{ .Values.issuer.email }}
+  #   server: {{ .Values.issuer.server }}
+  #   privateKeySecretRef:
+  #     name: {{ .Values.issuer.privateKeySecretName }}
+  #   solvers:
+  #   - http01:
+  #       ingress:
+  #         class: {{ .Values.issuer.solver.ingressClass }}
 
 ---
 
@@ -31,9 +41,11 @@ metadata:
     app.kubernetes.io/part-of: {{ .Release.Name }}
 spec:
   dnsNames:
-  - {{ .Values.service.name }}.{{ .Values.service.namespace }}.svc
-  - {{ .Values.service.name }}.{{ .Values.service.namespace }}.svc.cluster.local
+    - {{ .Values.service.name }}.{{ .Values.service.namespace }}.svc
+    - {{ .Values.service.name }}.{{ .Values.service.namespace }}.svc.cluster.local
   issuerRef:
     kind: Issuer
-    name: redis-operator-issuer
+    name: {{ .Values.issuer.name }}
   secretName: {{ .Values.certificate.secretName }}
+
+{{ end }}

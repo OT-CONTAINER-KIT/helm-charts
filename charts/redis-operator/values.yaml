@@ -44,6 +44,14 @@ certificate:
   name: serving-cert
   secretName: webhook-server-cert
 
+issuer:
+  name: letsencrypt-prod
+  email: shubham.gupta@opstree.com
+  server: https://acme-v02.api.letsencrypt.org/directory
+  privateKeySecretName: letsencrypt-prod
+  solver:
+    enabled: true
+    ingressClass: nginx
+
 cert-manager:
   enabled: true
-  installCRDs: true
