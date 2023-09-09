@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This Helm chart deploys the redis-operator into your Kubernetes cluster. The operator facilitates the deployment, scaling, and management of Redis clusters and oter Redis resources provided by the OpsTree Solutions team.
+This Helm chart deploys the redis-operator into your Kubernetes cluster. The operator facilitates the deployment, scaling, and management of Redis clusters and other Redis resources provided by the OpsTree Solutions team.
 
 ## Pre-requisites
 
@@ -48,7 +48,7 @@ kubectl patch crd redissentinels.redis.redis.opstreelabs.in -p '{"metadata":{"an
 
 > Note: Replace `<redis-operator>` and `<serving-cert>` with your specific values i.e. release name and certificate name.
 
-#### You can verify the patch by running the following command:
+#### You can verify the patch by running the following commands
 
 ```bash
 kubectl get crd redis.redis.redis.opstreelabs.in -o=jsonpath='{.metadata.annotations}'
