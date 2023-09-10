@@ -48,8 +48,11 @@ rules:
   resources:
   - redis/finalizers
   - rediscluster/finalizers
+  - redisclusters/finalizers
   - redissentinel/finalizers
+  - redissentinels/finalizers
   - redisreplication/finalizers
+  - redisreplications/finalizers
   verbs:
   - update
 - apiGroups:
@@ -57,8 +60,11 @@ rules:
   resources:
   - redis/status
   - rediscluster/status
+  - redisclusters/status
   - redissentinel/status
+  - redissentinels/status
   - redisreplication/status
+  - redisreplications/status
   verbs:
   - get
   - patch
