@@ -13,16 +13,7 @@ metadata:
     app.kubernetes.io/component: issuer
     app.kubernetes.io/part-of: {{ .Release.Name }}
 spec:
-  selfSigned: {}
-  # acme:
-  #   email: {{ .Values.issuer.email }}
-  #   server: {{ .Values.issuer.server }}
-  #   privateKeySecretRef:
-  #     name: {{ .Values.issuer.privateKeySecretName }}
-  #   solvers:
-  #   - http01:
-  #       ingress:
-  #         class: {{ .Values.issuer.solver.ingressClass }}
+  {{- include "redis-operator.issuerSpec" . | nindent 2 }}
 
 ---
 

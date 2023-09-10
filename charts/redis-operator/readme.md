@@ -34,6 +34,8 @@ Replace `<YourCertSecretName>` and `<YourPrivateKey>` with your specific values.
 helm install <redis-operator> ot-helm/redis-operator --version=0.15.4 --appVersion=0.15.1 --set certificate.secretName=<YourCertSecretName> --set cert-manager=true --namespace <redis-operator> --create-namespace
 ```
 
+> Note: If `certificate.secretName` is not provided, the operator will generate a self-signed certificate and use it for webhook server.
+
 ### 4. Patch the CA Bundle (if using cert-manager)
 
 ```bash
@@ -57,12 +59,14 @@ kubectl get crd redisreplications.redis.redis.opstreelabs.in -o=jsonpath='{.meta
 kubectl get crd redissentinels.redis.redis.opstreelabs.in -o=jsonpath='{.metadata.annotations}'
 ```
 
-### How to generate private key
+### How to generate private key( Optional )
 
 ```bash
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt
 kubectl create secret tls <webhook-server-cert> --key tls.key --cert tls.crt -n <redis-operator>
 ```
+
+> Note: This secret will be used for webhook server certificate so generate it before installing the redis-operator.
 
 ## Default Values
 
@@ -79,8 +83,9 @@ kubectl create secret tls <webhook-server-cert> --key tls.key --cert tls.crt -n 
 | `replicas`                          | Number of replicas                 | `1`                                                         |
 | `serviceAccountName`                | Service account name               | `redis-operator`                                             |
 | `certificate.name`                  | Certificate name                   | `serving-cert`                                               |
-| `certificate.secretName`            | Certificate secret name            | `webhook-server-cert`                                        |
-| `issuer.name`                       | Issuer name                        | `letsencrypt-prod`                                           |
+| `certificate.secretName`            | Certificate secret name            | `webhook-server-cert`                                      |
+| `issuer.type`                      | Issuer type                       | `selfSigned`                                                   |
+| `issuer.name`                       | Issuer name                        | `redis-operator-issuer`                                           |
 | `issuer.email`                      | Issuer email                       | `shubham.gupta@opstree.com`                                  |
 | `issuer.server`                     | Issuer server URL                  | `https://acme-v02.api.letsencrypt.org/directory`            |
 | `issuer.privateKeySecretName`       | Private key secret name            | `letsencrypt-prod`                                           |
