@@ -45,7 +45,8 @@ certificate:
   secretName: webhook-server-cert
 
 issuer:
-  name: letsencrypt-prod
+  type: selfSigned
+  name: redis-operator-issuer
   email: shubham.gupta@opstree.com
   server: https://acme-v02.api.letsencrypt.org/directory
   privateKeySecretName: letsencrypt-prod
