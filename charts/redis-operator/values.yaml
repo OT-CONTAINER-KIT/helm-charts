@@ -35,6 +35,7 @@ nodeSelector: {}
 tolerateAllTaints: false
 tolerations: []
 affinity: {}
+securityContext: {}
 
 service:
   name: webhook-service
