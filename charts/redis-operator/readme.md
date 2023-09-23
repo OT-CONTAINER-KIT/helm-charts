@@ -31,10 +31,12 @@ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/
 Replace `<YourCertSecretName>` and `<YourPrivateKey>` with your specific values.
 
 ```bash
-helm install <redis-operator> ot-helm/redis-operator --version=0.15.4 --appVersion=0.15.1 --set certificate.secretName=<YourCertSecretName> --set cert-manager=true --namespace <redis-operator> --create-namespace
+helm install <redis-operator> ot-helm/redis-operator --version=0.15.5 --appVersion=0.15.1 --set certificate.secretName=<YourCertSecretName> --set certManager.enabled=true --namespace <redis-operator> --create-namespace
 ```
 
 > Note: If `certificate.secretName` is not provided, the operator will generate a self-signed certificate and use it for webhook server.
+---
+> Note : If you want to disable the webhook you have to pass the `--set webhook=false` while installing the redis-operator.
 
 ### 4. Patch the CA Bundle (if using cert-manager)
 
@@ -74,8 +76,14 @@ kubectl create secret tls <webhook-server-cert> --key tls.key --cert tls.crt -n 
 |-------------------------------------|------------------------------------|--------------------------------------------------------------|
 | `redisOperator.name`                | Operator name                      | `redis-operator`                                             |
 | `redisOperator.imageName`           | Image repository                   | `quay.io/opstree/redis-operator`                             |
-| `redisOperator.imageTag`            | Image tag                          |                                                              |
+| `redisOperator.imageTag`            | Image tag                          |  `{{appVersion}}`                                                        |
 | `redisOperator.imagePullPolicy`     | Image pull policy                  | `Always`                                                     |
+| `redisOperator.podAnnotations`        | Additional pod annotations         | `{}`                                                         |
+| `redisOperator.podLabels`             | Additional Pod labels             | `{}`                                                         |
+| `redisOperator.extraArgs`             | Additional arguments for the operator | `{}`                                                         |
+| `redisOperator.watch_namespace`       | Namespace for the operator to watch  | `""`                                                         |
+| `redisOperator.env`                  | Environment variables for the operator | `{}`                                                         |
+| `redisOperator.webhook`              | Enable webhook                     | `true`                                                     |
 | `resources.limits.cpu`              | CPU limit                          | `500m`                                                      |
 | `resources.limits.memory`           | Memory limit                       | `500Mi`                                                     |
 | `resources.requests.cpu`            | CPU request                        | `500m`                                                      |
@@ -89,4 +97,14 @@ kubectl create secret tls <webhook-server-cert> --key tls.key --cert tls.crt -n 
 | `issuer.email`                      | Issuer email                       | `shubham.gupta@opstree.com`                                  |
 | `issuer.server`                     | Issuer server URL                  | `https://acme-v02.api.letsencrypt.org/directory`            |
 | `issuer.privateKeySecretName`       | Private key secret name            | `letsencrypt-prod`                                           |
-| `cert-manager.enabled`              | Enable cert-manager                | `true`                                                       |
+| `certManager.enabled`              | Enable cert-manager                | `true`                                                       |
+
+## Scheduling Parameters
+
+| Parameter               | Description                                | Default  |
+|-------------------------|--------------------------------------------|----------|
+| `priorityClassName`     | Priority class name for the pods           | `""`     |
+| `nodeSelector`          | Labels for pod assignment                  | `{}`     |
+| `tolerateAllTaints`     | Whether to tolerate all node taints         | `false`  |
+| `tolerations`           | Taints to tolerate                         | `[]`     |
+| `affinity`              | Affinity rules for pod assignment          | `{}`     |

@@ -49,11 +49,20 @@ spec:
         {{- range $arg := .Values.redisOperator.extraArgs }}
         - {{ $arg }}
         {{- end }}
-{{- if .Values.watch_namespace }}
+{{- if and .Values.redisOperator.watch_namespace (ne .Values.redisOperator.watch_namespace "") }}
         env:
-          - name: NAMESPACE
-            value: {{ .Values.watch_namespace }}
+          - name: WATCH_NAMESPACE
+            value: {{ .Values.redisOperator.watch_namespace }}
 {{- end }}
+{{- if .Values.redisOperator.env}}
+        env:
+          - name:  ENABLE_WEBHOOKS
+            value: "true"
+{{- end }}
+        {{- range $env := .Values.redisOperator.env }}
+        - name: {{ $env.name }}
+          value: {{ $env.value }}
+        {{- end }}
 {{- if .Values.resources }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
