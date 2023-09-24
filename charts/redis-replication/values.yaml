@@ -2,11 +2,11 @@
 redisReplication:
   clusterSize: 3
   image: quay.io/opstree/redis
-  tag: v7.0.5
-  imagePullPolicy: IfNotPresent
-  # redisSecret:
-  #   secretName: redis-secret
-  #   secretKey: password
+  tag: v7.0.12
+  imagePullPolicy: Always
+  redisSecret:
+    secretName: ""
+    secretKey: ""
   serviceType: ClusterIP
   resources: {}
     # requests:
@@ -16,9 +16,13 @@ redisReplication:
     #   cpu: 100m
     #   memory: 128Mi
 
-# labels:
-#   foo: bar
-#   test: echo
+labels: {}
+  # foo: bar
+  # test: echo
+
+annotations: {}
+  # foo: bar
+  # test: echo
 
 externalConfig:
   enabled: false
@@ -41,9 +45,8 @@ serviceMonitor:
   namespace: monitoring
 
 redisExporter:
-  enabled: false
-  image: quay.io/opstree/redis-exporter
-  tag: "v1.44.0"
+  enabled: true
+  image: quay.io/opstree/redis-exporter:"v1.44.0"
   imagePullPolicy: IfNotPresent
   resources: {}
     # requests:
@@ -52,19 +55,22 @@ redisExporter:
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
-  # env:
-  # - name: REDIS_EXPORTER_INCL_SYSTEM_METRICS
-  #   value: "true"
-  # - name: UI_PROPERTIES_FILE_NAME
-  #   valueFrom:
-  #     configMapKeyRef:
-  #       name: game-demo
-  #       key: ui_properties_file_name
-  # - name: SECRET_USERNAME
-  #   valueFrom:
-  #     secretKeyRef:
-  #       name: mysecret
-  #       key: username
+  env : []
+
+initContainer:
+  enabled: false  
+  image: ""
+  imagePullPolicy: "IfNotPresent"
+  resources: {}
+    # requests:
+    #   memory: "64Mi"
+    #   cpu: "250m"
+    # limits:
+    #   memory: "128Mi"
+    #   cpu: "500m"
+  env: []
+  command: []
+  args: []
 
 sidecars: []
   # - name: "sidecar1"
@@ -81,7 +87,7 @@ sidecars: []
   #   - name: VAR_NAME
   #     value: "value1"
 
-# priorityClassName: "-"
+priorityClassName: ""
 
 # imagePullSecrets:
 #  - name: regcred
@@ -97,20 +103,15 @@ storageSpec:
       resources:
         requests:
           storage: 1Gi
-  # volumemount:
-  #   volume:
-  #     - name: example-config
-  #       configMap:
-  #         name: example-configmap
-  #   mount:
-  #     - mountPath: /config
-  #       name: example-config
-
-  #   selector: {}
+  volumeMount : 
+    volume : []
+    mountPath : []
 
 podSecurityContext:
   runAsUser: 1000
   fsGroup: 1000
+
+securityContext: {}
 
 affinity: {}
   # nodeAffinity:
@@ -122,11 +123,44 @@ affinity: {}
   #         values:
   #         - ssd
 
-# serviceAccountName: redis-sa
+tolerations: []
+  # - key: "key"
+  #   operator: "Equal"
+  #   value: "value"
+  #   effect: "NoSchedule"
 
-# TLS:
-#   ca: ca.key
-#   cert: tls.crt
-#   key: tls.key
-#   secret:
-#     secretName: redis-tls-cert
+TLS:
+  enabled: false
+  ca: ca.key
+  cert: tls.crt
+  key: tls.key
+  secret:
+    secretName: redis-tls-cert
+
+acl : 
+  enabled: false
+  secret : ""
+
+
+readinessProbe:
+  enabled: false
+  initialDelaySeconds: 15
+  timeoutSeconds: 5
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
+
+livenessProbe:
+  enabled: false
+  initialDelaySeconds: 15
+  timeoutSeconds: 5
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
+
+
+terminationGracePeriodSeconds: 0
+
+env : []
+  # - name: VAR_NAME
+  #   value: "value1"

@@ -4,11 +4,18 @@ redisCluster:
   clusterVersion: v7
   persistenceEnabled: true
   image: quay.io/opstree/redis
-  tag: v7.0.5
-  imagePullPolicy: IfNotPresent
-  # redisSecret:
-  #   secretName: redis-secret
-  #   secretKey: password
+  tag: v7.0.12
+  imagePullPolicy: Always
+  redisSecret:
+    secretName: ""
+    secretKey: ""
+  resources: {}
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
   leader:
     replicas: 3
     serviceType: ClusterIP
@@ -21,6 +28,15 @@ redisCluster:
       #         operator: In
       #         values:
       #         - ssd
+    tolerations: []
+      # - key: "key"
+      #   operator: "Equal"
+      #   value: "value"
+      #   effect: "NoSchedule"
+    nodeSelector: {}
+      # memory: medium
+    securityContext : {}
+    terminationGracePeriodSeconds: 0
   follower:
     replicas: 3
     serviceType: ClusterIP
@@ -33,21 +49,27 @@ redisCluster:
       #         operator: In
       #         values:
       #         - ssd
-  resources: {}
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
+    tolerations: []
+      # - key: "key"
+      #   operator: "Equal"
+      #   value: "value"
+      #   effect: "NoSchedule"
+    nodeSelector: {}
+      # memory: medium
+    securityContext : {}
+    terminationGracePeriodSeconds: 0
 
-# labels:
-#   foo: bar
-#   test: echo
+labels: {}
+  # app: redis-cluster
+  # release: redis-cluster
+
+annotations: {}
+  # iam.amazonaws.com/role: role-arn
 
 pdb:
   enabled: false
   maxUnavailable: 1
+  minAvailable: 1
 
 externalConfig:
   enabled: false
@@ -55,6 +77,22 @@ externalConfig:
     tcp-keepalive 400
     slowlog-max-len 158
     stream-node-max-bytes 2048
+
+readinessProbe:
+  enabled: false
+  initialDelaySeconds: 15
+  timeoutSeconds: 5
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
+
+livenessProbe:
+  enabled: false
+  initialDelaySeconds: 15
+  timeoutSeconds: 5
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
 
 externalService:
   enabled: false
@@ -71,8 +109,7 @@ serviceMonitor:
 
 redisExporter:
   enabled: true
-  image: quay.io/opstree/redis-exporter
-  tag: "v1.44.0"
+  image: quay.io/opstree/redis-exporter:"v1.44.0"
   imagePullPolicy: IfNotPresent
   resources: {}
     # requests:
@@ -81,6 +118,7 @@ redisExporter:
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
+  env : []
 
 sidecars: []
   # - name: "sidecar1"
@@ -97,11 +135,6 @@ sidecars: []
   #   - name: VAR_NAME
   #     value: "value1"
 
-# priorityClassName: "-"
-
-nodeSelector: {}
-  # memory: medium
-
 storageSpec:
   volumeClaimTemplate:
     spec:
@@ -110,6 +143,10 @@ storageSpec:
       resources:
         requests:
           storage: 1Gi
+  volumeMount : 
+    volume : []
+    mountPath : []
+  nodeConfVolume: true
   nodeConfVolumeClaimTemplate:
     spec:
       accessModes: ["ReadWriteOnce"]
@@ -122,21 +159,39 @@ podSecurityContext:
   runAsUser: 1000
   fsGroup: 1000
 
-affinity: {}
-  # nodeAffinity:
-  #   requiredDuringSchedulingIgnoredDuringExecution:
-  #     nodeSelectorTerms:
-  #     - matchExpressions:
-  #       - key: disktype
-  #         operator: In
-  #         values:
-  #         - ssd
+priorityClassName: ""
 
 # serviceAccountName: redis-sa
 
-# TLS:
-#   ca: ca.key
-#   cert: tls.crt
-#   key: tls.key
-#   secret:
-#     secretName: redis-tls-cert
+TLS:
+  enabled: false
+  ca: ca.key
+  cert: tls.crt
+  key: tls.key
+  secret:
+    secretName: redis-tls-cert
+
+acl : 
+  enabled: false
+  secret : ""
+
+initContainer:
+  enabled: false  
+  image: ""
+  imagePullPolicy: "IfNotPresent"
+  resources: {}
+    # requests:
+    #   memory: "64Mi"
+    #   cpu: "250m"
+    # limits:
+    #   memory: "128Mi"
+    #   cpu: "500m"
+  env: []
+  command: []
+  args: []
+
+serviceAccountName : "" # Default is Release Name
+
+env : []
+  # - name: VAR_NAME
+  #   value: "value1"

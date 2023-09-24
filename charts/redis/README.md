@@ -27,33 +27,146 @@ helm delete <my-release> --namespace <namespace>
 
 ## Parameters
 
-| **Name**                          | **Value**                      | **Description**                                                                               |
-|-----------------------------------|--------------------------------|-----------------------------------------------------------------------------------------------|
-| `imagePullSecrets`                | []                             | List of image pull secrets, in case redis image is getting pull from private registry         |
-| `redisStandalone.secretName`      | redis-secret                   | Name of the existing secret in Kubernetes                                                     |
-| `redisStandalone.secretKey`       | password                       | Name of the existing secret key in Kubernetes                                                 |
-| `redisStandalone.image`           | quay.io/opstree/redis          | Name of the redis image                                                                       |
-| `redisStandalone.tag`             | v6.2                           | Tag of the redis image                                                                        |
-| `redisStandalone.imagePullPolicy` | IfNotPresent                   | Image Pull Policy of the redis image                                                          |
-| `redisStandalone.serviceType`     | ClusterIP                      | Kubernetes service type for Redis                                                             |
-| `redisStandalone.resources`       | {}                             | Request and limits for redis statefulset                                                      |
-| `externalService.enabled`         | false                          | If redis service needs to be exposed using LoadBalancer or NodePort                           |
-| `externalService.annotations`     | {}                             | Kubernetes service related annotations                                                        |
-| `externalService.serviceType`     | NodePort                       | Kubernetes service type for exposing service, values - ClusterIP, NodePort, and LoadBalancer  |
-| `externalService.port`            | 6379                           | Port number on which redis external service should be exposed                                 |
-| `serviceMonitor.enabled`          | false                          | Servicemonitor to monitor redis with Prometheus                                               |
-| `serviceMonitor.interval`         | 30s                            | Interval at which metrics should be scraped.                                                  |
-| `serviceMonitor.scrapeTimeout`    | 10s                            | Timeout after which the scrape is ended                                                       |
-| `serviceMonitor.namespace`        | monitoring                     | Namespace in which Prometheus operator is running                                             |
-| `redisExporter.enabled`           | true                           | Redis exporter should be deployed or not                                                      |
-| `redisExporter.image`             | quay.io/opstree/redis-exporter | Name of the redis exporter image                                                              |
-| `redisExporter.tag`               | v6.2                           | Tag of the redis exporter image                                                               |
-| `redisExporter.imagePullPolicy`   | IfNotPresent                   | Image Pull Policy of the redis exporter image                                                 |
-| `redisExporter.env`               | []                             | Extra environment variables which needs to be added in redis exporter                         |
-| `sidecars`                        | []                             | Sidecar for redis pods                                                                        |
-| `nodeSelector`                    | {}                             | NodeSelector for redis statefulset                                                            |
-| `priorityClassName`               | ""                             | Priority class name for the redis statefulset                                                 |
-| `storageSpec`                     | {}                             | Storage configuration for redis setup                                                         |
-| `securityContext`                 | {}                             | Security Context for redis pods for changing system or kernel level parameters                |
-| `affinity`                        | {}                             | Affinity for node and pod for redis statefulset                                               |
-| `tolerations`                     | []                             | Tolerations for redis statefulset                                                             |
+The following table lists the configurable parameters of the chart and their default values.
+
+| Parameter                                              | Description                                 | Default                  |
+|--------------------------------------------------------|---------------------------------------------|--------------------------|
+| `redisStandalone.persistenceEnabled`                      | Persistence switch                          | `true`                   |
+| `redisStandalone.image`                                   | Redis image                                 | `quay.io/opstree/redis`  |
+| `redisStandalone.tag`                                     | Image tag                                   | `v7.0.12`                |
+| `redisStandalone.imagePullPolicy`                         | Image pull policy                           | `Always`                 |
+| `redisStandalone.redisSecret.secretName`                  | Redis secret name                           | `""`                     |
+| `redisStandalone.redisSecret.secretKey`                   | Redis secret key                            | `""`                     |
+| `redisStandalone.resources`                               | Resource limits and requests for Redis      | `{}`                     |
+| `labels`                                               | Custom labels                               | `{}`                     |
+| `annotations`                                          | Custom annotations                          | `{}`                     |
+| `externalConfig.enabled`                              | External configuration enablement           | `false`                  |
+| `externalConfig.data`                                 | External configuration data                 | (provided data)          |
+| `readinessProbe`...                                    | Readiness probe configurations              | (provided configurations)|
+| `livenessProbe`...                                     | Liveness probe configurations               | (provided configurations)|
+| `redisExporter`...                                     | Redis exporter configurations               | (provided configurations)|
+| `sidecars`                                            | Additional sidecar configurations           | `[]`                     |
+| `storageSpec`...                                       | Storage specifications                      | (provided configurations)|
+| `podSecurityContext.runAsUser`                        | User ID for the pod                         | `1000`                   |
+| `podSecurityContext.fsGroup`                          | File system group ID for the pod            | `1000`                   |
+| `priorityClassName`                                   | Name of the priority class                  | `""`                     |
+| `serviceAccountName`                                  | Name of the service account                 | `""` (Release Name)      |
+| `TLS`...                                               | TLS configurations                          | (provided configurations)|
+| `acl`...                                               | ACL configurations                          | (provided configurations)|
+| `initContainer`...                                     | Init container configurations               | (provided configurations)|
+| `env`...                                                 | List of environment variables               | `[]`                     |
+
+Note: Replace the "..." with specific details or additional rows as required.
+
+### Detailed Configurations
+
+#### Readiness Probe
+
+| Parameter                           | Description                          | Default                 |
+|-------------------------------------|--------------------------------------|-------------------------|
+| `readinessProbe.enabled`            | Enable the readiness probe           | `false`                 |
+| `readinessProbe.initialDelaySeconds`| Delay before probe starts            | `15`                    |
+| `readinessProbe.timeoutSeconds`     | Probe timeout                        | `5`                     |
+| `readinessProbe.periodSeconds`      | Interval between each probe          | `10`                    |
+| `readinessProbe.successThreshold`   | Threshold to consider the probe successful | `1`                  |
+| `readinessProbe.failureThreshold`   | Probe failure threshold              | `3`                     |
+
+#### Liveness Probe
+
+| Parameter                           | Description                          | Default                 |
+|-------------------------------------|--------------------------------------|-------------------------|
+| `livenessProbe.enabled`             | Enable the liveness probe            | `false`                 |
+| `livenessProbe.initialDelaySeconds` | Delay before probe starts            | `15`                    |
+| `livenessProbe.timeoutSeconds`      | Probe timeout                        | `5`                     |
+| `livenessProbe.periodSeconds`       | Interval between each probe          | `10`                    |
+| `livenessProbe.successThreshold`    | Threshold to consider the probe successful | `1`                  |
+| `livenessProbe.failureThreshold`    | Probe failure threshold              | `3`                     |
+
+#### External Service
+
+| Parameter                       | Description                       | Default                  |
+|---------------------------------|-----------------------------------|--------------------------|
+| `externalService.enabled`       | Enable external service           | `false`                  |
+| `externalService.serviceType`   | Service type (e.g., LoadBalancer) | `LoadBalancer`           |
+| `externalService.port`          | External service port             | `6379`                   |
+| `externalService.annotations`   | Service annotations               | `{}`                     |
+
+#### Service Monitor
+
+| Parameter                       | Description                       | Default                  |
+|---------------------------------|-----------------------------------|--------------------------|
+| `serviceMonitor.enabled`        | Enable service monitor            | `false`                  |
+| `serviceMonitor.interval`       | Scrape interval                   | `30s`                    |
+| `serviceMonitor.scrapeTimeout`  | Scrape timeout                    | `10s`                    |
+| `serviceMonitor.namespace`      | Namespace where monitor resides   | `monitoring`             |
+
+#### Redis Exporter
+
+| Parameter                            | Description                         | Default                        |
+|--------------------------------------|-------------------------------------|--------------------------------|
+| `redisExporter.enabled`              | Enable Redis exporter               | `true`                         |
+| `redisExporter.image`                | Redis exporter image                | `quay.io/opstree/redis-exporter:"v1.44.0"` |
+| `redisExporter.imagePullPolicy`      | Image pull policy                   | `IfNotPresent`                 |
+| `redisExporter.resources`            | Resource limits and requests         | `{}`                           |
+| `redisExporter.env`                  | List of environment variables        | `[]`                           |
+
+### Sidecars
+
+| Parameter  | Description                           | Default |
+|------------|---------------------------------------|---------|
+| `sidecars` | Additional sidecar configurations     | `[]`    |
+
+Example:
+
+```yaml
+sidecars:
+  - name: "sidecar1"
+    image: "image:1.0"
+    ...
+```
+
+#### Storage Specifications
+
+| Parameter                                   | Description                           | Default                     |
+|---------------------------------------------|---------------------------------------|-----------------------------|
+| `storageSpec`                               |Volume claim template details          | (provided configurations)   |
+| `storageSpec.volumeMount.volume`            | Volume name for the volume mount        | `[]`                      |
+| `storageSpec.volumeMount.mountPath`        | Mount paths                              |     []                    |
+| `storageSpec.nodeConfVolume`                  | Node configuration volume             | true                     |
+| `storageSpec.nodeConfVolumeClaimTemplate` |   Node volume claim template |            (provided configurations)   |
+
+#### TLS
+
+| Parameter                                   | Description                           | Default                     |
+|---------------------------------------------|---------------------------------------|-----------------------------|
+| `TLS.enabled`                               | Enable TLS                             | `false`                     |
+| `TLS.ca`                                    | CA key                                 | `ca.key`                    |
+| `TLS.cert`                                  | TLS certificate                        | `tls.crt`                   |
+| `TLS.key`                                   | TLS key                                | `tls.key`                   |
+| `TLS.secret.secretName`                     | Secret name                            | `redis-tls-cert`            |
+
+#### ACL
+
+| Parameter                                   | Description                           | Default                     |
+|---------------------------------------------|---------------------------------------|-----------------------------|
+| `acl.enabled`                               | Enable ACL                             | `false`                     |
+| `acl.secret`                                | Secret for ACL                         | `""`                        |
+
+#### Init Container
+
+| Parameter                                   | Description                           | Default                     |
+|---------------------------------------------|---------------------------------------|-----------------------------|
+| `initContainer.enabled`                     | Enable init container                  | `false`                     |
+| `initContainer.image`                       | Image for init container               | `""`                        |
+| `initContainer.imagePullPolicy`             | Image pull policy                      | `IfNotPresent`              |
+| `initContainer.resources`                   | Resource configurations                | `{}`                        |
+| `initContainer.env`                         | Environment variables                  | `[]`                        |
+| `initContainer.command`                     | Commands for init container            | `[]`                        |
+| `initContainer.args`                        | Arguments for the command              | `[]`                        |
+
+#### Environment Variables
+
+| Parameter                                   | Description                           | Default                     |
+|---------------------------------------------|---------------------------------------|-----------------------------|
+| `env`                                       | List of environment variables          | `[]`                        |
+efulset                                                             |

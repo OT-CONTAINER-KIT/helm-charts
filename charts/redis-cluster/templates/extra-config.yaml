@@ -1,5 +1,5 @@
 {{- if eq .Values.externalConfig.enabled true }}
----
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,6 +11,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/component: middleware
+    app.kubernetes.io/part-of : {{ .Release.Name }}
 data:
   redis-additional.conf: |
     {{ .Values.externalConfig.data | nindent 4 }}

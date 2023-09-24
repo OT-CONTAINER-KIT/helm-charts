@@ -10,6 +10,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/component: middleware
+    app.kubernetes.io/part-of : {{ .Release.Name }}
 {{- if .Values.labels }}
 {{- range $labelkey, $labelvalue := .Values.labels }}
     {{ $labelkey}}: {{ $labelvalue }}
@@ -23,16 +24,17 @@ spec:
   clusterSize: {{ .Values.redisCluster.clusterSize }}
   persistenceEnabled: {{ .Values.redisCluster.persistenceEnabled }}
   clusterVersion: {{ .Values.redisCluster.clusterVersion }}
+# Redis Leader Specs
   redisLeader:
-{{- if .Values.redisCluster.leader.affinity }}
-    affinity:
-{{ toYaml .Values.redisCluster.leader.affinity | nindent 6 }}
-{{- end }}
     replicas: {{ .Values.redisCluster.leader.replicas }}
 {{- if eq .Values.externalConfig.enabled true }}
     redisConfig:
       additionalRedisConfig: {{ .Release.Name }}-ext-config
 {{- end }}
+{{- if .Values.redisCluster.leader.affinity }}
+    affinity:
+{{ toYaml .Values.redisCluster.leader.affinity | nindent 6 }}
+{{- end }}
 {{- if eq .Values.pdb.enabled true }}
     pdb:
       enabled: {{ .Values.pdb.enabled }}
@@ -43,16 +45,56 @@ spec:
       minAvailable: {{ .Values.pdb.minAvailable }}
       {{- end  }}
 {{- end }}
-  redisFollower:
-{{- if .Values.redisCluster.follower.affinity }}
-    affinity:
-{{ toYaml .Values.redisCluster.follower.affinity | nindent 6 }}
+{{- if eq .Values.readinessProbe.enabled true }}
+    readinessProbe:
+      initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+      timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+      periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+      successThreshold: {{ .Values.readinessProbe.successThreshold }}
+      failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
 {{- end }}
+{{- if eq .Values.livenessProbe.enabled true }}
+    livenessProbe:
+      initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+      timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+      periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+      successThreshold: {{ .Values.livenessProbe.successThreshold }}
+      failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+{{- end }}
+{{- if .Values.redisCluster.leader.tolerations }}
+    tolerations:
+    {{- range .Values.redisCluster.leader.tolerations }}
+      - key: {{ .key | quote }}
+        operator: {{ .operator | quote }}
+        value: {{ .value | quote }}
+        effect: {{ .effect | quote }}
+    {{- end }}
+{{- end }}
+{{- if .Values.redisCluster.leader.nodeSelector }}
+    nodeSelector:
+    {{- range $key, $value := .Values.redisCluster.leader.nodeSelector }}
+      {{ $key | quote }}: {{ $value | quote }}
+    {{- end }}
+{{- end }}
+{{- if .Values.redisCluster.leader.securityContext }}
+{{- if ne (len .Values.redisCluster.leader.securityContext) 0 }}
+    securityContext: {{- toYaml .Values.redisCluster.leader.securityContext | nindent 2 }}
+{{- end }}
+{{- end }}
+{{- if ne .Values.redisCluster.leader.terminationGracePeriodSeconds 0 }}
+    terminationGracePeriodSeconds: {{ .Values.redisCluster.leader.terminationGracePeriodSeconds }}
+{{- end }}
+# Redis Follower Specs
+  redisFollower:
     replicas: {{ .Values.redisCluster.follower.replicas }}
 {{- if eq .Values.externalConfig.enabled true }}
     redisConfig:
       additionalRedisConfig: {{ .Release.Name }}-ext-config
 {{- end }}
+{{- if .Values.redisCluster.follower.affinity }}
+    affinity:
+{{ toYaml .Values.redisCluster.follower.affinity | nindent 6 }}
+{{- end }}
 {{- if eq .Values.pdb.enabled true }}
     pdb:
       enabled: {{ .Values.pdb.enabled }}
@@ -63,49 +105,144 @@ spec:
       minAvailable: {{ .Values.pdb.minAvailable }}
       {{- end  }}
 {{- end }}
+{{- if eq .Values.readinessProbe.enabled true }}
+    readinessProbe:
+      initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+      timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+      periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+      successThreshold: {{ .Values.readinessProbe.successThreshold }}
+      failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+{{- end }}
+{{- if eq .Values.livenessProbe.enabled true }}
+    livenessProbe:
+      initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+      timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+      periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+      successThreshold: {{ .Values.livenessProbe.successThreshold }}
+      failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+{{- end }}
+{{- if .Values.redisCluster.follower.tolerations }}
+    tolerations:
+    {{- range .Values.redisCluster.follower.tolerations }}
+      - key: {{ .key | quote }}
+        operator: {{ .operator | quote }}
+        value: {{ .value | quote }}
+        effect: {{ .effect | quote }}
+    {{- end }}
+{{- end }}
+{{- if .Values.redisCluster.follower.nodeSelector }}
+    nodeSelector:
+    {{- range $key, $value := .Values.redisCluster.follower.nodeSelector }}
+      {{ $key | quote }}: {{ $value | quote }}
+    {{- end }}
+{{- end }}
+{{- if .Values.redisCluster.follower.securityContext }}
+{{- if ne (len .Values.redisCluster.follower.securityContext) 0 }}
+    securityContext: {{- toYaml .Values.redisCluster.follower.securityContext | nindent 2 }}
+{{- end }}
+{{- end }}
+{{- if ne .Values.redisCluster.follower.terminationGracePeriodSeconds 0 }}
+    terminationGracePeriodSeconds: {{ .Values.redisCluster.follower.terminationGracePeriodSeconds }}
+{{- end }}
+# Redis Exporter Specs
   redisExporter:
     enabled: {{ .Values.redisExporter.enabled }}
-    image: "{{ .Values.redisExporter.image }}:{{ .Values.redisExporter.tag }}"
+    image: "{{ .Values.redisExporter.image }}"
     imagePullPolicy: "{{ .Values.redisExporter.imagePullPolicy }}"
     resources:
 {{ toYaml .Values.redisExporter.resources | indent 6 }}
+    {{- with .Values.redisExporter.env }}
+    env:
+{{ toYaml . | indent 6 }}
+    {{- end }}
+# Kubernetes Config Specs
   kubernetesConfig:
     image: "{{ .Values.redisCluster.image }}:{{ .Values.redisCluster.tag }}"
     imagePullPolicy: "{{ .Values.redisCluster.imagePullPolicy }}"
     resources:
 {{ toYaml .Values.redisCluster.resources | indent 6 }}
-{{- if .Values.redisCluster.redisSecret }}
+{{- with .Values.redisCluster.redisSecret }}
+{{- if and .secretName .secretKey }}
     redisSecret:
-      name: "{{ .Values.redisCluster.redisSecret.secretName }}"
-      key: "{{ .Values.redisCluster.redisSecret.secretKey }}"
+      name: "{{ .secretName | trim }}"
+      key: "{{ .secretKey | trim }}"
 {{- end }}
-{{- if .Values.storageSpec }}
-  storage:
-{{ toYaml .Values.storageSpec | indent 4 }}
 {{- end }}
-{{- if .Values.priorityClassName }}
-  priorityClassName: "{{ .Values.priorityClassName }}"
-{{- end }}
-{{- if .Values.nodeSelector }}
-  nodeSelector:
-{{ toYaml .Values.nodeSelector | indent 4 }}
+# Storage Specs
+{{- with .Values.storageSpec }}
+storage:
+  {{- if .volumeClaimTemplate }}
+  volumeClaimTemplate: 
+{{ toYaml .volumeClaimTemplate | indent 4 }}
+  {{- end }}
+  {{- if .volumeMount }}
+  volumeMount: 
+{{ toYaml .volumeMount | indent 4 }}
+  {{- end }}
+  {{- if .nodeConfVolume }}
+  nodeConfVolume: {{ .nodeConfVolume }}
+  {{- end }}
+  {{- if .nodeConfVolumeClaimTemplate }}
+  nodeConfVolumeClaimTemplate:
+{{ toYaml .nodeConfVolumeClaimTemplate | indent 4 }}
+  {{- end }}
 {{- end }}
 {{- if .Values.podSecurityContext }}
   podSecurityContext:
 {{ toYaml .Values.podSecurityContext | indent 4 }}
 {{- end }}
-{{- if .Values.tolerations }}
-  tolerations:
-{{ toYaml .Values.tolerations | indent 4 }}
+{{- if and .Values.priorityClassName (ne .Values.priorityClassName "") }}
+  priorityClassName: "{{ .Values.priorityClassName }}"
 {{- end }}
-{{- if .Values.TLS }}
-  TLS:
-{{ toYaml .Values.TLS | indent 4 }}
-{{- end}}
+# TLS Specs and acl specs 
+{{- if and .Values.TLS.enabled .Values.TLS.ca .Values.TLS.cert .Values.TLS.key .Values.TLS.secret.secretName }}
+TLS:
+  ca: {{ .Values.TLS.ca | quote }}
+  cert: {{ .Values.TLS.cert | quote }}
+  key: {{ .Values.TLS.key | quote }}
+  secret:
+    secretName: {{ .Values.TLS.secret.secretName | quote }}
+{{- end }}
+{{- if and .Values.acl.enabled .Values.acl.secret }}
+acl:
+  secret: {{ .Values.acl.secret | quote }}
+{{- end }}
+# Init Container Specs
+{{- with .Values.initContainer }}
+{{- if .enabled }}
+initContainer:
+  image: {{ .image | quote }}
+  imagePullPolicy: {{ .imagePullPolicy | default "IfNotPresent" }}
+  {{- with .resources }}
+  resources:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+  {{- with .env }}
+  env:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+  {{- with .command }}
+  command:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+  {{- with .args }}
+  args:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}
+# Sidecar Specs
 {{- if .Values.sidecars }}
   sidecars:
 {{ toYaml .Values.sidecars | indent 4 }}
 {{- end }}
-{{- if .Values.serviceAccountName }}
-  serviceAccountName: "{{ .Values.serviceAccountName }}"
+
+  serviceAccountName: "{{ .Release.Name }}"
+
+# Additional Env Variables
+{{- if .Values.env }}
+{{- if gt (len .Values.env) 0 }}
+  env:
+  {{ toYaml .Values.env | indent 2 }}
+{{- end }}
 {{- end }}
