@@ -16,10 +16,6 @@ metadata:
     {{ $labelkey}}: {{ $labelvalue }}
 {{- end }}
 {{- end }}
-# {{- with .Values.annotations }}
-#   annotations:
-# {{- toYaml . | nindent 4 }}
-# {{- end }}
 spec:
   kubernetesConfig:
     image: {{ .Values.redisStandalone.image }}:{{ .Values.redisStandalone.tag }}
