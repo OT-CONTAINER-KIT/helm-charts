@@ -16,22 +16,25 @@ metadata:
     {{ $labelkey}}: {{ $labelvalue }}
 {{- end }}
 {{- end }}
-{{- with .Values.annotations }}
-  annotations:
-{{- toYaml . | nindent 6 }}
-{{- end }}
+# {{- with .Values.annotations }}
+#   annotations:
+# {{- toYaml . | nindent 4 }}
+# {{- end }}
 spec:
   kubernetesConfig:
-    image: "{{ .Values.redisStandalone.image }}:{{ .Values.redisStandalone.tag }}"
+    image: {{ .Values.redisStandalone.image }}:{{ .Values.redisStandalone.tag }}
     imagePullPolicy: "{{ .Values.redisStandalone.imagePullPolicy }}"
-    resources:
-{{ toYaml .Values.redisStandalone.resources | indent 6 }}
+    {{- include "redisStandalone.resources" . | nindent 4 }}
 {{- with .Values.redisStandalone.redisSecret }}
 {{- if and .secretName .secretKey }}
     redisSecret:
       name: "{{ .secretName | trim }}"
       key: "{{ .secretKey | trim }}"
 {{- end }}
+{{- end }}
+{{- with .Values.redisStandalone.imagePullSecrets }}
+    imagePullSecrets:
+      {{- toYaml . | nindent 2 }}
 {{- end }}
 # Redis Exporter Specs
   redisExporter:
@@ -155,8 +158,8 @@ initContainer:
 {{ toYaml .Values.sidecars | indent 4 }}
 {{- end }}
   serviceAccountName: "{{ .Release.Name }}"
-{{- if ne .Values.redisCluster.leader.terminationGracePeriodSeconds 0 }}
-  terminationGracePeriodSeconds: {{ .Values.redisCluster.leader.terminationGracePeriodSeconds }}
+{{- if ne (int .Values.terminationGracePeriodSeconds) 0 }}
+  terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
 {{- end }}
 # Additional Env Variables
 {{- if .Values.env }}
