@@ -77,7 +77,7 @@ spec:
     securityContext: {{- toYaml .Values.redisCluster.leader.securityContext | nindent 2 }}
 {{- end }}
 {{- end }}
-{{- if ne .Values.redisCluster.leader.terminationGracePeriodSeconds 0 }}
+{{- if ne (int .Values.redisCluster.leader.terminationGracePeriodSeconds) 0 }}
     terminationGracePeriodSeconds: {{ .Values.redisCluster.leader.terminationGracePeriodSeconds }}
 {{- end }}
 # Redis Follower Specs
@@ -137,7 +137,7 @@ spec:
     securityContext: {{- toYaml .Values.redisCluster.follower.securityContext | nindent 2 }}
 {{- end }}
 {{- end }}
-{{- if ne .Values.redisCluster.follower.terminationGracePeriodSeconds 0 }}
+{{- if ne (int .Values.redisCluster.follower.terminationGracePeriodSeconds) 0 }}
     terminationGracePeriodSeconds: {{ .Values.redisCluster.follower.terminationGracePeriodSeconds }}
 {{- end }}
 # Redis Exporter Specs
