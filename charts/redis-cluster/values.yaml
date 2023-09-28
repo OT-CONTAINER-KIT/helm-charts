@@ -1,7 +1,7 @@
 ---
 redisCluster:
   clusterSize: 3
-  clusterVersion: v7
+  clusterVersion: "v7"
   persistenceEnabled: true
   image: quay.io/opstree/redis
   tag: v7.0.12

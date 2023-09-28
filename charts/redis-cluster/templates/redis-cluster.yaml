@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/component: middleware
-    app.kubernetes.io/part-of : {{ .Release.Name }}
+    app.kubernetes.io/part-of: {{ .Release.Name }}
 {{- if .Values.labels }}
 {{- range $labelkey, $labelvalue := .Values.labels }}
     {{ $labelkey}}: {{ $labelvalue }}
@@ -20,12 +20,11 @@ spec:
   clusterSize: {{ .Values.redisCluster.clusterSize }}
   persistenceEnabled: {{ .Values.redisCluster.persistenceEnabled }}
   clusterVersion: {{ .Values.redisCluster.clusterVersion }}
-# Redis Leader Specs
   redisLeader:
     replicas: {{ .Values.redisCluster.leader.replicas }}
 {{- if eq .Values.externalConfig.enabled true }}
     redisConfig:
-      additionalRedisConfig: {{ .Release.Name }}-ext-config
+      additionalRedisConfig: "{{ .Release.Name }}"-ext-config
 {{- end }}
 {{- if .Values.redisCluster.leader.affinity }}
     affinity:
@@ -80,7 +79,6 @@ spec:
 {{- if ne (int .Values.redisCluster.leader.terminationGracePeriodSeconds) 0 }}
     terminationGracePeriodSeconds: {{ .Values.redisCluster.leader.terminationGracePeriodSeconds }}
 {{- end }}
-# Redis Follower Specs
   redisFollower:
     replicas: {{ .Values.redisCluster.follower.replicas }}
 {{- if eq .Values.externalConfig.enabled true }}
@@ -140,7 +138,6 @@ spec:
 {{- if ne (int .Values.redisCluster.follower.terminationGracePeriodSeconds) 0 }}
     terminationGracePeriodSeconds: {{ .Values.redisCluster.follower.terminationGracePeriodSeconds }}
 {{- end }}
-# Redis Exporter Specs
   redisExporter:
     enabled: {{ .Values.redisExporter.enabled }}
     image: "{{ .Values.redisExporter.image }}"
@@ -151,7 +148,6 @@ spec:
     env:
 {{ toYaml . | indent 6 }}
     {{- end }}
-# Kubernetes Config Specs
   kubernetesConfig:
     image: "{{ .Values.redisCluster.image }}:{{ .Values.redisCluster.tag }}"
     imagePullPolicy: "{{ .Values.redisCluster.imagePullPolicy }}"
@@ -164,25 +160,24 @@ spec:
       key: "{{ .secretKey | trim }}"
 {{- end }}
 {{- end }}
-# Storage Specs
-{{- with .Values.storageSpec }}
-storage:
-  {{- if .volumeClaimTemplate }}
-  volumeClaimTemplate: 
-{{ toYaml .volumeClaimTemplate | indent 4 }}
+  {{- with .Values.storageSpec }}
+  storage:
+    {{- if .volumeClaimTemplate }}
+    volumeClaimTemplate: 
+  {{ toYaml .volumeClaimTemplate | indent 4 }}
+    {{- end }}
+    {{- if .volumeMount }}
+    volumeMount: 
+  {{ toYaml .volumeMount | indent 4 }}
+    {{- end }}
+    {{- if .nodeConfVolume }}
+    nodeConfVolume: {{ .nodeConfVolume }}
+    {{- end }}
+    {{- if .nodeConfVolumeClaimTemplate }}
+    nodeConfVolumeClaimTemplate:
+  {{ toYaml .nodeConfVolumeClaimTemplate | indent 4 }}
+    {{- end }}
   {{- end }}
-  {{- if .volumeMount }}
-  volumeMount: 
-{{ toYaml .volumeMount | indent 4 }}
-  {{- end }}
-  {{- if .nodeConfVolume }}
-  nodeConfVolume: {{ .nodeConfVolume }}
-  {{- end }}
-  {{- if .nodeConfVolumeClaimTemplate }}
-  nodeConfVolumeClaimTemplate:
-{{ toYaml .nodeConfVolumeClaimTemplate | indent 4 }}
-  {{- end }}
-{{- end }}
 {{- if .Values.podSecurityContext }}
   podSecurityContext:
 {{ toYaml .Values.podSecurityContext | indent 4 }}
@@ -190,52 +185,46 @@ storage:
 {{- if and .Values.priorityClassName (ne .Values.priorityClassName "") }}
   priorityClassName: "{{ .Values.priorityClassName }}"
 {{- end }}
-# TLS Specs and acl specs 
 {{- if and .Values.TLS.enabled .Values.TLS.ca .Values.TLS.cert .Values.TLS.key .Values.TLS.secret.secretName }}
-TLS:
-  ca: {{ .Values.TLS.ca | quote }}
-  cert: {{ .Values.TLS.cert | quote }}
-  key: {{ .Values.TLS.key | quote }}
-  secret:
-    secretName: {{ .Values.TLS.secret.secretName | quote }}
+  TLS:
+    ca: {{ .Values.TLS.ca | quote }}
+    cert: {{ .Values.TLS.cert | quote }}
+    key: {{ .Values.TLS.key | quote }}
+    secret:
+      secretName: {{ .Values.TLS.secret.secretName | quote }}
 {{- end }}
 {{- if and .Values.acl.enabled .Values.acl.secret }}
-acl:
-  secret: {{ .Values.acl.secret | quote }}
+  acl:
+    secret: {{ .Values.acl.secret | quote }}
 {{- end }}
-# Init Container Specs
 {{- with .Values.initContainer }}
 {{- if .enabled }}
-initContainer:
-  image: {{ .image | quote }}
-  imagePullPolicy: {{ .imagePullPolicy | default "IfNotPresent" }}
-  {{- with .resources }}
-  resources:
-{{ toYaml . | indent 4 }}
-  {{- end }}
-  {{- with .env }}
-  env:
-{{ toYaml . | indent 4 }}
-  {{- end }}
-  {{- with .command }}
-  command:
-{{ toYaml . | indent 4 }}
-  {{- end }}
-  {{- with .args }}
-  args:
-{{ toYaml . | indent 4 }}
-  {{- end }}
+  initContainer:
+    image: {{ .image | quote }}
+    imagePullPolicy: {{ .imagePullPolicy | default "IfNotPresent" }}
+    {{- with .resources }}
+    resources:
+  {{ toYaml . | indent 4 }}
+    {{- end }}
+    {{- with .env }}
+    env:
+  {{ toYaml . | indent 4 }}
+    {{- end }}
+    {{- with .command }}
+    command:
+  {{ toYaml . | indent 4 }}
+    {{- end }}
+    {{- with .args }}
+    args:
+  {{ toYaml . | indent 4 }}
+    {{- end }}
 {{- end }}
 {{- end }}
-# Sidecar Specs
 {{- if .Values.sidecars }}
   sidecars:
 {{ toYaml .Values.sidecars | indent 4 }}
 {{- end }}
-
   serviceAccountName: "{{ .Release.Name }}"
-
-# Additional Env Variables
 {{- if .Values.env }}
 {{- if gt (len .Values.env) 0 }}
   env:
