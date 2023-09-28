@@ -63,8 +63,6 @@ labels: {}
   # app: redis-cluster
   # release: redis-cluster
 
-annotations: {}
-  # iam.amazonaws.com/role: role-arn
 
 pdb:
   enabled: false

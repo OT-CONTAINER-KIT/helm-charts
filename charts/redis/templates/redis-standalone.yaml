@@ -18,9 +18,9 @@ metadata:
 {{- end }}
 spec:
   kubernetesConfig:
-    image: {{ .Values.redisStandalone.image }}:{{ .Values.redisStandalone.tag }}
+    image: "{{ .Values.redisStandalone.image }}:{{ .Values.redisStandalone.tag }}"
     imagePullPolicy: "{{ .Values.redisStandalone.imagePullPolicy }}"
-    {{- include "redisStandalone.resources" . | nindent 4 }}
+{{- include "redisStandalone.resources" . | nindent 4 }}
 {{- with .Values.redisStandalone.redisSecret }}
 {{- if and .secretName .secretKey }}
     redisSecret:
@@ -28,10 +28,12 @@ spec:
       key: "{{ .secretKey | trim }}"
 {{- end }}
 {{- end }}
+{{- if .Values.redisStandalone.imagePullSecrets -}}
 {{- with .Values.redisStandalone.imagePullSecrets }}
     imagePullSecrets:
       {{- toYaml . | nindent 2 }}
 {{- end }}
+{{- end -}}
 # Redis Exporter Specs
   redisExporter:
     enabled: {{ .Values.redisExporter.enabled }}
@@ -50,15 +52,15 @@ spec:
 {{- end }}
 # Storage Specs
 {{- with .Values.storageSpec }}
-storage:
-  {{- if .volumeClaimTemplate }}
-  volumeClaimTemplate: 
-{{ toYaml .volumeClaimTemplate | indent 4 }}
-  {{- end }}
-  {{- if .volumeMount }}
-  volumeMount: 
-{{ toYaml .volumeMount | indent 4 }}
-  {{- end }}
+  storage:
+    {{- if .volumeClaimTemplate }}
+    volumeClaimTemplate: 
+  {{ toYaml .volumeClaimTemplate | indent 4 }}
+    {{- end }}
+    {{- if .volumeMount }}
+    volumeMount: 
+  {{ toYaml .volumeMount | indent 4 }}
+    {{- end }}
 {{- end }}
 # Node Selector
 {{- if .Values.nodeSelector }}
@@ -96,16 +98,16 @@ storage:
 {{- end }}
 # TLS Specs and acl specs 
 {{- if and .Values.TLS.enabled .Values.TLS.ca .Values.TLS.cert .Values.TLS.key .Values.TLS.secret.secretName }}
-TLS:
-  ca: {{ .Values.TLS.ca | quote }}
-  cert: {{ .Values.TLS.cert | quote }}
-  key: {{ .Values.TLS.key | quote }}
-  secret:
-    secretName: {{ .Values.TLS.secret.secretName | quote }}
+  TLS:
+    ca: {{ .Values.TLS.ca | quote }}
+    cert: {{ .Values.TLS.cert | quote }}
+    key: {{ .Values.TLS.key | quote }}
+    secret:
+      secretName: {{ .Values.TLS.secret.secretName | quote }}
 {{- end }}
 {{- if and .Values.acl.enabled .Values.acl.secret }}
-acl:
-  secret: {{ .Values.acl.secret | quote }}
+  acl:
+    secret: {{ .Values.acl.secret | quote }}
 {{- end }}
 {{- if eq .Values.readinessProbe.enabled true }}
   readinessProbe:
@@ -127,25 +129,25 @@ acl:
 {{- with .Values.initContainer }}
 {{- if .enabled }}
 # Init Container Specs
-initContainer:
-  image: {{ .image | quote }}
-  imagePullPolicy: {{ .imagePullPolicy | default "IfNotPresent" }}
-  {{- with .resources }}
-  resources:
-{{ toYaml . | indent 4 }}
-  {{- end }}
-  {{- with .env }}
-  env:
-{{ toYaml . | indent 4 }}
-  {{- end }}
-  {{- with .command }}
-  command:
-{{ toYaml . | indent 4 }}
-  {{- end }}
-  {{- with .args }}
-  args:
-{{ toYaml . | indent 4 }}
-  {{- end }}
+  initContainer:
+    image: {{ .image | quote }}
+    imagePullPolicy: {{ .imagePullPolicy | default "IfNotPresent" }}
+    {{- with .resources }}
+    resources:
+  {{ toYaml . | indent 4 }}
+    {{- end }}
+    {{- with .env }}
+    env:
+  {{ toYaml . | indent 4 }}
+    {{- end }}
+    {{- with .command }}
+    command:
+  {{ toYaml . | indent 4 }}
+    {{- end }}
+    {{- with .args }}
+    args:
+  {{ toYaml . | indent 4 }}
+    {{- end }}
 {{- end }}
 {{- end }}
 # Sidecar Specs

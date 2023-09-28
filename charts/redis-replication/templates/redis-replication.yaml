@@ -16,10 +16,6 @@ metadata:
     {{ $labelkey}}: {{ $labelvalue }}
 {{- end }}
 {{- end }}
-{{- with .Values.annotations }}
-  annotations:
-{{- toYaml . | nindent 6 }}
-{{- end }}
 spec:
   clusterSize: {{ .Values.redisReplication.clusterSize }}  
   kubernetesConfig:

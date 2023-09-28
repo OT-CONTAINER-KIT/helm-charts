@@ -20,10 +20,6 @@ labels: {}
   # foo: bar
   # test: echo
 
-annotations: {}
-  # foo: bar
-  # test: echo
-
 externalConfig:
   enabled: false
   data: |
