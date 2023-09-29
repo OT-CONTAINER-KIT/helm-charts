@@ -31,14 +31,16 @@ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/
 Replace `<YourCertSecretName>` and `<YourPrivateKey>` with your specific values.
 
 ```bash
-helm install <redis-operator> ot-helm/redis-operator --version=0.15.5 --appVersion=0.15.1 --set certificate.secretName=<YourCertSecretName> --set certManager.enabled=true --namespace <redis-operator> --create-namespace
+helm install <redis-operator> ot-helm/redis-operator --version=0.15.5 --appVersion=0.15.1 --set certificate.secretName=<YourCertSecretName> --set certmanager.enabled=true --set redisOperator.webhook=true --namespace <redis-operator> --create-namespace
 ```
 
 > Note: If `certificate.secretName` is not provided, the operator will generate a self-signed certificate and use it for webhook server.
 ---
-> Note : If you want to disable the webhook you have to pass the `--set webhook=false` while installing the redis-operator.
+> Note : If you want to disable the webhook you have to pass the `--set webhook=false` and `--set certmanager.enabled=false`  while installing the redis-operator.
 
 ### 4. Patch the CA Bundle (if using cert-manager)
+
+Cert-manager injects the CA bundle into the webhook configuration.
 
 ```bash
 kubectl patch crd redis.redis.redis.opstreelabs.in -p '{"metadata":{"annotations":{"cert-manager.io/inject-ca-from":"<redis-operator>/<serving-cert>"}}}'
@@ -83,7 +85,7 @@ kubectl create secret tls <webhook-server-cert> --key tls.key --cert tls.crt -n 
 | `redisOperator.extraArgs`             | Additional arguments for the operator | `{}`                                                         |
 | `redisOperator.watch_namespace`       | Namespace for the operator to watch  | `""`                                                         |
 | `redisOperator.env`                  | Environment variables for the operator | `{}`                                                         |
-| `redisOperator.webhook`              | Enable webhook                     | `true`                                                     |
+| `redisOperator.webhook`              | Enable webhook                     | `false`                                                     |
 | `resources.limits.cpu`              | CPU limit                          | `500m`                                                      |
 | `resources.limits.memory`           | Memory limit                       | `500Mi`                                                     |
 | `resources.requests.cpu`            | CPU request                        | `500m`                                                      |
@@ -97,7 +99,7 @@ kubectl create secret tls <webhook-server-cert> --key tls.key --cert tls.crt -n 
 | `issuer.email`                      | Issuer email                       | `shubham.gupta@opstree.com`                                  |
 | `issuer.server`                     | Issuer server URL                  | `https://acme-v02.api.letsencrypt.org/directory`            |
 | `issuer.privateKeySecretName`       | Private key secret name            | `letsencrypt-prod`                                           |
-| `certManager.enabled`              | Enable cert-manager                | `true`                                                       |
+| `certManager.enabled`              | Enable cert-manager                | `false`                                                       |
 
 ## Scheduling Parameters
 

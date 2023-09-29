@@ -16,3 +16,19 @@ acme:
 selfSigned: {}
 {{- end }}
 {{- end -}}
+
+{{/* Common labels */}}
+{{- define "redisOperator.labels" -}}
+app.kubernetes.io/name: {{ .Values.redisOperator.name }}
+helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/version: {{ .Chart.AppVersion }}
+app.kubernetes.io/component: operator
+app.kubernetes.io/part-of: {{ .Release.Name }}
+{{- end }}
+
+{{/* Selector labels */}}
+{{- define "redisOperator.selectorLabels" -}}
+name: {{ .Values.redisOperator.name }}
+{{- end }}
