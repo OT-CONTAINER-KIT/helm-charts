@@ -17,9 +17,13 @@ app.kubernetes.io/component: middleware
 
 {{/* Helper for Redis Cluster (leader & follower) */}}
 {{- define "redis.role" -}}
-{{- with .affinity }}
+{{- if .affinity }}
 affinity:
-  {{- toYaml . | nindent 4 }}
+  {{- toYaml .affinity | nindent 2 }}
+{{- end }}
+{{- if .tolerations }}
+tolerations:
+  {{- toYaml .tolerations | nindent 2 }}
 {{- end }}
 {{- if .pdb.enabled  }}
 pdb:
@@ -30,6 +34,10 @@ pdb:
 {{- if .nodeSelector }}
 nodeSelector:
   {{- toYaml .nodeSelector | nindent 2 }}
+{{- end }}
+{{- if .securityContext }}
+securityContext:
+  {{- toYaml .securityContext | nindent 2 }}
 {{- end }}
 {{- end -}}
 
