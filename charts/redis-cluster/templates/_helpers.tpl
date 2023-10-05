@@ -23,9 +23,9 @@ affinity:
 {{- end }}
 {{- if .pdb.enabled  }}
 pdb:
-  enabled: "{{ .pdb.enabled | quote }}"
+  enabled: {{ .pdb.enabled }}
   maxUnavailable: {{ .pdb.maxUnavailable }}
-  minAvailable: {{ .pdb.minUnavailable }}
+  minAvailable: {{ .pdb.minAvailable }}
 {{- end }}
 {{- if .nodeSelector }}
 nodeSelector:
