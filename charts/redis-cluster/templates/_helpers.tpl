@@ -29,7 +29,7 @@ pdb:
 {{- end }}
 {{- if .nodeSelector }}
 nodeSelector:
-  {{- toYaml .nodeSelector | nindent 4 }}
+  {{- toYaml .nodeSelector | nindent 2 }}
 {{- end }}
 {{- end -}}
 
