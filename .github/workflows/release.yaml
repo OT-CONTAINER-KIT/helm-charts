@@ -37,6 +37,14 @@ jobs:
       - name: Update Chart Dependencies for redis-operator
         run: helm dependency update charts/redis-operator
 
+      - name: Package and Release Charts
+        run: |
+          CHARTS=("elasticsearch" "k8s-vault-webhook" "logging-operator" "mongodb" "mongodb-cluster" "mongodb-operator" "mysql" "redis" "redis-cluster" "redis-operator" "redis-replication" "redis-sentinel" "fluentd" "kibana")
+          for CHART in "${CHARTS[@]}"; do
+              echo "Packaging $CHART..."
+              helm package charts/$CHART
+          done
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.5.0
         env:
