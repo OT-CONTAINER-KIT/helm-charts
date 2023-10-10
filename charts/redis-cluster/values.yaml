@@ -41,7 +41,7 @@ redisCluster:
     pdb:
       enabled: false
       maxUnavailable: 1
-      minUnavailable: 1
+      minAvailable: 1
 
   follower:
     replicas: 3
@@ -66,7 +66,7 @@ redisCluster:
     pdb:
       enabled: false
       maxUnavailable: 1
-      minUnavailable: 1
+      minAvailable: 1
 
 labels: {}
 #   foo: bar
