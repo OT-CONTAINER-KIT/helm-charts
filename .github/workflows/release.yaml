@@ -37,6 +37,9 @@ jobs:
       - name: Update Chart Dependencies for redis-operator
         run: helm dependency update charts/redis-operator
 
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.4.0
+
       - name: List Changed Charts
         id: list-changed
         run: |
