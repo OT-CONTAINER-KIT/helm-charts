@@ -71,7 +71,7 @@ spec:
     secret:
       secretName: {{ .Values.acl.secret.secretName | quote }}
   {{- end }}
-  {{- if and .Values.sidecars (ne .Values.sidecars.name "") (ne .Values.sidecars.image) }}
+  {{- if and .Values.sidecars (ne .Values.sidecars.name "") (ne .Values.sidecars.image "") }}
   sidecars: {{ include "sidecar.properties" | nindent 4 }}
   {{- end }}
   {{- if and .Values.initContainer .Values.initContainer.enabled (ne .Values.initContainer.image "") }}
