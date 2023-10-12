@@ -2,11 +2,13 @@
 redisSentinel:
   clusterSize: 3
   image: quay.io/opstree/redis-sentinel
-  tag: v7.0.7
+  tag: v7.0.12
   imagePullPolicy: IfNotPresent
-  # redisSecret:
-  #   secretName: redis-secret
-  #   secretKey: password
+  imagePullSecrets: []
+    # - name:  Secret with Registry credentials
+  redisSecret:
+    secretName: ""
+    secretKey: ""
   serviceType: ClusterIP
   resources: {}
     # requests:
@@ -15,19 +17,21 @@ redisSentinel:
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
+  ignoreAnnotations: []
+    # - "redis.opstreelabs.in/ignore"
 
-# labels:
+labels: {}
 #   foo: bar
 #   test: echo
 
 redisSentinelConfig:
   redisReplicationName: "redis-replication"
-  # masterGroupName:
-  # redisPort:
-  # quorum:
-  # parallelSyncs:
-  # failoverTimeout:
-  # downAfterMilliseconds:
+  masterGroupName: ""
+  redisPort: ""
+  quorum: ""
+  parallelSyncs: ""
+  failoverTimeout: ""
+  downAfterMilliseconds: ""
 
 externalConfig:
   enabled: false
@@ -49,51 +53,53 @@ serviceMonitor:
   scrapeTimeout: 10s
   namespace: monitoring
 
-# redisExporter:
-#   enabled: false
-#   image: quay.io/opstree/redis-exporter
-#   tag: "v1.44.0"
-#   imagePullPolicy: IfNotPresent
-#   resources: {}
+redisExporter:
+  enabled: false
+  image: quay.io/opstree/redis-exporter
+  tag: "v1.44.0"
+  imagePullPolicy: IfNotPresent
+  resources: {}
     # requests:
     #   cpu: 100m
     #   memory: 128Mi
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
-  # env:
-  # - name: REDIS_EXPORTER_INCL_SYSTEM_METRICS
-  #   value: "true"
-  # - name: UI_PROPERTIES_FILE_NAME
-  #   valueFrom:
-  #     configMapKeyRef:
-  #       name: game-demo
-  #       key: ui_properties_file_name
-  # - name: SECRET_USERNAME
-  #   valueFrom:
-  #     secretKeyRef:
-  #       name: mysecret
-  #       key: username
+  env: []
+    # - name: VAR_NAME
+    #   value: "value1"
 
-sidecars: []
-  # - name: "sidecar1"
-  #   image: "image:1.0"
-  #   imagePullPolicy: Always
-  #   resources:
-  #     limits:
-  #       cpu: 50m
-  #       memory: 64Mi
-  #     requests:
-  #       cpu: 10m
-  #       memory: 32M
-  #   env:
-  #   - name: VAR_NAME
-  #     value: "value1"
+initContainer:
+  enabled: false  
+  image: ""
+  imagePullPolicy: "IfNotPresent"
+  resources: {}
+    # requests:
+    #   memory: "64Mi"
+    #   cpu: "250m"
+    # limits:
+    #   memory: "128Mi"
+    #   cpu: "500m"
+  env: []
+  command: []
+  args: []
 
-# priorityClassName: "-"
+sidecars:
+  name: ""
+  image: ""
+  imagePullPolicy: "IfNotPresent"
+  resources:
+    limits:
+      cpu: "100m"
+      memory: "128Mi"
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+  env: []
+    # - name: MY_ENV_VAR
+    #   value: "my-env-var-value"
 
-# imagePullSecrets:
-#  - name: regcred
+priorityClassName: ""
 
 nodeSelector: {}
   # memory: medium
@@ -112,6 +118,8 @@ podSecurityContext:
   runAsUser: 1000
   fsGroup: 1000
 
+securityContext : {}
+
 affinity: {}
   # nodeAffinity:
   #   requiredDuringSchedulingIgnoredDuringExecution:
@@ -122,11 +130,25 @@ affinity: {}
   #         values:
   #         - ssd
 
-# serviceAccountName: redis-sa
+tolerations: []
+  # - key: "key"
+  #   operator: "Equal"
+  #   value: "value"
+  #   effect: "NoSchedule"
 
-# TLS:
-#   ca: ca.key
-#   cert: tls.crt
-#   key: tls.key
-#   secret:
-#     secretName: redis-tls-cert
+serviceAccountName : ""
+
+TLS:
+  ca: ca.key
+  cert: tls.crt
+  key: tls.key
+  secret:
+    secretName: ""
+
+acl : 
+  secret : 
+    secretName: ""
+
+env : []
+  # - name: VAR_NAME
+  #   value: "value1"
