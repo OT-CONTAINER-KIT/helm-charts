@@ -32,7 +32,7 @@ jobs:
         do
           chart_version=$(yq e .version ./charts/$dir/Chart.yaml)
           echo "Installing $dir chart with version $chart_version..."
-          helm install $dir ./charts/$dir/ --version $chart_version
+          helm install $dir ./charts/$dir/
           helm test $dir
         done
         echo "Listing installed Helm charts..."
