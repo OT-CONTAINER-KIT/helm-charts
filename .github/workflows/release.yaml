@@ -48,7 +48,7 @@ jobs:
       - name: List Changed Charts
         id: list-changed
         run: |
-          changed_charts=$(ct list-changed --debug)
+          changed_charts=$(ct list-changed --config ct.yaml)
           echo "Changed charts: $changed_charts"
           echo "::set-output name=changed_charts::$changed_charts"
           
