@@ -27,12 +27,15 @@ jobs:
     - name: Install and test Redis Related Helm charts
       run: |
         kubectl cluster-info --context kind-kind
-        for CHART_DIR in $(find charts -maxdepth 1 -type d | tail -n +2 | grep "^charts/redis")
+        chart_dirs=("redis-operator" "redis" "redis-cluster" "redis-replication" "redis-sentinel")
+        for dir in "${chart_dirs[@]}"
         do
-          chart_version=$(yq e .version $CHART_DIR/Chart.yaml)
+          if [[ -f ./charts/$dir/Chart.yaml ]]; then
+            helm dependency update ./charts/$dir/
+          fi
+          chart_version=$(yq e .version ./charts/$dir/Chart.yaml)
           echo "Installing $dir chart with version $chart_version..."
-          helm install $(basename $CHART_DIR) $CHART_DIR/
+          helm install $dir ./charts/$dir/
           helm test $dir
         done
         echo "Listing installed Helm charts..."
-        helm ls

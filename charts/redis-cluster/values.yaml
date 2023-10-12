@@ -105,6 +105,9 @@ redisExporter:
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
+  env: []
+    # - name: VAR_NAME
+    #   value: "value1"
 
 sidecars:
   name: ""

@@ -30,6 +30,9 @@ spec:
     {{- if .Values.redisExporter.resources}}
     resources: {{ toYaml .Values.redisExporter.resources | nindent 6 }}
     {{- end }}
+    {{- if .Values.redisExporter.env }}
+    env: {{ toYaml .Values.redisExporter.env | nindent 6 }}
+    {{- end }}
     
   kubernetesConfig:
     image: "{{ .Values.redisCluster.image }}:{{ .Values.redisCluster.tag }}"
@@ -37,7 +40,7 @@ spec:
     {{- if .Values.redisCluster.imagePullSecrets}}
     imagePullSecrets: {{ toYaml .Values.redisCluster.imagePullSecrets | nindent 4 }}
     {{- end }}
-    {{- if .Values.redisExporter.resources}}
+    {{- if .Values.redisCluster.resources}}
     resources: {{ toYaml .Values.redisCluster.resources | nindent 6 }}
     {{- end }}
     {{- if and .Values.redisCluster.redisSecret.secretName .Values.redisCluster.redisSecret.secretKey }}
@@ -68,11 +71,11 @@ spec:
     secret:
       secretName: {{ .Values.acl.secret.secretName | quote }}
   {{- end }}
-  {{- if and .Values.sidecars (ne .Values.sidecars.name "") (ne .Values.sidecars.image) }}
+  {{- if and .Values.sidecars (ne .Values.sidecars.name "") (ne .Values.sidecars.image "") }}
   sidecars: {{ include "sidecar.properties" | nindent 4 }}
   {{- end }}
-  {{- if and .Values.initContainers .Values.initContainer.enabled (ne .Values.initContainers.name "") (ne .Values.initContainers.image) }}
-  initContainers: {{ include "initContainer.properties" | nindent 4 }}
+  {{- if and .Values.initContainer .Values.initContainer.enabled (ne .Values.initContainer.image "") }}
+  initContainer: {{ include "initContainer.properties" | nindent 4 }}
   {{- end }}
   {{- if .Values.env }}
   env: {{ toYaml .Values.env | nindent 4 }}
