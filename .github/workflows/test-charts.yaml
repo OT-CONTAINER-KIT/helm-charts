@@ -30,6 +30,9 @@ jobs:
         chart_dirs=("redis-operator" "redis" "redis-cluster" "redis-replication" "redis-sentinel")
         for dir in "${chart_dirs[@]}"
         do
+          if [[ -f ./charts/$dir/Chart.yaml ]]; then
+            helm dependency update ./charts/$dir/
+          fi
           chart_version=$(yq e .version ./charts/$dir/Chart.yaml)
           echo "Installing $dir chart with version $chart_version..."
           helm install $dir ./charts/$dir/
