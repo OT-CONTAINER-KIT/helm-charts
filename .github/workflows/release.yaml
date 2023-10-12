@@ -39,10 +39,10 @@ jobs:
 
       - name: Package and Release Charts
         run: |
-          CHARTS=("elasticsearch" "k8s-vault-webhook" "logging-operator" "mongodb" "mongodb-cluster" "mongodb-operator" "mysql" "redis" "redis-cluster" "redis-operator" "redis-replication" "redis-sentinel" "fluentd" "kibana")
-          for CHART in "${CHARTS[@]}"; do
+          for CHART_DIR in $(find charts -maxdepth 1 -type d | tail --lines +2); do
+              CHART=$(basename $CHART_DIR)
               echo "Packaging $CHART..."
-              helm package charts/$CHART
+              helm package $CHART_DIR
           done
 
       - name: Run chart-releaser
