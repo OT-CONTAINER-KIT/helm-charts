@@ -74,8 +74,8 @@ spec:
   {{- if and .Values.sidecars (ne .Values.sidecars.name "") (ne .Values.sidecars.image) }}
   sidecars: {{ include "sidecar.properties" | nindent 4 }}
   {{- end }}
-  {{- if and .Values.initContainers .Values.initContainer.enabled (ne .Values.initContainers.image "") }}
-  initContainers: {{ include "initContainer.properties" | nindent 4 }}
+  {{- if and .Values.initContainer .Values.initContainer.enabled (ne .Values.initContainer.image "") }}
+  initContainer: {{ include "initContainer.properties" | nindent 4 }}
   {{- end }}
   {{- if .Values.env }}
   env: {{ toYaml .Values.env | nindent 4 }}
