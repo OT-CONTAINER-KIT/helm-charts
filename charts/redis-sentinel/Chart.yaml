@@ -1,7 +1,7 @@
 apiVersion: v2
 name: redis-sentinel
 description: Provides easy redis setup definitions for Kubernetes services, and deployment.
-version: 0.15.8
+version: 0.15.9
 appVersion: "0.15.1"
 home: https://github.com/ot-container-kit/redis-operator
 sources:
