@@ -37,6 +37,13 @@ jobs:
       - name: Update Chart Dependencies for redis-operator
         run: helm dependency update charts/redis-operator
 
+      - name: List Changed Charts
+        id: list-changed
+        run: |
+          changed_charts=$(ct list-changed)
+          echo "Changed charts: $changed_charts"
+          echo "::set-output name=changed_charts::$changed_charts"
+          
       - name: Package and Release Charts
         run: |
           for CHART_DIR in $(find charts -maxdepth 1 -type d | tail --lines +2); do
