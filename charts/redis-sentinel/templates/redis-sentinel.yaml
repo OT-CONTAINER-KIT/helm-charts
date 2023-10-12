@@ -52,9 +52,6 @@ spec:
     redisConfig:
       additionalRedisConfig: "{{ .Release.Name }}-ext-config"
   {{- end }}
-  {{- if .Values.storageSpec }}
-  storage: {{ toYaml .Values.storageSpec | nindent 4 }}
-  {{- end }}
   {{- if .Values.nodeSelector }}
   nodeSelector: {{ toYaml .Values.nodeSelector | nindent 4 }}
   {{- end }}

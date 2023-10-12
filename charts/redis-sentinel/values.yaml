@@ -104,16 +104,6 @@ priorityClassName: ""
 nodeSelector: {}
   # memory: medium
 
-storageSpec:
-  volumeClaimTemplate:
-    spec:
-      # storageClassName: standard
-      accessModes: ["ReadWriteOnce"]
-      resources:
-        requests:
-          storage: 1Gi
-  #   selector: {}
-
 podSecurityContext:
   runAsUser: 1000
   fsGroup: 1000
