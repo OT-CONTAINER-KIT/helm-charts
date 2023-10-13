@@ -50,7 +50,7 @@ jobs:
         run: |
           changed_charts=$(ct list-changed --config ct.yaml)
           echo "Changed charts: $changed_charts"
-          echo "::set-output name=changed_charts::$changed_charts"
+          echo "changed_charts=$changed_charts" >> $GITHUB_ENV
           
       - name: Package and Release Charts
         run: |
