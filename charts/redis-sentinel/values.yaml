@@ -136,7 +136,7 @@ TLS:
     secretName: ""
 
 acl:
-  secret: 
+  secret:
     secretName: ""
 
 env: []
