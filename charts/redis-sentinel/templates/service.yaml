@@ -20,7 +20,7 @@ spec:
   selector:
     app: {{ .Release.Name }}
     redis_setup_type: sentinel
-    role: sentinle
+    role: sentinel
   ports:
     - protocol: TCP
       port: {{ .Values.externalService.port }}
