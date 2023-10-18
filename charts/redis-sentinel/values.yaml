@@ -1,5 +1,6 @@
 ---
 redisSentinel:
+  name: ""
   clusterSize: 3
   image: quay.io/opstree/redis-sentinel
   tag: v7.0.12
@@ -19,6 +20,9 @@ redisSentinel:
     #   memory: 128Mi
   ignoreAnnotations: []
     # - "redis.opstreelabs.in/ignore"
+
+# Overwite name for resources
+# name: ""
 
 labels: {}
 #   foo: bar

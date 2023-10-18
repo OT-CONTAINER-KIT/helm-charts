@@ -2,7 +2,7 @@
 apiVersion: redis.redis.opstreelabs.in/v1beta2
 kind: RedisCluster
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Values.redisCluster.name | default .Release.Name }}
   labels: {{- include "common.labels" . | nindent 4 }}
 spec:
   clusterSize: {{ .Values.redisCluster.clusterSize }}
@@ -13,14 +13,14 @@ spec:
     replicas: {{ .Values.redisCluster.leader.replicas }}
   {{- if .Values.externalConfig.enabled }}
     redisConfig:
-      additionalRedisConfig: "{{ .Release.Name }}-ext-config"
+      additionalRedisConfig: "{{ .Values.redisCluster.name | default .Release.Name }}-ext-config"
   {{- end }}
   
   redisFollower: {{-  include "redis.role" .Values.redisCluster.follower | nindent 4 }}
     replicas: {{ .Values.redisCluster.follower.replicas }}
   {{- if .Values.externalConfig.enabled }}
     redisConfig:
-      additionalRedisConfig: "{{ .Release.Name }}-ext-config"
+      additionalRedisConfig: "{{ .Values.redisCluster.name | default .Release.Name }}-ext-config"
   {{- end }}
 
   redisExporter:
