@@ -140,6 +140,6 @@ acl:
   secret:
     secretName: ""
 
-env : []
+env: []
   # - name: VAR_NAME
   #   value: "value1"

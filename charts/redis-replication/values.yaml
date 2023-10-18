@@ -131,7 +131,7 @@ tolerations: []
   #   value: "value"
   #   effect: "NoSchedule"
 
-serviceAccountName : ""
+serviceAccountName: ""
 
 TLS:
   ca: ca.key
