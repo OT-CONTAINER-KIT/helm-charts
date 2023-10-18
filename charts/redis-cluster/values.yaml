@@ -38,7 +38,7 @@ redisCluster:
       #   effect: "NoSchedule"
     nodeSelector: null
       # memory: medium
-    securityContext : {}
+    securityContext: {}
     pdb:
       enabled: false
       maxUnavailable: 1
@@ -63,7 +63,7 @@ redisCluster:
       #   effect: "NoSchedule"
     nodeSelector: null
       # memory: medium
-    securityContext : {}
+    securityContext: {}
     pdb:
       enabled: false
       maxUnavailable: 1
@@ -126,7 +126,7 @@ sidecars:
     #   value: "my-env-var-value"
 
 initContainer:
-  enabled: false  
+  enabled: false
   image: ""
   imagePullPolicy: "IfNotPresent"
   resources: {}
@@ -173,12 +173,12 @@ TLS:
   secret:
     secretName: ""
 
-acl : 
-  secret : 
+acl:
+  secret:
     secretName: ""
 
-env : []
+env: []
   # - name: VAR_NAME
   #   value: "value1"
 
-serviceAccountName : ""
+serviceAccountName: ""
