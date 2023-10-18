@@ -68,6 +68,9 @@ redisCluster:
       maxUnavailable: 1
       minAvailable: 1
 
+# Overwite name for resources
+# name: ""
+
 labels: {}
 #   foo: bar
 #   test: echo

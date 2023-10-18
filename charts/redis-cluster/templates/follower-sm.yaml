@@ -3,18 +3,18 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ .Release.Name }}-follower-prometheus-monitoring
+  name: {{ .Values.name | default .Release.Name }}-follower-prometheus-monitoring
   labels:
-    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ .Values.name | default .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Values.name | default .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/component: middleware
 spec:
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-follower
+      app: {{ .Values.name | default .Release.Name }}-follower
       redis_setup_type: cluster
       role: follower
   endpoints:

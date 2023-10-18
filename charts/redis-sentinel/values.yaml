@@ -20,6 +20,9 @@ redisSentinel:
   ignoreAnnotations: []
     # - "redis.opstreelabs.in/ignore"
 
+# Overwite name for resources
+# name: ""
+
 labels: {}
 #   foo: bar
 #   test: echo
