@@ -2,7 +2,7 @@
 apiVersion: redis.redis.opstreelabs.in/v1beta2
 kind: Redis
 metadata:
-  name: {{ .Release.Name }}
+  name:  {{ .Values.redisStandalone.name | default .Release.Name }}
   labels: {{- include "common.labels" . | nindent 4 }}
 spec:
   kubernetesConfig:
@@ -36,7 +36,7 @@ spec:
   
   {{- if .Values.externalConfig.enabled }}
     redisConfig:
-      additionalRedisConfig: "{{ .Release.Name }}-ext-config"
+      additionalRedisConfig: "{{ .Values.redisStandalone.name | default .Release.Name }}-ext-config"
   {{- end }}
   {{- if .Values.storageSpec }}
   storage: {{ toYaml .Values.storageSpec | nindent 4 }}

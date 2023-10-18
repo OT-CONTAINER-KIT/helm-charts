@@ -1,5 +1,6 @@
 ---
 redisReplication:
+  name: ""
   clusterSize: 3
   image: quay.io/opstree/redis
   tag: v7.0.12
@@ -19,6 +20,9 @@ redisReplication:
     #   memory: 128Mi
   ignoreAnnotations: []
     # - "redis.opstreelabs.in/ignore"
+
+# Overwite name for resources
+# name: ""
 
 labels: {}
 #   foo: bar
@@ -61,7 +65,7 @@ redisExporter:
     #   value: "value1"
 
 initContainer:
-  enabled: false  
+  enabled: false
   image: ""
   imagePullPolicy: "IfNotPresent"
   resources: {}
@@ -109,7 +113,7 @@ podSecurityContext:
   runAsUser: 1000
   fsGroup: 1000
 
-securityContext : {}
+securityContext: {}
 
 affinity: {}
   # nodeAffinity:
@@ -127,7 +131,7 @@ tolerations: []
   #   value: "value"
   #   effect: "NoSchedule"
 
-serviceAccountName : ""
+serviceAccountName: ""
 
 TLS:
   ca: ca.key
@@ -136,10 +140,10 @@ TLS:
   secret:
     secretName: ""
 
-acl : 
-  secret : 
+acl:
+  secret:
     secretName: ""
 
-env : []
+env: []
   # - name: VAR_NAME
   #   value: "value1"

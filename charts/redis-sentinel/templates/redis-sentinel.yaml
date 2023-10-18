@@ -2,7 +2,7 @@
 apiVersion: redis.redis.opstreelabs.in/v1beta2
 kind: RedisSentinel
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Values.redisSentinel.name | default .Release.Name }}
   labels: {{- include "common.labels" . | nindent 4 }}
 spec:
   clusterSize: {{ .Values.redisSentinel.clusterSize }}
@@ -16,7 +16,7 @@ spec:
     failoverTimeout: {{ .Values.redisSentinelConfig.failoverTimeout | default "180000" | quote}}
     downAfterMilliseconds:  {{ .Values.redisSentinelConfig.downAfterMilliseconds | default "30000" | quote}}
     {{- if eq .Values.externalConfig.enabled true }}
-    additionalSentinelConfig: {{ .Release.Name }}-ext-config
+    additionalSentinelConfig: {{ .Values.redisSentinel.name | default .Release.Name }}-ext-config
     {{- end }}
 
   kubernetesConfig:
@@ -50,7 +50,7 @@ spec:
   
   {{- if .Values.externalConfig.enabled }}
     redisConfig:
-      additionalRedisConfig: "{{ .Release.Name }}-ext-config"
+      additionalRedisConfig: "{{ .Values.redisSentinel.name | default .Release.Name }}-ext-config"
   {{- end }}
   {{- if .Values.nodeSelector }}
   nodeSelector: {{ toYaml .Values.nodeSelector | nindent 4 }}
