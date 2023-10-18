@@ -2,10 +2,10 @@
 
 {{/* Define common labels */}}
 {{- define "common.labels" -}}
-app.kubernetes.io/name: {{ .Values.name | default .Release.Name }}
+app.kubernetes.io/name: {{ .Values.redisStandalone.name | default .Release.Name }}
 helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-app.kubernetes.io/instance: {{ .Values.name | default .Release.Name }}
+app.kubernetes.io/instance: {{ .Values.redisStandalone.name | default .Release.Name }}
 app.kubernetes.io/version: {{ .Chart.AppVersion }}
 app.kubernetes.io/component: middleware
 {{- if .Values.labels }}

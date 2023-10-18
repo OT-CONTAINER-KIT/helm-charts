@@ -2,7 +2,7 @@
 apiVersion: redis.redis.opstreelabs.in/v1beta2
 kind: RedisReplication
 metadata:
-  name: {{ .Values.name | default .Release.Name }}
+  name: {{ .Values.redisReplication.name | default .Release.Name }}
   labels: {{- include "common.labels" . | nindent 4 }}
 spec:
   clusterSize: {{ .Values.redisReplication.clusterSize }}  
@@ -37,7 +37,7 @@ spec:
   
   {{- if .Values.externalConfig.enabled }}
     redisConfig:
-      additionalRedisConfig: "{{ .Values.name | default .Release.Name }}-ext-config"
+      additionalRedisConfig: "{{ .Values.redisReplication.name | default .Release.Name }}-ext-config"
   {{- end }}
   {{- if .Values.storageSpec }}
   storage: {{ toYaml .Values.storageSpec | nindent 4 }}

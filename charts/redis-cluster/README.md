@@ -43,7 +43,7 @@ helm delete <my-release> --namespace <namespace>
 | `redisCluster.imagePullPolicy`     | IfNotPresent                   | Image Pull Policy of the redis image                                                          |
 | `redisCluster.leaderServiceType`   | ClusterIP                      | Kubernetes service type for Redis Leader                                                      |
 | `redisCluster.followerServiceType` | ClusterIP                      | Kubernetes service type for Redis Follower                                                    |
-| `name`                            | ""                             | Overwrites the name for the charts resources instead of the Release name |
+| `redisCluster.name`                            | ""                             | Overwrites the name for the charts resources instead of the Release name |
 | `externalService.enabled`          | false                          | If redis service needs to be exposed using LoadBalancer or NodePort                           |
 | `externalService.annotations`      | {}                             | Kubernetes service related annotations                                                        |
 | `externalService.serviceType`      | NodePort                       | Kubernetes service type for exposing service, values - ClusterIP, NodePort, and LoadBalancer  |

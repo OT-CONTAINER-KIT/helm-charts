@@ -1,5 +1,6 @@
 ---
 redisStandalone:
+  name: ""
   image: quay.io/opstree/redis
   tag: v7.0.12
   imagePullPolicy: IfNotPresent
@@ -18,9 +19,6 @@ redisStandalone:
     #   memory: 128Mi
   ignoreAnnotations: []
     # - "redis.opstreelabs.in/ignore"
-
-# Overwite name for resources
-# name: ""
 
 labels: {}
 #   foo: bar

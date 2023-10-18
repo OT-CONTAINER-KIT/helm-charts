@@ -1,5 +1,6 @@
 ---
 redisCluster:
+  name: ""
   clusterSize: 3
   clusterVersion: v7
   persistenceEnabled: true
@@ -67,9 +68,6 @@ redisCluster:
       enabled: false
       maxUnavailable: 1
       minAvailable: 1
-
-# Overwite name for resources
-# name: ""
 
 labels: {}
 #   foo: bar
