@@ -17,8 +17,8 @@ spec:
     {{- end }}
     {{- if and .Values.redisReplication.redisSecret.secretName .Values.redisReplication.redisSecret.secretKey }}
     redisSecret:
-      name: "{{ .Values.redisReplication.redisSecret.secretName | quote }}"
-      key: "{{ .Values.redisReplication.redisSecret.secretKey | quote }}"
+      name: {{ .Values.redisReplication.redisSecret.secretName | quote }}
+      key: {{ .Values.redisReplication.redisSecret.secretKey | quote }}
     {{- end }}
     {{- if .Values.redisReplication.ignoreAnnotations}}
     ignoreAnnotations: {{ toYaml .Values.redisReplication.ignoreAnnotations | nindent 6 }}
