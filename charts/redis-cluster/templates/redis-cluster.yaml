@@ -45,8 +45,8 @@ spec:
     {{- end }}
     {{- if and .Values.redisCluster.redisSecret.secretName .Values.redisCluster.redisSecret.secretKey }}
     redisSecret:
-      name: "{{ .Values.redisCluster.redisSecret.secretName | quote }}"
-      key: "{{ .Values.redisCluster.redisSecret.secretKey | quote }}"
+      name: {{ .Values.redisCluster.redisSecret.secretName | quote }}
+      key: {{ .Values.redisCluster.redisSecret.secretKey | quote }}
     {{- end }}
 
   {{- if .Values.storageSpec }}
