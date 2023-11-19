@@ -380,31 +380,6 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/kibana-0.3.0/kibana-0.3.0.tgz
     version: 0.3.0
-  logging-cluster:
-  - apiVersion: v1
-    appVersion: 0.3.0
-    created: "2022-05-30T10:44:05.574719847Z"
-    description: Provides easy Elasticsearch cluster setup
-    digest: e45fea214ea01e1f786fbe46f30e3fb8fd381670d226557e05bb7b0a1f623891
-    home: https://github.com/ot-container-kit/logging-operator
-    icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/logging-operator/master/static/logging-operator-logo.svg
-    keywords:
-    - operator
-    - elasticsearch
-    - opstree
-    - kubernetes
-    - openshift
-    - logging-operator
-    - kibana
-    - fluentd
-    maintainers:
-    - name: Opstree Solutions
-    name: logging-cluster
-    sources:
-    - https://github.com/ot-container-kit/logging-operator
-    urls:
-    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/logging-cluster-0.3.0/logging-cluster-0.3.0.tgz
-    version: 0.3.0
   logging-operator:
   - apiVersion: v2
     appVersion: 0.4.0
@@ -1684,29 +1659,6 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-cluster-0.10.0/redis-cluster-0.10.0.tgz
     version: 0.10.0
-  - apiVersion: v1
-    appVersion: 0.9.0
-    created: "2021-11-29T07:49:16.710533466Z"
-    description: Provides easy redis setup definitions for Kubernetes services, and
-      deployment.
-    digest: fa42614f795bf54b95188fa57d2e223bae79f2228bbfc59f47151213f9425dc7
-    home: https://github.com/ot-container-kit/redis-operator
-    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
-    keywords:
-    - operator
-    - redis
-    - opstree
-    - kubernetes
-    - openshift
-    - redis-exporter
-    maintainers:
-    - name: Opstree Solutions
-    name: redis-cluster
-    sources:
-    - https://github.com/ot-container-kit/redis-operator
-    urls:
-    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-cluster-0.9.0/redis-cluster-0.9.0.tgz
-    version: 0.9.0
   - apiVersion: v1
     appVersion: 0.8.0
     created: "2021-09-02T12:07:05.117260084Z"
