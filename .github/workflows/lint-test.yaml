@@ -11,19 +11,28 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Set up Helm
+
+      - name: Install Helm
         uses: azure/setup-helm@v3
         with:
-          version: v3.5.0
+          version: v3.5.4
+
       - uses: actions/setup-python@v4
         with:
-          python-version: 3.7
+          python-version: '3.9'
+          check-latest: true
+
       - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.3.1
+        uses: helm/chart-testing-action@v2.6.0
+
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
           changed=$(ct list-changed --config ct.yaml)
           if [[ -n "$changed" ]]; then
-            echo "::set-output name=changed::true"
+            echo "changed=true" >> $GITHUB_OUTPUT
           fi
+
+      - name: Run chart-testing (lint)
+        run: |
+          ct lint --config ct.yaml

@@ -21,12 +21,45 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
       # See https://github.com/helm/chart-releaser-action/issues/6
+
       - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.5.4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          check-latest: true
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.6.0
+
+      - name: Add Helm Repository
         run: |
-          curl -fsSLo get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
-          chmod 700 get_helm.sh
-          ./get_helm.sh
+          helm repo add jetstack https://charts.jetstack.io
+
+      - name: Update Helm Repositories
+        run: helm repo update
+
+      - name: Update Chart Dependencies for redis-operator
+        run: helm dependency update charts/redis-operator
+
+      - name: List Changed Charts
+        id: list-changed
+        run: |
+          changed_charts=$(ct list-changed --config ct.yaml)
+          echo "Changed charts: $changed_charts"
+          echo "changed_charts=$changed_charts" >> $GITHUB_ENV
+          
+      - name: Package and Release Charts
+        run: |
+          for CHART in ${{ steps.list-changed.outputs.changed_charts }}; do
+              echo "Packaging $CHART..."
+              helm package charts/$CHART
+          done
+
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.0.0
+        uses: helm/chart-releaser-action@v1.5.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

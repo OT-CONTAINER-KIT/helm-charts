@@ -1,111 +1,85 @@
 ---
-apiVersion: redis.redis.opstreelabs.in/v1beta1
+apiVersion: redis.redis.opstreelabs.in/v1beta2
 kind: RedisCluster
 metadata:
-  name: {{ .Release.Name }}
-  labels:
-    app.kubernetes.io/name: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/version: {{ .Chart.AppVersion }}
-    app.kubernetes.io/component: middleware
-{{- if .Values.labels }}
-{{- range $labelkey, $labelvalue := .Values.labels }}
-    {{ $labelkey}}: {{ $labelvalue }}
-{{- end }}
-{{- end }}
-{{- with .Values.annotations }}
-  annotations:
-{{- toYaml . | nindent 6 }}
-{{- end }}
+  name: {{ .Values.redisCluster.name | default .Release.Name }}
+  labels: {{- include "common.labels" . | nindent 4 }}
 spec:
   clusterSize: {{ .Values.redisCluster.clusterSize }}
   persistenceEnabled: {{ .Values.redisCluster.persistenceEnabled }}
   clusterVersion: {{ .Values.redisCluster.clusterVersion }}
-  redisLeader:
-{{- if .Values.redisCluster.leader.affinity }}
-    affinity:
-{{ toYaml .Values.redisCluster.leader.affinity | nindent 6 }}
-{{- end }}
+
+  redisLeader: {{- include "redis.role" .Values.redisCluster.leader | nindent 4 }}
     replicas: {{ .Values.redisCluster.leader.replicas }}
-{{- if eq .Values.externalConfig.enabled true }}
+  {{- if .Values.externalConfig.enabled }}
     redisConfig:
-      additionalRedisConfig: {{ .Release.Name }}-ext-config
-{{- end }}
-{{- if eq .Values.pdb.enabled true }}
-    pdb:
-      enabled: {{ .Values.pdb.enabled }}
-      {{- if .Values.pdb.maxUnavailable }}
-      maxUnavailable: {{ .Values.pdb.maxUnavailable }}
-      {{- end  }}
-      {{- if .Values.pdb.minAvailable }}
-      minAvailable: {{ .Values.pdb.minAvailable }}
-      {{- end  }}
-{{- end }}
-  redisFollower:
-{{- if .Values.redisCluster.follower.affinity }}
-    affinity:
-{{ toYaml .Values.redisCluster.follower.affinity | nindent 6 }}
-{{- end }}
+      additionalRedisConfig: "{{ .Values.redisCluster.name | default .Release.Name }}-ext-config"
+  {{- end }}
+  
+  redisFollower: {{-  include "redis.role" .Values.redisCluster.follower | nindent 4 }}
     replicas: {{ .Values.redisCluster.follower.replicas }}
-{{- if eq .Values.externalConfig.enabled true }}
+  {{- if .Values.externalConfig.enabled }}
     redisConfig:
-      additionalRedisConfig: {{ .Release.Name }}-ext-config
-{{- end }}
-{{- if eq .Values.pdb.enabled true }}
-    pdb:
-      enabled: {{ .Values.pdb.enabled }}
-      {{- if .Values.pdb.maxUnavailable }}
-      maxUnavailable: {{ .Values.pdb.maxUnavailable }}
-      {{- end  }}
-      {{- if .Values.pdb.minAvailable }}
-      minAvailable: {{ .Values.pdb.minAvailable }}
-      {{- end  }}
-{{- end }}
+      additionalRedisConfig: "{{ .Values.redisCluster.name | default .Release.Name }}-ext-config"
+  {{- end }}
+
   redisExporter:
     enabled: {{ .Values.redisExporter.enabled }}
     image: "{{ .Values.redisExporter.image }}:{{ .Values.redisExporter.tag }}"
     imagePullPolicy: "{{ .Values.redisExporter.imagePullPolicy }}"
-    resources:
-{{ toYaml .Values.redisExporter.resources | indent 6 }}
+    {{- if .Values.redisExporter.resources}}
+    resources: {{ toYaml .Values.redisExporter.resources | nindent 6 }}
+    {{- end }}
+    {{- if .Values.redisExporter.env }}
+    env: {{ toYaml .Values.redisExporter.env | nindent 6 }}
+    {{- end }}
+    
   kubernetesConfig:
     image: "{{ .Values.redisCluster.image }}:{{ .Values.redisCluster.tag }}"
     imagePullPolicy: "{{ .Values.redisCluster.imagePullPolicy }}"
-    resources:
-{{ toYaml .Values.redisCluster.resources | indent 6 }}
-{{- if .Values.redisCluster.redisSecret }}
+    {{- if .Values.redisCluster.imagePullSecrets}}
+    imagePullSecrets: {{ toYaml .Values.redisCluster.imagePullSecrets | nindent 4 }}
+    {{- end }}
+    {{- if .Values.redisCluster.resources}}
+    resources: {{ toYaml .Values.redisCluster.resources | nindent 6 }}
+    {{- end }}
+    {{- if and .Values.redisCluster.redisSecret.secretName .Values.redisCluster.redisSecret.secretKey }}
     redisSecret:
-      name: "{{ .Values.redisCluster.redisSecret.secretName }}"
-      key: "{{ .Values.redisCluster.redisSecret.secretKey }}"
-{{- end }}
-{{- if .Values.storageSpec }}
-  storage:
-{{ toYaml .Values.storageSpec | indent 4 }}
-{{- end }}
-{{- if .Values.priorityClassName }}
+      name: {{ .Values.redisCluster.redisSecret.secretName | quote }}
+      key: {{ .Values.redisCluster.redisSecret.secretKey | quote }}
+    {{- end }}
+
+  {{- if .Values.storageSpec }}
+  storage: {{ toYaml .Values.storageSpec | nindent 4 }}
+  {{- end }}
+  {{- if and .Values.priorityClassName (ne .Values.priorityClassName "") }}
   priorityClassName: "{{ .Values.priorityClassName }}"
-{{- end }}
-{{- if .Values.nodeSelector }}
-  nodeSelector:
-{{ toYaml .Values.nodeSelector | indent 4 }}
-{{- end }}
-{{- if .Values.podSecurityContext }}
-  podSecurityContext:
-{{ toYaml .Values.podSecurityContext | indent 4 }}
-{{- end }}
-{{- if .Values.tolerations }}
-  tolerations:
-{{ toYaml .Values.tolerations | indent 4 }}
-{{- end }}
-{{- if .Values.TLS }}
+  {{- end }}
+  {{- if .Values.podSecurityContext }}
+  podSecurityContext: {{ toYaml .Values.podSecurityContext | nindent 4 }}
+  {{- end }}
+  {{- if and .Values.TLS.ca .Values.TLS.cert .Values.TLS.key .Values.TLS.secret.secretName }}
   TLS:
-{{ toYaml .Values.TLS | indent 4 }}
-{{- end}}
-{{- if .Values.sidecars }}
-  sidecars:
-{{ toYaml .Values.sidecars | indent 4 }}
-{{- end }}
-{{- if .Values.serviceAccountName }}
+    ca: {{ .Values.TLS.ca | quote }}
+    cert: {{ .Values.TLS.cert | quote }}
+    key: {{ .Values.TLS.key | quote }}
+    secret:
+      secretName: {{ .Values.TLS.secret.secretName | quote }}
+  {{- end }}
+  {{- if and .Values.acl.secret (ne .Values.acl.secret.secretName "") }}
+  acl:
+    secret:
+      secretName: {{ .Values.acl.secret.secretName | quote }}
+  {{- end }}
+  {{- if and .Values.sidecars (ne .Values.sidecars.name "") (ne .Values.sidecars.image "") }}
+  sidecars: {{ include "sidecar.properties" | nindent 4 }}
+  {{- end }}
+  {{- if and .Values.initContainer .Values.initContainer.enabled (ne .Values.initContainer.image "") }}
+  initContainer: {{ include "initContainer.properties" | nindent 4 }}
+  {{- end }}
+  {{- if .Values.env }}
+  env: {{ toYaml .Values.env | nindent 4 }}
+  {{- end }}
+  {{- if and .Values.serviceAccountName (ne .Values.serviceAccountName "") }}
   serviceAccountName: "{{ .Values.serviceAccountName }}"
-{{- end }}
+  {{- end }}

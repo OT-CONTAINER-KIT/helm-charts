@@ -1,6 +1,6 @@
 ---
 apiVersion: v2
-version: 0.15.5
+version: 0.15.9
 appVersion: "0.15.1"
 description: Provides easy redis setup definitions for Kubernetes services, and deployment.
 engine: gotpl
@@ -24,5 +24,5 @@ dependencies:
   - name: cert-manager
     version: v1.12.4
     repository: https://charts.jetstack.io
-    alias: cert-manager
-    condition: cert-manager.enabled
+    alias: certmanager
+    condition: certmanager.enabled

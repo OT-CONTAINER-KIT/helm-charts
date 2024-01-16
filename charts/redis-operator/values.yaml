@@ -15,8 +15,10 @@ redisOperator:
   extraArgs: []
 
   #  - -zap-log-level=error
+  watch_namespace: ""
+  env: []
+  webhook: false
 
-# watch_namespace: ot-operators
 
 resources:
   limits:
@@ -55,5 +57,11 @@ issuer:
     enabled: true
     ingressClass: nginx
 
-cert-manager:
-  enabled: true
+certmanager:
+  enabled: false
+
+priorityClassName: ""
+nodeSelector: {}
+tolerateAllTaints: false
+tolerations: []
+affinity: {}
