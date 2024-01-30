@@ -1,0 +1,10 @@
+replicaCount: 1
+
+image:
+  repository: nginx # your microservice image name 
+  pullPolicy: IfNotPresent
+  tag: "latest"     # your microservice image tag
+
+service:
+  type: ClusterIP
+  port: 80
