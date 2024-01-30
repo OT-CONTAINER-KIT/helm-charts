@@ -465,6 +465,17 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/logging-operator-0.3.0/logging-operator-0.3.0.tgz
     version: 0.3.0
+  microservice:
+  - apiVersion: v2
+    appVersion: "1.0"
+    created: "2024-01-30T05:48:59.320159827Z"
+    description: A Helm chart for a microservice in Kubernetes
+    digest: d290acef625d4377941e2a2b5c29dcea7a1c09fd2dac8c4dd10400dfa57d7300
+    name: microservice
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/microservice-0.1.0/microservice-0.1.0.tgz
+    version: 0.1.0
   mongodb:
   - apiVersion: v1
     appVersion: 0.3.0
@@ -2804,4 +2815,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-setup-0.5.0/redis-setup-0.5.0.tgz
     version: 0.5.0
-generated: "2023-11-08T07:55:29.372428213Z"
+generated: "2024-01-30T05:48:59.320384579Z"
