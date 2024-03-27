@@ -39,6 +39,10 @@ nodeSelector:
 securityContext:
   {{- toYaml .securityContext | nindent 2 }}
 {{- end }}
+{{- if .tolerations }}
+tolerations:
+  {{- toYaml .tolerations | nindent 4 }}
+{{- end }}
 {{- end -}}
 
 {{/* Generate sidecar properties */}}
