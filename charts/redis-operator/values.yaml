@@ -51,6 +51,13 @@ issuer:
     ingressClass: nginx
 
 certmanager:
+  # Turns on the chart dependency on cert-manager and will install it in the cluster
+  install: false
+  # Hands over certificate creation and management to cert-manager by creating cert-manager CRs. 
+  # It's your responsibility to make sure the CRs are compatible with the installed cert-manager
+  # if certmanager.install is disabled (default). If you're using a incompatible version of 
+  # cert-manager you can always turn this off (default) and provide your own cert-manager CRs to
+  # create a certificate and save it to the secret defined by certificate.secretName.
   enabled: false
 
 priorityClassName: ""
