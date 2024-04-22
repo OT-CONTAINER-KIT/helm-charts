@@ -25,4 +25,4 @@ dependencies:
     version: v1.12.4
     repository: https://charts.jetstack.io
     alias: certmanager
-    condition: certmanager.enabled
+    condition: certmanager.install
