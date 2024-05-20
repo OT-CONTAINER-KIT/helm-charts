@@ -764,6 +764,32 @@ entries:
     version: 0.1.0
   redis:
   - apiVersion: v2
+    appVersion: 0.16.0
+    created: "2024-05-20T13:05:38.953180434Z"
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: 8f157665e5db58d4e1d9ee64d04afe2f55c42885365a9d0542a76c6a3e4e0344
+    home: https://github.com/ot-container-kit/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    - redis-exporter
+    maintainers:
+    - name: iamabhishek-dubey
+    - name: sandy724
+    - name: shubham-cmyk
+    name: redis
+    sources:
+    - https://github.com/ot-container-kit/redis-operator
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-0.16.0/redis-0.16.0.tgz
+    version: 0.16.0
+  - apiVersion: v2
     appVersion: 0.15.1
     created: "2023-11-08T07:55:28.912339937Z"
     description: Provides easy redis setup definitions for Kubernetes services, and
@@ -1211,6 +1237,32 @@ entries:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-0.1.0/redis-0.1.0.tgz
     version: 0.1.0
   redis-cluster:
+  - apiVersion: v2
+    appVersion: 0.16.0
+    created: "2024-05-20T13:05:39.112236197Z"
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: 4afac09c72a6d9d8124b5eef54f16fd3f83e7dd645c059a949220c596a9018e3
+    home: https://github.com/ot-container-kit/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    - redis-exporter
+    maintainers:
+    - name: iamabhishek-dubey
+    - name: sandy724
+    - name: shubham-cmyk
+    name: redis-cluster
+    sources:
+    - https://github.com/ot-container-kit/redis-operator
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-cluster-0.16.0/redis-cluster-0.16.0.tgz
+    version: 0.16.0
   - apiVersion: v2
     appVersion: 0.15.1
     created: "2023-11-08T07:55:29.068532793Z"
@@ -1740,6 +1792,30 @@ entries:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-cluster-0.6.0/redis-cluster-0.6.0.tgz
     version: 0.6.0
   redis-operator:
+  - apiVersion: v2
+    appVersion: 0.16.0
+    created: "2024-05-20T13:05:39.280763025Z"
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: 1112ef83589617396ccb9e9b13fc4a91fdcec40df695b85cfa70f45f535f4ce4
+    home: https://github.com/OT-CONTAINER-KIT/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    maintainers:
+    - name: iamabhishek-dubey
+    - name: sandy724
+    - name: shubham-cmyk
+    name: redis-operator
+    sources:
+    - https://github.com/OT-CONTAINER-KIT/redis-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-operator-0.16.0/redis-operator-0.16.0.tgz
+    version: 0.16.0
   - apiVersion: v2
     appVersion: 0.15.1
     created: "2024-05-20T13:02:45.543060915Z"
@@ -2355,6 +2431,32 @@ entries:
     version: 0.5.0
   redis-replication:
   - apiVersion: v2
+    appVersion: 0.16.0
+    created: "2024-05-20T13:05:39.430678456Z"
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: 8d970c6463a827d107b832bc46ae6aa9c6dbae355a0979859779e9d53b0961ae
+    home: https://github.com/ot-container-kit/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    - redis-exporter
+    maintainers:
+    - name: iamabhishek-dubey
+    - name: sandy724
+    - name: shubham-cmyk
+    name: redis-replication
+    sources:
+    - https://github.com/ot-container-kit/redis-operator
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-replication-0.16.0/redis-replication-0.16.0.tgz
+    version: 0.16.0
+  - apiVersion: v2
     appVersion: 0.15.1
     created: "2023-11-08T07:55:29.221908352Z"
     description: Provides easy redis setup definitions for Kubernetes services, and
@@ -2537,6 +2639,32 @@ entries:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-replication-0.14.2/redis-replication-0.14.2.tgz
     version: 0.14.2
   redis-sentinel:
+  - apiVersion: v2
+    appVersion: 0.16.0
+    created: "2024-05-20T13:05:39.577810711Z"
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: 5b12035aeeaad42208b3785163f1102365da949ef5f38cac105e3f8044f4e1af
+    home: https://github.com/ot-container-kit/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    - redis-exporter
+    maintainers:
+    - name: iamabhishek-dubey
+    - name: sandy724
+    - name: shubham-cmyk
+    name: redis-sentinel
+    sources:
+    - https://github.com/ot-container-kit/redis-operator
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-sentinel-0.16.0/redis-sentinel-0.16.0.tgz
+    version: 0.16.0
   - apiVersion: v2
     appVersion: 0.15.1
     created: "2023-11-08T07:55:29.371907113Z"
@@ -2839,4 +2967,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-setup-0.5.0/redis-setup-0.5.0.tgz
     version: 0.5.0
-generated: "2024-05-20T13:02:45.543329435Z"
+generated: "2024-05-20T13:05:39.57839828Z"
