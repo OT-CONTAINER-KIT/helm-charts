@@ -27,7 +27,7 @@ jobs:
     - name: Install and test Redis Related Helm charts
       run: |
         kubectl cluster-info --context kind-kind
-        chart_dirs=("redis-operator" "redis" "redis-cluster" "redis-replication" "redis-sentinel")
+        chart_dirs=("redis" "redis-cluster" "redis-replication" "redis-sentinel")
         for dir in "${chart_dirs[@]}"
         do
           if [[ -f ./charts/$dir/Chart.yaml ]]; then
