@@ -74,4 +74,3 @@ postgresql:
   username: myuser
 
 postgresqlPassword: cGFzc3dvcmQ=
-
