@@ -8,7 +8,7 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "microservice.selectorLabels" . | nindent 6 }}
+      {{- include "microservice.matchLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
@@ -18,7 +18,10 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+  
           ports:
             - name: http
               containerPort: 80
               protocol: TCP
+      
+
