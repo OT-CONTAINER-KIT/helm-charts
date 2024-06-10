@@ -1,9 +1,16 @@
-replicaCount: 1
+replicaCount: 3
 
 image:
-  repository: nginx # your microservice image name 
+  repository: nginx  # Replace with your microservice image name
   pullPolicy: IfNotPresent
-  tag: "latest"     # your microservice image tag
+  tags:
+    - "latest"
+    - "stable"
+    - "alpine"  # Replace with your microservice image tag
+env:
+  microservice:
+    selectorLabels: "micro"
+    fullname: "k8s"
 
 service:
   type: ClusterIP
