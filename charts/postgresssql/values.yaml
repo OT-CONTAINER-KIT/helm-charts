@@ -1,3 +1,6 @@
+service:
+  type: ClusterIP  # or LoadBalancer, NodePort, etc.
+
 mode: standalone  # Options: standalone, cluster
 
 replicaCount: 2
@@ -11,6 +14,12 @@ postgresql:
   database: mydatabase
   username: myuser
   generatePassword: true
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
 
 serviceAccount:
   create: true

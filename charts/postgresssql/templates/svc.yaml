@@ -1,16 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "postgresql-helm.name" . }}-svc
-  labels:
-    {{- include "postgresql-helm.labels" . | nindent 4 }}
+  name: {{ .Release.Name }}-service
 spec:
+  type: {{ .Values.service.type | default "ClusterIP" }}
   selector:
-    {{- include "postgresql-helm.selectorLabels" . | nindent 4 }}
-  type: {{ .Values.service.type }}
+    app: {{ .Release.Name }}
   ports:
-    - name: http
-      port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
 
