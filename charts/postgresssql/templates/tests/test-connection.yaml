@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "postgresql-helm.fullname" . }}-test-connection"
+  labels:
+    {{- include "postgresql-helm.labels" . | nindent 4 }}
+spec:
+  containers:
+  - name: {{ .Chart.Name }}-test-connection
+    image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+    command: ['sh', '-c', 'until pg_isready -h {{ include "postgresql-helm.fullname" . }} -U {{ .Values.postgresql.username }} -d {{ .Values.postgresql.database }}; do echo waiting for database; sleep 2; done;']
+  restartPolicy: Never
+
