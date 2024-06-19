@@ -1,27 +1,62 @@
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+ # name: {{ include "microservice.fullname" . }}
+  #labels:
+   # {{- include "microservice.labels" . | nindent 4 }}
+#spec:
+ # replicas: {{ .Values.replicaCount }}
+  #selector:
+   # matchLabels:
+    #  {{- include "microservice.matchLabels" . | nindent 6 }}
+  #template:
+   # metadata:
+    #  labels:
+     #   {{- include "microservice.selectorLabels" . | nindent 8 }}
+    #spec:
+     # containers:
+      #  - name: {{ .Chart.Name }}
+       #   image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        #  imagePullPolicy: {{ .Values.image.pullPolicy }}
+  
+         # ports:
+          #  - name: http
+           #   containerPort: 80
+            #  protocol: TCP
+      
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "microservice.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "microservice.labels" . | nindent 4 }}
+    app: {{ .Values.app.name }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.deployment.replicas }}
   selector:
     matchLabels:
-      {{- include "microservice.matchLabels" . | nindent 6 }}
+      app: {{ .Values.app.name }}
   template:
     metadata:
       labels:
-        {{- include "microservice.selectorLabels" . | nindent 8 }}
+        app: {{ .Values.app.name }}
     spec:
+      serviceAccountName: {{ include "microservice.fullname" . }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ .Values.app.name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-  
           ports:
-            - name: http
-              containerPort: 80
-              protocol: TCP
-      
+            - containerPort: {{ .Values.service.targetPort }}
+          env:
+            - name: CONFIG_FILE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "microservice.fullname" . }}
+                  key: {{ .Values.configMap.key }}
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "microservice.fullname" . }}
+                  key: {{ .Values.secret.key }}
 
