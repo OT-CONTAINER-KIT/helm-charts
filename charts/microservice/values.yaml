@@ -1,17 +1,41 @@
-replicaCount: 3
+#replicaCount: 3
+
+#image:
+ # repository: nginx  # Replace with your microservice image name
+  #pullPolicy: IfNotPresent
+  #tags:
+   # - "latest"
+    #- "stable"
+    #- "alpine"  # Replace with your microservice image tag
+#env:
+ # microservice:
+  #  selectorLabels: "micro"
+   # fullname: "k8s"
+
+#service:
+  #type: ClusterIP
+  #port: 80
+
+  app:
+  name: my-microservice
+
+deployment:
+  replicas: 2   # Example number of replicas for your deployment
 
 image:
-  repository: nginx  # Replace with your microservice image name
-  pullPolicy: IfNotPresent
-  tags:
-    - "latest"
-    - "stable"
-    - "alpine"  # Replace with your microservice image tag
-env:
-  microservice:
-    selectorLabels: "micro"
-    fullname: "k8s"
+  repository: nginx   # Replace with your Docker image repository URL/name
+  tag: latest         # Replace with your Docker image tag
 
 service:
-  type: ClusterIP
-  port: 80
+  port: 80            # Example service port
+  targetPort: 8080    # Example target port
+
+configMap:
+  name: my-microservice-config
+  key: configKey
+
+secret:
+  name: my-microservice-secret
+  key: secretKey
+  value: my-secret-value
+
