@@ -16,6 +16,9 @@
   #type: ClusterIP
   #port: 80
 
+ 
+  
+
   app:
   name: my-microservice
 
@@ -35,7 +38,9 @@ configMap:
   key: configKey
 
 secret:
-  name: my-microservice-secret
+  name: new-microservice-secret
   key: secretKey
   value: my-secret-value
+  passwordKey: password 
+password: my-secret-password 
 
