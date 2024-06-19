@@ -23,8 +23,8 @@
           #  - name: http
            #   containerPort: 80
             #  protocol: TCP
-      
-apiVersion: apps/v1
+
+      apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "microservice.fullname" . }}
@@ -59,4 +59,11 @@ spec:
                 secretKeyRef:
                   name: {{ include "microservice.fullname" . }}
                   key: {{ .Values.secret.key }}
+
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secret.name }}
+                  key: {{ .Values.secret.passwordKey }}
+
 
