@@ -32,6 +32,13 @@ replicas: 1
 
 serviceAccountName: redis-operator
 
+priorityClassName: ""
+nodeSelector: {}
+tolerateAllTaints: false
+tolerations: []
+affinity: {}
+securityContext: {}
+
 service:
   name: webhook-service
   namespace: redis-operator
