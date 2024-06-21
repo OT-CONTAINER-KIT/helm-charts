@@ -1,25 +1,4 @@
-#replicaCount: 3
-
-#image:
- # repository: nginx  # Replace with your microservice image name
-  #pullPolicy: IfNotPresent
-  #tags:
-   # - "latest"
-    #- "stable"
-    #- "alpine"  # Replace with your microservice image tag
-#env:
- # microservice:
-  #  selectorLabels: "micro"
-   # fullname: "k8s"
-
-#service:
-  #type: ClusterIP
-  #port: 80
-
- 
-  
-
-  app:
+ app:
   name: my-microservice
 
 deployment:
