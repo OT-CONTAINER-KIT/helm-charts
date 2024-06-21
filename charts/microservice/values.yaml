@@ -1,10 +1,25 @@
-replicaCount: 1
+ app:
+  name: my-microservice
+
+deployment:
+  replicas: 2   # Example number of replicas for your deployment
 
 image:
-  repository: nginx # your microservice image name 
-  pullPolicy: IfNotPresent
-  tag: "latest"     # your microservice image tag
+  repository: nginx   # Replace with your Docker image repository URL/name
+  tag: latest         # Replace with your Docker image tag
 
 service:
-  type: ClusterIP
-  port: 80
+  port: 80            # Example service port
+  targetPort: 8080    # Example target port
+
+configMap:
+  name: my-microservice-config
+  key: configKey
+
+secret:
+  name: new-microservice-secret
+  key: secretKey
+  value: my-secret-value
+  passwordKey: password 
+password: my-secret-password 
+
