@@ -1,3 +1,5 @@
+app:
+ name: nginx-app
 replicaCount: 3
 
 image:
