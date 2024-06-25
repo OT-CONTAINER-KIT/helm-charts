@@ -1,5 +1,4 @@
-microservice:
-   fullname: NGINX
+
 labels:
   app: microservice
 
