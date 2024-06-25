@@ -1,5 +1,11 @@
-app:
- name: nginx-app
+                                                                                                                                                                               
+labels:
+  app: microservice
+ 
+selectorLabels:
+  app: microservice
+  release: stable
+
 replicaCount: 3
 
 image:
