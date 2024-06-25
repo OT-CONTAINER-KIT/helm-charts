@@ -1,7 +1,6 @@
-                                                                                                                                                                               
 labels:
   app: microservice
- 
+
 selectorLabels:
   app: microservice
   release: stable
@@ -20,7 +19,7 @@ service:
   port: 80
 
 configMap:
-  my-config-key: my-config-value
+  my-config-key: nginx-config-value
 
 secret:
-  my-secret-key: my-secret-value
+  my-secret-key: nginx-secret-value
