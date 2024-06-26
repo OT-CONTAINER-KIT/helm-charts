@@ -1,10 +1,25 @@
-replicaCount: 1
+
+labels:
+  app: micro
+
+selectorLabels:
+  app: microservice
+  release: stable
+
+replicaCount: 3
 
 image:
-  repository: nginx # your microservice image name 
+  repository: nginx
+  tag: latest
   pullPolicy: IfNotPresent
-  tag: "latest"     # your microservice image tag
+
+protocol: TCP
 
 service:
-  type: ClusterIP
   port: 80
+
+configMap:
+  my-config-key: nginx-config-value
+
+secret:
+  my-secret-key: nginx-secret-value

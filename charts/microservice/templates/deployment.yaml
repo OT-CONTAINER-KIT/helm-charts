@@ -20,5 +20,16 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: 80
-              protocol: TCP
+              containerPort: {{ .Values.httpPort }}
+              protocol: {{ .Values.protocol }}
+          env:
+            - name: MY_CONFIG_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "microservice.fullname" . }}-config
+                  key: my-config-key
+            - name: MY_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "microservice.fullname" . }}-secret
+                  key: my-secret-key

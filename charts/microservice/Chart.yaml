@@ -1,5 +1,6 @@
 apiVersion: v2
 name: microservice
+fullname: microservice-application
 description: A Helm chart for a microservice in Kubernetes
 
 type: application
