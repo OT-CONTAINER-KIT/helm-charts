@@ -1,6 +1,6 @@
 
 labels:
-  app: microservice
+  app: micro
 
 selectorLabels:
   app: microservice
@@ -13,7 +13,6 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
-httpPort: 80
 protocol: TCP
 
 service:
