@@ -2,8 +2,9 @@ replicaCount: 1
 
 fullnameOverride: "nginx"
 nameOverride: ""
+
 image:
-  repository: nginx 
+  repository: nginx
   pullPolicy: IfNotPresent
   tag: "latest"
 
