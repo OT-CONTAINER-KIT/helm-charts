@@ -1,6 +1,6 @@
 chart_dirs:
   - charts
 validate_chart_schema: true
-validate-maintainers: false
+validate-maintainers: true
 helm-extra-args: --strict
-target_branch: fix-helm-chart # or the appropriate branch name
+target_branch: main # or the appropriate branch name
