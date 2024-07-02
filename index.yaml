@@ -467,6 +467,18 @@ entries:
     version: 0.3.0
   microservice:
   - apiVersion: v2
+    appVersion: 0.1.2
+    created: "2024-07-02T12:05:37.834186211Z"
+    description: A Helm chart for a microservice in Kubernetes
+    digest: b4f4dc45f559d87e2b801a0605f88132038d466221eb0df778b24afaa47282af
+    maintainers:
+    - name: Opstree Solutions
+    name: microservice
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/microservice-0.1.2/microservice-0.1.2.tgz
+    version: 0.1.2
+  - apiVersion: v2
     appVersion: "1.0"
     created: "2024-01-30T05:48:59.320159827Z"
     description: A Helm chart for a microservice in Kubernetes
@@ -3117,4 +3129,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-setup-0.5.0/redis-setup-0.5.0.tgz
     version: 0.5.0
-generated: "2024-06-15T13:00:02.801196417Z"
+generated: "2024-07-02T12:05:37.834501364Z"
