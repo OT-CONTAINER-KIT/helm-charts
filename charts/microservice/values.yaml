@@ -1,9 +1,11 @@
 replicaCount: 1
 
+fullnameOverride: "nginx"
+nameOverride: ""
 image:
-  repository: nginx # your microservice image name 
+  repository: nginx
   pullPolicy: IfNotPresent
-  tag: "latest"     # your microservice image tag
+  tag: "latest"
 
 service:
   type: ClusterIP
