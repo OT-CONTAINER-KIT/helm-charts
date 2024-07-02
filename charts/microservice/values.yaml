@@ -1,5 +1,7 @@
 replicaCount: 1
 
+fullnameOverride: "nginx"
+nameOverride: ""
 image:
   repository: nginx # your microservice image name 
   pullPolicy: IfNotPresent
