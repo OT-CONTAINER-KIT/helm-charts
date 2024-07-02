@@ -1,9 +1,5 @@
----
-remote: origin
-target-branch: main
-chart-dirs:
+chart_dirs:
   - charts
-chart-repos:
-  - ot-helm=https://ot-container-kit.github.io/helm-charts
-excluded-charts:
-  - mysql
+validate_chart_schema: true
+validate-maintainers: false
+helm-extra-args: --strict
