@@ -1,8 +1,7 @@
 replicaCount: 1
 
-fullnameOverride: "nginx"
+fullnameOverride: "nginx-svc"
 nameOverride: ""
-
 image:
   repository: nginx
   pullPolicy: IfNotPresent
@@ -10,4 +9,6 @@ image:
 
 service:
   type: ClusterIP
-  port: 80
+  port: 80         # Example valid port number
+  targetPort: 8000 # Example valid target port number
+  protocol: TCP    # Example protocol (usually TCP for web services)
