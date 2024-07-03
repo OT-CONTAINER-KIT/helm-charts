@@ -51,10 +51,3 @@ service name
 {{- define "app.servicename" -}}
 {{- printf "%s-%s" ( include "app.tempname" . ) "svc" | trunc 63 | trimSuffix "-" }}
 {{- end }}%
-
-{{/*
-configmap name
-*/}}
-{{- define "app.configmapname" -}}
-{{- printf "%s-%s" ( include "app.tempname" . ) "cm" | trunc 63 | trimSuffix "-" }}
-{{- end }}%
