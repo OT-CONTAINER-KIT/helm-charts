@@ -33,7 +33,7 @@ helm install my-release microservice/
   - [ ] Service Account
   - [ ] Role Binding
   - [ ] Role
-- [ ] Rolling Deployment Manupulation
+- [ ] Rolling Deployment Manipulation
 - [ ] Environment Parmaters 
 - [ ] Container Port Mapping
 - [ ] Application Secrets
