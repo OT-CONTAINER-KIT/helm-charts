@@ -23,7 +23,7 @@ The Helm chart is specifically for deploying a microservice with a Kubernetes se
 helm install my-release microservice/
 ```
 
-### TODO
+## TODO
 
 - [ ] Application Health Probes
 - [ ] Service
