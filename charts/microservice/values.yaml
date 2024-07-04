@@ -1,14 +1,47 @@
 replicaCount: 1
 
-fullnameOverride: "nginx-svc"
+fullnameOverride: "nginx"
 nameOverride: ""
 image:
   repository: nginx
   pullPolicy: IfNotPresent
   tag: "latest"
+containerPorts:
+  http: 80
+  https: 443
+  custom: 8080
+
+servicePorts:
+  http: 80
+  https: 443
+  custom: 8080
 
 service:
-  type: ClusterIP
-  port: 80         # Example valid port number
-  targetPort: 8000 # Example valid target port number
-  protocol: TCP    # Example protocol (usually TCP for web services)
+  type: ClusterIP  
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "250m"
+  limits:
+    memory: "256Mi"
+    cpu: "500m"
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 50
+
+liveness:
+  enabled: false
+  path: /alive
+  port: 80
+  initialDelaySeconds: 3
+  periodSeconds: 3
+readiness:
+  enabled: false
+  path: /ready
+  port: 80
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  failureThreshold: 3
