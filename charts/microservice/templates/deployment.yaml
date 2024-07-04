@@ -19,9 +19,36 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            {{- range .Values.ports }}
-            - port: {{ .Port }}
-              targetPort: {{ .targetPort }}
-
-           {{- end }}
-
+            - containerPort: {{ .Values.containerPorts.http }}
+              name: http
+              protocol: TCP
+            - containerPort: {{ .Values.containerPorts.https }}
+              name: https
+              protocol: TCP
+            - containerPort: {{ .Values.containerPorts.custom }}
+              name: custom-port
+              protocol: TCP
+          resources:
+            requests:
+              memory: "{{ .Values.resources.requests.memory }}"
+              cpu: "{{ .Values.resources.requests.cpu }}"
+            limits:
+              memory: "{{ .Values.resources.limits.memory }}"
+              cpu: "{{ .Values.resources.limits.cpu }}"
+       {{- if .Values.liveness.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.liveness.path }}
+              port: {{ .Values.liveness.port }}
+            initialDelaySeconds: {{ .Values.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.liveness.periodSeconds }}
+      {{- end}}
+      {{- if .Values.readiness.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readiness.path }}
+              port: {{ .Values.readiness.port }}
+            initialDelaySeconds: {{ .Values.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readiness.periodSeconds }}
+            failureThreshold: {{ .Values.readiness.failureThreshold }}
+      {{- end }}
