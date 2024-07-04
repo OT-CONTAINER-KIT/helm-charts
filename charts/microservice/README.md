@@ -22,3 +22,18 @@ The Helm chart is specifically for deploying a microservice with a Kubernetes se
 ```bash
 helm install my-release microservice/
 ```
+
+## TODO
+
+- [ ] Application Health Probes
+- [ ] Service
+- [ ] Horizontal Pod Autoscaler
+- [ ] ConfigMap
+- [ ] RBAC 
+  - [ ] Service Account
+  - [ ] Role Binding
+  - [ ] Role
+- [ ] Rolling Deployment Manipulation
+- [ ] Environment Parmaters 
+- [ ] Container Port Mapping
+- [ ] Application Secrets
