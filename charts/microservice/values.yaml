@@ -1,11 +1,41 @@
-replicaCount: 1
+# -- global variables  
+global:
+  replicaCount: 1
+  fullnameOverride: "nginx"
+  nameOverride: ""
 
-fullnameOverride: "nginx"
-nameOverride: ""
-image:
-  repository: nginx
-  pullPolicy: IfNotPresent
-  tag: "latest"
+# -- Object that configures Deployment instance
+deployment:
+  # -- Override default container image format
+  image:
+    # -- Image repository
+    repository: "nginx"
+    # -- Image tag
+    tag: "latest"
+    # -- Variable used to control when the image should be fetched
+    pullPolicy: always
+  # -- Definition of the liveness probe
+  livenessProbe: 
+    httpPath: '/'
+  # -- Definition of the readiness probe
+  readinessProbe:
+    httpPath: '/'
+  # -- Configure container's resource request and limits
+  resources:
+    # -- Resources that the container is guaranteed to get
+    requests:
+      # -- Memory that the container is guaranteed to get
+      memory:
+      # -- CPU that the container is guaranteed to get
+      cpu: 
+    # -- Defines a hard ceiling on resource use
+    limits:
+      # -- Defines a hard ceiling on how much Memory time that the container can use
+      memory:
+      # -- Defines a hard ceiling on how much CPU time that the container can use
+      cpu:
+
+hpa: {}
 
 service:
   type: ClusterIP

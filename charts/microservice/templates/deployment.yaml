@@ -1,24 +1,48 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "app.fullname" . }}
+  name: {{ include "microservice.fullname" . }}
   labels:
-    {{- include "app.labels" . | nindent 4 }}
+    {{- include "microservice.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.global.replicaCount }}
   selector:
     matchLabels:
-      {{- include "app.selectorLabels" . | nindent 6 }}
+      {{- include "microservice.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "app.selectorLabels" . | nindent 8 }}
+        {{- include "microservice.selectorLabels" . | nindent 8 }}
     spec:
       containers:
-        - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        - name: {{ include "microservice.fullname" . }}
+          image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
+          imagePullPolicy: {{ .Values.deployment.image.pullPolicy | default "IfNotPresent" }}
           ports:
             - name: http
               containerPort: 80
               protocol: TCP
+          {{- if .Values.deployment.livenessProbe }}
+          livenessProbe:
+            httpGet:
+              path: {{ default "/health" .Values.deployment.livenessProbe.httpPath }}
+              port: http
+            initialDelaySeconds: {{ default 25 .Values.deployment.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ default 10 .Values.deployment.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ default 5 .Values.deployment.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ default 1 .Values.deployment.livenessProbe.successThreshold }}
+            failureThreshold: {{ default 5 .Values.deployment.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.deployment.readinessProbe }}
+          readinessProbe:
+            httpGet:
+              path: {{ default "/health" .Values.deployment.readinessProbe.httpPath }}
+              port: http
+            initialDelaySeconds: {{ default 25 .Values.deployment.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ default 10 .Values.deployment.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ default 5 .Values.deployment.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ default 1 .Values.deployment.readinessProbe.successThreshold }}
+            failureThreshold: {{ default 5 .Values.deployment.readinessProbe.failureThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.deployment.resources | nindent 12 }}          

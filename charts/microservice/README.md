@@ -25,9 +25,9 @@ helm install my-release microservice/
 
 ## TODO
 
-- [ ] Application Health Probes
+- [x] Application Health Probes
 - [ ] Service
-- [ ] Horizontal Pod Autoscaler
+- [x] Horizontal Pod Autoscaler
 - [ ] ConfigMap
 - [ ] RBAC 
   - [ ] Service Account
