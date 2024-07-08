@@ -41,3 +41,14 @@ Selector labels
 {{- define "microservice.selectorLabels" -}}
 app: {{ include "microservice.fullname" . }}
 {{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "microservice.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "microservice.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}

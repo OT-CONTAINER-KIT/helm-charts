@@ -1,9 +1,10 @@
 # -- global variables  
 global:
-  namespace: ""
+  namespace: "default"
   replicaCount: 1
   nameOverride: "ashwani"
   fullnameOverride: "ashwani"
+  imagePullSecrets: []
   environment: {}
    # list of key: value
    # GLOBAL1: value
@@ -63,49 +64,45 @@ deployment:
 
   # Additional volumes on the output Deployment definition.
   volumes:
-    enabled: true
-    pvc:
-      enabled: false
-      existing_claim:
-      name: pvc
-      mountPath: /pv
-      size: 1G
-      class:
-      accessModes:
-        - ReadWriteOnce
+    enabled: false
+    # pvc:
+    #   enabled: false
+    #   existing_claim: false
+    #   name: pvc
+    #   mountPath: /pv
+    #   size: 1G
+    #   class: "default"
+    #   accessModes:
+    #     - ReadWriteOnce
 
     # configFileCommonHeader: |
     #   line1
     #   line2
     
-    configMaps:
-      - name: test
-        mountPath: /test
-        data:
-          test.conf: |
-            hello
-      #       hello2
+    # configMaps:
+    #   - name: test
+    #     mountPath: /test
+    #     data:
+    #       test.conf: |
+    #         hello
+    #         hello2
 
-      # - name: test-from-file
-      #   mountPath: /test2
-      #   files:
-      #     - source: config.conf
-      #       destination: application.conf
-      # - name: test-mixed
-      #   mountPath: /test3
-      #   data:
-      #     test2.conf: |
-      #       another hello
-      #   files:
-      #     - source: config.conf
-      #       destination: application2.conf
-
-  # - name: foo
-  #   secret:
-  #     secretName: mysecret
-  #     optional: false
+    #   - name: test-from-file
+    #     mountPath: /test2
+    #     files:
+    #       - source: config.conf
+    #         destination: application.conf
+    #   - name: test-mixed
+    #     mountPath: /test3
+    #     data:
+    #       test2.conf: |
+    #         another hello
+    #     files:
+    #       - source: config.conf
+    #         destination: application2.conf
 
   # Additional volumeMounts on the output Deployment definition.
+
   volumeMounts: []
   # - name: foo
   #   mountPath: "/etc/foo"
@@ -130,3 +127,13 @@ service:
   specs:
   - port: 80
     name: http
+
+serviceAccount:
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""

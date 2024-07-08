@@ -23,6 +23,11 @@ spec:
       labels:
         {{- include "microservice.selectorLabels" . | nindent 8 }}
     spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "microservice.serviceAccountName" . }}
       containers:
         - name: {{ include "microservice.fullname" . }}
           image: "{{ .Values.deployment.image.name }}:{{ .Values.deployment.image.tag }}"
@@ -66,7 +71,7 @@ spec:
         {{- range $conf := .Values.deployment.volumes.configMaps }}
         - name: {{ include "microservice.fullname" $root }}-{{ $conf.name }}-cm
           configMap:
-            name: {{ $conf.name }}
+            name: {{ include "microservice.fullname" $root }}-{{ $conf.name }}-cm
       {{- end }}
       {{- if .Values.deployment.volumes.pvc.enabled}}
         - name: {{ .Values.deployment.volumes.pvc.existing_claim | default .Values.volumes.pvc.name }}-volume
