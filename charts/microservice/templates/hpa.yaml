@@ -1,27 +1,28 @@
-{{- if .Values.hpa }}
-apiVersion: autoscaling/v2beta1
+{{- if .Values.hpa.enabled }}
+apiVersion: {{ include "microservice.capabilities.hpa.apiVersion" ( dict "context" $ ) }}
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "microservice.HorizontalScalingName" . }}
+  name: {{ include "microservice.fullname" . }}-hpa
+  namespace: {{ .Values.global.namespace }}
   labels:
     {{- include "microservice.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     kind: Deployment
     name: {{ include "microservice.fullname" . }}
-  minReplicas: {{ default 1 .Values.hpa.minReplicas }}
-  maxReplicas: {{ default 1 .Values.hpa.maxReplicas }}
+  minReplicas: {{ .Values.hpa.minReplicas }}
+  maxReplicas: {{ .Values.hpa.maxReplicas }}
   metrics:
-  {{- if .Values.hpa.targetAverageCPUUtilization }}
+  {{- if .Values.hpa.targetCPUUtilizationPercentage }}
   - type: Resource
     resource:
       name: cpu
-      targetAverageUtilization: {{ default 50 .Values.hpa.targetAverageCPUUtilization }}
+      targetAverageUtilization: {{ .Values.hpa.targetCPUUtilizationPercentage }}
   {{- end }}
-  {{- if .Values.hpa.targetAverageMemoryUtilization }}
+  {{- if .Values.hpa.targetMemoryUtilizationPercentage }}
   - type: Resource
     resource:
       name: memory
-      targetAverageUtilization: {{ default 50 .Values.hpa.targetAverageMemoryUtilization }}
+      targetAverageUtilization: {{ .Values.hpa.targetMemoryUtilizationPercentage }}
   {{- end }}
 {{- end }}

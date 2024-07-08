@@ -1,42 +1,132 @@
 # -- global variables  
 global:
+  namespace: ""
   replicaCount: 1
-  fullnameOverride: "nginx"
-  nameOverride: ""
+  nameOverride: "ashwani"
+  fullnameOverride: "ashwani"
+  environment: {}
+   # list of key: value
+   # GLOBAL1: value
+
+## @param kubeVersion Override Kubernetes version
+##
+kubeVersion: ""
 
 # -- Object that configures Deployment instance
 deployment:
   # -- Override default container image format
   image:
-    # -- Image repository
-    repository: "nginx"
-    # -- Image tag
-    tag: "latest"
-    # -- Variable used to control when the image should be fetched
-    pullPolicy: always
-  # -- Definition of the liveness probe
-  livenessProbe: 
-    httpPath: '/'
-  # -- Definition of the readiness probe
-  readinessProbe:
-    httpPath: '/'
-  # -- Configure container's resource request and limits
-  resources:
-    # -- Resources that the container is guaranteed to get
-    requests:
-      # -- Memory that the container is guaranteed to get
-      memory:
-      # -- CPU that the container is guaranteed to get
-      cpu: 
-    # -- Defines a hard ceiling on resource use
-    limits:
-      # -- Defines a hard ceiling on how much Memory time that the container can use
-      memory:
-      # -- Defines a hard ceiling on how much CPU time that the container can use
-      cpu:
+    name: ""
+    tag: ""
+    pullPolicy: IfNotPresent
 
-hpa: {}
+  # Annotation for the Deployment
+  annotations: {}
 
+  livenessProbe: {}
+  # livenessProbe: 
+  #   httpGet:
+  #     path: "/"
+  #     port: http
+  #   initialDelaySeconds: 25
+  #   periodSeconds: 10
+  #   timeoutSeconds: 5
+  #   successThreshold: 1
+  #   failureThreshold: 5
+
+  readinessProbe: {}
+  # readinessProbe:
+  #   httpGet:
+  #     path: "/"
+  #     port: http
+  #   initialDelaySeconds: 25
+  #   periodSeconds: 10
+  #   timeoutSeconds: 5
+  #   successThreshold: 1
+  #   failureThreshold: 5
+
+  environment:
+    ashwani: singh
+
+  # environment: {}
+  #   VAR1: value1
+
+  resources: {}
+
+  # resources:
+  #   requests:
+  #     memory: 100m
+  #     cpu: 100m
+  #   limits:
+  #     memory: 100m
+  #     cpu: 100m
+
+  # Additional volumes on the output Deployment definition.
+  volumes:
+    enabled: true
+    pvc:
+      enabled: false
+      existing_claim:
+      name: pvc
+      mountPath: /pv
+      size: 1G
+      class:
+      accessModes:
+        - ReadWriteOnce
+
+    # configFileCommonHeader: |
+    #   line1
+    #   line2
+    
+    configMaps:
+      - name: test
+        mountPath: /test
+        data:
+          test.conf: |
+            hello
+      #       hello2
+
+      # - name: test-from-file
+      #   mountPath: /test2
+      #   files:
+      #     - source: config.conf
+      #       destination: application.conf
+      # - name: test-mixed
+      #   mountPath: /test3
+      #   data:
+      #     test2.conf: |
+      #       another hello
+      #   files:
+      #     - source: config.conf
+      #       destination: application2.conf
+
+  # - name: foo
+  #   secret:
+  #     secretName: mysecret
+  #     optional: false
+
+  # Additional volumeMounts on the output Deployment definition.
+  volumeMounts: []
+  # - name: foo
+  #   mountPath: "/etc/foo"
+  #   readOnly: true
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+hpa: 
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 1
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+  
 service:
   type: ClusterIP
-  port: 80
+  annotations: {}
+  specs:
+  - port: 80
+    name: http

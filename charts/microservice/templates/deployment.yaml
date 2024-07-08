@@ -1,7 +1,16 @@
+{{ $root := . }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "microservice.fullname" . }}
+  name: {{ include "microservice.fullname" . }}-app
+  namespace: {{ .Values.global.namespace }}
+  {{- if .Values.annotations }}
+  annotations:
+  {{- range $key, $value := .Values.annotations }}
+    {{ $key }}: {{ $value }}
+  {{- end }}
+  {{- end }}
   labels:
     {{- include "microservice.labels" . | nindent 4 }}
 spec:
@@ -16,33 +25,64 @@ spec:
     spec:
       containers:
         - name: {{ include "microservice.fullname" . }}
-          image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
-          imagePullPolicy: {{ .Values.deployment.image.pullPolicy | default "IfNotPresent" }}
+          image: "{{ .Values.deployment.image.name }}:{{ .Values.deployment.image.tag }}"
+          imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           ports:
-            - name: http
-              containerPort: 80
-              protocol: TCP
+            {{- range .Values.service.specs}}
+            - name: {{ .name }}
+              containerPort: {{ .targetPort | default .port}}
+              protocol: {{ .protocol | default "TCP" }}
+            {{- end }}
+          {{- if (merge .Values.global.environment .Values.deployment.environment) }}
+          env:
+          {{- range $name, $value := merge .Values.global.environment .Values.deployment.environment}}
+          - name: {{ $name | quote}}
+            value: {{ $value | quote }}
+          {{- end }}
+          {{- end }}
           {{- if .Values.deployment.livenessProbe }}
           livenessProbe:
-            httpGet:
-              path: {{ default "/health" .Values.deployment.livenessProbe.httpPath }}
-              port: http
-            initialDelaySeconds: {{ default 25 .Values.deployment.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ default 10 .Values.deployment.livenessProbe.periodSeconds }}
-            timeoutSeconds: {{ default 5 .Values.deployment.livenessProbe.timeoutSeconds }}
-            successThreshold: {{ default 1 .Values.deployment.livenessProbe.successThreshold }}
-            failureThreshold: {{ default 5 .Values.deployment.livenessProbe.failureThreshold }}
+            {{- toYaml .Values.deployment.livenessProbe | nindent 12 }}
           {{- end }}
           {{- if .Values.deployment.readinessProbe }}
           readinessProbe:
-            httpGet:
-              path: {{ default "/health" .Values.deployment.readinessProbe.httpPath }}
-              port: http
-            initialDelaySeconds: {{ default 25 .Values.deployment.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ default 10 .Values.deployment.readinessProbe.periodSeconds }}
-            timeoutSeconds: {{ default 5 .Values.deployment.readinessProbe.timeoutSeconds }}
-            successThreshold: {{ default 1 .Values.deployment.readinessProbe.successThreshold }}
-            failureThreshold: {{ default 5 .Values.deployment.readinessProbe.failureThreshold }}
+            {{- toYaml .Values.deployment.readinessProbe | nindent 12 }}
           {{- end }}
           resources:
-            {{- toYaml .Values.deployment.resources | nindent 12 }}          
+            {{- toYaml .Values.deployment.resources | nindent 12 }}
+          {{- if .Values.deployment.volumes.enabled }}
+          volumeMounts:
+            {{- range $conf := .Values.deployment.volumes.configMaps }}
+            - mountPath: {{ $conf.mountPath }}
+              name: {{ include "microservice.fullname" $root }}-{{ $conf.name }}-cm
+            {{- end }}
+            {{- if .Values.deployment.volumes.pvc.enabled }}
+            - mountPath: {{ .Values.volumes.pvc.mountPath }}
+              name: {{ .Values.volumes.pvc.existing_claim | default .Values.volumes.pvc.name }}-volume
+            {{- end }}
+          {{- end }}
+      {{- if .Values.deployment.volumes.enabled }}
+      volumes:
+        {{- range $conf := .Values.deployment.volumes.configMaps }}
+        - name: {{ include "microservice.fullname" $root }}-{{ $conf.name }}-cm
+          configMap:
+            name: {{ $conf.name }}
+      {{- end }}
+      {{- if .Values.deployment.volumes.pvc.enabled}}
+        - name: {{ .Values.deployment.volumes.pvc.existing_claim | default .Values.volumes.pvc.name }}-volume
+          persistentVolumeClaim:
+            claimName: {{ .Values.deployment.volumes.pvc.existing_claim | default .Values.volumes.pvc.name }}
+      {{- end}}
+      {{- end }}
+      {{- with .Values.deployment.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

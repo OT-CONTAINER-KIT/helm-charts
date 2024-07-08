@@ -1,0 +1,5 @@
+deployment:
+  image:
+    name: "nginx"
+    tag: "latest"
+    pullPolicy: IfNotPresent
