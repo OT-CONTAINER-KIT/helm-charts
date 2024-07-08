@@ -1,5 +1,71 @@
 deployment:
   image:
-    name: "nginx"
-    tag: "latest"
+    name: nginx
+    tag: latest
     pullPolicy: IfNotPresent
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 25
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 5
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 25
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 5
+
+  resources:
+    requests:
+      memory: 100Mi
+      cpu: 100m
+    limits:
+      memory: 100Mi
+      cpu: 100m
+
+  pvc:
+    enabled: false  # Adjust based on your requirements
+    existing_claim: false  # Adjust based on your requirements
+    name: pvc  # Adjust based on your requirements
+    mountPath: /pv  # Adjust based on your requirements
+    size: 1Gi  # Adjust based on your requirements
+    class: default  # Adjust based on your requirements
+    accessModes:
+      - ReadWriteOnce
+
+  configMaps:
+    - name: test
+      mountPath: /test
+      data:
+        test.conf: |
+          hello
+          hello2
+
+    - name: test-from-file
+      mountPath: /test2
+      files:
+        - source: config.conf
+          destination: application.conf
+
+    - name: test-mixed
+      mountPath: /test3
+      data:
+        test2.conf: |
+          another hello
+      files:
+        - source: config.conf
+          destination: application2.conf
+
+  volumeMounts:
+    - name: foo
+      mountPath: /etc/foo
+      readOnly: true
