@@ -1,9 +1,32 @@
+global:
+  namespace: "nginx"
+  fullnameOverride: "webapp"
+
 deployment:
   image:
     name: nginx
     tag: latest
     pullPolicy: IfNotPresent
-
- 
-
-    
+  livenessProbe: 
+    httpGet:
+      path: "/"
+      port: http
+  readinessProbe: 
+    httpGet:
+      path: "/"
+      port: http
+  resources:
+    requests:
+      memory: 100Mi
+      cpu: 100m
+    limits:
+      memory: 500Mi
+      cpu: 500m
+  volumes:
+    enabled: true
+    configMaps:
+      - name: webapp
+        mountPath: /webapp
+        data:
+          webapp.conf: |
+            name="opstree"

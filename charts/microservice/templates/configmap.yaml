@@ -22,7 +22,7 @@ data:
   {{- range $file := $cm.files }}
   {{ $file.destination }}: |
 {{ $header | toString | indent 4 }}
-    {{ $root.Files.Get $file.source }}
+    {{ $root.Files.Get "$file.source" }}
   {{- end}}
   {{- end }}
 {{- end }}

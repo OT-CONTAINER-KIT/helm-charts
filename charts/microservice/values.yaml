@@ -2,8 +2,8 @@
 global:
   namespace: "default"
   replicaCount: 1
-  nameOverride: "ashwani"
-  fullnameOverride: "ashwani"
+  nameOverride: ""
+  fullnameOverride: ""
   imagePullSecrets: []
   environment: {}
    # list of key: value
@@ -24,47 +24,46 @@ deployment:
   # Annotation for the Deployment
   annotations: {}
 
-  livenessProbe: {}
-  # livenessProbe: 
-  #   httpGet:
-  #     path: "/"
-  #     port: http
-  #   initialDelaySeconds: 25
-  #   periodSeconds: 10
-  #   timeoutSeconds: 5
-  #   successThreshold: 1
-  #   failureThreshold: 5
+  # livenessProbe: {}
+  livenessProbe: 
+    # httpGet:
+    #   path: "/"
+    #   port: http
+    initialDelaySeconds: 250
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 5
 
-  readinessProbe: {}
-  # readinessProbe:
-  #   httpGet:
-  #     path: "/"
-  #     port: http
-  #   initialDelaySeconds: 25
-  #   periodSeconds: 10
-  #   timeoutSeconds: 5
-  #   successThreshold: 1
-  #   failureThreshold: 5
+  # readinessProbe: {}
+  readinessProbe:
+    # httpGet:
+    #   path: "/"
+    #   port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 5
 
-  environment:
-    ashwani: singh
-
-  # environment: {}
+  environment: {}
   #   VAR1: value1
 
   resources: {}
 
   # resources:
   #   requests:
-  #     memory: 100m
+  #     memory: 100Mi
   #     cpu: 100m
   #   limits:
-  #     memory: 100m
+  #     memory: 100Mi
   #     cpu: 100m
 
   # Additional volumes on the output Deployment definition.
   volumes:
-    enabled: false
+    enabled: true
+    pvc: 
+      enabled: false
     # pvc:
     #   enabled: false
     #   existing_claim: false
@@ -79,7 +78,7 @@ deployment:
     #   line1
     #   line2
     
-    # configMaps:
+    configMaps:
     #   - name: test
     #     mountPath: /test
     #     data:
@@ -118,8 +117,8 @@ hpa:
   enabled: true
   minReplicas: 1
   maxReplicas: 1
-  targetCPUUtilizationPercentage: 80
-  targetMemoryUtilizationPercentage: 80
+  targetCPU: 80
+  targetMemory: 80
   
 service:
   type: ClusterIP
@@ -129,7 +128,7 @@ service:
     name: http
 
 serviceAccount:
-  create: true
+  create: false
   # Automatically mount a ServiceAccount's API credentials?
   automount: true
   # Annotations to add to the service account

@@ -23,3 +23,14 @@ Return the appropriate apiVersion for Horizontal Pod Autoscaler.
 {{- end -}}
 {{- end -}}
 
+{{/*
+Return the appropriate apiVersion for deployment.
+*/}}
+{{- define "microservice.capabilities.deployment.apiVersion" -}}
+{{- $kubeVersion := include "microservice.capabilities.kubeVersion" . -}}
+{{- if and (not (empty $kubeVersion)) (semverCompare "<1.14-0" $kubeVersion) -}}
+{{- print "extensions/v1beta1" -}}
+{{- else -}}
+{{- print "apps/v1" -}}
+{{- end -}}
+{{- end -}}
