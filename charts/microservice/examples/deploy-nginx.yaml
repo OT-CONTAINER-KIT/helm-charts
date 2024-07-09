@@ -1,0 +1,33 @@
+global:
+  namespace: "demo-dev"
+  fullnameOverride: "webapp"
+
+deployment:
+  image:
+    name: nginx
+    tag: latest
+    pullPolicy: IfNotPresent
+  livenessProbe: 
+    httpGet:
+      path: "/"
+      port: http
+  readinessProbe: 
+    httpGet:
+      path: "/"
+      port: http
+  resources:
+    requests:
+      memory: 100Mi
+      cpu: 100m
+    limits:
+      memory: 500Mi
+      cpu: 500m
+  volumes:
+    enabled: true
+    configMaps:
+      - name: index
+        mountPath: /usr/share/nginx/html
+        data:
+          index.html: |
+            Hello! Opstree
+            

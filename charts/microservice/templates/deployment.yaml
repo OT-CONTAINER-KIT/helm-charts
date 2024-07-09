@@ -1,24 +1,99 @@
-apiVersion: apps/v1
+{{ $root := . }}
+---
+apiVersion: {{ include "microservice.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
-  name: {{ include "app.fullname" . }}
+  name: {{ include "microservice.fullname" . }}-app
+  namespace: {{ .Values.global.namespace | quote }}
+  {{- if .Values.annotations }}
+  annotations:
+  {{- range $key, $value := .Values.annotations }}
+    {{ $key }}: {{ $value }}
+  {{- end }}
+  {{- end }}
   labels:
-    {{- include "app.labels" . | nindent 4 }}
+    {{- include "microservice.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.global.replicaCount }}
   selector:
     matchLabels:
-      {{- include "app.selectorLabels" . | nindent 6 }}
+      {{- include "microservice.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "app.selectorLabels" . | nindent 8 }}
+        {{- include "microservice.selectorLabels" . | nindent 8 }}
     spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "microservice.serviceAccountName" . }}
       containers:
-        - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        - name: {{ include "microservice.fullname" . }}
+          image: "{{ .Values.deployment.image.name }}:{{ .Values.deployment.image.tag }}"
+          imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+          {{- if .Values.deployment.command }}
+          command: {{ .Values.deployment.command }}
+          {{- end }}
+          {{- if .Values.deployment.args }}
+          args: {{ .Values.deployment.args }}
+          {{- end }}
           ports:
-            - name: http
-              containerPort: 80
-              protocol: TCP
+            {{- range .Values.service.specs}}
+            - name: {{ .name }}
+              containerPort: {{ .targetPort | default .port}}
+              protocol: {{ .protocol | default "TCP" }}
+            {{- end }}
+          {{- if (merge .Values.global.environment .Values.deployment.environment) }}
+          env:
+          {{- range $name, $value := merge .Values.global.environment .Values.deployment.environment}}
+          - name: {{ $name | quote}}
+            value: {{ $value | quote }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.deployment.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.deployment.livenessProbe | nindent 12 }}
+          {{- end }}
+          {{- if .Values.deployment.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.deployment.readinessProbe | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.deployment.resources | nindent 12 }}
+          {{- if .Values.deployment.volumes.enabled }}
+          volumeMounts:
+            {{- range $conf := .Values.deployment.volumes.configMaps }}
+            - mountPath: {{ $conf.mountPath }}
+              name: {{ include "microservice.fullname" $root }}-{{ $conf.name }}-cm
+            {{- end }}
+            {{- if .Values.deployment.volumes.pvc.enabled }}
+            - mountPath: {{ .Values.volumes.pvc.mountPath }}
+              name: {{ .Values.volumes.pvc.existing_claim | default .Values.volumes.pvc.name }}-volume
+            {{- end }}
+          {{- end }}
+      {{- if .Values.deployment.volumes.enabled }}
+      volumes:
+        {{- range $conf := .Values.deployment.volumes.configMaps }}
+        - name: {{ include "microservice.fullname" $root }}-{{ $conf.name }}-cm
+          configMap:
+            name: {{ include "microservice.fullname" $root }}-{{ $conf.name }}-cm
+      {{- end }}
+      {{- if .Values.deployment.volumes.pvc.enabled}}
+        - name: {{ .Values.deployment.volumes.pvc.existing_claim | default .Values.volumes.pvc.name }}-volume
+          persistentVolumeClaim:
+            claimName: {{ .Values.deployment.volumes.pvc.existing_claim | default .Values.volumes.pvc.name }}
+      {{- end}}
+      {{- end }}
+      {{- with .Values.deployment.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
