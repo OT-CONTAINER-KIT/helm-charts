@@ -16,7 +16,7 @@ Basic helm chart for deploying microservices on kubernetes with best practices
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release microservice/
+helm install my-release microservice/
 ```
 
 ## Values
