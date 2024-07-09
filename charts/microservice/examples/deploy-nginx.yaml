@@ -1,5 +1,5 @@
 global:
-  namespace: "default"
+  namespace: "demo-dev"
   fullnameOverride: "webapp"
 
 deployment:
