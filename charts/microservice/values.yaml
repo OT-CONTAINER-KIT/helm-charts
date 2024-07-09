@@ -1,4 +1,4 @@
-# -- global variables  
+# -- global variables
 global:
   namespace: "default"
   replicaCount: 1
@@ -25,7 +25,7 @@ deployment:
   annotations: {}
 
   # livenessProbe: {}
-  livenessProbe: 
+  livenessProbe:
     # httpGet:
     #   path: "/"
     #   port: http
@@ -48,7 +48,7 @@ deployment:
 
   # command: ["/bin/sh","-c"]
   # args: ["echo 'consuming a message'; sleep 5"]
-  
+
   environment: {}
   #   VAR1: value1
 
@@ -78,7 +78,7 @@ deployment:
     # configFileCommonHeader: |
     #   line1
     #   line2
-    
+
     configMaps:
     #   - name: test
     #     mountPath: /test
@@ -114,13 +114,13 @@ deployment:
 
   affinity: {}
 
-hpa: 
+hpa:
   enabled: true
   minReplicas: 1
   maxReplicas: 1
   targetCPU: 80
   targetMemory: 80
-  
+
 service:
   type: ClusterIP
   annotations: {}
