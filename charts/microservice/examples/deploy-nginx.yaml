@@ -1,5 +1,5 @@
 global:
-  namespace: "nginx"
+  namespace: "default"
   fullnameOverride: "webapp"
 
 deployment:
