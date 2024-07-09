@@ -46,6 +46,9 @@ deployment:
     successThreshold: 1
     failureThreshold: 5
 
+  # command: ["/bin/sh","-c"]
+  # args: ["echo 'consuming a message'; sleep 5"]
+  
   environment: {}
   #   VAR1: value1
 
@@ -62,17 +65,15 @@ deployment:
   # Additional volumes on the output Deployment definition.
   volumes:
     enabled: true
-    pvc: 
+    pvc:
       enabled: false
-    # pvc:
-    #   enabled: false
-    #   existing_claim: false
-    #   name: pvc
-    #   mountPath: /pv
-    #   size: 1G
-    #   class: "default"
-    #   accessModes:
-    #     - ReadWriteOnce
+      existing_claim: false
+      name: pvc
+      mountPath: /pv
+      size: 1G
+      class: "default"
+      accessModes:
+        - ReadWriteOnce
 
     # configFileCommonHeader: |
     #   line1

@@ -1,27 +1,10 @@
 apiVersion: v2
 name: microservice
 description: A Helm chart for a microservice in Kubernetes
-
-# A chart can be either an 'application' or a 'library' chart
-#
-# Application chart deploys a complete application, includes all necessary Kubernetes resources, 
-# used for installing and managing applications.
-#
-# Library chart provides reusable templates and components, does not deploy an application by itself, 
-# used to promote consistency and reuse across multiple charts.
 type: application
-
-# This is the chart version. This chart version should be incremented with each change to the chart 
-# or its templates, including the app version. 
-# Follow Semantic Versioning (https://semver.org/). 
 version: 0.1.2
-
-# This is the application version number, which should be incremented with each change to the application. 
-# It doesn't need to follow Semantic Versioning but should reflect the application's version. 
-# Quotes are recommended.
 appVersion: "0.1.2"
-
-# This is maintainers files. this field lists the individuals or teams responsible for maintaining the Helm chart. 
-# It typically includes their names and contact information, such as email addresses.
 maintainers:
-  - name: Opstree Solutions
+  - name: Ashwani Singh
+    email: ashwani.singh@opstree.com
+  - name: Shikha Tripathi

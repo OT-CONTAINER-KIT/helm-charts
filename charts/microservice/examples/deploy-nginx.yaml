@@ -25,8 +25,9 @@ deployment:
   volumes:
     enabled: true
     configMaps:
-      - name: webapp
-        mountPath: /webapp
+      - name: index
+        mountPath: /usr/share/nginx/html
         data:
-          webapp.conf: |
-            name="opstree"
+          index.html: |
+            Hello! Opstree
+            

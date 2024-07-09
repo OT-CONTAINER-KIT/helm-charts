@@ -3,7 +3,7 @@ apiVersion: {{ include "microservice.capabilities.hpa.apiVersion" ( dict "contex
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "microservice.fullname" . }}-hpa
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.namespace | quote }}
   labels:
     {{- include "microservice.labels" . | nindent 4 }}
 spec:
