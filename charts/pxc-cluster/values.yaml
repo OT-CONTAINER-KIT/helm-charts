@@ -1,0 +1,17 @@
+msyql:
+  enabled: true
+  allowUnsafeConfigurations: true
+  backup:
+    enabled: false
+  pmm:
+    enabled: true
+  haproxy:
+    resources:
+      requests:
+        memory: 500Mi
+        cpu: 600m
+  pxc:
+    resources:
+      requests:
+        memory: 500Mi
+        cpu: 600m

@@ -1,0 +1,9 @@
+dependencies:
+- name: tempo
+  repository: https://grafana.github.io/helm-charts
+  version: 1.10.1
+- name: opentelemetry-operator
+  repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+  version: 0.64.2
+digest: sha256:3fa5db4f3570971cbf18aa37b6240b638fff2b99e6cce8af6238cb122cbf3e23
+generated: "2024-07-14T00:46:46.860976+05:30"

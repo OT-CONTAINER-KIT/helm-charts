@@ -1,0 +1,14 @@
+apiVersion: v2
+name: pxc-mysql
+description: A Helm chart for percona xtradb mysql cluster
+type: application
+version: 1.0.0
+appVersion: 1.0.0
+dependencies:
+  - name: pxc-db
+    version: ~1
+    repository: https://percona.github.io/percona-helm-charts/
+    alias: opstree
+    tags:
+      - opstree
+    condition: opstree.enabled
