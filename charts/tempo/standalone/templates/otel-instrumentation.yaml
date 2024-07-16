@@ -5,7 +5,7 @@ metadata:
   namespace: opstree
 spec:
   exporter:
-    endpoint: http://otel-collector-collector-headless:4317
+    endpoint: http://otel-collector-collector-headless.tracing.svc.cluster.local:4317
   propagators:
     - tracecontext
     - baggage
