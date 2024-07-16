@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-prometheus-datasource
+  namespace: monitoring
+  labels:
+    grafana_datasource: "1"
+    app: kube-grafana
+    prometheus: kube
+data:
+  kube-prometheus.yaml: |-
+    apiVersion: 1
+    datasources:
+      - name: "kube"
+        type: prometheus
+        uid: prometheus
+        url: http://kube-prometheus.monitoring:9090/
+        access: proxy
+        isDefault: true
+        jsonData:
+          httpMethod: POST
+          timeInterval: 30s
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-alertmanager-datasource
+  namespace: monitoring
+  labels:
+    grafana_datasource: "1"
+    app: kube-grafana
+    prometheus: kube
+data:
+  kube-alertmanager.yaml: |-
+    apiVersion: 1
+    datasources:
+      - name: "kube-alertmanager"
+        type: alertmanager
+        uid: alertmanager
+        url: http://kube-alertmanager.monitoring:9093/
+        access: proxy
+        jsonData:
+          handleGrafanaManagedAlerts: false
+          implementation: prometheus
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tempo-datasource
+  namespace: monitoring
+  labels:
+    grafana_datasource: "1"
+    app: kube-grafana
+    prometheus: kube
+data:
+  tempo.yaml: |-
+    apiVersion: 1
+    datasources:
+      - name: "tempo"
+        type: tempo
+        uid: tempo
+        url: http://tempo.tracing.svc.cluster.local:3100/
+        access: proxy
+        jsonData:
+          handleGrafanaManagedAlerts: false
+          implementation: prometheus
