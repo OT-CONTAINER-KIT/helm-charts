@@ -14,5 +14,8 @@ dependencies:
 - name: prometheus-blackbox-exporter
   repository: https://prometheus-community.github.io/helm-charts/
   version: 8.17.0
-digest: sha256:fc4b5d1a68181468fa2ec35ef9307c470a68bfb0b4d46a191c772a82f85f70e7
-generated: "2024-07-12T21:49:05.791141+05:30"
+- name: thanos
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 15.7.12
+digest: sha256:4a0c393daa5d1e4bec2ae97f0a9506b11cf6e157fac593e970a727e1dd8f5459
+generated: "2024-07-17T10:22:19.985933+05:30"
