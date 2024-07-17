@@ -89,6 +89,9 @@ kube:
     thanosServiceMonitor:
       enabled: true
     prometheusSpec:
+      externalLabels:
+        kkubernetes_cluster: opstree
+        prometheus_cluster: kube
       # get more details https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#monitoring.coreos.com/v1.ThanosSpec
       thanos:
         version: 0.35.1
