@@ -92,6 +92,12 @@ kube:
       # get more details https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#monitoring.coreos.com/v1.ThanosSpec
       thanos:
         version: 0.35.1
+        # image: quay.io/thanos/thanos:v0.35.1
+        blockSize: 5m
+        objectStorageConfig:
+          existingSecret:
+            key: objstore.yml
+            name: monitoring-thanos-objstore-secret
     #   nodeSelector:
     #     appType: monitoring
     #   tolerations:
@@ -116,7 +122,7 @@ kube:
 #              action: keep
       # image:
       #   tag: v2.41.0
-      retention: 1d
+      retention: 1h
       replicas: 2
       # externalUrl: "http://kube-opstree.prod.internal/"
       resources:

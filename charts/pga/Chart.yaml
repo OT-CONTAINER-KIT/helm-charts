@@ -43,3 +43,11 @@ dependencies:
       - blackbox
     alias: blackbox
     condition: blackbox.enabled
+
+  - name: thanos
+    version: 15.7.12
+    repository: oci://registry-1.docker.io/bitnamicharts
+    tags:
+      - thanos
+    alias: thanos
+    condition: thanos.enabled
