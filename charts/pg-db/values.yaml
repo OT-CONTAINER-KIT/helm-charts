@@ -1,9 +1,20 @@
-opstree:
-  enabled: true
+postgresVersion: 16
+pause: false
+unmanaged: false
+standby:
+  enabled: false
+instances:
+- name: instance1
+  replicas: 2
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
 
-pg-db:
-  postgresVersion: 16
-  pause: false
-  unmanaged: false
-  standby:
-    enabled: false
+proxy:
+  pgBouncer:
+    replicas: 2
+    resources:
+      limits:
+        cpu: 200m
+        memory: 128Mi
