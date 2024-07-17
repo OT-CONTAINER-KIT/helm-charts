@@ -1,0 +1,9 @@
+opstree:
+  enabled: true
+
+pg-db:
+  postgresVersion: 16
+  pause: false
+  unmanaged: false
+  standby:
+    enabled: false
