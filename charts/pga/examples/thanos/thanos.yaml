@@ -1,0 +1,244 @@
+app:
+  enabled: false
+
+kube:
+  fullnameOverride: kube
+  commonLabels:
+    prometheus: kube
+  defaultRules:
+    create: false
+  alertmanager:
+    enabled: true
+    alertmanagerSpec:
+      retention: 240h
+      resources:
+        requests:
+          cpu: 250m
+          memory: 500Mi
+        limits:
+          cpu: 250m
+          memory: 500Mi
+      storage:
+        volumeClaimTemplate:
+          spec:
+            # storageClassName: encrypted-gp3
+            accessModes: [ "ReadWriteOnce" ]
+            resources:
+              requests:
+                storage: 1Gi
+  grafana:
+    enabled: true
+    sidecar:
+      datasources:
+        defaultDatasourceEnabled: false
+  kubeApiServer:
+    enabled: true
+  kubelet:
+    enabled: true
+    namespace: kube-system
+  kubeControllerManager:
+    enabled: false
+  coreDns:
+    enabled: true
+  kubeEtcd:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+  kubeProxy:
+    enabled: false
+  kubeStateMetrics:
+    enabled: true
+  kube-state-metrics:
+    customLabels:
+      prometheus: kube
+    enabled: true
+    podSecurityPolicy:
+      enabled: false
+    resources:
+      requests:
+        cpu: 250m
+        memory: 500Mi
+      limits:
+        cpu: 250m
+        memory: 500Mi
+  nodeExporter:
+    enabled: true
+  prometheus-node-exporter:
+    prometheus:
+      monitor:
+        additionalLabels:
+          prometheus: kube
+  #   rbac:
+  #     pspEnabled: false
+    # image:
+    #   repository:
+    #   tag: latest
+    #   pullPolicy: Always
+  prometheusOperator:
+    enabled: true
+    admissionWebhooks:
+      enabled: false
+    deployment:
+      enabled: true
+    tls:
+      enabled: false
+  prometheus:
+    enabled: true
+    thanosService:
+      enabled: true
+    thanosServiceMonitor:
+      enabled: true
+    prometheusSpec:
+      # get more details https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#monitoring.coreos.com/v1.ThanosSpec
+      thanos:
+        version: 0.35.1
+    #   nodeSelector:
+    #     appType: monitoring
+    #   tolerations:
+    #     - key: "appType"
+    #       operator: "Equal"
+    #       value: "monitoring"
+    #       effect: "NoSchedule"
+#      remoteWrite:
+#        - url: https://app.last9.io/jupiter/prometheus/write
+#          basicAuth:
+#            username:
+#              name: promsecret
+#              key: username
+#            password:
+#              name: promsecret
+#              key: password
+##          # Do not add the writeRelabelConfigs section if you want to
+##          # send all metrics via remote write
+##          writeRelabelConfigs:
+#            - sourceLabels: [ __name__ ]
+#              regex: 'istio*'
+#              action: keep
+      # image:
+      #   tag: v2.41.0
+      retention: 1d
+      replicas: 2
+      # externalUrl: "http://kube-opstree.prod.internal/"
+      resources:
+        requests:
+          cpu: "500m"
+          memory: 500Mi
+        limits:
+          cpu: "500m"
+          memory: 500Mi
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            # storageClassName: encrypted-gp3
+            accessModes:
+              - "ReadWriteOnce"
+            resources:
+              requests:
+                storage: 1Gi
+      serviceMonitorSelector:
+        matchExpressions:
+          - key: prometheus
+            operator: In
+            values:
+              - kube
+      podMonitorSelector:
+        matchExpressions:
+          - key: prometheus
+            operator: In
+            values:
+              - kube
+      ruleSelector:
+        matchLabels:
+          prometheus: kube
+    service:
+      name: kube-prometheus
+
+
+pushgateway:
+  enabled: false
+  serviceMonitor:
+    enabled: true
+    namespace: monitoring
+    additionalLabels:
+      prometheus: app
+  extraArgs:
+    - --log.level=debug
+    - --push.disable-consistency-check
+  resources:
+    limits:
+      cpu: 1
+      memory: 4096Mi
+    requests:
+      cpu: 500m
+      memory: 4096Mi
+
+blackbox:
+  enabled: false
+  serviceMonitor:
+    enabled: true
+    defaults:
+      additionalMetricsRelabels: {}
+      labels:
+        prometheus: app
+      interval: 30s
+      scrapeTimeout: 30s
+      module: http_2xx
+  config:
+    modules:
+      http_2xx:
+        prober: http
+        timeout: 5s
+        http:
+          valid_http_versions: [ "HTTP/1.0", "HTTP/1.1", "HTTP/2.0" ]
+          no_follow_redirects: false
+          preferred_ip_protocol: "ip4"
+          fail_if_ssl: false
+          fail_if_not_ssl: false
+
+adapter:
+    enabled: false
+
+thanos:
+  enabled: true
+  objstoreConfig: |-
+    type: s3
+    config:
+      bucket: thanos
+      endpoint: monitoring-minio.monitoring.svc.cluster.local:9000
+      access_key: minio
+      secret_key: minio123
+      insecure: true
+  query:
+    dnsDiscovery:
+      sidecarsService: kube-thanos-discovery
+      sidecarsNamespace: monitoring
+  bucketweb:
+    enabled: true
+  compactor:
+    enabled: true
+  storegateway:
+    enabled: true
+  ruler:
+    enabled: true
+    alertmanagers:
+      - http://kube-alertmanager.monitoring.svc.cluster.local:9093
+    config: |-
+      groups:
+        - name: "metamonitoring"
+          rules:
+            - alert: "PrometheusDown"
+              expr: absent(up{prometheus="monitoring/kube-prometheus"})
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+  minio:
+    enabled: true
+    auth:
+      rootPassword: minio123
+      rootUser: minio
+    monitoringBuckets: thanos
+    accessKey:
+      password: minio
+    secretKey:
+      password: minio123
