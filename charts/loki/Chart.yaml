@@ -11,3 +11,9 @@ dependencies:
     alias: logging
     tags:
       - logging
+  - name: promtail
+    version: 6.16.4
+    repository: https://grafana.github.io/helm-charts
+    alias: promtail
+    tags:
+      - logging
