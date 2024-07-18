@@ -1,32 +1,6 @@
-pg-operator:
+pxc-operator:
   enabled: true
-
 pg-db:
   enabled: true
-  postgresVersion: 16
-  pause: false
-  unmanaged: false
-  standby:
+  pmm:
     enabled: false
-  instances:
-  - name: instance1
-    replicas: 3
-    resources:
-      requests:
-        cpu: 2.0
-        memory: 4Gi
-    dataVolumeClaimSpec:
-      storageClassName: standard
-      accessModes:
-      - ReadWriteOnce
-      resources:
-        requests:
-          storage: 5Gi
-
-  proxy:
-    pgBouncer:
-      replicas: 3
-      resources:
-        limits:
-          cpu: 200m
-          memory: 128Mi
