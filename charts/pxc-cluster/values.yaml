@@ -1,3 +1,5 @@
+pxc-operator:
+  enabled: true
 msyql:
   enabled: true
   allowUnsafeConfigurations: true
