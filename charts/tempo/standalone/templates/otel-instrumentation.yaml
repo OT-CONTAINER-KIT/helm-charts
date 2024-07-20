@@ -2,14 +2,14 @@ apiVersion: opentelemetry.io/v1alpha1
 kind: Instrumentation
 metadata:
   name: otel-instrumentation
-  namespace: opstree
+  namespace: default
 spec:
   exporter:
-    endpoint: http://otel-collector-collector-headless.tracing.svc.cluster.local:4317
+    endpoint: http://opentelemetry-collector-headless.observability.svc.cluster.local:4317
   propagators:
     - tracecontext
     - baggage
     - b3
   sampler:
     type: parentbased_traceidratio
-    argument: "0.25"
+    argument: "1"

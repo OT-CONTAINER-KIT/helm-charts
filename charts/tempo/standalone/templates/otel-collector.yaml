@@ -9,8 +9,10 @@ spec:
     receivers:
       otlp:
         protocols:
-          grpc: {}
-          http: {}
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
 
     exporters:
       otlp:
@@ -22,15 +24,25 @@ spec:
       debug: {}
 
     processors:
-      batch: {}
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 75
+        spike_limit_percentage: 15
+      batch:
+        send_batch_size: 10000
+        timeout: 10s
 
     service:
       pipelines:
         traces:
           receivers: [otlp]
-          processors: [batch]
+          processors: [memory_limiter, batch]
           exporters: [debug, otlp]
         metrics:
           receivers: [otlp]
-          processors: [batch]
+          processors: [memory_limiter, batch]
           exporters: [prometheus, debug]
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [debug]
