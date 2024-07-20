@@ -1,6 +1,11 @@
-pxc-operator:
+pg-operator:
   enabled: true
 pg-db:
   enabled: true
   pmm:
     enabled: false
+  proxy:
+    pgBouncer:
+      config:
+        global:
+          client_tls_sslmode: prefer
