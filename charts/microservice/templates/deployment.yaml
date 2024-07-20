@@ -5,9 +5,9 @@ kind: Deployment
 metadata:
   name: {{ include "microservice.fullname" . }}-app
   namespace: {{ .Values.global.namespace | quote }}
-  {{- if .Values.annotations }}
+  {{- if .Values.deployment.annotations }}
   annotations:
-  {{- range $key, $value := .Values.annotations }}
+  {{- range $key, $value := .Values.deployment.annotations }}
     {{ $key }}: {{ $value }}
   {{- end }}
   {{- end }}
@@ -15,6 +15,11 @@ metadata:
     {{- include "microservice.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.global.replicaCount }}
+  {{- if .Values.deployment.strategy }}
+  strategy:
+    {{- toYaml .Values.deployment.strategy | nindent 4 }}
+  {{- end }}
+  terminationGracePeriodSeconds: {{ .Values.deployment.terminationGracePeriodSeconds }}
   selector:
     matchLabels:
       {{- include "microservice.selectorLabels" . | nindent 6 }}
@@ -22,6 +27,12 @@ spec:
     metadata:
       labels:
         {{- include "microservice.selectorLabels" . | nindent 8 }}
+      {{- if .Values.deployment.annotations }}
+      annotations:
+        {{- range $key, $value := .Values.deployment.podAnnotations }}
+          {{ $key }}: {{ $value }}
+      {{- end }}
+      {{- end }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -51,11 +62,11 @@ spec:
             value: {{ $value | quote }}
           {{- end }}
           {{- end }}
-          {{- if .Values.deployment.livenessProbe }}
+          {{- if and .Values.deployment.healthProbes.enabled .Values.deployment.livenessProbe }}
           livenessProbe:
             {{- toYaml .Values.deployment.livenessProbe | nindent 12 }}
           {{- end }}
-          {{- if .Values.deployment.readinessProbe }}
+          {{- if and .Values.deployment.healthProbes.enabled .Values.deployment.readinessProbe }}
           readinessProbe:
             {{- toYaml .Values.deployment.readinessProbe | nindent 12 }}
           {{- end }}
