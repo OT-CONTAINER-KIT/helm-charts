@@ -27,10 +27,10 @@ spec:
     metadata:
       labels:
         {{- include "microservice.selectorLabels" . | nindent 8 }}
-      {{- if .Values.deployment.annotations }}
+      {{- if .Values.deployment.podAnnotations }}
       annotations:
-        {{- range $key, $value := .Values.deployment.podAnnotations }}
-          {{ $key }}: {{ $value }}
+      {{- range $key, $value := .Values.deployment.podAnnotations }}
+        {{ $key }}: {{ $value }}
       {{- end }}
       {{- end }}
     spec:
