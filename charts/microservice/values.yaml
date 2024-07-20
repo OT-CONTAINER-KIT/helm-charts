@@ -21,15 +21,23 @@ deployment:
     tag: ""
     pullPolicy: IfNotPresent
 
+  strategy: {}
+
   # Annotation for the Deployment
   annotations: {}
+  podAnnotations: {}
+
+  terminationGracePeriodSeconds: 30
+
+  healthProbes:
+    enabled: true
 
   # livenessProbe: {}
   livenessProbe:
     # httpGet:
     #   path: "/"
     #   port: http
-    initialDelaySeconds: 250
+    initialDelaySeconds: 30
     periodSeconds: 10
     timeoutSeconds: 5
     successThreshold: 1
