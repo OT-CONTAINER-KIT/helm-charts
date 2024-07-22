@@ -291,3 +291,6 @@ blackbox:
 
 adapter:
     enabled: false
+
+thanos:
+  enabled: false
