@@ -3,8 +3,20 @@ kind: OpenTelemetryCollector
 metadata:
   name: opentelemetry
 spec:
-  mode: daemonset
-  hostNetwork: true
+  mode: deployment
+  resources:
+    requests:
+      cpu: 300m
+      memory: 300Mi
+    Limits:
+      cpu: 300m
+      memory: 300Mi
+  autoscaler:
+    minReplicas: 2
+    maxReplicas: 4
+    targetCPUUtilization: 80
+    targetMemoryUtilization: 80
+    
   config:
     receivers:
       otlp:
@@ -32,14 +44,23 @@ spec:
         send_batch_size: 10000
         timeout: 10s
 
+    connectors:
+      spanmetrics:
+        dimensions:
+          - name: http.method
+          - name: http.status_code
+          - name: http.route
+        exemplars:
+          enabled: true
+
     service:
       pipelines:
         traces:
           receivers: [otlp]
           processors: [memory_limiter, batch]
-          exporters: [debug, otlp]
+          exporters: [debug, otlp ,spanmetrics]
         metrics:
-          receivers: [otlp]
+          receivers: [spanmetrics, otlp]
           processors: [memory_limiter, batch]
           exporters: [prometheus, debug]
         logs:
