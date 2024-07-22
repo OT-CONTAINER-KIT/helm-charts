@@ -2,7 +2,9 @@ app:
   enabled: false
 
 kube:
+  enabled: true
   fullnameOverride: kube
+  namespaceOverride: monitoring
   commonLabels:
     prometheus: kube
   defaultRules:
@@ -28,6 +30,7 @@ kube:
                 storage: 1Gi
   grafana:
     enabled: true
+    namespaceOverride: monitoring
     sidecar:
       datasources:
         defaultDatasourceEnabled: false
@@ -49,6 +52,7 @@ kube:
   kubeStateMetrics:
     enabled: true
   kube-state-metrics:
+    namespaceOverride: monitoring
     customLabels:
       prometheus: kube
     enabled: true
@@ -64,6 +68,7 @@ kube:
   nodeExporter:
     enabled: true
   prometheus-node-exporter:
+    namespaceOverride: monitoring
     prometheus:
       monitor:
         additionalLabels:
@@ -209,6 +214,7 @@ adapter:
 
 thanos:
   enabled: true
+  namespaceOverride: monitoring
   objstoreConfig: |-
     type: s3
     config:
@@ -218,17 +224,24 @@ thanos:
       secret_key: minio123
       insecure: true
   query:
+    namespaceOverride: monitoring
     dnsDiscovery:
       sidecarsService: kube-thanos-discovery
       sidecarsNamespace: monitoring
   bucketweb:
+    namespaceOverride: monitoring
     enabled: true
   compactor:
-    enabled: true
+    namespaceOverride: monitoring
+    enabled: false
   storegateway:
+    namespaceOverride: monitoring
     enabled: true
   ruler:
+    namespaceOverride: monitoring
     enabled: true
+    serviceMonitor:
+      namespace: monitoring
     alertmanagers:
       - http://kube-alertmanager.monitoring.svc.cluster.local:9093
     config: |-
@@ -239,10 +252,13 @@ thanos:
               expr: absent(up{prometheus="monitoring/kube-prometheus"})
   metrics:
     enabled: true
+    namespaceOverride: monitoring
     serviceMonitor:
+      namespace: monitoring
       enabled: true
   minio:
     enabled: true
+    namespaceOverride: monitoring
     auth:
       rootPassword: minio123
       rootUser: minio
