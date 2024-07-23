@@ -16,7 +16,7 @@ spec:
     maxReplicas: 4
     targetCPUUtilization: 80
     targetMemoryUtilization: 80
-    
+
   config:
     receivers:
       otlp:
@@ -63,7 +63,4 @@ spec:
           receivers: [spanmetrics, otlp]
           processors: [memory_limiter, batch]
           exporters: [prometheus, debug]
-        logs:
-          receivers: [otlp]
-          processors: [memory_limiter, batch]
-          exporters: [debug]
+
