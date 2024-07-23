@@ -2638,6 +2638,32 @@ entries:
     version: 0.5.0
   redis-replication:
   - apiVersion: v2
+    appVersion: 0.16.1
+    created: "2024-07-23T05:21:47.223271696Z"
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: c5845bea9e14bf4fe2ef2a0293be2209b16842ff43546ba5057c29811a3d00a7
+    home: https://github.com/ot-container-kit/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    - redis-exporter
+    maintainers:
+    - name: iamabhishek-dubey
+    - name: sandy724
+    - name: shubham-cmyk
+    name: redis-replication
+    sources:
+    - https://github.com/ot-container-kit/redis-operator
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-replication-0.16.1/redis-replication-0.16.1.tgz
+    version: 0.16.1
+  - apiVersion: v2
     appVersion: 0.16.0
     created: "2024-05-20T13:05:39.430678456Z"
     description: Provides easy redis setup definitions for Kubernetes services, and
@@ -3200,4 +3226,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-setup-0.5.0/redis-setup-0.5.0.tgz
     version: 0.5.0
-generated: "2024-07-12T15:28:19.958443919Z"
+generated: "2024-07-23T05:21:47.397203334Z"
