@@ -2873,6 +2873,32 @@ entries:
     version: 0.14.2
   redis-sentinel:
   - apiVersion: v2
+    appVersion: 0.16.2
+    created: "2024-07-23T10:14:06.354556901Z"
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: f0da2a9bd20d5b58df485f3d9d0b68e2f8fa6b1d49b8c5c665345b3e869f9024
+    home: https://github.com/ot-container-kit/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    - redis-exporter
+    maintainers:
+    - name: iamabhishek-dubey
+    - name: sandy724
+    - name: shubham-cmyk
+    name: redis-sentinel
+    sources:
+    - https://github.com/ot-container-kit/redis-operator
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-sentinel-0.16.2/redis-sentinel-0.16.2.tgz
+    version: 0.16.2
+  - apiVersion: v2
     appVersion: 0.16.1
     created: "2024-07-10T06:34:15.492356682Z"
     description: Provides easy redis setup definitions for Kubernetes services, and
@@ -3226,4 +3252,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-setup-0.5.0/redis-setup-0.5.0.tgz
     version: 0.5.0
-generated: "2024-07-23T05:21:47.397203334Z"
+generated: "2024-07-23T10:14:06.354842165Z"
