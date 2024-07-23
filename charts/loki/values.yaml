@@ -147,10 +147,14 @@ logging:
       sidecar.istio.io/inject: "false"
     storageConfig:
       aws:
-        region: ap-south-1
-        bucketnames: jm-prod-loki-app-logs
-        s3forcepathstyle: false
-        sse_encryption: true
+        s3: http://minio:minio123@monitoring-minio.monitoring.svc:9000/loki
+        s3forcepathstyle: true
+        region: us-east-1
+      # aws:
+      #   region: ap-south-1
+      #   bucketnames: jm-prod-loki-app-logs
+      #   s3forcepathstyle: false
+      #   sse_encryption: true
       boltdb_shipper:
         shared_store: s3
         cache_ttl: 24h
@@ -493,6 +497,5 @@ logging:
 promtail:
   config:
     logLevel: info
-    serverPort: 80
     clients:
       - url: http://loki-logging-gateway.logging.svc.cluster.local/loki/api/v1/push
