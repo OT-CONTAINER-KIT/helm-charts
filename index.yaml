@@ -2638,6 +2638,32 @@ entries:
     version: 0.5.0
   redis-replication:
   - apiVersion: v2
+    appVersion: 0.16.2
+    created: "2024-07-24T03:24:39.688278925Z"
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: 7160dfaf735628da3d7457e7e5f64b7c9c1777bf7432e060be92840e26145946
+    home: https://github.com/ot-container-kit/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    - redis-exporter
+    maintainers:
+    - name: iamabhishek-dubey
+    - name: sandy724
+    - name: shubham-cmyk
+    name: redis-replication
+    sources:
+    - https://github.com/ot-container-kit/redis-operator
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-replication-0.16.2/redis-replication-0.16.2.tgz
+    version: 0.16.2
+  - apiVersion: v2
     appVersion: 0.16.1
     created: "2024-07-23T05:21:47.223271696Z"
     description: Provides easy redis setup definitions for Kubernetes services, and
@@ -2872,6 +2898,32 @@ entries:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-replication-0.14.2/redis-replication-0.14.2.tgz
     version: 0.14.2
   redis-sentinel:
+  - apiVersion: v2
+    appVersion: 0.16.3
+    created: "2024-07-24T03:24:39.821940201Z"
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: 8a1e58136b3414e082c7623bcc6c1ed5e9e55cf2f722c3c16c7a60fe6e42d75f
+    home: https://github.com/ot-container-kit/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    - redis-exporter
+    maintainers:
+    - name: iamabhishek-dubey
+    - name: sandy724
+    - name: shubham-cmyk
+    name: redis-sentinel
+    sources:
+    - https://github.com/ot-container-kit/redis-operator
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-sentinel-0.16.3/redis-sentinel-0.16.3.tgz
+    version: 0.16.3
   - apiVersion: v2
     appVersion: 0.16.2
     created: "2024-07-23T10:14:06.354556901Z"
@@ -3252,4 +3304,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-setup-0.5.0/redis-setup-0.5.0.tgz
     version: 0.5.0
-generated: "2024-07-23T10:14:06.354842165Z"
+generated: "2024-07-24T03:24:39.822215956Z"
