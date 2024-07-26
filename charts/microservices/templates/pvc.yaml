@@ -1,0 +1,21 @@
+{{- if .Values.deployment.volumes.pvc.enabled }}
+{{- if .Values.deployment.volumes.pvc.existing_claim -}}
+{{- else -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.deployment.volumes.pvc.name }}
+  namespace: {{ .Values.global.namespace | quote }}
+spec:
+  {{- if .Values.deployment.volumes.pvc.class }}
+  storageClassName: {{ .Values.deployment.volumes.pvc.class }}
+  {{- end }}
+  accessModes:
+    {{- range $accessMode := .Values.deployment.volumes.pvc.accessModes }}
+    - {{ $accessMode }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.deployment.volumes.pvc.size }}
+{{- end }}
+{{- end }}

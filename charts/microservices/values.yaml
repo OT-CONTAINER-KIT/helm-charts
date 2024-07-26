@@ -1,0 +1,108 @@
+# -- global variables
+global:
+  namespace: "default"
+#  replicaCount: 5 
+  nameOverride: ""
+  fullnameOverride: ""
+  imagePullSecrets:
+  environment: {}
+  # list of key: value
+  # GLOBAL1: value
+
+## @param kubeVersion Override Kubernetes version
+kubeVersion: ""
+
+# -- Object that configures Deployment instance
+deployment:
+  # -- Override default container image format
+  image:
+    name: ""
+    tag: ""
+    pullPolicy: IfNotPresent
+
+  # Annotation for the Deployment
+  annotations: {}
+
+  livenessProbe:
+#     httpGet:
+#      path: "/health"
+#      port: http
+    initialDelaySeconds: 250
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 5
+
+  readinessProbe:
+#     httpGet:
+#      path: "/readiness"
+#      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 5
+
+  environment: {}
+  #   VAR1: value1
+
+  resources: {}
+
+  volumes:
+    enabled: true
+    pvc:
+      enabled: false
+      existing_claim: false
+      name: pvc
+      mountPath: /pv
+      size: 1G
+      class: "default"
+      accessModes:
+        - ReadWriteOnce
+
+    configMaps: []
+
+  volumeMounts: []
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app: "my-microservice"
+          topologyKey: topology.kubernetes.io/zone
+
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: "topology.kubernetes.io/zone"  # Ensure this key is valid
+      whenUnsatisfiable: "DoNotSchedule"
+      labelSelector:
+        matchLabels:
+          app: "my-microservice"
+      minDomains: 2
+
+hpa:
+  enabled: true
+  minReplicas: 5 
+  maxReplicas: 6
+  targetCPU: 80
+  targetMemory: 80
+
+service:
+  type: ClusterIP
+  annotations: {}
+  specs:
+    - port: 80
+      name: http
+
+serviceAccount:
+  create: false
+  automount: true
+  annotations: {}
+  name: ""

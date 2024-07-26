@@ -1,0 +1,22 @@
+{{ template "chart.header" . }}
+{{ template "chart.description" . }}
+
+{{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}{{ template "chart.appVersionBadge" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+## Installing the Chart
+
+To install the chart with the release name `my-release`:
+
+```console
+$ helm install my-release microservice/
+```
+
+{{/* {{ template "chart.requirementsSection" . }} */}}
+
+{{ template "chart.valuesSection" . }}
+
+> **_NOTE:_**  Please find the sample helm values yaml in example repository.
+
+{{/* {{ template "helm-docs.versionFooter" . }} */}}
