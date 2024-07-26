@@ -39,25 +39,43 @@ spec:
           args: {{ .Values.deployment.args }}
           {{- end }}
           ports:
-            {{- range .Values.service.specs}}
+            {{- range .Values.service.specs }}
             - name: {{ .name }}
-              containerPort: {{ .targetPort | default .port}}
+              containerPort: {{ .targetPort | default .port }}
               protocol: {{ .protocol | default "TCP" }}
             {{- end }}
           {{- if (merge .Values.global.environment .Values.deployment.environment) }}
           env:
-          {{- range $name, $value := merge .Values.global.environment .Values.deployment.environment}}
-          - name: {{ $name | quote}}
+          {{- range $name, $value := merge .Values.global.environment .Values.deployment.environment }}
+          - name: {{ $name | quote }}
             value: {{ $value | quote }}
           {{- end }}
           {{- end }}
           {{- if .Values.deployment.livenessProbe }}
           livenessProbe:
-            {{- toYaml .Values.deployment.livenessProbe | nindent 12 }}
+            {{- with .Values.deployment.livenessProbe }}
+            httpGet:
+              path: {{ .httpGet.path | quote }}
+              port: {{ .httpGet.port | quote }}
+            initialDelaySeconds: {{ .initialDelaySeconds }}
+            periodSeconds: {{ .periodSeconds }}
+            timeoutSeconds: {{ .timeoutSeconds }}
+            successThreshold: {{ .successThreshold }}
+            failureThreshold: {{ .failureThreshold }}
+            {{- end }}
           {{- end }}
           {{- if .Values.deployment.readinessProbe }}
           readinessProbe:
-            {{- toYaml .Values.deployment.readinessProbe | nindent 12 }}
+            {{- with .Values.deployment.readinessProbe }}
+            httpGet:
+              path: {{ .httpGet.path | quote }}
+              port: {{ .httpGet.port | quote }}
+            initialDelaySeconds: {{ .initialDelaySeconds }}
+            periodSeconds: {{ .periodSeconds }}
+            timeoutSeconds: {{ .timeoutSeconds }}
+            successThreshold: {{ .successThreshold }}
+            failureThreshold: {{ .failureThreshold }}
+            {{- end }}
           {{- end }}
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
@@ -78,12 +96,12 @@ spec:
         - name: {{ include "microservice.fullname" $root }}-{{ $conf.name }}-cm
           configMap:
             name: {{ include "microservice.fullname" $root }}-{{ $conf.name }}-cm
-      {{- end }}
-      {{- if .Values.deployment.volumes.pvc.enabled}}
-        - name: {{ .Values.deployment.volumes.pvc.existing_claim | default .Values.volumes.pvc.name }}-volume
+        {{- end }}
+        {{- if .Values.deployment.volumes.pvc.enabled }}
+        - name: {{ .Values.deployment.volumes.pvc.existing_claim | default .Values.deployment.volumes.pvc.name }}-volume
           persistentVolumeClaim:
-            claimName: {{ .Values.deployment.volumes.pvc.existing_claim | default .Values.volumes.pvc.name }}
-      {{- end}}
+            claimName: {{ .Values.deployment.volumes.pvc.existing_claim | default .Values.deployment.volumes.pvc.name }}
+        {{- end }}
       {{- end }}
       {{- with .Values.deployment.nodeSelector }}
       nodeSelector:
@@ -96,4 +114,16 @@ spec:
       {{- with .Values.deployment.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- range . }}
+        - maxSkew: {{ .maxSkew }}
+          topologyKey: {{ .topologyKey | quote }}  # Ensure this is set and not empty
+          whenUnsatisfiable: {{ .whenUnsatisfiable }}
+          labelSelector:
+            matchLabels:
+              app: {{ include "microservice.fullname" $root }}
+          minDomains: {{ .minDomains }}
+        {{- end }}
       {{- end }}

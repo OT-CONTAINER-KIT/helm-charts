@@ -1,16 +1,15 @@
 # -- global variables
 global:
   namespace: "default"
-  replicaCount: 1
+#  replicaCount: 5 
   nameOverride: ""
   fullnameOverride: ""
-  imagePullSecrets: []
+  imagePullSecrets:
   environment: {}
-   # list of key: value
-   # GLOBAL1: value
+  # list of key: value
+  # GLOBAL1: value
 
 ## @param kubeVersion Override Kubernetes version
-##
 kubeVersion: ""
 
 # -- Object that configures Deployment instance
@@ -24,45 +23,31 @@ deployment:
   # Annotation for the Deployment
   annotations: {}
 
-  # livenessProbe: {}
   livenessProbe:
-    # httpGet:
-    #   path: "/"
-    #   port: http
+#     httpGet:
+#      path: "/health"
+#      port: http
     initialDelaySeconds: 250
     periodSeconds: 10
     timeoutSeconds: 5
     successThreshold: 1
     failureThreshold: 5
 
-  # readinessProbe: {}
   readinessProbe:
-    # httpGet:
-    #   path: "/"
-    #   port: http
+#     httpGet:
+#      path: "/readiness"
+#      port: http
     initialDelaySeconds: 30
     periodSeconds: 10
     timeoutSeconds: 5
     successThreshold: 1
     failureThreshold: 5
 
-  # command: ["/bin/sh","-c"]
-  # args: ["echo 'consuming a message'; sleep 5"]
-
   environment: {}
   #   VAR1: value1
 
   resources: {}
 
-  # resources:
-  #   requests:
-  #     memory: 100Mi
-  #     cpu: 100m
-  #   limits:
-  #     memory: 100Mi
-  #     cpu: 100m
-
-  # Additional volumes on the output Deployment definition.
   volumes:
     enabled: true
     pvc:
@@ -75,49 +60,37 @@ deployment:
       accessModes:
         - ReadWriteOnce
 
-    # configFileCommonHeader: |
-    #   line1
-    #   line2
-
-    configMaps:
-    #   - name: test
-    #     mountPath: /test
-    #     data:
-    #       test.conf: |
-    #         hello
-    #         hello2
-
-    #   - name: test-from-file
-    #     mountPath: /test2
-    #     files:
-    #       - source: config.conf
-    #         destination: application.conf
-    #   - name: test-mixed
-    #     mountPath: /test3
-    #     data:
-    #       test2.conf: |
-    #         another hello
-    #     files:
-    #       - source: config.conf
-    #         destination: application2.conf
-
-  # Additional volumeMounts on the output Deployment definition.
+    configMaps: []
 
   volumeMounts: []
-  # - name: foo
-  #   mountPath: "/etc/foo"
-  #   readOnly: true
 
   nodeSelector: {}
 
   tolerations: []
 
-  affinity: {}
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app: "my-microservice"
+          topologyKey: topology.kubernetes.io/zone
+
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: "topology.kubernetes.io/zone"  # Ensure this key is valid
+      whenUnsatisfiable: "DoNotSchedule"
+      labelSelector:
+        matchLabels:
+          app: "my-microservice"
+      minDomains: 2
 
 hpa:
   enabled: true
-  minReplicas: 1
-  maxReplicas: 1
+  minReplicas: 5 
+  maxReplicas: 6
   targetCPU: 80
   targetMemory: 80
 
@@ -125,15 +98,11 @@ service:
   type: ClusterIP
   annotations: {}
   specs:
-  - port: 80
-    name: http
+    - port: 80
+      name: http
 
 serviceAccount:
   create: false
-  # Automatically mount a ServiceAccount's API credentials?
   automount: true
-  # Annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
   name: ""
