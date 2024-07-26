@@ -16,6 +16,7 @@ This chart will deploy the Operator Pod and a PostgreSQL cluster in Kubernetes. 
 To install the chart with the `my-db` release name using a dedicated namespace (recommended):
 
 ```sh
+helm dependency build
 helm install my-db <path-to-chart> --namespace my-namespace
 ```
 

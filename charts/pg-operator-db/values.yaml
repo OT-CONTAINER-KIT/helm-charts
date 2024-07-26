@@ -22,6 +22,16 @@ pg-db:
           storage: 1Gi
   pmm:
     enabled: false
+    image:
+      repository: percona/pmm-client
+      tag: 2.42.0
+  #  imagePullPolicy: IfNotPresent
+    secret: cluster1-pmm-secret
+    serverHost: monitoring-service
+  #  resources:
+  #    requests:
+  #      memory: 200M
+  #      cpu: 500m
   proxy:
     pgBouncer:
       replicas: 2
