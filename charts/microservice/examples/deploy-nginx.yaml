@@ -1,5 +1,6 @@
 global:
-  namespace: "demo-dev"
+  namespace: "default"
+#  replicaCount: 5
   fullnameOverride: "webapp"
 
 deployment:
