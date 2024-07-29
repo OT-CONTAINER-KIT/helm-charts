@@ -468,6 +468,20 @@ entries:
   microservice:
   - apiVersion: v2
     appVersion: 0.1.2
+    created: "2024-07-29T18:34:21.881573224Z"
+    description: Basic helm chart for deploying microservices on kubernetes with best
+      practices
+    digest: 29227d5b5298a3a3d8a691a64e4d35ab025084ede0d9666c03766a33f6f59d7b
+    maintainers:
+    - name: ashwani-opstree
+    - name: tripathishikha1
+    name: microservice
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/microservice-0.1.4/microservice-0.1.4.tgz
+    version: 0.1.4
+  - apiVersion: v2
+    appVersion: 0.1.2
     created: "2024-07-09T07:13:52.869459121Z"
     description: Basic helm chart for deploying microservices on kubernetes with best
       practices
@@ -3304,4 +3318,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-setup-0.5.0/redis-setup-0.5.0.tgz
     version: 0.5.0
-generated: "2024-07-24T03:24:39.822215956Z"
+generated: "2024-07-29T18:34:21.881804858Z"
