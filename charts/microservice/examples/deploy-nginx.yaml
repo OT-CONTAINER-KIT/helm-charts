@@ -30,4 +30,4 @@ deployment:
         data:
           index.html: |
             Hello! Opstree
-            
+          
