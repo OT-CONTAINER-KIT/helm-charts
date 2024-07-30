@@ -1,7 +1,7 @@
 # -- global variables
 global:
   namespace: "default"
-#  replicaCount: 5
+  replicaCount: 1
   nameOverride: ""
   fullnameOverride: ""
   imagePullSecrets: []
