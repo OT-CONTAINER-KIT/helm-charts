@@ -24,9 +24,9 @@ deployment:
       memory: 500Mi
       cpu: 500m
   affinity:
-    enabled: true # Set to false to disable podAntiAffinity
+    enabled: false # Set to false to disable podAntiAffinity
   topologySpreadConstraints:
-    enabled: true # Set to false to disable topologySpreadConstraints
+    enabled: false # Set to false to disable topologySpreadConstraints
   volumes:
     enabled: true
     configMaps:
