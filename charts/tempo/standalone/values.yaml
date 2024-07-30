@@ -2,6 +2,7 @@ tempo:
   enabled: true
   fullnameOverride: tempo
   tempo:
+    retention: 168h
     resources:
       requests:
         cpu:  1
