@@ -121,23 +121,10 @@ deployment:
   tolerations: []
 
   affinity: 
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchLabels:
-              app: "my-microservice"
-          topologyKey: topology.kubernetes.io/zone
+    enabled: true
 
   topologySpreadConstraints:
-    - maxSkew: 1
-      topologyKey: "topology.kubernetes.io/zone"  # Ensure this key is valid
-      whenUnsatisfiable: "DoNotSchedule"
-      labelSelector:
-        matchLabels:
-          app: "my-microservice"
-      minDomains: 2
+    enabled: true
 
 hpa:
   enabled: true
