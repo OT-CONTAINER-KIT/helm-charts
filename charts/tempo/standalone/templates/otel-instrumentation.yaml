@@ -2,6 +2,7 @@ apiVersion: opentelemetry.io/v1alpha1
 kind: Instrumentation
 metadata:
   name: otel-instrumentation
+  namespace: observability
 spec:
   exporter:
     endpoint: http://opentelemetry-collector.observability.svc.cluster.local:4317

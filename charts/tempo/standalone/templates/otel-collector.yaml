@@ -2,13 +2,14 @@ apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
   name: opentelemetry
+  namespace: observability
 spec:
   mode: deployment
   resources:
     requests:
       cpu: 300m
       memory: 300Mi
-    Limits:
+    limits:
       cpu: 300m
       memory: 300Mi
   autoscaler:
@@ -64,3 +65,25 @@ spec:
           processors: [memory_limiter, batch]
           exporters: [prometheus, debug]
 
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app: otel-collector-trace-metrics
+    prometheus: kube
+    release: monitoring
+  name: otel-collector-trace-metrics
+  namespace: observability
+spec:
+  endpoints:
+    - interval: 10s
+      path: /metrics
+      targetPort: 8889
+  namespaceSelector:
+    matchNames:
+      - observability
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: opentelemetry-collector
+      operator.opentelemetry.io/collector-service-type: base

@@ -1,3 +1,17 @@
 tempo:
   enabled: true
   fullnameOverride: tempo
+  tempo:
+    resources:
+      requests:
+        cpu:  1
+        memory: 2Gi
+      limits:
+        cpu: 1
+        memory: 2Gi
+
+  persistence:
+    enabled: true
+
+  serviceMonitor:
+    enabled: true
