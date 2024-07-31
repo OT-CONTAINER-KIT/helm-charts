@@ -109,7 +109,7 @@ app:
               target_label: __param_target
               replacement: ${1}${2}
             - source_labels:
-              - __param_target ]
+                - __param_target ]
               target_label: instance
             - source_labels: []
               target_label: __address__
@@ -138,7 +138,8 @@ kube:
         volumeClaimTemplate:
           spec:
             # storageClassName: encrypted-gp3
-            accessModes: [ "ReadWriteOnce" ]
+            accessModes:
+              - "ReadWriteOnce"
             resources:
               requests:
                 storage: 1Gi
@@ -304,7 +305,7 @@ blackbox:
           fail_if_not_ssl: false
 
 adapter:
-    enabled: false
+  enabled: false
 
 thanos:
   enabled: false
