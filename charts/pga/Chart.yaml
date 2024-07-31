@@ -49,7 +49,7 @@ dependencies:
 
   - name: thanos
     version: 15.7.12
-    repository: oci://registry-1.docker.io/bitnamicharts
+    repository: https://charts.bitnami.com/bitnami
     tags:
       - thanos
     alias: thanos
