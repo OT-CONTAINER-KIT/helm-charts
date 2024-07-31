@@ -4,6 +4,9 @@ description: A Helm chart for prometheus, grafana and alertmanager
 type: application
 version: 1.0.0
 appVersion: 1.0.0
+maintainers:
+  - name: ashwani-opstree
+
 dependencies:
   - name: kube-prometheus-stack
     version: 61.3.1
