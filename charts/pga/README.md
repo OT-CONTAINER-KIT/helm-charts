@@ -19,19 +19,18 @@ kubectl apply --server-side=true -f https://raw.githubusercontent.com/prometheus
 kubectl apply --server-side=true -f https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-61.5.0/charts/kube-prometheus-stack/charts/crds/crds/crd-thanosrulers.yaml
 ```
 ## 2. Update Helm Chart Dependencies
-```
+```bash
 helm dep update
 ```
 Updates Helm chart dependencies.
 
 ## 3. Create a Namespace for Monitoring
-
-```
+```bash
 kubectl create ns monitoring
 ```
 Creates a Kubernetes namespace named monitoring.
 
 ## 4. Render chart templates locally and apply
-```
+```bash
 helm template --name-template=monitoring . -n monitoring -f values.yaml | kubectl apply -f -
 ```
