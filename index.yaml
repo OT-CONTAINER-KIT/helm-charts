@@ -817,6 +817,61 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/mysql-0.1.0/mysql-0.1.0.tgz
     version: 0.1.0
+  pga:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-07-31T17:58:07.035009124Z"
+    dependencies:
+    - alias: app
+      condition: app.enabled
+      name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts/
+      tags:
+      - monitoring
+      version: 61.3.1
+    - alias: kube
+      name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts/
+      tags:
+      - monitoring
+      version: 61.3.1
+    - alias: adapter
+      condition: adapter.enabled
+      name: prometheus-adapter
+      repository: https://prometheus-community.github.io/helm-charts/
+      tags:
+      - monitoring
+      version: 4.10.0
+    - alias: pushgateway
+      condition: pushgateway.enabled
+      name: prometheus-pushgateway
+      repository: https://prometheus-community.github.io/helm-charts/
+      tags:
+      - monitoring
+      version: 2.14.0
+    - alias: blackbox
+      condition: blackbox.enabled
+      name: prometheus-blackbox-exporter
+      repository: https://prometheus-community.github.io/helm-charts/
+      tags:
+      - blackbox
+      version: 8.17.0
+    - alias: thanos
+      condition: thanos.enabled
+      name: thanos
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - thanos
+      version: 15.7.12
+    description: A Helm chart for prometheus, grafana and alertmanager
+    digest: 2f2cada4088cc9dbf4d836b260fe484f745241b7305fe8d620efcca1f21b4128
+    maintainers:
+    - name: ashwani-opstree
+    name: pga
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/pga-1.0.0/pga-1.0.0.tgz
+    version: 1.0.0
   redis:
   - apiVersion: v2
     appVersion: 0.16.0
@@ -3332,4 +3387,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-setup-0.5.0/redis-setup-0.5.0.tgz
     version: 0.5.0
-generated: "2024-07-30T09:46:32.400534318Z"
+generated: "2024-07-31T17:58:07.035208197Z"
