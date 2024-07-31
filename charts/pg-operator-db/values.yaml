@@ -2,14 +2,14 @@ pg-operator:
   enabled: true
 pg-db:
   enabled: true
-  users:
-    - name: rhino
-      databases:
-        - zoo
-      options: "NOSUPERUSER"
-      password:
-        type: ASCII
-      secretName: "rhino-credentials"
+  # users:
+  #   - name: rhino
+  #     databases:
+  #       - zoo
+  #     options: "NOSUPERUSER"
+  #     password:
+  #       type: ASCII
+  #     secretName: "rhino-credentials"
   instances:
   - name: instance1
     replicas: 2
@@ -20,6 +20,32 @@ pg-db:
       resources:
         requests:
           storage: 1Gi
+    sidecars:
+    - name: postgres-exporter
+      image: quay.io/prometheuscommunity/postgres-exporter
+      env:
+      # - name: DATA_SOURCE_URI
+      #   valueFrom:
+      #     secretKeyRef:
+      #       name: pg-db-pguser-pg-db
+      #       key: pgbouncer-uri
+      # - name: DATA_SOURCE_USER
+      #   valueFrom:
+      #     secretKeyRef:
+      #       name: pg-db-pguser-pg-db
+      #       key: user
+      - name: DATA_SOURCE_PASS
+        valueFrom:
+          secretKeyRef:
+            name: pg-db-pguser-pg-db
+            key: password
+      - name: DATA_SOURCE_NAME
+        value: "postgresql://pg-db:$(DATA_SOURCE_PASS)@pg-db-pgbouncer.pgns.svc:5432/pg-db"
+      - name: CONFIG_FILE
+        value: "" # Ensure this is empty to avoid the config file requirement
+        # value: "postgresql://$(DATA_SOURCE_USER):$(DATA_SOURCE_PASS)@$(DATA_SOURCE_URI)/pg-db?sslmode=disable"
+    # - name: testcontainer2
+    #   image: mycontainer1:latest
   pmm:
     enabled: false
     image:

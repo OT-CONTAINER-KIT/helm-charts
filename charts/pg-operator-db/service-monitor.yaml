@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: postgres-exporter-monitor
+  namespace: pgns
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: pg-db
+  namespaceSelector:
+    matchNames:
+    - pgns
+  endpoints:
+  - port: http
+    interval: 30s
+    path: /metrics
