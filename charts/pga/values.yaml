@@ -65,40 +65,51 @@ app:
               requests:
                 storage: 1Gi
       alertingEndpoints:
-       - name: kube-alertmanager
-         namespace: monitoring
-         port: web
-         pathPrefix: /
-         apiVersion: v2
+        - name: kube-alertmanager
+          namespace: monitoring
+          port: web
+          pathPrefix: /
+          apiVersion: v2
       serviceMonitorSelector:
         matchExpressions:
-          - { key: prometheus, operator: In, values: [ app ] }
+          - key: prometheus
+            operator: In
+            values:
+              - app
       podMonitorSelector:
         matchExpressions:
-          - { key: prometheus, operator: In, values: [ app ] }
+          - key: prometheus
+            operator: In
+            values:
+              - app
       ruleSelector:
-         matchLabels:
-           prometheus: app
+        matchLabels:
+          prometheus: app
       additionalScrapeConfigs:
         - job_name: kubernets-servics-probe
           metrics_path: /probe
           params:
-            module: [ http_2xx ]
+            module:
+              - http_2xx
           kubernetes_sd_configs:
             - role: service
           scrape_interval: 30s
           scrape_timeout: 25s
           relabel_configs:
-            - source_labels: [ __meta_kubernetes_service_annotation_prometheus_io_probe ]
+            - source_labels:
+                - __meta_kubernetes_service_annotation_prometheus_io_probe
               regex: true
               action: keep
-            - source_labels: [ __meta_kubernetes_service_name ]
+            - source_labels:
+                - __meta_kubernetes_service_name
               target_label: service
-            - source_labels: [ __address__,__meta_kubernetes_service_annotation_prometheus_io_path]
+            - source_labels:
+                - __address__,__meta_kubernetes_service_annotation_prometheus_io_path
               regex: (.+);(.+)
               target_label: __param_target
               replacement: ${1}${2}
-            - source_labels: [ __param_target ]
+            - source_labels:
+              - __param_target ]
               target_label: instance
             - source_labels: []
               target_label: __address__
@@ -283,7 +294,10 @@ blackbox:
         prober: http
         timeout: 5s
         http:
-          valid_http_versions: [ "HTTP/1.0", "HTTP/1.1", "HTTP/2.0" ]
+          valid_http_versions:
+            - "HTTP/1.0"
+            - "HTTP/1.1"
+            - "HTTP/2.0"
           no_follow_redirects: false
           preferred_ip_protocol: "ip4"
           fail_if_ssl: false
