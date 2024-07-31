@@ -7,4 +7,4 @@ chart-repos:
   - ot-helm=https://ot-container-kit.github.io/helm-charts
 excluded-charts:
   - mysql
-  - pga/charts/thanos
+  - pga
