@@ -20,4 +20,10 @@ data:
         jsonData:
           httpMethod: POST
           timeInterval: 30s
+          exemplarTraceIdDestinations:
+            - datasourceUid: tempo
+              name: TraceID
+          httpMethod: POST
+        readOnly: false
+        editable: true
 {{- end }}
