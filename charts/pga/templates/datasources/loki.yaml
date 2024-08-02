@@ -11,9 +11,9 @@ data:
   kube-loki.yaml: |-
     apiVersion: 1
     datasources:
-      - uid: loki
+      - uid: logging
         orgId: 1
-        name: Loki
+        name: logging
         type: loki
         typeName: Loki
         access: proxy
