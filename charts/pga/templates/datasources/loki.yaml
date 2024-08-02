@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: kube-thanos-datasource
-  namespace: monitoring
+  name: kube-loki-datasource
+  namespace: logging
   labels:
     grafana_datasource: "1"
     app: kube-grafana
     prometheus: kube
 data:
-  kube-thanos.yaml: |-
+  kube-loki.yaml: |-
     apiVersion: 1
     datasources:
       - uid: loki
