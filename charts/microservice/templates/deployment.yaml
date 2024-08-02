@@ -109,7 +109,7 @@ spec:
             podAffinityTerm:
               labelSelector:
                 matchLabels:
-                  app: {{ include "microservice.fullname" . }}-app
+                  app: {{ include "microservice.fullname" . }}
               topologyKey: topology.kubernetes.io/zone
         {{- end }}
         {{- if .Values.deployment.topologySpreadConstraints.enabled }}
@@ -119,7 +119,7 @@ spec:
             whenUnsatisfiable: "DoNotSchedule"
             labelSelector:
               matchLabels:
-                app: {{ include "microservice.fullname" . }}-app
+                app: {{ include "microservice.fullname" . }}
             minDomains: 2
         {{- end }}
       {{- end }}
