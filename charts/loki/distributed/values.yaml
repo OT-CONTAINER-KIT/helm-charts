@@ -2,7 +2,7 @@ logging:
   gateway:
     # image:
     #   registry:
-    #   repository: grafana/loki/nginxinc/nginx-unprivileged
+    #   repository:
     #   tag: 1.20.2-alpine
     enabled: true
     autoscaling:
@@ -140,7 +140,7 @@ logging:
 
   loki:
     # image:
-    #   registry: 351409330128.dkr.ecr.ap-south-1.amazonaws.com
+    #   registry:
     #   repository: grafana/loki
     #   tag: 2.9.2
     podAnnotations:
