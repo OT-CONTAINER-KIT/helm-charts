@@ -1,0 +1,46 @@
+app:
+  enabled: false
+
+kube:
+  enabled: true
+  grafana:
+    enabled: true
+    sidecar:
+      datasources:
+        defaultDatasourceEnabled: false
+  alertmanager:
+    alertmanagerSpec:
+      storage:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: buildpiper-storage
+  prometheus:
+    enabled: true
+    prometheusSpec:
+      retention: 7d
+      resources:
+        requests:
+          cpu: 1
+          memory: 1Gi
+        limits:
+          cpu: 2
+          memory: 2Gi
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: buildpiper-storage
+            resources:
+              requests:
+                storage: 10Gi
+
+pushgateway:
+  enabled: false
+
+blackbox:
+  enabled: false
+
+adapter:
+    enabled: true
+
+thanos:
+  enabled: false
