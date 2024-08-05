@@ -100,23 +100,32 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.deployment.affinity }}
+           {{- if .Values.deployment.affinity.enabled }}
       affinity:
-        {{- if .Values.deployment.affinity.enabled }}
+        {{- if or .Values.deployment.affinity.preferred.enabled .Values.deployment.affinity.required.enabled }}
         podAntiAffinity:
+          {{- if .Values.deployment.affinity.preferred.enabled }}
           preferredDuringSchedulingIgnoredDuringExecution:
           - weight: 100
             podAffinityTerm:
               labelSelector:
                 matchLabels:
                   app: {{ include "microservice.fullname" . }}
-              topologyKey: topology.kubernetes.io/zone
+              topologyKey: {{ .Values.deployment.affinity.topologyKey }}
+          {{- end }}
+          {{- if .Values.deployment.affinity.required.enabled }}
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: {{ include "microservice.fullname" . }}-app
+            topologyKey: {{ .Values.deployment.affinity.topologyKey }}
+          {{- end }}
         {{- end }}
         {{- if .Values.deployment.topologySpreadConstraints.enabled }}
         topologySpreadConstraints:
           - maxSkew: 1
-            topologyKey: "topology.kubernetes.io/zone"
-            whenUnsatisfiable: "DoNotSchedule"
+            topologyKey: {{ .Values.deployment.topologySpreadConstraints.topologyKey }}
+            whenUnsatisfiable: "{{ .Values.deployment.topologySpreadConstraints.whenUnsatisfiable }}"
             labelSelector:
               matchLabels:
                 app: {{ include "microservice.fullname" . }}

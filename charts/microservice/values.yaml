@@ -122,14 +122,13 @@ deployment:
 
   affinity: 
     enabled: true
-
-  topologySpreadConstraints:
-    enabled: true
+    preferred:
+      enabled: true
 
 hpa:
   enabled: true
-  minReplicas: 5
-  maxReplicas: 6
+  minReplicas: 2
+  maxReplicas: 3
   targetCPU: 80
   targetMemory: 80
 
