@@ -29,7 +29,7 @@ deployment:
       enabled: false
     required:
       enabled: true
-    topologyKey: "topology.kubernetes.io/hostname" 
+    topologyKey: "topology.kubernetes.io/hostname" # distribution according to the Hosts
  
   hpa:
     enabled: true
@@ -41,7 +41,7 @@ deployment:
   topologySpreadConstraints:
     enabled: true
     whenUnsatisfiable: "DoNotSchedule" # Options: "DoNotSchedule", "ScheduleAnyway"
-    topologyKey: "topology.kubernetes.io/hostname"    
+    topologyKey: "topology.kubernetes.io/hostname"    # distribution according to the Hosts
 
   volumes:
     enabled: true
