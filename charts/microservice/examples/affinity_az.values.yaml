@@ -29,7 +29,8 @@ deployment:
       enabled: false
     required:
       enabled: true
- 
+    topologyKey: "topology.kubernetes.io/zone"  # distribution according to the zones
+  
   hpa:
     enabled: true
     minReplicas: 1
@@ -40,7 +41,8 @@ deployment:
   topologySpreadConstraints:
     enabled: true
     whenUnsatisfiable: "DoNotSchedule" # Options: "DoNotSchedule", "ScheduleAnyway"
-
+    topologyKey: "topology.kubernetes.io/zone"  # distribution according to the zones
+    
   volumes:
     enabled: true
     configMaps:
