@@ -120,12 +120,15 @@ deployment:
 
   tolerations: []
 
-  affinity: {}
+  affinity: 
+    enabled: true
+    preferred:
+      enabled: true
 
 hpa:
   enabled: true
-  minReplicas: 1
-  maxReplicas: 1
+  minReplicas: 2
+  maxReplicas: 3
   targetCPU: 80
   targetMemory: 80
 

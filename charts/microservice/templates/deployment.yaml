@@ -100,11 +100,36 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.deployment.affinity }}
+           {{- if .Values.deployment.affinity.enabled }}
       affinity:
-        {{- toYaml . | nindent 8 }}
+        {{- if or .Values.deployment.affinity.preferred.enabled .Values.deployment.affinity.required.enabled }}
+        podAntiAffinity:
+          {{- if .Values.deployment.affinity.preferred.enabled }}
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: {{ include "microservice.fullname" . }}
+              topologyKey: {{ .Values.deployment.affinity.topologyKey }}
+          {{- end }}
+          {{- if .Values.deployment.affinity.required.enabled }}
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: {{ include "microservice.fullname" . }}-app
+            topologyKey: {{ .Values.deployment.affinity.topologyKey }}
+          {{- end }}
+        {{- end }}
+        {{- if .Values.deployment.topologySpreadConstraints.enabled }}
+        topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: {{ .Values.deployment.topologySpreadConstraints.topologyKey }}
+            whenUnsatisfiable: "{{ .Values.deployment.topologySpreadConstraints.whenUnsatisfiable }}"
+            labelSelector:
+              matchLabels:
+                app: {{ include "microservice.fullname" . }}
+            minDomains: 2
+        {{- end }}
       {{- end }}
-      {{- with .Values.deployment.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+   
