@@ -1,0 +1,50 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kubernetes-system-apiserver-high-rules
+spec:
+  groups:
+  - name: kubernetes-system-apiserver
+    rules:
+    - alert: KubeClientCertificateExpiration | PROD
+      annotations:
+        description: A client certificate used to authenticate to the apiserver is expiring in less than 7.0 days.
+        runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeclientcertificateexpiration
+        summary: Client certificate is about to expire.
+      expr: apiserver_client_certificate_expiration_seconds_count{job="apiserver"} > 0 and on(job) histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="apiserver"}[5m]))) < 604800
+      labels:
+        severity: warning
+        channel: slack
+        team: devops
+    - alert: AggregatedAPIErrors | PROD
+      annotations:
+        description: An aggregated API {{ $labels.name }}/{{ $labels.namespace }} has reported errors. The number of errors have increased for it in the past two minutes. High values indicate that the availability of the service changes too often.
+        runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-aggregatedapierrors
+        summary: An aggregated API has reported errors.
+      expr: sum by(name, namespace)(increase(aggregator_unavailable_apiservice_count[2m])) > 2
+      labels:
+        severity: warning
+        channel: slack
+        team: devops
+    - alert: AggregatedAPIDown | PROD
+      annotations:
+        description: An aggregated API {{ $labels.name }}/{{ $labels.namespace }} has been only {{ $value | humanize }}% available over the last 5m.
+        runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-aggregatedapidown
+        summary: An aggregated API is down.
+      expr: (1 - max by(name, namespace)(avg_over_time(aggregator_unavailable_apiservice[5m]))) * 100 < 85
+      for: 5m
+      labels:
+        severity: warning
+        channel: slack
+        team: devops
+    - alert: KubeAPIDown | PROD
+      annotations:
+        description: KubeAPI has disappeared from Prometheus target discovery.
+        runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeapidown
+        summary: Target disappeared from Prometheus target discovery.
+      expr: absent(up{job="apiserver"} == 1)
+      for: 2m
+      labels:
+        severity: warning
+        channel: slack
+        team: devops

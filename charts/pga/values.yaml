@@ -306,6 +306,8 @@ blackbox:
 
 adapter:
   enabled: false
+  prometheus:
+    url: http://kube-prometheus.monitoring.svc
 
 thanos:
   enabled: false

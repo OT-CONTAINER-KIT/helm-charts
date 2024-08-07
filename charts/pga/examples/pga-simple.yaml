@@ -5,15 +5,24 @@ kube:
   enabled: true
   grafana:
     enabled: true
+    testFramework:
+      enabled: false
     sidecar:
       datasources:
         defaultDatasourceEnabled: false
-  alertmanager:
-    alertmanagerSpec:
-      storage:
-        volumeClaimTemplate:
-          spec:
-            storageClassName: buildpiper-storage
+  # alertmanager:
+  #   alertmanagerSpec:
+  #     alertmanagerConfigSelector:
+  #       matchLabels:
+  #         alertmanagerConfig: example
+  #     alertmanagerConfiguration:
+  #       name: config-example
+  #     alertmanagerConfigMatcherStrategy:
+  #       type: None
+  #     storage:
+  #       volumeClaimTemplate:
+  #         spec:
+  #           storageClassName: buildpiper-storage
   prometheus:
     enabled: true
     prometheusSpec:
@@ -28,7 +37,7 @@ kube:
       storageSpec:
         volumeClaimTemplate:
           spec:
-            storageClassName: buildpiper-storage
+            # storageClassName: buildpiper-storage
             resources:
               requests:
                 storage: 10Gi
@@ -40,7 +49,8 @@ blackbox:
   enabled: false
 
 adapter:
-    enabled: true
+  enabled: true
+
 
 thanos:
   enabled: false

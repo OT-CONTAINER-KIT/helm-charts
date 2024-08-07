@@ -1,0 +1,55 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: test.rules
+spec:
+  groups:
+  - name: test.rules
+    rules:
+    - alert: kube-test-rule-Watchdog | PROD
+      expr: vector(1)
+      labels:
+        severity: critical
+        type: kube
+      annotations:
+        message: |
+          This is an alert meant to ensure that the entire alerting pipeline is functional.
+          This alert is always firing, therefore it should always be firing in Alertmanager
+          and always fire against a receiver. There are integrations with various notification
+          mechanisms that send a notification when this alert is not firing. For example the
+          "DeadMansSnitch" integration in PagerDuty.
+#     - alert: kube-test-rule-CPUThrottlingHigh
+#       expr: sum
+#         by(container, pod, namespace) (increase(container_cpu_cfs_throttled_periods_total{container!=""}[1m]))
+#         / sum by(container, pod, namespace) (increase(container_cpu_cfs_periods_total[1m]))
+#         > (25 / 100)
+#       for: 1m
+#       labels:
+#         severity: high
+#         type: kube
+#       annotations:
+#         description: '{{ $value | humanizePercentage }} throttling of CPU in namespace {{
+#           $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod
+#           }}.'
+#         message: Processes experience elevated CPU throttling
+#     - alert: kube-test-rule-AlertmanagerFailedReload
+#       annotations:
+#         message: Reloading Alertmanager's configuration has failed for {{ $labels.namespace
+#           }}/{{ $labels.pod}}.
+#       expr: alertmanager_config_last_reload_successful{job="kube-alertmanager",namespace="monitoring"}
+#         == 1
+#       for: 10m
+#       labels:
+#         severity: critical
+#         type: kube
+#     - alert: kube-test-rule-AlertmanagerMembersInconsistent
+#       annotations:
+#         message: Alertmanager has not found all other members of the cluster.
+#       expr: |-
+#         alertmanager_cluster_members{job="kube-alertmanager",namespace="monitoring"}
+#           != on (service) GROUP_LEFT()
+#         count by (service) (alertmanager_cluster_members{job="kube-alertmanager",namespace="monitoring"})
+#       for: 5m
+#       labels:
+#         severity: critical
+#         type: kube

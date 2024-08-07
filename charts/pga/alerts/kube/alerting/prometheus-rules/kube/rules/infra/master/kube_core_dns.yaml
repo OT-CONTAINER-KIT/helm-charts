@@ -1,0 +1,84 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: coredns-rules
+spec:
+  groups:
+  - name: coredns-rules
+    rules:
+    - alert: CoreDNSDown | PROD
+      annotations:
+        message: CoreDNS target is fluctuating from Prometheus target discovery.
+        runbook_url: https://github.com/povilasv/coredns-mixin/tree/master/runbook.md#alert-name-corednsdown
+        description: CoreDNS target is fluctuating from Prometheus target discovery.
+      expr: |
+        absent(up{job="coredns"} == 1)
+      for: 1m
+      labels:
+        severity: warning
+        channel: slack
+        team: devops
+    - alert: CoreDNSDownCritical | PROD
+      annotations:
+        message: CoreDNS has disappeared from Prometheus target discovery for last 5 minutes.
+        runbook_url: https://github.com/povilasv/coredns-mixin/tree/master/runbook.md#alert-name-corednsdown
+        description: CoreDNS has disappeared from Prometheus target discovery for last 5 minutes.
+      expr: |
+        absent(up{job="coredns"} == 1)
+      for: 5m
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops
+    - alert: CoreDNSLatencyHigh | PROD
+      annotations:
+        message: CoreDNS has 99th percentile latency of {{ $value }} seconds for server
+          {{ $labels.server }} zone {{ $labels.zone }} .
+        runbook_url: https://github.com/povilasv/coredns-mixin/tree/master/runbook.md#alert-name-corednslatencyhigh
+        description: CoreDNS has 99th percentile latency of {{ $value }} seconds for server
+      expr: |
+        histogram_quantile(0.99, sum(rate(coredns_dns_request_duration_seconds_bucket{job="coredns"}[2m])) by(server, zone, le)) > 4
+      for: 2m
+      labels:
+        severity: warning
+        channel: slack
+        team: devops
+    - alert: CoreDNSLatencyCritical | PROD
+      annotations:
+        message: CoreDNS has 99th percentile latency of {{ $value }} seconds for server
+          {{ $labels.server }} zone {{ $labels.zone }} in 10 minutes .
+        runbook_url: https://github.com/povilasv/coredns-mixin/tree/master/runbook.md#alert-name-corednslatencyhigh
+        description: CoreDNS has 99th percentile latency of {{ $value }} seconds for server
+      expr: |
+        histogram_quantile(0.99, sum(rate(coredns_dns_request_duration_seconds_bucket{job="coredns"}[5m])) by(server, zone, le)) > 4
+      for: 5m
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops
+    - alert: CoreDNSForwardLatencyHigh | PROD
+      annotations:
+        message: CoreDNS has 99th percentile latency of {{ $value }} seconds forwarding
+          requests to {{ $labels.to }}.
+        runbook_url: https://github.com/povilasv/coredns-mixin/tree/master/runbook.md#alert-name-corednsforwardlatencyhigh
+        description: CoreDNS has 99th percentile latency of {{ $value }} seconds forwarding
+      expr: |
+        histogram_quantile(0.99, sum(rate(coredns_forward_request_duration_seconds_bucket{job="coredns"}[2m])) by(to, le)) > 4
+      for: 2m
+      labels:
+        severity: warning
+        channel: slack
+        team: devops
+    - alert: CoreDNSForwardLatencyCritical | PROD
+      annotations:
+        message: CoreDNS has 99th percentile latency of {{ $value }} seconds forwarding
+          requests to {{ $labels.to }}.
+        runbook_url: https://github.com/povilasv/coredns-mixin/tree/master/runbook.md#alert-name-corednsforwardlatencyhigh
+        description: CoreDNS has 99th percentile latency of {{ $value }} seconds forwarding
+      expr: |
+        histogram_quantile(0.99, sum(rate(coredns_forward_request_duration_seconds_bucket{job="coredns"}[5m])) by(to, le)) > 4
+      for: 5m
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops

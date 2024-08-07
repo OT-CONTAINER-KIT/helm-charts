@@ -1,0 +1,180 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kube-node-critical-rules
+spec:
+  groups:
+  - name: ds-jupiter-kube-node-critical-rules
+    rules:
+#     - alert: HostOutOfMemory | PROD
+#       expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 5
+#       for: 10m
+#       labels:
+#         severity: critical
+#         channel: opsgenie
+#         team: devops
+#       annotations:
+#         summary: Host out of memory (instance {{ $labels.instance }})
+#         description: "Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: HostMemoryUnderMemoryPressure | PROD
+      expr: rate(node_vmstat_pgmajfault[1m]) > 1000
+      for: 2m
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops
+      annotations:
+        summary: Host memory under memory pressure (instance {{ $labels.instance }})
+        description: "The node is under heavy memory pressure. High rate of major page faults\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: HostUnusualNetworkThroughputIn | PROD
+      expr: sum by (instance) (rate(node_network_receive_bytes_total[2m])) / 1024 / 1024 > 1000
+      for: 5m
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops
+      annotations:
+        summary: Host unusual network throughput in (instance {{ $labels.instance }})
+        description: "Host network interfaces are probably receiving too much data (> 150 MB/s)\n  VALUE = {{ $value }}"
+    - alert: HostUnusualNetworkThroughputOut | PROD
+      expr: sum by (instance) (rate(node_network_transmit_bytes_total[2m])) / 1024 / 1024 > 400
+      for: 5m
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops
+      annotations:
+        summary: Host unusual network throughput out (instance {{ $labels.instance }})
+        description: "Host network interfaces are probably sending too much data (> 150 MB/s)\n  VALUE = {{ $value }}"
+    - alert: HostUnusualDiskReadRate | PROD
+      expr: sum by (instance) (rate(node_disk_read_bytes_total[2m])) / 1024 / 1024 > 400
+      for: 5m
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops
+      annotations:
+        summary: Host unusual disk read rate (instance {{ $labels.instance }})
+        description: "Disk is probably reading too much data (> 400 MB/s)\n  VALUE = {{ $value }}"
+    - alert: HostUnusualDiskWriteRate | PROD
+      expr: sum by (instance) (rate(node_disk_written_bytes_total[2m])) / 1024 / 1024 > 400
+      for: 15m
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops
+      annotations:
+        summary: Host unusual disk write rate (instance {{ $labels.instance }})
+        description: "Disk is probably writing too much data (> 400 MB/s)\n  VALUE = {{ $value }}"
+    - alert: HostUnusualDiskReadLatency | PROD
+      expr: rate(node_disk_read_time_seconds_total[1m]) / rate(node_disk_reads_completed_total[1m]) > 0.1 and rate(node_disk_reads_completed_total[1m]) > 0
+      for: 2m
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops
+      annotations:
+        summary: Host unusual disk read latency (instance {{ $labels.instance }})
+        description: "Disk latency is growing (read operations > 100ms)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: HostUnusualDiskWriteLatency | PROD
+      expr: rate(node_disk_write_time_seconds_total[1m]) / rate(node_disk_writes_completed_total[1m]) > 0.1 and rate(node_disk_writes_completed_total[1m]) > 1
+      for: 5m
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops
+      annotations:
+        summary: Host unusual disk write latency (instance {{ $labels.instance }})
+        description: "Disk latency is growing (write operations > 100ms)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: HostHighCpuLoad | PROD
+      expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 95
+      for: 5m
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops
+      annotations:
+        summary: Host high CPU load (instance {{ $labels.instance }})
+        description: "CPU load is > 95%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: HostSwapIsFillingUp | PROD
+      expr: (1 - (node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes)) * 100 > 90
+      for: 2m
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops
+      annotations:
+        summary: Host swap is filling up (instance {{ $labels.instance }})
+        description: "Swap is filling up (>80%)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: KubePersistentVolumeFillingUp | PROD
+      annotations:
+        description: Based on recent sampling, the PersistentVolume claimed by {{ $labels.persistentvolumeclaim }} in Namespace {{ $labels.namespace }} is expected to fill up within four days. Currently {{ $value | humanizePercentage }} is available.
+        runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepersistentvolumefillingup
+        summary: PersistentVolume is filling up.
+      expr: |-
+        (
+          kubelet_volume_stats_available_bytes{job="kubelet", namespace=~".*", metrics_path="/metrics"}
+            /
+          kubelet_volume_stats_capacity_bytes{job="kubelet", namespace=~".*", metrics_path="/metrics"}
+        ) < 0.15
+        and
+        predict_linear(kubelet_volume_stats_available_bytes{job="kubelet", namespace=~".*", metrics_path="/metrics"}[6h], 4 * 24 * 3600) < 0
+      for: 1h
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops
+    - alert: KubePersistentVolumeErrors | PROD
+      annotations:
+        description: The persistent volume {{ $labels.persistentvolume }} has status {{ $labels.phase }}.
+        runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepersistentvolumeerrors
+        summary: PersistentVolume is having issues with provisioning.
+      expr: kube_persistentvolume_status_phase{phase=~"Failed|Pending",job="kube-state-metrics"} > 0
+      for: 5m
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops
+    - alert: NodeFilesystemAlmostOutOfSpace | PROD
+      annotations:
+        description: Filesystem on {{ $labels.device }} at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available space left.
+        runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-nodefilesystemalmostoutofspace
+        summary: Filesystem has less than 10% space left.
+      expr: |-
+        (
+          node_filesystem_avail_bytes{job="node-exporter",fstype!=""} / node_filesystem_size_bytes{job="node-exporter",fstype!=""} * 100 < 10
+        and
+          node_filesystem_readonly{job="node-exporter",fstype!=""} == 0
+        )
+      for: 1h
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops
+    - alert: NodeFilesystemAlmostOutOfFiles | PROD
+      annotations:
+        description: Filesystem on {{ $labels.device }} at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available inodes left.
+        runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-nodefilesystemalmostoutoffiles
+        summary: Filesystem has less than 10% inodes left.
+      expr: |-
+        (
+          node_filesystem_files_free{job="node-exporter",fstype!=""} / node_filesystem_files{job="node-exporter",fstype!=""} * 100 < 10
+        and
+          node_filesystem_readonly{job="node-exporter",fstype!=""} == 0
+        )
+      for: 1h
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops
+    - alert: HostOomKillDetected | PRod
+      expr: increase(node_vmstat_oom_kill[1m]) > 10
+      for: 0m
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops
+      annotations:
+        summary: Host OOM kill detected (instance {{ $labels.instance }}) 5 times in last 1 minute
+        description: "OOM kill detected\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+

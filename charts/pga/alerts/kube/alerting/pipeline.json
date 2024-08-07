@@ -1,0 +1,152 @@
+{
+  "name": "toProd",
+  "description": "Deploying PrometheusRule in Prod",
+  "application": "alerting",
+  "exclude": [],
+  "expectedArtifacts": [
+    {
+      "defaultArtifact": {
+        "artifactAccount": "no-auth-http-account",
+        "id": "424a5dc7-af90-4f30-a2a2-e9bfc240faa6",
+        "type": "http/file"
+      },
+      "displayName": "app",
+      "id": "f5dec37e-8d2b-4e75-a90d-a81321e3f8b4",
+      "matchArtifact": {
+        "artifactAccount": "github",
+        "customKind": true,
+        "id": "ed8a38d7-42b8-4864-a9fc-ee63876b8f6b",
+        "name": "k8/alerting/prometheus-rules/app/kustomization.yaml",
+        "type": "github/file"
+      },
+      "useDefaultArtifact": true,
+      "usePriorArtifact": false
+    },
+    {
+      "defaultArtifact": {
+        "artifactAccount": "no-auth-http-account",
+        "id": "2324df72-dee9-4254-95a1-db8f7d5933dd",
+        "type": "http/file"
+      },
+      "displayName": "kube",
+      "id": "10071b92-1a27-47d7-9672-f9cf5726a5f8",
+      "matchArtifact": {
+        "artifactAccount": "github",
+        "customKind": true,
+        "id": "8a87d4ae-de98-447c-9715-075d06e1d5b9",
+        "name": "k8/alerting/prometheus-rules/kube/kustomization.yaml",
+        "type": "github/file"
+      },
+      "useDefaultArtifact": true,
+      "usePriorArtifact": false
+    },
+    {
+      "defaultArtifact": {
+        "artifactAccount": "no-auth-http-account",
+        "id": "dbb80a6e-55df-4641-8e80-2516251da5aa",
+        "type": "http/file"
+      },
+      "displayName": "alert-config",
+      "id": "eb6f6225-09ac-4f92-81f8-0bb65843a684",
+      "matchArtifact": {
+        "artifactAccount": "github",
+        "customKind": true,
+        "id": "7fc8a3ec-f7c7-4e2a-a28a-81e0a52a22ef",
+        "name": "k8/alerting/alertmanager/kustomization.yaml",
+        "type": "github/file"
+      },
+      "useDefaultArtifact": true,
+      "usePriorArtifact": false
+    }
+  ],
+  "keepWaitingPipelines": false,
+  "lastModifiedBy": "sanjeev.pandey@jupiter.money",
+  "limitConcurrent": true,
+  "notifications": [],
+  "parameters": [],
+  "schema": "v2",
+  "spelEvaluator": "v4",
+  "stages": [
+    {
+      "expectedArtifacts": [
+        {
+          "defaultArtifact": {
+            "customKind": true,
+            "id": "c29f2d58-eaed-4b2d-856b-29db4e8d3113"
+          },
+          "displayName": "Deployment",
+          "id": "af7fd40c-403c-4d8f-ab62-e3c8e66a821e",
+          "matchArtifact": {
+            "artifactAccount": "embedded-artifact",
+            "customKind": false,
+            "id": "48862902-871b-49cd-8bb8-4dcc2f01425b",
+            "name": "Deployment",
+            "type": "embedded/base64"
+          },
+          "useDefaultArtifact": false,
+          "usePriorArtifact": false
+        }
+      ],
+      "inputArtifact": {
+        "account": "gitrepo",
+        "artifact": {
+          "artifactAccount": "gitrepo",
+          "customKind": true,
+          "id": "fc593648-4b77-4760-b611-195e6d10e120",
+          "reference": "https://github.com/jupitermoney/prod.jupiter.money.git",
+          "type": "git/repo",
+          "version": "master"
+        }
+      },
+      "kustomizeFilePath": "k8/alerting/kustomization.yaml",
+      "name": "Bake Manifest",
+      "overrides": {},
+      "refId": "1",
+      "requisiteStageRefIds": [],
+      "templateRenderer": "KUSTOMIZE",
+      "type": "bakeManifest"
+    },
+    {
+      "account": "prod",
+      "cloudProvider": "kubernetes",
+      "manifestArtifactId": "af7fd40c-403c-4d8f-ab62-e3c8e66a821e",
+      "moniker": {
+        "app": "alerting"
+      },
+      "name": "Deploy",
+      "namespaceOverride": "monitoring",
+      "refId": "2",
+      "requisiteStageRefIds": [
+        "1"
+      ],
+      "skipExpressionEvaluation": true,
+      "source": "artifact",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false,
+          "services": []
+        }
+      },
+      "type": "deployManifest"
+    }
+  ],
+  "triggers": [
+    {
+      "branch": "master",
+      "enabled": true,
+      "expectedArtifactIds": [
+        "f5dec37e-8d2b-4e75-a90d-a81321e3f8b4",
+        "10071b92-1a27-47d7-9672-f9cf5726a5f8",
+        "eb6f6225-09ac-4f92-81f8-0bb65843a684"
+      ],
+      "project": "jupitermoney",
+      "secret": "cd020be688a6ce1f9ebfedc1b434164fe122c90c",
+      "slug": "prod.jupiter.money",
+      "source": "github",
+      "type": "git"
+    }
+  ],
+  "updateTs": "1605847501000"
+  
+}

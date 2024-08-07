@@ -1,0 +1,35 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cluster-alerts
+spec:
+  groups:
+  - name: custom-alerts
+    rules:
+    - alert: KubeNodeNotSafeToAutoscale | PROD
+      annotations:
+        summary: Cluster is not safe to autoscale.
+      expr: cluster_autoscaler_cluster_safe_to_autoscale{job="base-aws-cluster-autoscaler",namespace="kube-system",service="base-aws-cluster-autoscaler"} != 1
+      for: 5m
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops
+    - alert: KubeNodeUnschedulablePodCount | PROD
+      annotations:
+        summary: Some pods are unschedulable.
+      expr: cluster_autoscaler_unschedulable_pods_count{container="aws-cluster-autoscaler-chart",service="base-aws-cluster-autoscaler"} > 0
+      for: 5m
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops
+    - alert: KubeNodeUnneededNodes | PROD
+      annotations:
+        summary: Cluster is not able to scale down.
+      expr: cluster_autoscaler_unneeded_nodes_count{container="aws-cluster-autoscaler-chart",job="base-aws-cluster-autoscaler"} != 0
+      for: 5m
+      labels:
+        severity: warning
+        channel: slack
+        team: devops

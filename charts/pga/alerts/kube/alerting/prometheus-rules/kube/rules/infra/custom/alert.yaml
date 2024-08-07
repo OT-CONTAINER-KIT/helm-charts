@@ -1,0 +1,28 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: custom-alerts
+spec:
+  groups:
+  - name: custom-alerts
+    rules:
+    - alert: KubePodRestartingInBaseSystem | PROD  # specifiying cluster indenfier is temp basis like DSPROD/PROD
+      annotations:
+        description: Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is restarting {{ printf "%.2f" $value }} times / 5 minutes.
+        runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepodcrashlooping
+        summary: Pod is Restarting.
+      expr: rate(kube_pod_container_status_restarts_total{job="kube-state-metrics", namespace=~"kube-system|monitoring",container=~"coredns|kubernetes-external-secrets|external-dns|aws-load-balancer-controller|cluster-autoscaler|metrics-helper|metrics-server|prometheus|kube-state-metrics|alertmanager|pushgateway"}[5m]) * 60 * 2 > 1
+      labels:
+        severity: warning
+        channel: slack
+        team: devops
+    - alert: KubePodRestartingInBaseSystemCritical | PROD  # specifiying cluster indenfier is temp basis like DSPROD/PROD
+      annotations:
+        description: Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is restarting {{ printf "%.2f" $value }} times / 10 minutes.
+        runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepodcrashlooping
+        summary: Pod is Restarting.
+      expr: rate(kube_pod_container_status_restarts_total{job="kube-state-metrics", namespace=~"kube-system|monitoring",container=~"coredns|kubernetes-external-secrets|external-dns|aws-load-balancer-controller|cluster-autoscaler|metrics-helper|metrics-server|prometheus|kube-state-metrics|alertmanager|pushgateway"}[5m]) * 60 * 2 > 2
+      labels:
+        severity: critical
+        channel: opsgenie
+        team: devops

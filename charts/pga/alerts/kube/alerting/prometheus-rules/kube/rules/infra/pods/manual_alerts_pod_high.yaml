@@ -1,0 +1,48 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: manual-pod-high-rules
+spec:
+  groups:
+  - name: ds-jupiter-manual-pod-high-rules
+    rules:
+    # - alert: ContainerHighCpuUsage | PROD
+    #   expr: (sum(rate(container_cpu_usage_seconds_total[3m])) BY (namespace, pod) * 100) > 80
+    #   for: 10m
+    #   labels:
+    #     severity: high
+    #     channel: slack
+    #     team: devops
+    #   annotations:
+    #     message: "Container CPU is at 80% usage"
+    #     description: Container CPU usage value is {{ $value }} for {{ $labels.namespace }}/{{ $labels.pod }}.
+#    - alert: ContainerMemoryHighUsage | PROD
+#      expr: (sum(container_memory_working_set_bytes) BY (namespace, pod) / sum(container_spec_memory_limit_bytes > 0) BY (namespace, pod) * 100) > 80
+#      for: 15m
+#      labels:
+#        severity: high
+#        channel: slack
+#        team: devops
+#      annotations:
+#        message: "Container Memory is at 80% usage"
+#        description: Container Memory usage value is {{ $value }} for {{ $labels.namespace }}/{{ $labels.pod }}.
+    - alert: ContainerVolumeIoUsage | PROD
+      expr: (sum(container_fs_io_current) BY (namespace, pod) * 100) > 500
+      for: 5m
+      labels:
+        severity: warning
+        channel: slack
+        team: devops
+      annotations:
+        message: "Container Volume IO is at 80% usage"
+        description: Container Volume IO usage value is {{ $value }} for {{ $labels.namespace }}/{{ $labels.pod }}.
+    # - alert: ContainerHighThrottleRate | PROD
+    #   expr: rate(container_cpu_cfs_throttled_seconds_total[3m]) > 1
+    #   for: 10m
+    #   labels:
+    #     severity: high
+    #     channel: slack
+    #     team: devops
+    #   annotations:
+    #     message: "Container CPU usage is throttling"
+    #     description: Container {{ $labels.namespace }}/{{ $labels.pod }} is being throttled with {{ $value }}.

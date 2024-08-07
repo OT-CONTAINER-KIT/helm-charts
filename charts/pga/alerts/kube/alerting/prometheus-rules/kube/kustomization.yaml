@@ -1,0 +1,39 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namePrefix: monitoring-kube-
+namespace: monitoring
+commonLabels:
+  prometheus: kube
+
+resources:
+  - rules/infra/custom/alert.yaml
+  - rules/infra/cluster/alert.yaml
+  - rules/infra/master/kube_core_dns.yaml
+  - rules/test-rule.yaml
+  - rules/infra/istio/kube_istio.yaml
+  - rules/infra/master/kube_kubernetes_resources_critical.yaml
+  - rules/infra/master/kube_system_apiserver_critical.yaml
+  - rules/infra/master/kube_system_apiserver_high.yaml
+  - rules/infra/master/kube_system_high.yaml
+  - rules/infra/master/kube_system_kubelet_critical.yaml
+  - rules/infra/master/kube_system_kubelet_high.yaml
+  - rules/infra/monitor/kube_alertmanager_rules.yaml
+  - rules/infra/monitor/kube_general_rules.yaml
+  - rules/infra/monitor/kube_prometheus_operator.yaml
+  - rules/infra/monitor/kube_prometheus.yaml
+  - rules/infra/monitor/kube_state_metrics.yaml
+  - rules/infra/monitor/kube_cert_manager_rules.yaml
+  - rules/infra/nodes/kube_alerts_node_critical.yaml
+  - rules/infra/nodes/kube_alerts_node_high.yaml
+  - rules/infra/pods/kube_kubernetes_apps_critical.yaml
+  - rules/infra/pods/kube_kubernetes_apps_high.yaml
+  - rules/infra/pods/manual_alerts_pod_high.yaml
+  - rules/infra/records/monitoring_kube_k8s.rules.yaml
+  - rules/infra/records/monitoring_kube_apiserver_availability.rules.yaml
+  - rules/infra/records/monitoring_kube_apiserver.rules.yaml
+  - rules/infra/records/monitoring_kube_kubelet.rules.yaml
+  - rules/infra/records/monitoring_kube_prometheus_general.rules.yaml
+  - rules/infra/records/monitoring_kube_prometheus_node_recording.rules.yaml
+  - rules/infra/records/monitoring_kube_node_exporter.rules.yaml
+  - rules/infra/records/monitoring_kube_node.rules.yaml
+
