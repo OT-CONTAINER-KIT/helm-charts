@@ -1,0 +1,4 @@
+psmdb-operator:
+  enabled: true
+psmdb-db:
+  enabled: true
