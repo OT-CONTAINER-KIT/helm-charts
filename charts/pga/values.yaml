@@ -144,7 +144,12 @@ kube:
               requests:
                 storage: 1Gi
   grafana:
-    enabled: false
+    enabled: true
+    testFramework:
+      enabled: false
+    sidecar:
+      datasources:
+        defaultDatasourceEnabled: false
   kubeApiServer:
     enabled: true
   kubelet:

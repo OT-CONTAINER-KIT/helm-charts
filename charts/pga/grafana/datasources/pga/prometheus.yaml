@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-prometheus-datasource
+  namespace: monitoring
+  labels:
+    grafana_datasource: "1"
+    app: kube-grafana
+    prometheus: kube
+data:
+  kube-prometheus.yaml: |-
+    apiVersion: 1
+    datasources:
+      - name: "kube"
+        type: prometheus
+        uid: prometheus
+        url: http://kube-prometheus.monitoring:9090/
+        access: proxy
+        isDefault: true
+        jsonData:
+          httpMethod: POST
+          timeInterval: 30s
+          exemplarTraceIdDestinations:
+            - datasourceUid: tempo
+              name: TraceID
+          httpMethod: POST
+        readOnly: false
+        editable: true
