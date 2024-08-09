@@ -1,0 +1,1 @@
+Backup and Restore have been tested using backup.yaml and restore.yaml files respectively using Azure Blob Storage.
