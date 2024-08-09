@@ -1,0 +1,10 @@
+apiVersion: psmdb.percona.com/v1
+kind: PerconaServerMongoDBBackup
+metadata:
+  finalizers:
+  - delete-backup
+  name: backup
+spec:
+  clusterName: mdb-db-psmdb-db
+  storageName: azure-blob
+  type: logical
