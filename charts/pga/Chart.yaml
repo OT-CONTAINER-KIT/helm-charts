@@ -2,7 +2,7 @@ apiVersion: v2
 name: pga
 description: A Helm chart for prometheus, grafana and alertmanager
 type: application
-version: 1.0.1
+version: 1.0.2
 appVersion: 1.0.1
 maintainers:
   - name: ashwani-opstree
