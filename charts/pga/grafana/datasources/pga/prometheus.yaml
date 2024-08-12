@@ -11,7 +11,7 @@ data:
   kube-prometheus.yaml: |-
     apiVersion: 1
     datasources:
-      - name: "kube"
+      - name: "kube-prom"
         type: prometheus
         uid: prometheus
         url: http://kube-prometheus.monitoring:9090/
@@ -23,6 +23,5 @@ data:
           exemplarTraceIdDestinations:
             - datasourceUid: tempo
               name: TraceID
-          httpMethod: POST
         readOnly: false
         editable: true

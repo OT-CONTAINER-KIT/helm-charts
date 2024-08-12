@@ -2,8 +2,8 @@ apiVersion: v2
 name: pga
 description: A Helm chart for prometheus, grafana and alertmanager
 type: application
-version: 1.0.0
-appVersion: 1.0.0
+version: 1.0.1
+appVersion: 1.0.1
 maintainers:
   - name: ashwani-opstree
 
@@ -22,6 +22,7 @@ dependencies:
     alias: kube
     tags:
       - monitoring
+    condition: kube.enabled
 
   - name: prometheus-adapter
     version: 4.10.0

@@ -118,6 +118,7 @@ app:
       name: app-prometheus
 
 kube:
+  enabled: yes
   fullnameOverride: kube
   commonLabels:
     prometheus: kube

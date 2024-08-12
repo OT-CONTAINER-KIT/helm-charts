@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: kube-loki-datasource
-  namespace: logging
+  namespace: monitoring
   labels:
     grafana_datasource: "1"
     app: kube-grafana
