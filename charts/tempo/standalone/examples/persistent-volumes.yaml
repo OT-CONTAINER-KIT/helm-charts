@@ -1,0 +1,22 @@
+tempo:
+  enabled: true
+  fullnameOverride: tempo
+  tempo:
+    retention: 168h
+    resources:
+      requests:
+        cpu:  1
+        memory: 2Gi
+      limits:
+        cpu: 1
+        memory: 2Gi
+    securityContext:
+      privileged: true
+      runAsUser: 0
+      
+  persistence:
+    enabled: true
+    storageClassName: buildpiper-storage
+
+  serviceMonitor:
+    enabled: true
