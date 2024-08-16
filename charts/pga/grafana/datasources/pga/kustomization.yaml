@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: monitoring
 
 resources:
-- loki.yaml
-- prometheus.yaml
-- tempo.yaml
-- alertmanager.yaml
+- ds/loki.yaml
+- ds/prometheus.yaml
+- ds/tempo.yaml
+- ds/alertmanager.yaml
