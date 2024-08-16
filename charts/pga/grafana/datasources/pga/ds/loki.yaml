@@ -16,7 +16,7 @@ data:
         type: loki
         typeName: Loki
         access: proxy
-        url: http://loki-logging-gateway.logging.svc
+        url: http://logging-loki-gateway.logging.svc.cluster.local
         password: ''
         user: ''
         database: ''
