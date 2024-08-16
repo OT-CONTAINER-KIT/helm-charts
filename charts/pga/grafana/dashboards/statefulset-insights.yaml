@@ -5,7 +5,7 @@ metadata:
     k8s-sidecar-target-directory: /tmp/dashboards/ot
   labels:
     grafana_dashboard: "1"
-  name: deployment-insights-grafana-dashboard
+  name: statefulset-insights-grafana-dashboard
   namespace: monitoring
 
 data:
