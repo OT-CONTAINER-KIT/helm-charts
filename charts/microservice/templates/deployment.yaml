@@ -40,7 +40,7 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "microservice.serviceAccountName" . }}
       containers:
-        - name: {{ include "microservice.fullname" . }}
+        - name: {{ include "microservice.fullname" . }}-app
           image: "{{ .Values.deployment.image.name }}:{{ .Values.deployment.image.tag }}"
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           {{- if .Values.deployment.command }}
@@ -100,9 +100,8 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-           {{- if .Values.deployment.affinity.enabled }}
+      {{- if and .Values.deployment.affinity.enabled (or .Values.deployment.affinity.preferred.enabled .Values.deployment.affinity.required.enabled) }}
       affinity:
-        {{- if or .Values.deployment.affinity.preferred.enabled .Values.deployment.affinity.required.enabled }}
         podAntiAffinity:
           {{- if .Values.deployment.affinity.preferred.enabled }}
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -113,23 +112,22 @@ spec:
                   app: {{ include "microservice.fullname" . }}
               topologyKey: {{ .Values.deployment.affinity.topologyKey }}
           {{- end }}
-          {{- if .Values.deployment.affinity.required.enabled }}
+          {{- if and .Values.deployment.affinity.required.enabled (not .Values.deployment.affinity.preferred.enabled) }}
           requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
               matchLabels:
-                app: {{ include "microservice.fullname" . }}-app
+                app: {{ include "microservice.fullname" . }}
             topologyKey: {{ .Values.deployment.affinity.topologyKey }}
           {{- end }}
-        {{- end }}
-        {{- if .Values.deployment.topologySpreadConstraints.enabled }}
-        topologySpreadConstraints:
-          - maxSkew: 1
-            topologyKey: {{ .Values.deployment.topologySpreadConstraints.topologyKey }}
-            whenUnsatisfiable: "{{ .Values.deployment.topologySpreadConstraints.whenUnsatisfiable }}"
-            labelSelector:
-              matchLabels:
-                app: {{ include "microservice.fullname" . }}
-            minDomains: 2
-        {{- end }}
       {{- end }}
-   
+      {{- if .Values.deployment.topologySpreadConstraints.enabled }}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: {{ .Values.deployment.topologySpreadConstraints.topologyKey }}
+          whenUnsatisfiable: "{{ .Values.deployment.topologySpreadConstraints.whenUnsatisfiable }}"
+          labelSelector:
+            matchLabels:
+              app: {{ include "microservice.fullname" . }}
+          minDomains: 2
+      {{- end }}
+
