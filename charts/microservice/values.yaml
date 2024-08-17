@@ -130,7 +130,8 @@ deployment:
 
   topologySpreadConstraints:
     enabled: true
-    whenUnsatisfiable: "ScheduleAnyway" # Options: "DoNotSchedule", "ScheduleAnyway"
+    # whenUnsatisfiable: "DoNotSchedule" OR "ScheduleAnyway"
+    whenUnsatisfiable: "ScheduleAnyway"
     topologyKey: "topology.kubernetes.io/zone"
 
 hpa:
