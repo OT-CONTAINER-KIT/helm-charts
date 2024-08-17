@@ -27,7 +27,7 @@ deployment:
   annotations: {}
   podAnnotations: {}
 
-  terminationGracePeriodSeconds: 30
+  terminationGracePeriodSeconds: 60
 
   healthProbes:
     enabled: true

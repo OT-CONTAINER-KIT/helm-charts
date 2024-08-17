@@ -19,7 +19,6 @@ spec:
   strategy:
     {{- toYaml .Values.deployment.strategy | nindent 4 }}
   {{- end }}
-  terminationGracePeriodSeconds: {{ .Values.deployment.terminationGracePeriodSeconds }}
   selector:
     matchLabels:
       {{- include "microservice.selectorLabels" . | nindent 6 }}
@@ -38,7 +37,13 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "microservice.serviceAccountName" . }}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "microservice.serviceAccountName" . }}-sa
+      {{- end }}
+      {{- if .Values.serviceAccount.name }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.deployment.terminationGracePeriodSeconds }}
       containers:
         - name: {{ include "microservice.fullname" . }}
           image: "{{ .Values.deployment.image.name }}:{{ .Values.deployment.image.tag }}"
@@ -128,5 +133,7 @@ spec:
           labelSelector:
             matchLabels:
               app: {{ include "microservice.fullname" . }}
+          {{- if ( eq .Values.deployment.topologySpreadConstraints.whenUnsatisfiable "DoNotSchedule")}}
           minDomains: 2
+          {{- end }}
       {{- end }}
