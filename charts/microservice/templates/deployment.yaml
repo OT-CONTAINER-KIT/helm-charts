@@ -19,7 +19,6 @@ spec:
   strategy:
     {{- toYaml .Values.deployment.strategy | nindent 4 }}
   {{- end }}
-  terminationGracePeriodSeconds: {{ .Values.deployment.terminationGracePeriodSeconds }}
   selector:
     matchLabels:
       {{- include "microservice.selectorLabels" . | nindent 6 }}
@@ -38,7 +37,13 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "microservice.serviceAccountName" . }}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "microservice.serviceAccountName" . }}-sa
+      {{- end }}
+      {{- if .Values.serviceAccount.name }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.deployment.terminationGracePeriodSeconds }}
       containers:
         - name: {{ include "microservice.fullname" . }}
           image: "{{ .Values.deployment.image.name }}:{{ .Values.deployment.image.tag }}"
@@ -100,11 +105,35 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.deployment.affinity }}
+      {{- if and .Values.deployment.affinity.enabled (or .Values.deployment.affinity.preferred.enabled .Values.deployment.affinity.required.enabled) }}
       affinity:
-        {{- toYaml . | nindent 8 }}
+        podAntiAffinity:
+          {{- if .Values.deployment.affinity.preferred.enabled }}
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: {{ include "microservice.fullname" . }}
+              topologyKey: {{ .Values.deployment.affinity.topologyKey }}
+          {{- end }}
+          {{- if and .Values.deployment.affinity.required.enabled (not .Values.deployment.affinity.preferred.enabled) }}
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: {{ include "microservice.fullname" . }}
+            topologyKey: {{ .Values.deployment.affinity.topologyKey }}
+          {{- end }}
       {{- end }}
-      {{- with .Values.deployment.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
+      {{- if .Values.deployment.topologySpreadConstraints.enabled }}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: {{ .Values.deployment.topologySpreadConstraints.topologyKey }}
+          whenUnsatisfiable: "{{ .Values.deployment.topologySpreadConstraints.whenUnsatisfiable }}"
+          labelSelector:
+            matchLabels:
+              app: {{ include "microservice.fullname" . }}
+          {{- if ( eq .Values.deployment.topologySpreadConstraints.whenUnsatisfiable "DoNotSchedule")}}
+          minDomains: 2
+          {{- end }}
       {{- end }}

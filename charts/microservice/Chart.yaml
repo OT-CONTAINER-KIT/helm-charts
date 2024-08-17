@@ -2,8 +2,9 @@ apiVersion: v2
 name: microservice
 description: Basic helm chart for deploying microservices on kubernetes with best practices
 type: application
-version: 0.1.5
+version: 0.1.6
 appVersion: "0.1.2"
 maintainers:
   - name: ashwani-opstree
   - name: tripathishikha1
+  - name: khushimalhoz
