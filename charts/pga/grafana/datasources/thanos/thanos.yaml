@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-thanos-datasource
+  namespace: monitoring
+  labels:
+    grafana_datasource: "1"
+    app: kube-grafana
+    prometheus: kube
+data:
+  kube-thanos.yaml: |-
+    apiVersion: 1
+    datasources:
+      - name: "kube-thanos"
+        type: prometheus
+        uid: thanos
+        url: http://monitoring-thanos-query-frontend.monitoring:9090/
+        access: proxy
+        jsonData:
+          httpMethod: POST
+          timeInterval: 30s
+          exemplarTraceIdDestinations:
+            - datasourceUid: tempo
+              name: TraceID
+          httpMethod: POST
+        readOnly: false
+        editable: true

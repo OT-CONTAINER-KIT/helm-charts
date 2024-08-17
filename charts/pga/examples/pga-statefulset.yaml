@@ -1,0 +1,60 @@
+app:
+  enabled: false
+
+kube:
+  enabled: true
+  grafana:
+    enabled: true
+    testFramework:
+      enabled: false
+    sidecar:
+      datasources:
+        defaultDatasourceEnabled: false
+    resources:
+      requests:
+        cpu: 1
+        memory: 2Gi
+      limits:
+        cpu: 1
+        memory: 2Gi
+    persistence:
+      enabled: true
+      type: sts
+      storageClassName: buildpiper-storage
+      accessModes:
+        - ReadWriteOnce
+      size: 1Gi
+      finalizers:
+        - kubernetes.io/pvc-protection
+  alertmanager:
+    enabled: false
+  prometheus:
+    enabled: true
+    prometheusSpec:
+      retention: 3d
+      resources:
+        requests:
+          cpu: 1
+          memory: 1Gi
+        limits:
+          cpu: 2
+          memory: 2Gi
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: buildpiper-storage
+            resources:
+              requests:
+                storage: 20Gi
+
+pushgateway:
+  enabled: false
+
+blackbox:
+  enabled: false
+
+adapter:
+  enabled: false
+
+thanos:
+  enabled: false
