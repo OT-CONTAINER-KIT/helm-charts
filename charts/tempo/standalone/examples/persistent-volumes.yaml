@@ -13,6 +13,9 @@ tempo:
     securityContext:
       privileged: true
       runAsUser: 0
+    metricsGenerator:
+      enabled: true
+      remoteWriteUrl: "http://kube-prometheus.monitoring:9090/api/v1/write"
       
   persistence:
     enabled: true
