@@ -10,6 +10,9 @@ tempo:
       limits:
         cpu: 1
         memory: 2Gi
+    metricsGenerator:
+      enabled: true
+      remoteWriteUrl: "http://kube-prometheus.monitoring:9090/api/v1/write"
 
   persistence:
     enabled: true
