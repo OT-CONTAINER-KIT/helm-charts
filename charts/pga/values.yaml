@@ -117,6 +117,75 @@ app:
     service:
       name: app-prometheus
 
+  apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRoleBinding
+  metadata:
+  labels:
+    name: event-exporter
+  name: event-exporter
+      namespace: monitoring
+  subjects:
+    - kind: ServiceAccount
+      name: event-exporter
+      namespace: monitoring
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: view
+
+  eventExporter:
+    replicas: 1
+    revisionHistoryLimit: 2
+    selector:
+    matchLabels:
+        app: event-exporter
+    strategy:
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          prometheus.io/path: /metrics
+          prometheus.io/port: '9102'
+          prometheus.io/scrape: 'true'
+        labels:
+          app: event-exporter
+      spec:
+        containers:
+          - name: event-exporter
+            image: 'ashwanisingh007/event_exporter:v0.0.1'
+            imagePullPolicy: Always
+            args:
+              - --eventType=Warning
+              - --eventType=Normal
+            ports:
+              - containerPort: 9102
+              name: http
+            resources:
+              limits:
+                cpu: 100m
+                memory: 100Mi
+              requests:
+                cpu: 50m
+                memory: 40Mi
+        serviceAccountName: event-exporter
+        terminationGracePeriodSeconds: 30
+  eventExporterService:
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        name: event-exporter
+      name: event-exporter
+      namespace: monitoring
+    spec:
+      ports:
+        - name: http
+          port: 9102
+          targetPort: 9102
+      selector:
+        app: event-exporter
+
+
 kube:
   enabled: true
   fullnameOverride: kube
@@ -265,7 +334,6 @@ kube:
           prometheus: kube
     service:
       name: kube-prometheus
-
 pushgateway:
   enabled: false
   serviceMonitor:
