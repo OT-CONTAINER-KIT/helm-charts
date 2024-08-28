@@ -117,6 +117,7 @@ app:
     service:
       name: app-prometheus
 
+
 kube:
   enabled: true
   fullnameOverride: kube
@@ -265,7 +266,6 @@ kube:
           prometheus: kube
     service:
       name: kube-prometheus
-
 pushgateway:
   enabled: false
   serviceMonitor:
@@ -312,6 +312,48 @@ blackbox:
 
 adapter:
   enabled: false
+
+k8s-events:
+  enabled: true
+  serviceAccount:
+    create: false
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      labels:
+        prometheus: kube
+        release: monitoring
+  config:
+    logLevel: debug
+    logFormat: json
+    receivers:
+      - name: "loki"
+        loki:
+          url: http://logging-loki-gateway.logging.svc.cluster.local/loki/api/v1/push
+        layout:
+          message: "{{ .msg }}"
+          reason: "{{ .Reason }}"
+          type: "{{ .Type }}"
+          count: "{{ .Count }}"
+          kind: "{{ .InvolvedObject.Kind }}"
+          name: "{{ .InvolvedObject.Name }}"
+          namespace: "{{ .Namespace }}"
+          component: "{{ .Source.Component }}"
+          host: "{{ .Source.Host }}"
+    route:
+      routes:
+        - match:
+            - receiver: "loki"
+
+  rbac:
+    rules:
+      - apiGroups: [metrics.k8s.io]
+        resources: [pods, nodes]
+        verbs: [get, list, watch]
+      - apiGroups: ["*"]
+        resources: ["*"]
+        verbs: ["get", "watch", "list"]
 
 thanos:
   enabled: false
