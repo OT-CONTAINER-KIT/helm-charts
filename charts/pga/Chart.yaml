@@ -55,3 +55,11 @@ dependencies:
       - thanos
     alias: thanos
     condition: thanos.enabled
+
+  - name: kubernetes-event-exporter
+    version: 3.2.10
+    repository: https://charts.bitnami.com/bitnami
+    alias: k8s-events
+    tags:
+      - monitoring
+    condition: k8s-events.enabled
