@@ -47,12 +47,24 @@ spec:
 
     connectors:
       spanmetrics:
+        histogram:
+          explicit:
+            buckets: [100us, 1ms, 2ms, 6ms, 10ms, 100ms, 250ms]
         dimensions:
           - name: http.method
           - name: http.status_code
           - name: http.route
         exemplars:
           enabled: true
+        dimensions_cache_size: 1000
+        aggregation_temporality: "AGGREGATION_TEMPORALITY_CUMULATIVE"    
+        metrics_flush_interval: 15s
+        metrics_expiration: 5m
+        events:
+          enabled: true
+          dimensions:
+            - name: exception.type
+            - name: exception.message
 
     service:
       pipelines:
