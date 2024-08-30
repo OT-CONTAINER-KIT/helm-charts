@@ -1,7 +1,7 @@
 ---
 apiVersion: v2
-version: 0.15.9
-appVersion: "0.15.1"
+version: 0.16.0
+appVersion: "0.16.0"
 description: Provides easy redis setup definitions for Kubernetes services, and deployment.
 engine: gotpl
 maintainers:
@@ -19,10 +19,3 @@ keywords:
 - opstree
 - kubernetes
 - openshift
-
-dependencies:
-  - name: cert-manager
-    version: v1.12.4
-    repository: https://charts.jetstack.io
-    alias: certmanager
-    condition: certmanager.enabled

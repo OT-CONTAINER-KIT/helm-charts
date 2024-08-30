@@ -1,0 +1,5 @@
+You have deployed the following release: {{ include "microservice.fullname" . }}.
+To get further information, you can run the commands:
+  $ helm status {{ include "microservice.fullname" . }}
+  $ helm get all {{ include "microservice.fullname" . }}
+
