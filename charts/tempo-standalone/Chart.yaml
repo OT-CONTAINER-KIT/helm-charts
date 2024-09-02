@@ -1,6 +1,6 @@
 apiVersion: v2
-name: opentelemetry-operator
-description: A Helm chart for Opentelemetry Operator
+name: tempo-standalone
+description: A Helm chart for tempo standalone
 type: application
 version: 1.0.0
 appVersion: 1.0.0
