@@ -817,6 +817,25 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/mysql-0.1.0/mysql-0.1.0.tgz
     version: 0.1.0
+  otel-operator:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-09-02T10:43:00.175442951Z"
+    dependencies:
+    - alias: operator
+      condition: operator.enabled
+      name: opentelemetry-operator
+      repository: https://open-telemetry.github.io/opentelemetry-helm-charts/
+      tags:
+      - operator
+      version: 0.64.2
+    description: A Helm chart for Opentelemetry Operator
+    digest: 67fcfedb5c7d74cba37bd0e612e0a08ce64e9ae612b1a1ec9877d70792647d73
+    name: otel-operator
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/otel-operator-1.0.0/otel-operator-1.0.0.tgz
+    version: 1.0.0
   pga:
   - apiVersion: v2
     appVersion: 1.0.1
@@ -3527,4 +3546,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-setup-0.5.0/redis-setup-0.5.0.tgz
     version: 0.5.0
-generated: "2024-08-30T09:13:07.914903311Z"
+generated: "2024-09-02T10:43:00.175705863Z"
