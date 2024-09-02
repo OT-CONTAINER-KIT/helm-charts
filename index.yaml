@@ -3546,4 +3546,23 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-setup-0.5.0/redis-setup-0.5.0.tgz
     version: 0.5.0
-generated: "2024-09-02T10:43:00.175705863Z"
+  tempo-standalone:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-09-02T16:58:46.960536865Z"
+    dependencies:
+    - alias: tempo
+      condition: tempo.enabled
+      name: tempo
+      repository: https://grafana.github.io/helm-charts
+      tags:
+      - tempo
+      version: 1.10.1
+    description: A Helm chart for tempo standalone
+    digest: 1b8193225b8d3e70e640c0e4e456008662c970552576f28fa4115485ec20ff31
+    name: tempo-standalone
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/tempo-standalone-1.0.0/tempo-standalone-1.0.0.tgz
+    version: 1.0.0
+generated: "2024-09-02T16:58:46.960832537Z"
