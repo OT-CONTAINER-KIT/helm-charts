@@ -468,6 +468,37 @@ entries:
   loki:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2024-09-03T04:22:30.076605948Z"
+    dependencies:
+    - alias: distributed
+      condition: distributed.enabled
+      name: loki-distributed
+      repository: https://grafana.github.io/helm-charts
+      tags:
+      - logging
+      version: 0.76.1
+    - alias: promtail
+      name: promtail
+      repository: https://grafana.github.io/helm-charts
+      tags:
+      - logging
+      version: 6.16.4
+    - alias: standalone
+      condition: standalone.enabled
+      name: loki
+      repository: https://grafana.github.io/helm-charts
+      tags:
+      - logging
+      version: 6.7.3
+    description: A Helm chart for loki
+    digest: cc5298b96b4519c48c11598f33036a79fe385f175a424e67884281759179bd12
+    name: loki
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/loki-1.0.1/loki-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2024-09-03T04:06:54.319660693Z"
     dependencies:
     - alias: logging
@@ -3597,4 +3628,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/tempo-standalone-1.0.0/tempo-standalone-1.0.0.tgz
     version: 1.0.0
-generated: "2024-09-03T04:06:54.319884843Z"
+generated: "2024-09-03T04:22:30.076801784Z"
