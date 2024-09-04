@@ -902,6 +902,68 @@ entries:
   pga:
   - apiVersion: v2
     appVersion: 1.0.1
+    created: "2024-09-04T17:56:38.155770854Z"
+    dependencies:
+    - alias: app
+      condition: app.enabled
+      name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts/
+      tags:
+      - monitoring
+      version: 61.3.1
+    - alias: kube
+      condition: kube.enabled
+      name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts/
+      tags:
+      - monitoring
+      version: 61.3.1
+    - alias: adapter
+      condition: adapter.enabled
+      name: prometheus-adapter
+      repository: https://prometheus-community.github.io/helm-charts/
+      tags:
+      - monitoring
+      version: 4.10.0
+    - alias: pushgateway
+      condition: pushgateway.enabled
+      name: prometheus-pushgateway
+      repository: https://prometheus-community.github.io/helm-charts/
+      tags:
+      - monitoring
+      version: 2.14.0
+    - alias: blackbox
+      condition: blackbox.enabled
+      name: prometheus-blackbox-exporter
+      repository: https://prometheus-community.github.io/helm-charts/
+      tags:
+      - blackbox
+      version: 8.17.0
+    - alias: thanos
+      condition: thanos.enabled
+      name: thanos
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - thanos
+      version: 15.7.12
+    - alias: k8s-events
+      condition: k8s-events.enabled
+      name: kubernetes-event-exporter
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - monitoring
+      version: 3.2.10
+    description: A Helm chart for prometheus, grafana and alertmanager
+    digest: 3224fe4d39ff9b3a8582cd37c475e165b19fcdb04f4dffda28d1bc278b0f46cc
+    maintainers:
+    - name: ashwani-opstree
+    name: pga
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/pga-1.0.3/pga-1.0.3.tgz
+    version: 1.0.3
+  - apiVersion: v2
+    appVersion: 1.0.1
     created: "2024-08-12T19:03:56.924591411Z"
     dependencies:
     - alias: app
@@ -3628,4 +3690,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/tempo-standalone-1.0.0/tempo-standalone-1.0.0.tgz
     version: 1.0.0
-generated: "2024-09-03T04:22:30.076801784Z"
+generated: "2024-09-04T17:56:38.155978381Z"
