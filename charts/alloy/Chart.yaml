@@ -1,0 +1,17 @@
+apiVersion: v2
+name: alloy
+description: 'Grafana Alloy'
+type: application
+version: 1.0.0
+appVersion: 1.0.0
+dependencies:
+  - name: alloy
+    version: 1.3.1
+    repository: https://grafana.github.io/helm-charts
+    alias: alloy
+    tags:
+      - alloy
+    condition: alloy.enabled
+  - name: crds
+    version: "0.0.0"
+    condition: crds.create
