@@ -37,11 +37,7 @@ vm:
       replicationFactor: 2
       vmstorage:
         extraArgs:
-          search.maxMemoryPerQuery: 500MB
-          search.maxPointsPerTimeseries: "10000000000000"
-          search.maxQueryLen: "10000000000000"
           search.maxUniqueTimeseries: "10000000000000"
-          search.maxSeries: "10000000000000"
         resources:
           limits:
             cpu: "1"
@@ -59,10 +55,13 @@ vm:
       vmselect:
         extraArgs:
           memory.allowedPercent: "75"
-          search.cacheTimestampOffset: 5m
-          search.maxMemoryPerQuery: 500MB
+          search.cacheTimestampOffset: 60m
+          search.maxLabelsAPISeries: "10000000000000"
+          search.maxMemoryPerQuery: 2GB
           search.maxPointsPerTimeseries: "10000000000000"
+          search.maxQueryDuration: 10m
           search.maxQueryLen: "10000000000000"
+          search.maxSeries: "10000000000000"
           search.maxUniqueTimeseries: "10000000000000"
         storage:
           volumeClaimTemplate:
