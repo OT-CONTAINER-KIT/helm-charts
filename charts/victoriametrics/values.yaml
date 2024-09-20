@@ -1,5 +1,5 @@
 vm:
-  defaultDashboardsEnabled: false
+  defaultDashboardsEnabled: false. 
   experimentalDashboardsEnabled: false
   prometheus-node-exporter:
     enabled: false
