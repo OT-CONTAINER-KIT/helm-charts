@@ -1,0 +1,124 @@
+vm:
+  defaultDashboardsEnabled: false
+  experimentalDashboardsEnabled: false
+  prometheus-node-exporter:
+    enabled: false
+  node:
+    enabled: false
+  kubeStateMetrics:
+    enabled: false
+  grafana:
+    enabled: false
+  alertmanager:
+    enabled: false
+  vmsingle:
+    enabled: false
+  defaultRules:
+    create: false
+  kubeApiServer:
+    enabled: false
+  kubeControllerManager:
+    enabled: false
+  kubeEtcd:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+  crds:
+    enabled: false
+  dashboards:
+    node-exporter-full: false
+  kube-state-metrics:
+    enabled: false
+
+  vmcluster:
+    enabled: true
+    spec:
+      retentionPeriod: "14d"
+      replicationFactor: 2
+      vmstorage:
+        extraArgs:
+          search.maxMemoryPerQuery: 500MB
+          search.maxPointsPerTimeseries: "10000000000000"
+          search.maxQueryLen: "10000000000000"
+          search.maxUniqueTimeseries: "10000000000000"
+          search.maxSeries: "10000000000000"
+        resources:
+          limits:
+            cpu: "1"
+            memory: 5Gi
+          requests:
+            cpu: "1"
+            memory: 5Gi
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: buildpiper-storage
+              resources:
+                requests:
+                  storage: 20Gi
+      vmselect:
+        extraArgs:
+          memory.allowedPercent: "75"
+          search.cacheTimestampOffset: 5m
+          search.maxMemoryPerQuery: 500MB
+          search.maxPointsPerTimeseries: "10000000000000"
+          search.maxQueryLen: "10000000000000"
+          search.maxUniqueTimeseries: "10000000000000"
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: buildpiper-storage
+              resources:
+                requests:
+                  storage: 2Gi
+        resources:
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+          requests:
+            cpu: "1"
+            memory: "1Gi"
+
+      vminsert:
+        image:
+          tag: v1.103.0-cluster
+        replicaCount: 2
+        extraArgs:
+          maxLabelsPerTimeseries: "100"
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: 500Mi
+          requests:
+            cpu: "0.5"
+            memory: "500Mi"
+
+  vmagent:
+    enabled: true
+    spec:
+      serviceScrapeNamespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: vm
+      extraArgs:
+        promscrape.maxScrapeSize: 200MB
+        promscrape.streamParse: "true"
+        promscrape.dropOriginalLabels: "true"
+      resources:
+        limits:
+          cpu: "1"
+          memory: 1Gi
+        requests:
+          cpu: "1"
+          memory: 1Gi
+      scrapeInterval: 30s
+
+  vmalert:
+    enabled: true
+    spec:
+      resources:
+        limits:
+          cpu: "0.5"
+          memory: 1Gi
+        requests:
+          cpu: "0.5"
+          memory: 1Gi
