@@ -3776,4 +3776,32 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/tempo-standalone-1.0.0/tempo-standalone-1.0.0.tgz
     version: 1.0.0
-generated: "2024-09-19T12:13:56.053562417Z"
+  vm:
+  - apiVersion: v2
+    appVersion: v0.0.1
+    created: "2024-09-23T04:41:17.525988435Z"
+    dependencies:
+    - alias: vm
+      condition: vm.enabled
+      name: victoria-metrics-k8s-stack
+      repository: https://victoriametrics.github.io/helm-charts/
+      tags:
+      - monitoring
+      version: 0.25.5
+    - alias: blackbox
+      condition: blackbox.enabled
+      name: prometheus-blackbox-exporter
+      repository: https://prometheus-community.github.io/helm-charts/
+      tags:
+      - blackbox
+      version: 8.17.0
+    description: A Helm chart for victoriametrics
+    digest: 26acaf82f2643c7ca3518e8de4d452cb5488e42869d739cabdc431d85c69e640
+    maintainers:
+    - name: ashwani-opstree
+    name: vm
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/vm-0.0.1/vm-0.0.1.tgz
+    version: 0.0.1
+generated: "2024-09-23T04:41:17.526284129Z"
