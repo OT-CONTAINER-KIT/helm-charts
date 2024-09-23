@@ -15,3 +15,11 @@ dependencies:
     tags:
       - monitoring
     condition: vm.enabled
+
+  - name: prometheus-blackbox-exporter
+    version: 8.17.0
+    repository: https://prometheus-community.github.io/helm-charts/
+    tags:
+      - blackbox
+    alias: blackbox
+    condition: blackbox.enabled
