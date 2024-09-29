@@ -30,13 +30,13 @@ vm:
       size: 1Gi
       finalizers:
         - kubernetes.io/pvc-protection
-    nodeSelector:
-      node_group: monit-logging
-    tolerations:
-      - key: olly
-        operator: Equal
-        value: "true"
-        effect: NoSchedule
+    # nodeSelector:
+    #   node_group: monit-logging
+    # tolerations:
+    #   - key: olly
+    #     operator: Equal
+    #     value: "true"
+    #     effect: NoSchedule
   alertmanager:
     enabled: true
     config:
@@ -61,13 +61,13 @@ vm:
         limits:
           cpu: 250m
           memory: 500Mi
-      nodeSelector:
-        node_group: monit-logging
-      tolerations:
-        - key: olly
-          operator: Equal
-          value: "true"
-          effect: NoSchedule
+      # nodeSelector:
+      #   node_group: monit-logging
+      # tolerations:
+      #   - key: olly
+      #     operator: Equal
+      #     value: "true"
+      #     effect: NoSchedule
       storage:
         volumeClaimTemplate:
           spec:
@@ -117,13 +117,13 @@ vm:
               resources:
                 requests:
                   storage: 20Gi
-        nodeSelector:
-          node_group: monit-logging
-        tolerations:
-          - key: olly
-            operator: Equal
-            value: "true"
-            effect: NoSchedule
+        # nodeSelector:
+        #   node_group: monit-logging
+        # tolerations:
+        #   - key: olly
+        #     operator: Equal
+        #     value: "true"
+        #     effect: NoSchedule
       vmselect:
         replicaCount: 1
         extraArgs:
@@ -150,13 +150,13 @@ vm:
           requests:
             cpu: "1"
             memory: "1Gi"
-        nodeSelector:
-          node_group: monit-logging
-        tolerations:
-          - key: olly
-            operator: Equal
-            value: "true"
-            effect: NoSchedule
+        # nodeSelector:
+        #   node_group: monit-logging
+        # tolerations:
+        #   - key: olly
+        #     operator: Equal
+        #     value: "true"
+        #     effect: NoSchedule
       vminsert:
         replicaCount: 1
         extraArgs:
@@ -170,13 +170,13 @@ vm:
           requests:
             cpu: "0.5"
             memory: "500Mi"
-        nodeSelector:
-          node_group: monit-logging
-        tolerations:
-          - key: olly
-            operator: Equal
-            value: "true"
-            effect: NoSchedule
+        # nodeSelector:
+        #   node_group: monit-logging
+        # tolerations:
+        #   - key: olly
+        #     operator: Equal
+        #     value: "true"
+        #     effect: NoSchedule
 
   vmagent:
     enabled: true
@@ -196,13 +196,13 @@ vm:
           cpu: "0.5"
           memory: 500Mi
       scrapeInterval: 30s
-      nodeSelector:
-        node_group: monit-logging
-      tolerations:
-        - key: olly
-          operator: Equal
-          value: "true"
-          effect: NoSchedule
+      # nodeSelector:
+      #   node_group: monit-logging
+      # tolerations:
+      #   - key: olly
+      #     operator: Equal
+      #     value: "true"
+      #     effect: NoSchedule
   vmalert:
     enabled: true
     spec:
@@ -213,14 +213,13 @@ vm:
         requests:
           cpu: "0.5"
           memory: 500Mi
-      nodeSelector:
-        node_group: monit-logging
-      tolerations:
-        - key: olly
-          operator: Equal
-          value: "true"
-          effect: NoSchedule
-
+      # nodeSelector:
+      #   node_group: monit-logging
+      # tolerations:
+      #   - key: olly
+      #     operator: Equal
+      #     value: "true"
+      #     effect: NoSchedule
 
 blackbox:
   enabled: false
