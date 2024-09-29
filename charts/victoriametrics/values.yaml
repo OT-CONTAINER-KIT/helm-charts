@@ -221,7 +221,6 @@ vm:
       #     value: "true"
       #     effect: NoSchedule
 
-
 blackbox:
   enabled: false
   serviceMonitor:
