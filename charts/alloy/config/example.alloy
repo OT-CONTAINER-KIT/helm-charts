@@ -1,0 +1,75 @@
+logging {
+	level  = "info"
+	format = "logfmt"
+}
+
+discovery.kubernetes "pods" {
+	role = "pod"
+}
+
+discovery.kubernetes "nodes" {
+	role = "node"
+}
+
+discovery.kubernetes "services" {
+	role = "service"
+}
+
+discovery.kubernetes "endpoints" {
+	role = "endpoints"
+}
+
+discovery.kubernetes "endpointslices" {
+	role = "endpointslice"
+}
+
+discovery.kubernetes "ingresses" {
+	role = "ingress"
+}
+
+prometheus.remote_write "metrics_write" {
+    endpoint {
+        name = "default"
+        url  = http://prometheus-operated.monitoring.svc.cluster.local:9090
+        queue_config { }
+        metadata_config { }
+    }
+}
+
+loki.process "logs_process_client" {
+    forward_to = [loki.write.logs_write_client.receiver]
+
+    stage.logfmt {
+        mapping = { "kind" = "", "service_name" = "", "app" = "" }
+    }
+
+    stage.labels {
+        values = { "kind" = "kind", "service_name" = "service_name", "app" = "app" }
+    }
+}
+
+loki.write "logs_write_client" {
+    endpoint {
+        url = http://loki-standalone.monitoring.svc.cluster.local:3100
+    }
+}
+
+faro.receiver "integrations_app_agent_receiver" {
+    server {
+        listen_address           = "0.0.0.0"
+        listen_port              = 12345
+        cors_allowed_origins     = ["http://localhost:3000/"]
+        api_key                  = ""
+        max_allowed_payload_size = "10MiB"
+
+        rate_limiting {
+            rate = 100
+        }
+    }
+
+    sourcemaps { }
+
+    output {
+        logs   = [loki.process.logs_process_client.receiver]
+    }
+}
