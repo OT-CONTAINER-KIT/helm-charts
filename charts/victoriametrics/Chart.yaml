@@ -2,8 +2,8 @@ apiVersion: v2
 name: vm
 description: A Helm chart for victoriametrics
 type: application
-version: 0.0.2
-appVersion: v0.0.2
+version: 0.0.3
+appVersion: v0.0.3
 maintainers:
   - name: ashwani-opstree
 
@@ -22,3 +22,10 @@ dependencies:
       - blackbox
     alias: blackbox
     condition: blackbox.enabled
+  - name: prometheus-msteams
+    version: 1.3.4
+    repository: https://prometheus-msteams.github.io/prometheus-msteams/
+    tags:
+      - msteams
+    alias: msteams
+    condition: msteams.enabled

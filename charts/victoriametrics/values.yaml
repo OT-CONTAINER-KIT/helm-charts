@@ -1,4 +1,6 @@
 vm:
+  victoria-metrics-operator:
+    cleanupCRD: false
   defaultDashboardsEnabled: false
   experimentalDashboardsEnabled: false
   prometheus-node-exporter:
@@ -239,3 +241,18 @@ blackbox:
           preferred_ip_protocol: "ip4"
           fail_if_ssl: false
           fail_if_not_ssl: false
+
+ms-teams:
+  enabled: false
+  image:
+    repository: quay.io/prometheusmsteams/prometheus-msteams
+    tag: 1.5.2
+  resources:
+   limits:
+     cpu: 200m
+     memory: 500Mi
+   requests:
+     cpu: 100m
+     memory: 250Mi
+  connectors: {}
+
