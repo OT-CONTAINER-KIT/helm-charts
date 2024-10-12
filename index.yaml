@@ -3778,6 +3778,40 @@ entries:
     version: 1.0.0
   vm:
   - apiVersion: v2
+    appVersion: v0.0.3
+    created: "2024-10-12T05:55:18.897338917Z"
+    dependencies:
+    - alias: vm
+      condition: vm.enabled
+      name: victoria-metrics-k8s-stack
+      repository: https://victoriametrics.github.io/helm-charts/
+      tags:
+      - monitoring
+      version: 0.25.5
+    - alias: blackbox
+      condition: blackbox.enabled
+      name: prometheus-blackbox-exporter
+      repository: https://prometheus-community.github.io/helm-charts/
+      tags:
+      - blackbox
+      version: 8.17.0
+    - alias: msteams
+      condition: msteams.enabled
+      name: prometheus-msteams
+      repository: https://prometheus-msteams.github.io/prometheus-msteams/
+      tags:
+      - msteams
+      version: 1.3.4
+    description: A Helm chart for victoriametrics
+    digest: 861c833b75e06d921c1237a5482949606e8aa814ea76773268d64af86a0201d3
+    maintainers:
+    - name: ashwani-opstree
+    name: vm
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/vm-0.0.3/vm-0.0.3.tgz
+    version: 0.0.3
+  - apiVersion: v2
     appVersion: v0.0.2
     created: "2024-09-29T16:47:16.350037794Z"
     dependencies:
@@ -3831,4 +3865,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/vm-0.0.1/vm-0.0.1.tgz
     version: 0.0.1
-generated: "2024-09-29T16:47:16.350260318Z"
+generated: "2024-10-12T05:55:18.897569007Z"
