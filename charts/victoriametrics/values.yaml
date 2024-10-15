@@ -33,9 +33,9 @@ vm:
       finalizers:
         - kubernetes.io/pvc-protection
     # nodeSelector:
-    #   node_group: monit-logging
+    #   node_group: o11y
     # tolerations:
-    #   - key: olly
+    #   - key: o11y
     #     operator: Equal
     #     value: "true"
     #     effect: NoSchedule
@@ -64,9 +64,9 @@ vm:
           cpu: 250m
           memory: 500Mi
       # nodeSelector:
-      #   node_group: monit-logging
+      #   node_group: o11y
       # tolerations:
-      #   - key: olly
+      #   - key: o11y
       #     operator: Equal
       #     value: "true"
       #     effect: NoSchedule
@@ -119,13 +119,8 @@ vm:
               resources:
                 requests:
                   storage: 20Gi
-        # nodeSelector:
-        #   node_group: monit-logging
-        # tolerations:
-        #   - key: olly
-        #     operator: Equal
-        #     value: "true"
-        #     effect: NoSchedule
+        # nodeSelector: {}
+        # tolerations: {}
       vmselect:
         replicaCount: 1
         extraArgs:
@@ -152,13 +147,8 @@ vm:
           requests:
             cpu: "1"
             memory: "1Gi"
-        # nodeSelector:
-        #   node_group: monit-logging
-        # tolerations:
-        #   - key: olly
-        #     operator: Equal
-        #     value: "true"
-        #     effect: NoSchedule
+        # nodeSelector: {}
+        # tolerations: {}
       vminsert:
         replicaCount: 1
         extraArgs:
@@ -172,13 +162,8 @@ vm:
           requests:
             cpu: "0.5"
             memory: "500Mi"
-        # nodeSelector:
-        #   node_group: monit-logging
-        # tolerations:
-        #   - key: olly
-        #     operator: Equal
-        #     value: "true"
-        #     effect: NoSchedule
+        # nodeSelector: {}
+        # tolerations: {}
 
   vmagent:
     enabled: true
@@ -198,13 +183,9 @@ vm:
           cpu: "0.5"
           memory: 500Mi
       scrapeInterval: 30s
-      # nodeSelector:
-      #   node_group: monit-logging
-      # tolerations:
-      #   - key: olly
-      #     operator: Equal
-      #     value: "true"
-      #     effect: NoSchedule
+      # nodeSelector: {}
+      # tolerations: {}
+      
   vmalert:
     enabled: true
     spec:
@@ -215,13 +196,8 @@ vm:
         requests:
           cpu: "0.5"
           memory: 500Mi
-      # nodeSelector:
-      #   node_group: monit-logging
-      # tolerations:
-      #   - key: olly
-      #     operator: Equal
-      #     value: "true"
-      #     effect: NoSchedule
+      # nodeSelector: {}
+      # tolerations: {}
 
 blackbox:
   enabled: false
@@ -242,7 +218,7 @@ blackbox:
           fail_if_ssl: false
           fail_if_not_ssl: false
 
-ms-teams:
+msteams:
   enabled: false
   image:
     repository: quay.io/prometheusmsteams/prometheus-msteams
@@ -255,4 +231,3 @@ ms-teams:
      cpu: 100m
      memory: 250Mi
   connectors: {}
-
