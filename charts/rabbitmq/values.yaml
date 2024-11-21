@@ -1,0 +1,14 @@
+namespaceOverride: "rabbitmq"
+replicaCount: 3
+
+auth:
+  username: user
+  password: password
+
+persistence:
+  enabled: true
+  storageClass: "gp2-provision"
+
+
+service:
+  type: ClusterIP
