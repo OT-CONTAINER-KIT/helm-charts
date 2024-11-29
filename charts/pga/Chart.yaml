@@ -1,0 +1,65 @@
+apiVersion: v2
+name: pga
+description: A Helm chart for prometheus, grafana and alertmanager
+type: application
+version: 1.0.3
+appVersion: 1.0.1
+maintainers:
+  - name: ashwani-opstree
+
+dependencies:
+  - name: kube-prometheus-stack
+    version: 61.3.1
+    repository: https://prometheus-community.github.io/helm-charts/
+    alias: app
+    tags:
+      - monitoring
+    condition: app.enabled
+
+  - name: kube-prometheus-stack
+    version: 61.3.1
+    repository: https://prometheus-community.github.io/helm-charts/
+    alias: kube
+    tags:
+      - monitoring
+    condition: kube.enabled
+
+  - name: prometheus-adapter
+    version: 4.10.0
+    repository: https://prometheus-community.github.io/helm-charts/
+    tags:
+      - monitoring
+    alias: adapter
+    condition: adapter.enabled
+
+  - name: prometheus-pushgateway
+    version: 2.14.0
+    repository: https://prometheus-community.github.io/helm-charts/
+    tags:
+      - monitoring
+    alias: pushgateway
+    condition: pushgateway.enabled
+
+  - name: prometheus-blackbox-exporter
+    version: 8.17.0
+    repository: https://prometheus-community.github.io/helm-charts/
+    tags:
+      - blackbox
+    alias: blackbox
+    condition: blackbox.enabled
+
+  - name: thanos
+    version: 15.7.12
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - thanos
+    alias: thanos
+    condition: thanos.enabled
+
+  - name: kubernetes-event-exporter
+    version: 3.2.10
+    repository: https://charts.bitnami.com/bitnami
+    alias: k8s-events
+    tags:
+      - monitoring
+    condition: k8s-events.enabled

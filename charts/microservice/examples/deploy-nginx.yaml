@@ -7,11 +7,11 @@ deployment:
     name: nginx
     tag: latest
     pullPolicy: IfNotPresent
-  livenessProbe: 
+  livenessProbe:
     httpGet:
       path: "/"
       port: http
-  readinessProbe: 
+  readinessProbe:
     httpGet:
       path: "/"
       port: http
@@ -30,4 +30,14 @@ deployment:
         data:
           index.html: |
             Hello! Opstree
-            
+  topologySpreadConstraints:
+    whenUnsatisfiable: "DoNotSchedule"
+
+# serviceAccount:
+#   create: true
+#   annotations: "aws arn link"
+
+# serviceAccount:
+#   name: "myserviceaccount"
+
+
