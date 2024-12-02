@@ -3,8 +3,8 @@ kind: PerconaServerMongoDBBackup
 metadata:
   finalizers:
   - delete-backup
-  name: backup
+  name: backup #specify the backup name. You will use this name to restore from this backup
 spec:
-  clusterName: mdb-db-psmdb-db
-  storageName: azure-blob
+  clusterName: mdb-db-psmdb-db #specify the name of your cluster. This is the name you specified when deploying Percona Server for MongoDB. 
+  storageName: azure-blob #specify the name of your already configured storage.
   type: logical
