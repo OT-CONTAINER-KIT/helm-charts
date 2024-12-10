@@ -1,0 +1,13 @@
+{{- if .Values.restore.enabled }}
+apiVersion: pgv2.percona.com/v2
+kind: PerconaPGRestore
+metadata:
+  name: {{ .Values.restore.name }}
+spec:
+  pgCluster: {{ .Values.restore.pgCluster }}
+  repoName: {{ .Values.restore.repoName }}
+  options:
+{{- range .Values.restore.options }}
+  - {{ . }}
+{{- end }}
+{{- end }}

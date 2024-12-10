@@ -1,6 +1,4 @@
-Backup - 
-
-Restore -
+Backup and Restore have been tested using backup.yaml and restore.yaml files respectively using Azure Blob Storage. For using cloud storage as backup, a Kubernetes secret need to be made: https://docs.percona.com/percona-operator-for-postgresql/2.0/backup-tutorial.html#configure-backup-storage
 
 Extension Installation- To use an extension, install it. Run the CREATE EXTENSION command on the PostgreSQL node where you want the extension to be available e.g. CREATE EXTENSION hstore SCHEMA demo; https://docs.percona.com/postgresql/13/extensions.html
 
@@ -18,5 +16,3 @@ https://docs.percona.com/postgresql/14/solutions/backup-recovery.html
 Switch Over- In Percona Operator, the primary instance election can be controlled by the patroni.switchover section of the Custom Resource manifest. It allows to enable switchover targeting a specific PostgreSQL instance as the new primary, or just running a failover if PostgreSQL cluster has entered a bad state. https://docs.percona.com/percona-operator-for-postgresql/2.0/change-primary.html
 
 User and DB creation- We can create the users and DB by providing values in the 'users' section in values.yaml. https://docs.percona.com/percona-operator-for-postgresql/2.0/users.html
-
-Monitoring- 
