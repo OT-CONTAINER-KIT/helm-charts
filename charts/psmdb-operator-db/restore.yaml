@@ -1,7 +1,0 @@
-apiVersion: psmdb.percona.com/v1
-kind: PerconaServerMongoDBRestore
-metadata:
-  name: restore1
-spec:
-  clusterName: mdb-db-psmdb-db #specify the name of your cluster. This is the name you specified when deploying Percona Server for MongoDB. 
-  backupName: backup #specify the backup name. You will use this name to restore from this backup

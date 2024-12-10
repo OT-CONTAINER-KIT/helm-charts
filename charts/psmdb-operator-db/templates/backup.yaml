@@ -1,0 +1,12 @@
+{{- if .Values.backup.enabled }}
+apiVersion: psmdb.percona.com/v1
+kind: PerconaServerMongoDBBackup
+metadata:
+  finalizers:
+    - delete-backup
+  name: {{ .Values.backup.name }}
+spec:
+  clusterName: {{ .Values.backup.clusterName }}
+  storageName: {{ .Values.backup.storageName }}
+  type: {{ .Values.backup.type }}
+{{- end }}

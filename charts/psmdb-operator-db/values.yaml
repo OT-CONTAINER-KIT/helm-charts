@@ -780,3 +780,16 @@ psmdb-db:
   #   PMM_SERVER_API_KEY: apikey
   #   # PMM_SERVER_USER: admin
   #   # PMM_SERVER_PASSWORD: admin
+
+backup:
+  enabled: false
+  name: backup
+  clusterName: mdb-db-psmdb-db
+  storageName: azure-blob
+  type: logical
+
+restore:
+  enabled: false
+  name: restore1
+  clusterName: mdb-db-psmdb-db
+  backupName: backup

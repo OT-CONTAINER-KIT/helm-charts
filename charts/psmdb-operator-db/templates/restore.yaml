@@ -1,0 +1,9 @@
+{{- if .Values.restore.enabled }}
+apiVersion: psmdb.percona.com/v1
+kind: PerconaServerMongoDBRestore
+metadata:
+  name: {{ .Values.restore.name }}
+spec:
+  clusterName: {{ .Values.restore.clusterName }}
+  backupName: {{ .Values.restore.backupName }}
+{{- end }}
