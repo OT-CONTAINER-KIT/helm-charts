@@ -785,21 +785,21 @@ backup:
   enabled: true
   annotations:
     description: "test"
-  name: backup
+  name: backup #specify the backup name. You will use this name to restore from this backup
   labels:
     app: mongo-backup
     environment: testing
-  clusterName: mdb-db-psmdb-db
-  storageName: azure-blob
+  clusterName: mdb-db-psmdb-db #specify the name of your cluster. This is the name you specified when deploying Percona Server for MongoDB.
+  storageName: azure-blob #specify the name of your already configured storage.
   type: logical
 
 restore:
   enabled: true
   annotations:
     description: "test"
-  name: restore1
+  name: restore1 #name of the restore
   labels:
     app: mongo-restore
     environment: testing
-  clusterName: mdb-db-psmdb-db
-  backupName: backup
+  clusterName: mdb-db-psmdb-db #name of the target cluster to restore the backup on
+  backupName: backup #name of the backup
