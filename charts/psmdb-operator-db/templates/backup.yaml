@@ -2,9 +2,15 @@
 apiVersion: psmdb.percona.com/v1
 kind: PerconaServerMongoDBBackup
 metadata:
-  finalizers:
-    - delete-backup
   name: {{ .Values.backup.name }}
+{{- if .Values.backup.annotations }}
+  annotations:
+{{ .Values.backup.annotations | toYaml | indent 4 }}
+{{- end }}
+{{- if .Values.backup.labels }}
+  labels:
+{{ .Values.backup.labels | toYaml | indent 4 }}
+{{- end }}
 spec:
   clusterName: {{ .Values.backup.clusterName }}
   storageName: {{ .Values.backup.storageName }}

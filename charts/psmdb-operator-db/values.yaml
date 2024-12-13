@@ -782,14 +782,24 @@ psmdb-db:
   #   # PMM_SERVER_PASSWORD: admin
 
 backup:
-  enabled: false
+  enabled: true
+  annotations:
+    description: "test"
   name: backup
+  labels:
+    app: mongo-backup
+    environment: testing
   clusterName: mdb-db-psmdb-db
   storageName: azure-blob
   type: logical
 
 restore:
-  enabled: false
+  enabled: true
+  annotations:
+    description: "test"
   name: restore1
+  labels:
+    app: mongo-restore
+    environment: testing
   clusterName: mdb-db-psmdb-db
   backupName: backup
