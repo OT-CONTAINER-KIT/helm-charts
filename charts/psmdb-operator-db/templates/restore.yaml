@@ -1,0 +1,17 @@
+{{- if .Values.restore.enabled }}
+apiVersion: psmdb.percona.com/v1
+kind: PerconaServerMongoDBRestore
+metadata:
+  name: {{ .Values.restore.name }}
+{{- if .Values.restore.annotations }}
+  annotations:
+{{ .Values.restore.annotations | toYaml | indent 4 }}
+{{- end }}
+{{- if .Values.restore.labels }}
+  labels:
+{{ .Values.restore.labels | toYaml | indent 4 }}
+{{- end }}
+spec:
+  clusterName: {{ .Values.restore.clusterName }}
+  backupName: {{ .Values.restore.backupName }}
+{{- end }}
