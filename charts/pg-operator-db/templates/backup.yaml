@@ -3,6 +3,14 @@ apiVersion: pgv2.percona.com/v2
 kind: PerconaPGBackup
 metadata:
   name: {{ .Values.backup.name }}
+{{- if .Values.backup.annotations }}
+  annotations:
+{{ .Values.backup.annotations | toYaml | indent 4 }}
+{{- end }}
+{{- if .Values.backup.labels }}
+  labels:
+{{ .Values.backup.labels | toYaml | indent 4 }}
+{{- end }}
 spec:
   pgCluster: {{ .Values.backup.pgCluster }}
   repoName: {{ .Values.backup.repoName }}

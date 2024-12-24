@@ -643,7 +643,12 @@ pg-db:
 
 backup:
   enabled: true
+  annotations:
+    description: "test"
   name: backup1
+  labels:
+    app: postgres-backup
+    environment: testing
   pgCluster: postgres-pg-db
   repoName: repo4
   options:
@@ -651,7 +656,12 @@ backup:
 
 restore:
   enabled: true
+  annotations:
+    description: "test"
   name: restore1
+  labels:
+    app: postgres-restore
+    environment: testing
   pgCluster: postgres-pg-db
   repoName: repo4
   options:
