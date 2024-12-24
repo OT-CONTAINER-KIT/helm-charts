@@ -1,0 +1,359 @@
+app:
+  enabled: false
+  fullnameOverride: app
+  commonLabels:
+    prometheus: app
+  defaultRules:
+    create: false
+  alertmanager:
+    enabled: false
+  grafana:
+    enabled: false
+  kubeApiServer:
+    enabled: false
+  kubelet:
+    enabled: false
+  kubeControllerManager:
+    enabled: false
+  coreDns:
+    enabled: false
+  kubeEtcd:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+  kubeProxy:
+    enabled: false
+  kubeStateMetrics:
+    enabled: false
+  kube-state-metrics:
+    enabled: false
+  nodeExporter:
+    enabled: false
+  prometheusOperator:
+    enabled: false
+    admissionWebhooks:
+      enabled: false
+    configReloaderCpu: 300m
+    configReloaderMemory: 300Mi
+  prometheus:
+    enabled: true
+    prometheusSpec:
+      # nodeSelector:
+      #   appType: monitoring
+      # tolerations:
+      #   - key: "appType"
+      #     operator: "Equal"
+      #     value: "monitoring"
+      #     effect: "NoSchedule"
+      retention: 30d
+      replicas: 1
+      # externalUrl: ""
+      resources:
+        requests:
+          cpu: "1"
+          memory: 1Gi
+        limits:
+          cpu: "1"
+          memory: 1Gi
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            # storageClassName: encrypted-gp3
+            accessModes:
+              - "ReadWriteOnce"
+            resources:
+              requests:
+                storage: 1Gi
+      alertingEndpoints:
+        - name: kube-alertmanager
+          namespace: monitoring
+          port: web
+          pathPrefix: /
+          apiVersion: v2
+      serviceMonitorSelector:
+        matchExpressions:
+          - key: prometheus
+            operator: In
+            values:
+              - app
+      podMonitorSelector:
+        matchExpressions:
+          - key: prometheus
+            operator: In
+            values:
+              - app
+      ruleSelector:
+        matchLabels:
+          prometheus: app
+      additionalScrapeConfigs:
+        - job_name: kubernets-servics-probe
+          metrics_path: /probe
+          params:
+            module:
+              - http_2xx
+          kubernetes_sd_configs:
+            - role: service
+          scrape_interval: 30s
+          scrape_timeout: 25s
+          relabel_configs:
+            - source_labels:
+                - __meta_kubernetes_service_annotation_prometheus_io_probe
+              regex: true
+              action: keep
+            - source_labels:
+                - __meta_kubernetes_service_name
+              target_label: service
+            - source_labels:
+                - __address__,__meta_kubernetes_service_annotation_prometheus_io_path
+              regex: (.+);(.+)
+              target_label: __param_target
+              replacement: ${1}${2}
+            - source_labels:
+                - __param_target ]
+              target_label: instance
+            - source_labels: []
+              target_label: __address__
+              replacement: monitoring-prometheus-blackbox-exporter:9115
+    service:
+      name: app-prometheus
+
+
+kube:
+  enabled: true
+  fullnameOverride: kube
+  commonLabels:
+    prometheus: kube
+  defaultRules:
+    create: false
+  alertmanager:
+    enabled: true
+    alertmanagerSpec:
+      retention: 240h
+      resources:
+        requests:
+          cpu: 250m
+          memory: 500Mi
+        limits:
+          cpu: 250m
+          memory: 500Mi
+      storage:
+        volumeClaimTemplate:
+          spec:
+            # storageClassName: encrypted-gp3
+            accessModes:
+              - "ReadWriteOnce"
+            resources:
+              requests:
+                storage: 1Gi
+  grafana:
+    enabled: true
+    testFramework:
+      enabled: false
+    sidecar:
+      datasources:
+        defaultDatasourceEnabled: false
+  kubeApiServer:
+    enabled: true
+  kubelet:
+    enabled: true
+    namespace: kube-system
+  kubeControllerManager:
+    enabled: false
+  coreDns:
+    enabled: true
+  kubeEtcd:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+  kubeProxy:
+    enabled: false
+  kubeStateMetrics:
+    enabled: true
+  kube-state-metrics:
+    customLabels:
+      prometheus: kube
+    enabled: true
+    podSecurityPolicy:
+      enabled: false
+    resources:
+      requests:
+        cpu: 250m
+        memory: 500Mi
+      limits:
+        cpu: 250m
+        memory: 500Mi
+  nodeExporter:
+    enabled: true
+  prometheus-node-exporter:
+    prometheus:
+      monitor:
+        additionalLabels:
+          prometheus: kube
+  #   rbac:
+  #     pspEnabled: false
+    # image:
+    #   repository:
+    #   tag: latest
+    #   pullPolicy: Always
+  prometheusOperator:
+    enabled: true
+    admissionWebhooks:
+      enabled: false
+    deployment:
+      enabled: true
+    tls:
+      enabled: false
+  prometheus:
+    enabled: true
+    prometheusSpec:
+    #   nodeSelector:
+    #     appType: monitoring
+    #   tolerations:
+    #     - key: "appType"
+    #       operator: "Equal"
+    #       value: "monitoring"
+    #       effect: "NoSchedule"
+#      remoteWrite:
+#        - url: https://app.last9.io/jupiter/prometheus/write
+#          basicAuth:
+#            username:
+#              name: promsecret
+#              key: username
+#            password:
+#              name: promsecret
+#              key: password
+##          # Do not add the writeRelabelConfigs section if you want to
+##          # send all metrics via remote write
+##          writeRelabelConfigs:
+#            - sourceLabels: [ __name__ ]
+#              regex: 'istio*'
+#              action: keep
+      # image:
+      #   tag: v2.41.0
+      retention: 30d
+      replicas: 1
+      # externalUrl: "http://kube-opstree.prod.internal/"
+      resources:
+        requests:
+          cpu: "500m"
+          memory: 500Mi
+        limits:
+          cpu: "500m"
+          memory: 500Mi
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            # storageClassName: encrypted-gp3
+            accessModes:
+              - "ReadWriteOnce"
+            resources:
+              requests:
+                storage: 1Gi
+      serviceMonitorSelector:
+        matchExpressions:
+          - key: prometheus
+            operator: In
+            values:
+              - kube
+      podMonitorSelector:
+        matchExpressions:
+          - key: prometheus
+            operator: In
+            values:
+              - kube
+      ruleSelector:
+        matchLabels:
+          prometheus: kube
+    service:
+      name: kube-prometheus
+pushgateway:
+  enabled: false
+  serviceMonitor:
+    enabled: true
+    namespace: monitoring
+    additionalLabels:
+      prometheus: app
+  extraArgs:
+    - --log.level=debug
+    - --push.disable-consistency-check
+  resources:
+    limits:
+      cpu: 1
+      memory: 4096Mi
+    requests:
+      cpu: 500m
+      memory: 4096Mi
+
+blackbox:
+  enabled: false
+  serviceMonitor:
+    enabled: true
+    defaults:
+      additionalMetricsRelabels: {}
+      labels:
+        prometheus: app
+      interval: 30s
+      scrapeTimeout: 30s
+      module: http_2xx
+  config:
+    modules:
+      http_2xx:
+        prober: http
+        timeout: 5s
+        http:
+          valid_http_versions:
+            - "HTTP/1.0"
+            - "HTTP/1.1"
+            - "HTTP/2.0"
+          no_follow_redirects: false
+          preferred_ip_protocol: "ip4"
+          fail_if_ssl: false
+          fail_if_not_ssl: false
+
+adapter:
+  enabled: false
+
+k8s-events:
+  enabled: true
+  serviceAccount:
+    create: false
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      labels:
+        prometheus: kube
+        release: monitoring
+  config:
+    logLevel: debug
+    logFormat: json
+    receivers:
+      - name: "loki"
+        loki:
+          url: http://logging-loki-gateway.logging.svc.cluster.local/loki/api/v1/push
+        layout:
+          message: "{{ .msg }}"
+          reason: "{{ .Reason }}"
+          type: "{{ .Type }}"
+          count: "{{ .Count }}"
+          kind: "{{ .InvolvedObject.Kind }}"
+          name: "{{ .InvolvedObject.Name }}"
+          namespace: "{{ .Namespace }}"
+          component: "{{ .Source.Component }}"
+          host: "{{ .Source.Host }}"
+    route:
+      routes:
+        - match:
+            - receiver: "loki"
+
+  rbac:
+    rules:
+      - apiGroups: [metrics.k8s.io]
+        resources: [pods, nodes]
+        verbs: [get, list, watch]
+      - apiGroups: ["*"]
+        resources: ["*"]
+        verbs: ["get", "watch", "list"]
+
+thanos:
+  enabled: false
