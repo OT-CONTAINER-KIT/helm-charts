@@ -1,0 +1,152 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-karpenter-iam-roles
+spec:
+  template:
+    spec:
+      containers:
+      - name: create-iam-roles
+        image: amazonlinux:2
+        command:
+          - /bin/sh
+          - -c
+          - |
+            # Install AWS CLI
+            yum update -y
+            yum install -y aws-cli
+
+            # Now run the rest of your commands
+            echo '{
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": "ec2.amazonaws.com"
+                    },
+                    "Action": "sts:AssumeRole"
+                  }
+                ]
+              }' > node-trust-policy.json
+
+            aws iam create-role --role-name "KarpenterNodeRole-${CLUSTER_NAME}" \
+                --assume-role-policy-document file://node-trust-policy.json
+
+            aws iam attach-role-policy --role-name "KarpenterNodeRole-${CLUSTER_NAME}" \
+                --policy-arn "arn:${AWS_PARTITION}:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+
+            aws iam attach-role-policy --role-name "KarpenterNodeRole-${CLUSTER_NAME}" \
+                --policy-arn "arn:${AWS_PARTITION}:iam::aws:policy/AmazonEKS_CNI_Policy"
+
+            aws iam attach-role-policy --role-name "KarpenterNodeRole-${CLUSTER_NAME}" \
+                --policy-arn "arn:${AWS_PARTITION}:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+
+            aws iam attach-role-policy --role-name "KarpenterNodeRole-${CLUSTER_NAME}" \
+                --policy-arn "arn:${AWS_PARTITION}:iam::aws:policy/AmazonSSMManagedInstanceCore"
+
+            # Create controller trust policy
+            cat << EOF > controller-trust-policy.json
+            {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Federated": "arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:oidc-provider/${OIDC_ENDPOINT#*//}"
+                        },
+                        "Action": "sts:AssumeRoleWithWebIdentity",
+                        "Condition": {
+                            "StringEquals": {
+                                "${OIDC_ENDPOINT#*//}:aud": "sts.amazonaws.com",
+                                "${OIDC_ENDPOINT#*//}:sub": "system:serviceaccount:${KARPENTER_NAMESPACE}:karpenter"
+                            }
+                        }
+                    }
+                ]
+            }
+            EOF
+
+            aws iam create-role --role-name "KarpenterControllerRole-${CLUSTER_NAME}" \
+                --assume-role-policy-document file://controller-trust-policy.json
+
+            # Create controller policy
+            cat << EOF > controller-policy.json
+            {
+                "Statement": [
+                    {
+                        "Action": [
+                            "ssm:GetParameter",
+                            "ec2:DescribeImages",
+                            "ec2:RunInstances",
+                            "ec2:DescribeSubnets",
+                            "ec2:DescribeSecurityGroups",
+                            "ec2:DescribeLaunchTemplates",
+                            "ec2:DescribeInstances",
+                            "ec2:DescribeInstanceTypes",
+                            "ec2:DescribeInstanceTypeOfferings",
+                            "ec2:DeleteLaunchTemplate",
+                            "ec2:CreateTags",
+                            "ec2:CreateLaunchTemplate",
+                            "ec2:CreateFleet",
+                            "ec2:DescribeSpotPriceHistory",
+                            "pricing:GetProducts"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": "*",
+                        "Sid": "Karpenter"
+                    },
+                    {
+                        "Action": "ec2:TerminateInstances",
+                        "Condition": {
+                            "StringLike": {
+                                "ec2:ResourceTag/karpenter.sh/nodepool": "*"
+                            }
+                        },
+                        "Effect": "Allow",
+                        "Resource": "*",
+                        "Sid": "ConditionalEC2Termination"
+                    },
+                    {
+                        "Effect": "Allow",
+                        "Action": "iam:PassRole",
+                        "Resource": "arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/KarpenterNodeRole-${CLUSTER_NAME}",
+                        "Sid": "PassNodeIAMRole"
+                    },
+                    {
+                        "Effect": "Allow",
+                        "Action": "eks:DescribeCluster",
+                        "Resource": "arn:${AWS_PARTITION}:eks:${AWS_REGION}:${AWS_ACCOUNT_ID}:cluster/${CLUSTER_NAME}",
+                        "Sid": "EKSClusterEndpointLookup"
+                    }
+                ],
+                "Version": "2012-10-17"
+            }
+            EOF
+
+            aws iam put-role-policy --role-name "KarpenterControllerRole-${CLUSTER_NAME}" \
+                --policy-name "KarpenterControllerPolicy-${CLUSTER_NAME}" \
+                --policy-document file://controller-policy.json
+        env:
+        - name: AWS_REGION
+          value: "{{ .Values.awsRegion }}"
+        - name: CLUSTER_NAME
+          value: "{{ .Values.clusterName }}"
+        - name: AWS_PARTITION
+          value: "{{ .Values.awsPartition }}"
+        - name: AWS_ACCOUNT_ID
+          value: "{{ .Values.awsAccountId }}"
+        - name: OIDC_ENDPOINT
+          value: "{{ .Values.oidcEndpoint }}"
+        - name: KARPENTER_NAMESPACE
+          value: "{{ .Values.karpenterNamespace }}"
+        - name: K8S_VERSION
+          value: "{{ .Values.k8sVersion }}"
+        - name: ARM_AMI_ID
+          value: "{{ .Values.amiIds.arm }}"
+        - name: AMD_AMI_ID
+          value: "{{ .Values.amiIds.amd }}"
+        - name: GPU_AMI_ID
+          value: "{{ .Values.amiIds.gpu }}"
+      restartPolicy: Never
+

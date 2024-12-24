@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: update-aws-auth
+  namespace: kube-system
+spec:
+  template:
+    spec:
+      serviceAccountName: updater-sa
+      containers:
+        - name: aws-auth-updater
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Fetching aws-auth ConfigMap..."
+              kubectl get configmap aws-auth -n kube-system -o yaml > /tmp/aws-auth.yaml
+
+              echo "Validating fetched aws-auth ConfigMap..."
+              cat /tmp/aws-auth.yaml
+
+              echo "Modifying aws-auth ConfigMap..."
+              # Replace with Helm templating for EC2PrivateDNSName
+              yq eval '(.data.mapRoles |= . + "\n- groups:\n  - system:bootstrappers\n  - system:nodes\n  rolearn: arn:{{ .Values.awsPartition }}:iam::{{ .Values.awsAccountId }}:role/KarpenterNodeRole-{{ .Values.clusterName }}\n  username: system:node:{{ .Values.ec2PrivateDNSName }}")' -i /tmp/aws-auth.yaml
+
+              echo "Validating modified aws-auth ConfigMap..."
+              cat /tmp/aws-auth.yaml
+
+              echo "Applying updated aws-auth ConfigMap..."
+              kubectl apply -f /tmp/aws-auth.yaml -n kube-system --validate=false
+          volumeMounts:
+            - name: tmp-volume
+              mountPath: /tmp
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
+      restartPolicy: Never
+  backoffLimit: 4
+

@@ -1,0 +1,62 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: karpenter-tagging-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: karpenter-tagging
+        image: amazonlinux:2
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: AWS_REGION
+            value: "{{ .Values.awsRegion }}" # AWS Region from values.yaml
+          - name: CLUSTER_NAME
+            value: "{{ .Values.clusterName }}" # EKS Cluster Name from values.yaml
+        command:
+          - "/bin/sh"
+          - "-c"
+          - |
+            #!/bin/bash
+            set -e
+
+            # Install AWS CLI
+            yum update -y
+            yum install -y aws-cli
+
+            # Export environment variables for AWS CLI
+            export AWS_REGION="${AWS_REGION}"
+            export CLUSTER_NAME="${CLUSTER_NAME}"
+
+            # Add tags to subnets for all nodegroups
+            for NODEGROUP in $(aws eks list-nodegroups --cluster-name "${CLUSTER_NAME}" --region "${AWS_REGION}" --query 'nodegroups' --output text); do
+                aws ec2 create-tags \
+                    --region "${AWS_REGION}" \
+                    --tags "Key=karpenter.sh/discovery,Value=${CLUSTER_NAME}" \
+                    --resources $(aws eks describe-nodegroup --cluster-name "${CLUSTER_NAME}" --nodegroup-name "${NODEGROUP}" \
+                    --region "${AWS_REGION}" --query 'nodegroup.subnets' --output text )
+            done
+
+            # Add tags to security groups for the first nodegroup
+            NODEGROUP=$(aws eks list-nodegroups --cluster-name "${CLUSTER_NAME}" --region "${AWS_REGION}" --query 'nodegroups[0]' --output text)
+
+            LAUNCH_TEMPLATE=$(aws eks describe-nodegroup --cluster-name "${CLUSTER_NAME}" --nodegroup-name "${NODEGROUP}" \
+                --region "${AWS_REGION}" --query 'nodegroup.launchTemplate.{id:id,version:version}' --output text | tr -s "\t" ",")
+
+            # If using Cluster security group
+            SECURITY_GROUPS=$(aws eks describe-cluster --name "${CLUSTER_NAME}" --region "${AWS_REGION}" \
+                 --query "cluster.resourcesVpcConfig.clusterSecurityGroupId" --output text)
+
+            # If using Launch template security groups
+            SECURITY_GROUPS="$(aws ec2 describe-launch-template-versions --launch-template-id "${LAUNCH_TEMPLATE%,*}" \
+                --versions "${LAUNCH_TEMPLATE#*,}" --region "${AWS_REGION}" \
+                --query 'LaunchTemplateVersions[0].LaunchTemplateData.[NetworkInterfaces[0].Groups||SecurityGroupIds]' --output text)"
+
+            aws ec2 create-tags \
+                --region "${AWS_REGION}" \
+                --tags "Key=karpenter.sh/discovery,Value=${CLUSTER_NAME}" \
+                --resources "${SECURITY_GROUPS}"
+      restartPolicy: Never
+  backoffLimit: 4
+
