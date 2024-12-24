@@ -5,8 +5,8 @@ karpenterVersion: "1.1.1"
 awsPartition: "aws"                 # Change to aws-cn or aws-us-gov if applicable
 ec2PrivateDNSName: "{{EC2PrivateDNSName}}"
 awsRegion: "ap-south-1"             # This will be populated from the AWS CLI
-oidcEndpoint: "https://oidc.eks.ap-south-1.amazonaws.com/id/89026BA50DBC3476D1DA2DA155EBB574"                    # This will be populated from the AWS CLI
-awsAccountId: "084828584148"        # This will be populated from the AWS CLI
+oidcEndpoint: "https://oidc.eks.ap-south-1.amazonaws.com/id/xyx"                    # This will be populated from the AWS CLI
+awsAccountId: "9999999999"        # This will be populated from the AWS CLI
 k8sVersion: "1.30"                  # Kubernetes version you're using
 amiIds:
   arm: "ami-0e3f1069f5a85fc29"                           # Placeholder for ARM AMI ID
