@@ -1,15 +1,23 @@
-# values.yaml
-clusterName: "demo-cluster"         # Replace with your actual cluster name
-karpenterNamespace: "kube-system"   # Default namespace for Karpenter
-karpenterVersion: "1.1.1"  
-awsPartition: "aws"                 # Change to aws-cn or aws-us-gov if applicable
-ec2PrivateDNSName: "{{EC2PrivateDNSName}}"
-awsRegion: "ap-south-1"             # This will be populated from the AWS CLI
-oidcEndpoint: "https://oidc.eks.ap-south-1.amazonaws.com/id/89026BA50DBC3476D1DA2DA155EBB574"                    # This will be populated from the AWS CLI
-awsAccountId: "084828584148"        # This will be populated from the AWS CLI
-k8sVersion: "1.30"                  # Kubernetes version you're using
-amiIds:
-  arm: "ami-0e3f1069f5a85fc29"                           # Placeholder for ARM AMI ID
-  amd: "ami-0308b0e27f09b0b25"                           # Placeholder for AMD AMI ID
-  gpu: "ami-0761bb90cfee48660"                           # Placeholder for GPU AMI ID
+# Custom values for your chart
+clusterName: test-demo-cluster
+awsPartition: aws
+awsAccountId: 3849
+karpenterVersion: 1.1.1
+
+# Karpenter chart overrides
+karpenter:
+  settings:
+    clusterName: test-demo-cluster
+   # interruptionQueue: test-demo-cluster
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::3849:role/KarpenterControllerRole-test-demo-cluster
+  controller:
+    resources:
+      requests:
+        cpu: "1"
+        memory: "1Gi"
+      limits:
+        cpu: "1"
+        memory: "1Gi"
 
