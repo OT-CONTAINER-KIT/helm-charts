@@ -1,0 +1,29 @@
+{{- if .Values.instrumentation.enabled }}
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: {{ .Values.instrumentation.name }}
+  namespace: {{ .Values.instrumentation.namespace }}
+spec:
+  {{- if .Values.instrumentation.exporter }}
+  exporter:
+    endpoint: {{ .Values.instrumentation.exporter.endpoint }}
+  {{- end }}
+  propagators:
+{{- range .Values.instrumentation.propagators }}
+    - {{ . }}
+{{- end }}
+  sampler:
+    type: {{ .Values.instrumentation.sampler.type }}
+    argument: {{ .Values.instrumentation.sampler.argument | quote }}
+  {{- if .Values.instrumentation.languages }}
+  {{- range $language, $envs := .Values.instrumentation.languages }}
+  {{ $language }}:
+    env:
+    {{- range $envs }}
+      - name: {{ .name }}
+        value: {{ .value }}
+    {{- end }}
+  {{- end }}
+  {{- end }}
+{{- end }}
