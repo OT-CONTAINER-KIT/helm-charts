@@ -1,0 +1,24 @@
+{{- if .Values.serviceScrape.enabled }}
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  labels:
+    {{- range $key, $value := .Values.serviceScrape.labels }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+  name: {{ .Values.serviceScrape.name }}
+  namespace: {{ .Values.serviceScrape.namespace }}
+spec:
+  endpoints:
+  - interval: {{ .Values.serviceScrape.endpoints.interval }}
+    path: {{ .Values.serviceScrape.endpoints.path }}
+    targetPort: {{ .Values.serviceScrape.endpoints.targetPort }}
+  namespaceSelector:
+    matchNames:
+    - {{ .Values.serviceScrape.namespace }}
+  selector:
+    matchLabels:
+      {{- range $key, $value := .Values.serviceScrape.selector }}
+      {{ $key }}: {{ $value }}
+      {{- end }}
+{{- end }}
