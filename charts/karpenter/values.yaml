@@ -1,13 +1,13 @@
 # Custom values for your chart
-clusterName: test-demo-cluster
-awsPartition: aws
+clusterName: ""
+awsPartition: ""
 awsAccountId: 3849
-karpenterVersion: 1.1.1
+karpenterVersion: 
 
 # Karpenter chart overrides
 karpenter:
   settings:
-    clusterName: test-demo-cluster
+    clusterName: ""
    # interruptionQueue: test-demo-cluster
   serviceAccount:
     annotations:
