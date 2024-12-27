@@ -21,3 +21,52 @@ karpenter:
         cpu: "1"
         memory: "1Gi"
 
+# Node Pool Configuration
+nodePools:
+  name: default
+  requirements:
+    - key: kubernetes.io/arch
+      operator: In
+      values:
+        - "amd64"
+    - key: kubernetes.io/os
+      operator: In
+      values:
+        - "linux"
+    - key: karpenter.sh/capacity-type
+      operator: In
+      values:
+        - "spot"
+    - key: karpenter.k8s.aws/instance-category
+      operator: In
+      values:
+        - "c"
+        - "m"
+        - "r"
+    - key: karpenter.k8s.aws/instance-generation
+      operator: Gt
+      values:
+        - "2"
+  nodeClass:
+    group: karpenter.k8s.aws
+    kind: EC2NodeClass
+    name: default
+  expireAfter: 720h
+  limits:
+    cpu: "1000"
+    memory: "1000Gi"
+  disruption:
+    consolidationPolicy: WhenEmptyOrUnderutilized
+    consolidateAfter: 1m
+  taints:
+    - key: "example.com/special-taint"
+      value: "my-value"
+      effect: "NoSchedule"
+    - key: "example.com/another-taint"
+      effect: "NoExecute"
+  labels:
+    billing-team: my-team
+    environment: production
+  annotations:
+    example.com/owner: "my-team"
+    example.com/maintainer: "admin@company.com"
