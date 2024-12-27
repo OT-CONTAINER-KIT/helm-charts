@@ -1,0 +1,7 @@
+apiVersion: v2
+name: ot-karpenter
+version: 0.1.0
+dependencies:
+  - name: karpenter
+    version: 1.1.1
+    repository: oci://public.ecr.aws/karpenter
