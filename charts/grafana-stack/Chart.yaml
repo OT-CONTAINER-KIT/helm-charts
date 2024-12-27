@@ -1,5 +1,5 @@
 apiVersion: v2
-name: vm
+name: grafana-stack
 description: A Helm chart for Grafana, Alertmanager and VictoriaMetrics
 type: application
 version: 0.0.1
