@@ -1,0 +1,232 @@
+grafana-stack:
+  enabled: true
+  victoria-metrics-operator:
+    enabled: true
+    crds:
+      plain: true
+      cleanup:
+        enabled: false
+  prometheus-node-exporter:
+    enabled: true
+  node:
+    enabled: true
+  kubeStateMetrics:
+    enabled: true
+  grafana:
+    enabled: true
+    testFramework:
+      enabled: false
+    sidecar:
+      datasources:
+        initDatasources: false
+    resources:
+      requests:
+        cpu: "0.5"
+        memory: 1Gi
+      limits:
+        cpu: 1
+        memory: 2Gi
+    persistence:
+      enabled: true
+      type: sts
+      storageClassName: buildpiper-storage
+      accessModes:
+        - ReadWriteOnce
+      size: 1Gi
+      finalizers:
+        - kubernetes.io/pvc-protection
+    # nodeSelector:
+    #   node_group: o11y
+    # tolerations:
+    #   - key: o11y
+    #     operator: Equal
+    #     value: "true"
+    #     effect: NoSchedule
+  alertmanager:
+    enabled: true
+    config:
+      global:
+        resolve_timeout: 5m
+      templates:
+        - "/etc/vm/configs/**/*.tmpl"
+      route:
+        receiver: "blackhole"
+      receivers:
+      - name: blackhole
+    spec:
+      disableNamespaceMatcher: true
+      configNamespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: monitoring
+      replicaCount: 2
+      retention: 240h
+      resources:
+        requests:
+          cpu: 250m
+          memory: 500Mi
+        limits:
+          cpu: 250m
+          memory: 500Mi
+      # nodeSelector: {}
+      # tolerations: {}
+      storage:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: buildpiper-storage
+            accessModes:
+              - "ReadWriteOnce"
+            resources:
+              requests:
+                storage: 1Gi
+  vmsingle:
+    enabled: false
+  defaultRules:
+    create: false
+  kubeApiServer:
+    enabled: false
+  kubeControllerManager:
+    enabled: false
+  kubeEtcd:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+  crds:
+    enabled: false
+  dashboards:
+    node-exporter-full: false
+
+  vmcluster:
+    enabled: true
+    spec:
+      retentionPeriod: "14d"
+      replicationFactor: 1
+      vmstorage:
+        replicaCount: 1
+        extraArgs:
+          search.maxUniqueTimeseries: "10000000000000"
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: 500Mi
+          requests:
+            cpu: "0.5"
+            memory: 500Mi
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: buildpiper-storage
+              resources:
+                requests:
+                  storage: 20Gi
+        # nodeSelector: {}
+        # tolerations: {}
+      vmselect:
+        replicaCount: 1
+        extraArgs:
+          memory.allowedPercent: "75"
+          search.cacheTimestampOffset: 60m
+          search.maxLabelsAPISeries: "10000000000000"
+          search.maxMemoryPerQuery: 2GB
+          search.maxPointsPerTimeseries: "10000000000000"
+          search.maxQueryDuration: 10m
+          search.maxQueryLen: "10000000000000"
+          search.maxSeries: "10000000000000"
+          search.maxUniqueTimeseries: "10000000000000"
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: buildpiper-storage
+              resources:
+                requests:
+                  storage: 2Gi
+        resources:
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+          requests:
+            cpu: "1"
+            memory: "1Gi"
+        # nodeSelector: {}
+        # tolerations: {}
+      vminsert:
+        replicaCount: 1
+        extraArgs:
+          maxLabelsPerTimeseries: "100"
+        image:
+          tag: v1.103.0-cluster
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: 500Mi
+          requests:
+            cpu: "0.5"
+            memory: "500Mi"
+        # nodeSelector: {}
+        # tolerations: {}
+
+  vmagent:
+    enabled: true
+    spec:
+      extraArgs:
+        promscrape.maxScrapeSize: 200MB
+        promscrape.streamParse: "true"
+        promscrape.dropOriginalLabels: "true"
+      resources:
+        limits:
+          cpu: "0.5"
+          memory: 500Mi
+        requests:
+          cpu: "0.5"
+          memory: 500Mi
+      scrapeInterval: 30s
+      # nodeSelector: {}
+      # tolerations: {}
+      
+  vmalert:
+    enabled: true
+    spec:
+      resources:
+        limits:
+          cpu: "0.5"
+          memory: 500Mi
+        requests:
+          cpu: "0.5"
+          memory: 500Mi
+      # nodeSelector: {}
+      # tolerations: {}
+
+blackbox:
+  enabled: false
+  serviceMonitor:
+    enabled: false
+  config:
+    modules:
+      http_2xx:
+        prober: http
+        timeout: 5s
+        http:
+          valid_http_versions:
+            - "HTTP/1.0"
+            - "HTTP/1.1"
+            - "HTTP/2.0"
+          no_follow_redirects: false
+          preferred_ip_protocol: "ip4"
+          fail_if_ssl: false
+          fail_if_not_ssl: false
+
+msteams:
+  enabled: false
+  image:
+    repository: quay.io/prometheusmsteams/prometheus-msteams
+    tag: 1.5.2
+  resources:
+   limits:
+     cpu: 200m
+     memory: 500Mi
+   requests:
+     cpu: 100m
+     memory: 250Mi
+  connectors: []
+
+victoria-metrics-operator:
+  enabled: true

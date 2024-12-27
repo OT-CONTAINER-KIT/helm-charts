@@ -1,0 +1,31 @@
+apiVersion: v2
+name: vm
+description: A Helm chart for Grafana, Alertmanager and VictoriaMetrics
+type: application
+version: 0.0.1
+appVersion: v0.0.1
+maintainers:
+  - name: ashwani-opstree
+
+dependencies:
+  - name: victoria-metrics-k8s-stack
+    version: 0.33.1
+    repository: https://victoriametrics.github.io/helm-charts/
+    alias: grafana-stack
+    tags:
+      - monitoring
+    condition: grafana-stack.enabled
+  - name: prometheus-blackbox-exporter
+    version: 9.1.0
+    repository: https://prometheus-community.github.io/helm-charts/
+    tags:
+      - blackbox
+    alias: blackbox
+    condition: blackbox.enabled
+  - name: prometheus-msteams
+    version: 1.3.4
+    repository: https://prometheus-msteams.github.io/prometheus-msteams/
+    tags:
+      - msteams
+    alias: msteams
+    condition: msteams.enabled
