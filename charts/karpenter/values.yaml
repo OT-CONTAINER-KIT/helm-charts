@@ -1,0 +1,23 @@
+# Custom values for your chart
+clusterName: ""
+awsPartition: ""
+awsAccountId: 3849
+karpenterVersion: 
+
+# Karpenter chart overrides
+karpenter:
+  settings:
+    clusterName: ""
+   # interruptionQueue: test-demo-cluster
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::3849:role/KarpenterControllerRole-test-demo-cluster
+  controller:
+    resources:
+      requests:
+        cpu: "1"
+        memory: "1Gi"
+      limits:
+        cpu: "1"
+        memory: "1Gi"
+
