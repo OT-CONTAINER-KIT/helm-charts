@@ -1,3 +1,4 @@
+namespace: default
 ingress:
   enabled: true
   className: ""
