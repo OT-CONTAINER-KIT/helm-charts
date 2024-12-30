@@ -14,7 +14,6 @@ spec:
 {{- else }}
         {} # Empty labels object if no labels are defined
 {{- end }}
-      
       # Annotations - This will loop over and add all annotations specified in values.yaml
       annotations:
 {{- if .Values.nodePools.annotations }}
@@ -33,6 +32,9 @@ spec:
           operator: {{ .operator }}
           values:
 {{ toYaml .values | indent 12 }}
+{{- if .minValues }}
+          minValues: {{ .minValues }}
+{{- end }}
 {{- end }}
 {{- else }}
         [] # In case requirements is empty, an empty array will be passed
