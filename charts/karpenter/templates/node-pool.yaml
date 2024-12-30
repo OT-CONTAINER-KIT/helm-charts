@@ -1,0 +1,68 @@
+{{- range .Values.nodePools }}
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: {{ .name }}
+spec:
+  template:
+    metadata:
+      labels:
+{{- if .labels }}
+{{- range $key, $value := .labels }}
+        {{ $key }}: {{ $value }}
+{{- end }}
+{{- else }}
+        {} # Empty labels object if no labels are defined
+{{- end }}
+      annotations:
+{{- if .annotations }}
+{{- range $key, $value := .annotations }}
+        {{ $key }}: {{ $value }}
+{{- end }}
+{{- else }}
+        {} # Empty annotations object if no annotations are defined
+{{- end }}
+    spec:
+      requirements:
+{{- if .requirements | len }}
+{{- range .requirements }}
+        - key: {{ .key }}
+          operator: {{ .operator }}
+          values:
+{{ toYaml .values | indent 12 }}
+{{- if .minValues }}
+          minValues: {{ .minValues }}
+{{- end }}
+{{- end }}
+{{- else }}
+        [] # In case requirements is empty, an empty array will be passed
+{{- end }}
+
+      taints:
+{{- if .taints }}
+{{- range .taints }}
+        - key: {{ .key }}
+          {{- if .value }}
+          value: {{ .value }}
+          {{- end }}
+          effect: {{ .effect }}
+{{- end }}
+{{- else }}
+        [] # Empty taints array if no taints are defined
+{{- end }}
+      nodeClassRef:
+        group: {{ .nodeClass.group | default "karpenter.k8s.aws" }}
+        kind: {{ .nodeClass.kind | default "EC2NodeClass" }}
+        name: {{ .nodeClass.name }}
+      expireAfter: {{ .expireAfter | default "720h" }}
+  limits:
+{{- if .limits.cpu }}
+    cpu: {{ .limits.cpu }}
+{{- end }}
+{{- if .limits.memory }}
+    memory: {{ .limits.memory }}
+{{- end }}
+  disruption:
+    consolidationPolicy: {{ .disruption.consolidationPolicy | default "WhenEmptyOrUnderutilized" }}
+    consolidateAfter: {{ .disruption.consolidateAfter | default "1m" }}
+{{- end }}
