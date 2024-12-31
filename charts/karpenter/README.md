@@ -43,13 +43,13 @@ $ helm delete <my-release> --namespace <namespace>
 | `karpenter.controller.resources.limits.memory`                     | `1Gi`                          | Memory limit for Karpenter controller          |
 | `nodePools`                                                        | []                             | List of NodePools to be created                |
 | `nodePools.name`                                                   | default-nodepool               | Name of the NodePool                           |
-| `nodePools.labels`                                                 | {}                             | Labels for the NodePool                        |
-| `nodePools.annotations`                                            | {}                             | Annotations for the NodePool                   |
-| `nodePools.requirements`                                           | []                             | Node requirements like CPU, memory, etc.       |
-| `nodePools.taints`                                                 | []                             | Taints for the NodePool                        |
+| `nodePools.labels`       - If not required can be omiited          | {}                               | Labels for the NodePool                        |
+| `nodePools.annotations`  - If not required can be omiited          | {}                             | Annotations for the NodePool                   |
+| `nodePools.requirements` - Can be empty []                         | []                             | Node requirements like CPU, memory, etc.       |
+| `nodePools.taints`       - If not required can be omiited          | []                             | Taints for the NodePool                        |
 | `nodePools.expireAfter`                                            | 720h                           | Expiration duration for idle NodePools         |
 | `nodePools.limits.cpu`                                             | "1000m"                        | CPU limit for the NodePool                     |
-| `nodePools.limits.memory`                                          | "2Gi"                          | Memory limit for the NodePool                  |
+| `nodePools.limits.memory`- If not required can be omiited          | "2Gi"                          | Memory limit for the NodePool                  |
 | `nodePools.disruption.consolidationPolicy`                         | WhenEmptyOrUnderutilized       | Consolidation policy for underutilized nodes   |
 | `nodePools.disruption.consolidateAfter`                            | 1m                             | Time before consolidating underutilized nodes  |
 
