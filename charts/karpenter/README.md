@@ -7,19 +7,19 @@ To install Karpenter, use the following commands:
 
 ```shell
 $ helm repo add ot-helm https://ot-container-kit.github.io/helm-charts/
-$ helm install <my-release> ot-helm/karpenter --namespace <namespace>
+$ helm install <my-release> ot-helm/karpenter --namespace kube-system
 ```
 
 To upgrade the setup:
 
 ```shell
-$ helm upgrade <my-release> ot-helm/karpenter --install --namespace <namespace>
+$ helm upgrade <my-release> ot-helm/karpenter --install --namespace kube-system
 ```
 
 To uninstall the chart:
 
 ```shell
-$ helm delete <my-release> --namespace <namespace>
+$ helm delete <my-release> --namespace kube-system
 ```
 
 ### Pre-Requisites
@@ -43,7 +43,7 @@ $ helm delete <my-release> --namespace <namespace>
 | `karpenter.controller.resources.limits.memory`                     | `1Gi`                          | Memory limit for Karpenter controller          |
 | `nodePools`                                                        | []                             | List of NodePools to be created                |
 | `nodePools.name`                                                   | default-nodepool               | Name of the NodePool                           |
-| `nodePools.labels`       - If not required can be omiited          | {}                               | Labels for the NodePool                        |
+| `nodePools.labels`       - If not required can be omiited          | {}                             | Labels for the NodePool                        |
 | `nodePools.annotations`  - If not required can be omiited          | {}                             | Annotations for the NodePool                   |
 | `nodePools.requirements` - Can be empty []                         | []                             | Node requirements like CPU, memory, etc.       |
 | `nodePools.taints`       - If not required can be omiited          | []                             | Taints for the NodePool                        |
