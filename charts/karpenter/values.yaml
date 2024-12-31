@@ -74,34 +74,30 @@ nodePools:
       group: karpenter.k8s.aws  # Node class group for Karpenter
       kind: EC2NodeClass  # Kind of node class, EC2NodeClass indicates AWS EC2 instances
       name: default  # The name of the node class (default for this pool)
-
-    expireAfter: 720h  # The TTL for this node pool, indicating how long unused nodes should remain before being deleted
-
-    limits:
-      cpu: "1000"  # Maximum CPU limit for the node pool
-      memory: "1000Gi"  # Maximum memory limit for the node pool
-
-    disruption:
-      consolidationPolicy: WhenEmptyOrUnderutilized  # Specifies when nodes can be consolidated based on their utilization
-      consolidateAfter: 1m  # Time period after which nodes will be consolidated if underutilized
-
-    annotations:
-      example.com/owner: "my-team"  # Custom annotation t
-      example.com/maintainer: "admin@company.com"  # Custom annotation f
-
-    taints:  # Adding taints for the node pool
-      - key: "example.com/special-taint"  # Custom key for the taint
-        value: "my-value"  
-        effect: "NoSchedule"  
-      - key: "example.com/another-taint"  # Another custom taint key
-        effect: "NoExecute"  
-
-    labels:  # Adding labels for node pool identification
-      billing-team: my-team  # Label indicating the team associated with the node pool
-      environment: production  # Label indicating the environment the node pool belongs to
-
-  # A second node pool definition with similar configuration but with different names and settings
   - name: default1
+    expireAfter: 720h
+    labels:
+      billing-team: my-team
+      environment: production
+    annotations:
+      example.com/owner: "my-team"
+      example.com/maintainer: "admin@company.com"
+    limits:
+      cpu: "1000"
+      memory: "1000Gi"
+    disruption:
+      consolidationPolicy: WhenEmptyOrUnderutilized
+      consolidateAfter: 1m
+    nodeClass:
+      group: karpenter.k8s.aws
+      kind: EC2NodeClass
+      name: default
+    taints:
+      - key: "example.com/special-taint"
+        value: "my-value"
+        effect: "NoSchedule"
+      - key: "example.com/another-taint"
+        effect: "NoExecute"
     requirements:
       - key: kubernetes.io/arch
         operator: In
@@ -142,24 +138,3 @@ nodePools:
         operator: Gt
         values:
           - "2"
-    nodeClass:
-      group: karpenter.k8s.aws
-      kind: EC2NodeClass
-      name: default1
-    expireAfter: 720h
-    limits:
-      cpu: "1000"
-      memory: "1000Gi"
-    disruption:
-      consolidationPolicy: WhenEmptyOrUnderutilized
-      consolidateAfter: 1m
-    annotations:
-      example.com/owner: "my-team"
-      example.com/maintainer: "admin@company.com"
-    taints:  # Taints for the second node pool (if needed)
-      - key: "example.com/special-taint"
-        value: "special-value"
-        effect: "NoExecute"
-    labels:  # Labels for the second node pool
-      environment: staging
-      team: "devops"
