@@ -7,19 +7,19 @@ To install Karpenter, use the following commands:
 
 ```shell
 $ helm repo add ot-helm https://ot-container-kit.github.io/helm-charts/
-$ helm install <my-release> ot-helm/karpenter --namespace kube-system
+$ helm install karpenter ot-helm/karpenter --namespace kube-system
 ```
 
 To upgrade the setup:
 
 ```shell
-$ helm upgrade <my-release> ot-helm/karpenter --install --namespace kube-system
+$ helm upgrade karpenter ot-helm/karpenter --install --namespace kube-system
 ```
 
 To uninstall the chart:
 
 ```shell
-$ helm delete <my-release> --namespace kube-system
+$ helm delete karpenter --namespace kube-system
 ```
 
 ### Pre-Requisites
