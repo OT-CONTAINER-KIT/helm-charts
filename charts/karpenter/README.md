@@ -27,6 +27,7 @@ $ helm delete karpenter --namespace kube-system
 - Kubernetes => 1.18+
 - Helm => 3.X
 - Karpenter Operator => 0.1.0
+- Open ID Connector (EKS) => https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html
 - IAM Roles for Karpenter
 - Add tags to subnets and security groups
 - Update aws-auth ConfigMap
