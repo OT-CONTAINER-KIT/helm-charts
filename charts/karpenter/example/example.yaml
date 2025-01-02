@@ -1,0 +1,67 @@
+# Custom values for chart
+clusterName: test-cluster
+awsPartition: aws
+awsAccountId: 384961113000
+karpenterVersion: 1.1.1
+
+# Karpenter chart overrides
+karpenter:
+  settings:
+    clusterName: test-cluster
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::384961113000:role/KarpenterControllerRole-test-cluster
+  controller:
+    resources:
+      requests:
+        cpu: "1"
+        memory: "1Gi"
+      limits: 
+        cpu: "1"
+        memory: "1Gi"
+
+nodePools:
+  - name: default
+    requirements:
+      - key: kubernetes.io/arch
+        operator: In
+        values:
+          - "amd64"
+      - key: kubernetes.io/os
+        operator: In
+        values:
+          - "linux"
+      - key: karpenter.sh/capacity-type
+        operator: In
+        values:
+          - "on-demand"
+      - key: karpenter.k8s.aws/instance-category
+        operator: In
+        values:
+          - "t"
+          - "m"
+          - "r"
+      - key: karpenter.k8s.aws/instance-generation
+        operator: Gt
+        values:
+          - "2"
+    nodeClass:
+      group: karpenter.k8s.aws
+      kind: EC2NodeClass
+      name: default  # Name of the ec2nodeclass 
+    expireAfter: 720h
+    limits:
+      cpu: "1000"
+    disruption:
+      consolidationPolicy: WhenEmptyOrUnderutilized
+      consolidateAfter: 1m
+    annotations:
+      example.com/owner: "my-team"
+      example.com/maintainer: "admin@company.com"
+   # taints:
+   #   - key: "example.com/special-taint"
+   #     value: "special-value"
+   #     effect: "NoExecute"
+    labels:
+      environment: production
+      team: "engineering"

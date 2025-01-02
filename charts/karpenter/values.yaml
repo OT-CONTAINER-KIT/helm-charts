@@ -25,6 +25,12 @@ karpenter:
 # NodePools define groups of nodes with specific requirements
 nodePools:
   - name: default  # Name of the node pool, used for identification
+    limits:        # Required Field 
+      cpu: "1000"
+      memory: "1000Gi"
+    disruption:    # Required Field 
+      consolidationPolicy: WhenEmptyOrUnderutilized
+      consolidateAfter: 1m
     requirements:  # Node pool requirements for instance types and other properties
       - key: kubernetes.io/arch
         operator: In  # Specifies the architecture for nodes
