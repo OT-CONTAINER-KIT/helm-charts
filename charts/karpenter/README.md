@@ -54,7 +54,9 @@ $ helm delete karpenter --namespace kube-system
 | `nodePools.disruption.consolidationPolicy` - Required Field        | WhenEmptyOrUnderutilized       | Consolidation policy for underutilized nodes   |
 | `nodePools.disruption.consolidateAfter`    - Required Field        | 1m                             | Time before consolidating underutilized nodes  |
 
-### Example `values.yaml`
+### Example1 `values.yaml`
+
+Below is an example for creation of a nodepool which can be modified inside values.yaml .
 
 ```yaml
 nodePools:
@@ -86,6 +88,58 @@ nodePools:
 ```
 
 This `values.yaml` example deploys a Karpenter setup with a NodePool named `default-nodepool`, containing specifications such as labels, annotations, requirements, taints, node class, and limits.
+
+### Example2 `values.yaml`
+
+```yaml
+
+nodePools:
+  - name: default
+    requirements:
+      - key: kubernetes.io/arch
+        operator: In
+        values:
+          - "amd64"
+      - key: kubernetes.io/os
+        operator: In
+        values:
+          - "linux"
+      - key: karpenter.sh/capacity-type
+        operator: In
+        values:
+          - "on-demand"
+      - key: karpenter.k8s.aws/instance-category
+        operator: In
+        values:
+          - "t"
+          - "m"
+          - "r"
+      - key: karpenter.k8s.aws/instance-generation
+        operator: Gt
+        values:
+          - "2"
+    nodeClass:
+      group: karpenter.k8s.aws
+      kind: EC2NodeClass
+      name: default
+    expireAfter: 720h
+    limits:
+      cpu: "1000"
+    disruption:
+      consolidationPolicy: WhenEmptyOrUnderutilized
+      consolidateAfter: 1m
+    annotations:
+      example.com/owner: "my-team"
+      example.com/maintainer: "admin@company.com"
+   # taints:
+   #   - key: "example.com/special-taint"
+   #     value: "special-value"
+   #     effect: "NoExecute"
+    labels:
+      environment: production
+      team: "engineering"
+```
+
 
 ### Notes:
 
