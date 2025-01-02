@@ -44,105 +44,20 @@ $ helm delete karpenter --namespace kube-system
 | `karpenter.controller.resources.limits.memory`                     | `1Gi`                          | Memory limit for Karpenter controller          |
 | `nodePools`                                                        | []                             | List of NodePools to be created                |
 | `nodePools.name`                                                   | default-nodepool               | Name of the NodePool                           |
-| `nodePools.labels`       - If not required can be omiited          | {}                             | Labels for the NodePool                        |
-| `nodePools.annotations`  - If not required can be omiited          | {}                             | Annotations for the NodePool                   |
+| `nodePools.labels`       - If not required can be omitted          | {}                             | Labels for the NodePool                        |
+| `nodePools.annotations`  - If not required can be omitted          | {}                             | Annotations for the NodePool                   |
 | `nodePools.requirements` - Can be empty []                         | []                             | Node requirements like CPU, memory, etc.       |
-| `nodePools.taints`       - If not required can be omiited          | []                             | Taints for the NodePool                        |
+| `nodePools.taints`       - If not required can be omitted          | []                             | Taints for the NodePool                        |
 | `nodePools.expireAfter`                                            | 720h                           | Expiration duration for idle NodePools         |
 | `nodePools.limits.cpu`   - Required Field                          | "1000m"                        | CPU limit for the NodePool                     |
-| `nodePools.limits.memory`- If not required can be omiited          | "2Gi"                          | Memory limit for the NodePool                  |
+| `nodePools.limits.memory`- If not required can be omitted          | "2Gi"                          | Memory limit for the NodePool                  |
 | `nodePools.disruption.consolidationPolicy` - Required Field        | WhenEmptyOrUnderutilized       | Consolidation policy for underutilized nodes   |
 | `nodePools.disruption.consolidateAfter`    - Required Field        | 1m                             | Time before consolidating underutilized nodes  |
-
-### Example1 `values.yaml`
-
-Below is an example for creation of a nodepool which can be modified inside values.yaml .
-
-```yaml
-nodePools:
-  - name: default-nodepool
-    labels:
-      environment: production
-    annotations:
-      dedicated: true
-    requirements:
-      - key: "kubernetes.io/arch"
-        operator: "In"
-        values:
-          - amd64
-    taints:
-      - key: "dedicated"
-        value: "true"
-        effect: "NoSchedule"
-    nodeClass:
-      group: karpenter.k8s.aws
-      kind: EC2NodeClass
-      name: default
-    expireAfter: 720h
-    limits:
-      cpu: "1000m"
-      memory: "2Gi"
-    disruption:
-      consolidationPolicy: "WhenEmptyOrUnderutilized"
-      consolidateAfter: "1m"
-```
-
-This `values.yaml` example deploys a Karpenter setup with a NodePool named `default-nodepool`, containing specifications such as labels, annotations, requirements, taints, node class, and limits.
-
-### Example2 `values.yaml`
-
-```yaml
-
-nodePools:
-  - name: default
-    requirements:
-      - key: kubernetes.io/arch
-        operator: In
-        values:
-          - "amd64"
-      - key: kubernetes.io/os
-        operator: In
-        values:
-          - "linux"
-      - key: karpenter.sh/capacity-type
-        operator: In
-        values:
-          - "on-demand"
-      - key: karpenter.k8s.aws/instance-category
-        operator: In
-        values:
-          - "t"
-          - "m"
-          - "r"
-      - key: karpenter.k8s.aws/instance-generation
-        operator: Gt
-        values:
-          - "2"
-    nodeClass:
-      group: karpenter.k8s.aws
-      kind: EC2NodeClass
-      name: default
-    expireAfter: 720h
-    limits:
-      cpu: "1000"
-    disruption:
-      consolidationPolicy: WhenEmptyOrUnderutilized
-      consolidateAfter: 1m
-    annotations:
-      example.com/owner: "my-team"
-      example.com/maintainer: "admin@company.com"
-   # taints:
-   #   - key: "example.com/special-taint"
-   #     value: "special-value"
-   #     effect: "NoExecute"
-    labels:
-      environment: production
-      team: "engineering"
-```
 
 
 ### Notes:
 
+- Refer to Example Folder for a example values.yaml file 
 - Karpenter automatically creates and manages NodePools as part of the installation process.
 - Make sure to configure the IAM roles required by Karpenter for it to interact with EC2 instances and manage resources along with all prerequisites.
 - The chart will ensure the Karpenter controller and NodePools are deployed correctly with all required configurations.
