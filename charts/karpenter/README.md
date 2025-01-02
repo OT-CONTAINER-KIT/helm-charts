@@ -48,10 +48,10 @@ $ helm delete karpenter --namespace kube-system
 | `nodePools.requirements` - Can be empty []                         | []                             | Node requirements like CPU, memory, etc.       |
 | `nodePools.taints`       - If not required can be omiited          | []                             | Taints for the NodePool                        |
 | `nodePools.expireAfter`                                            | 720h                           | Expiration duration for idle NodePools         |
-| `nodePools.limits.cpu`                                             | "1000m"                        | CPU limit for the NodePool                     |
+| `nodePools.limits.cpu`   - Required Field                          | "1000m"                        | CPU limit for the NodePool                     |
 | `nodePools.limits.memory`- If not required can be omiited          | "2Gi"                          | Memory limit for the NodePool                  |
-| `nodePools.disruption.consolidationPolicy`                         | WhenEmptyOrUnderutilized       | Consolidation policy for underutilized nodes   |
-| `nodePools.disruption.consolidateAfter`                            | 1m                             | Time before consolidating underutilized nodes  |
+| `nodePools.disruption.consolidationPolicy` - Required Field        | WhenEmptyOrUnderutilized       | Consolidation policy for underutilized nodes   |
+| `nodePools.disruption.consolidateAfter`    - Required Field        | 1m                             | Time before consolidating underutilized nodes  |
 
 ### Example `values.yaml`
 
