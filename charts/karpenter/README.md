@@ -5,15 +5,24 @@ Karpenter is an open-source Kubernetes cluster autoscaler built for efficiency a
 
 To install Karpenter, use the following commands:
 
+First clone the helm-chart repository and deploy the following commands
+
 ```shell
-$ helm repo add ot-helm https://ot-container-kit.github.io/helm-charts/
-$ helm install karpenter ot-helm/karpenter --namespace kube-system
+$ git clone https://github.com/OT-CONTAINER-KIT/helm-charts.git
+$ cd helm-charts/charts/karpenter/
+$ helm dependency update
+```
+
+After customizing the values.yaml according to the requirement and completing all prerequisites install using below command
+
+```shell
+$ helm install karpenter ./<path of helm chart> --namespace=kube-system
 ```
 
 To upgrade the setup:
 
 ```shell
-$ helm upgrade karpenter ot-helm/karpenter --install --namespace kube-system
+$ helm upgrade karpenter <path of helm chart> --install --namespace kube-system
 ```
 
 To uninstall the chart:
@@ -57,6 +66,7 @@ $ helm delete karpenter --namespace kube-system
 
 ### Notes:
 
+- After deployment of helm chart, in order for the nodepool to work, ec2nodeclass should be installed as well.
 - Refer to Example Folder for a example values.yaml file 
 - Karpenter automatically creates and manages NodePools as part of the installation process.
 - Make sure to configure the IAM roles required by Karpenter for it to interact with EC2 instances and manage resources along with all prerequisites.
