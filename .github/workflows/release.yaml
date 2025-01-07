@@ -42,8 +42,8 @@ jobs:
       - name: Update Helm Repositories
         run: helm repo update
 
-      - name: Update Chart Dependencies for redis-operator
-        run: helm dependency update charts/redis-operator
+      - name: Update Chart Dependencies for karpenter
+        run: helm dependency update charts/karpenter
 
       - name: List Changed Charts
         id: list-changed
