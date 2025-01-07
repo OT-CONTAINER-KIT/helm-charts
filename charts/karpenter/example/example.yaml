@@ -1,27 +1,109 @@
-# Custom values for chart
-clusterName: test-cluster
-awsPartition: aws
-awsAccountId: 384961113000
-karpenterVersion: 1.1.1
+#This example below has 2 nodepools for reference 
+# Custom values for your chart
+clusterName: ""  # Name of the EKS cluster (for identification in the chart and Karpenter)
+awsPartition: ""  # AWS partition, default is 'aws' (used in multi-region or partitioned environments)
+awsAccountId: 3333  # AWS account ID where the resources will be provisioned
 
 # Karpenter chart overrides
 karpenter:
   settings:
-    clusterName: test-cluster
+    clusterName: ""  # Cluster name for the Karpenter controller to identify and manage nodes in this cluster
+
   serviceAccount:
     annotations:
-      eks.amazonaws.com/role-arn: arn:aws:iam::384961113000:role/KarpenterControllerRole-test-cluster
+      eks.amazonaws.com/role-arn: arn:aws:iam::3333:role/KarpenterControllerRole-demo-eks  # IAM role for Karpenter controller's access to AWS services
+
   controller:
     resources:
       requests:
-        cpu: "1"
-        memory: "1Gi"
-      limits: 
-        cpu: "1"
-        memory: "1Gi"
+        cpu: "1"  # CPU resource request for the Karpenter controller (minimum resources Karpenter will be allocated)
+        memory: "1Gi"  # Memory resource request for the Karpenter controller
+      limits:
+        cpu: "1"  # CPU resource limit for the Karpenter controller (maximum resources Karpenter can consume)
+        memory: "1Gi"  # Memory resource limit for the Karpenter controller
 
+# NodePools define groups of nodes with specific requirements
 nodePools:
-  - name: default
+  - name: default  # Name of the node pool, used for identification
+    limits:        # Required Field 
+      cpu: "1000"
+      memory: "1000Gi"
+    disruption:    # Required Field 
+      consolidationPolicy: WhenEmptyOrUnderutilized
+      consolidateAfter: 1m
+    requirements:  # Node pool requirements for instance types and other properties
+      - key: kubernetes.io/arch
+        operator: In  # Specifies the architecture for nodes
+        values:
+          - "amd64"  
+      - key: kubernetes.io/os
+        operator: In  # Specifies the OS type for nodes
+        values:
+          - "linux"  # The node pool requires Linux OS
+      - key: karpenter.sh/capacity-type
+        operator: In  # Specifies the capacity type for nodes
+        values:
+          - "on-demand"  
+      - key: karpenter.k8s.aws/instance-category
+        operator: In  # Specifies allowed EC2 instance categories
+        values:
+          - "t"  # Instance category t (e.g., T2, T3)
+          - "m"  
+          - "r"  
+        minValues: 2  # Minimum number of instances of each category
+
+      - key: karpenter.k8s.aws/instance-family
+        operator: Exists  # Specifies that instances in the family must exist (e.g., m5, r5)
+        minValues: 5  # Minimum number of instances in the specified family
+
+      - key: karpenter.k8s.aws/instance-family
+        operator: In  # Specifies that the instance family must match one of the listed values
+        values:
+          - "m5"  
+          - "m5d"  
+          - "c5"  
+          - "c5d"  
+          - "c4"  
+          - "r4"  
+        minValues: 3  # Minimum number of instances from these families
+
+      - key: node.kubernetes.io/instance-type
+        operator: Exists  # Ensures that the node pool has specific instance types
+        minValues: 10  # Minimum number of instances of the specified types
+
+      - key: karpenter.k8s.aws/instance-generation
+        operator: Gt  # Specifies that the instance generation must be greater than a particular value
+        values:
+          - "2"  # Instance generation must be greater than 2 (i.e., newer generation)
+
+    nodeClass:
+      group: karpenter.k8s.aws  # Node class group for Karpenter
+      kind: EC2NodeClass  # Kind of node class, EC2NodeClass indicates AWS EC2 instances
+      name: default  # The name of the node class (default for this pool)
+  - name: default1
+    expireAfter: 720h
+    labels:
+      billing-team: my-team
+      environment: production
+    annotations:
+      example.com/owner: "my-team"
+      example.com/maintainer: "admin@company.com"
+    limits:
+      cpu: "1000"
+      memory: "1000Gi"
+    disruption:
+      consolidationPolicy: WhenEmptyOrUnderutilized
+      consolidateAfter: 1m
+    nodeClass:
+      group: karpenter.k8s.aws
+      kind: EC2NodeClass
+      name: default
+    taints:
+      - key: "example.com/special-taint"
+        value: "my-value"
+        effect: "NoSchedule"
+      - key: "example.com/another-taint"
+        effect: "NoExecute"
     requirements:
       - key: kubernetes.io/arch
         operator: In
@@ -41,27 +123,24 @@ nodePools:
           - "t"
           - "m"
           - "r"
+        minValues: 2
+      - key: karpenter.k8s.aws/instance-family
+        operator: Exists
+        minValues: 5
+      - key: karpenter.k8s.aws/instance-family
+        operator: In
+        values:
+          - "m5"
+          - "m5d"
+          - "c5"
+          - "c5d"
+          - "c4"
+          - "r4"
+        minValues: 3
+      - key: node.kubernetes.io/instance-type
+        operator: Exists
+        minValues: 10
       - key: karpenter.k8s.aws/instance-generation
         operator: Gt
         values:
           - "2"
-    nodeClass:
-      group: karpenter.k8s.aws
-      kind: EC2NodeClass
-      name: default  # Name of the ec2nodeclass 
-    expireAfter: 720h
-    limits:
-      cpu: "1000"
-    disruption:
-      consolidationPolicy: WhenEmptyOrUnderutilized
-      consolidateAfter: 1m
-    annotations:
-      example.com/owner: "my-team"
-      example.com/maintainer: "admin@company.com"
-   # taints:
-   #   - key: "example.com/special-taint"
-   #     value: "special-value"
-   #     effect: "NoExecute"
-    labels:
-      environment: production
-      team: "engineering"
