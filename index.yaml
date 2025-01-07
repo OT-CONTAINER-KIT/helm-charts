@@ -880,6 +880,18 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/mysql-0.1.0/mysql-0.1.0.tgz
     version: 0.1.0
+  ot-karpenter:
+  - apiVersion: v2
+    created: "2025-01-07T10:15:34.041421096Z"
+    dependencies:
+    - name: karpenter
+      repository: oci://public.ecr.aws/karpenter
+      version: 1.1.1
+    digest: fbfcb034971c88ad670ef3f5b902588477d1591392216fe0cee683822012ca56
+    name: ot-karpenter
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/ot-karpenter-0.1.0/ot-karpenter-0.1.0.tgz
+    version: 0.1.0
   otel-operator:
   - apiVersion: v2
     appVersion: 1.0.0
@@ -4445,4 +4457,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/vm-0.0.1/vm-0.0.1.tgz
     version: 0.0.1
-generated: "2025-01-05T12:53:06.067949263Z"
+generated: "2025-01-07T10:15:34.041743618Z"
