@@ -5,31 +5,37 @@ Karpenter is an open-source Kubernetes cluster autoscaler built for efficiency a
 
 To install Karpenter, use the following commands:
 
-First clone the helm-chart repository and deploy the following commands
-
 ```shell
-$ git clone https://github.com/OT-CONTAINER-KIT/helm-charts.git
-$ cd helm-charts/charts/karpenter/
-$ helm dependency update
-```
+$ helm repo add ot-helm https://ot-container-kit.github.io/helm-charts/
+$ helm install karpenter ot-helm/karpenter --namespace <namespace> --dependency-update --include-crds
 
-After customizing the values.yaml according to the requirement and completing all prerequisites install using below command
-
-```shell
-$ helm install karpenter ./<path of helm chart> --namespace=kube-system
 ```
+# Adds the ot-helm repository to Helm, which contains the Karpenter Helm chart.
+# Installs the Karpenter chart from the ot-helm repository.
+
+
 
 To upgrade the setup:
 
 ```shell
-$ helm upgrade karpenter <path of helm chart> --install --namespace kube-system
+$ helm upgrade karpenter ot-helm/karpenter --install --namespace <namespace> --create-namespace
+
 ```
+
+# Upgrades an existing Karpenter release or installs it if it doesn't exist.
+
 
 To uninstall the chart:
 
 ```shell
-$ helm delete karpenter --namespace kube-system
+$ helm delete karpenter --namespace <namespace>
 ```
+
+# Deletes the Karpenter release from the specified namespace.
+# Replace <namespace> with the namespace where Karpenter is installed.
+
+
+
 
 ### Pre-Requisites
 
