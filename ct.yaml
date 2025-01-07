@@ -8,3 +8,4 @@ chart-repos:
 excluded-charts:
   - mysql
   - pga
+  - redis-operator
