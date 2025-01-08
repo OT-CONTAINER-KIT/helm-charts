@@ -25,14 +25,18 @@ karpenter:
 
 ec2NodeClasses:
   - name: default
-    amiFamily: AL2s
-    role: "KarpenterNodeRole-my-eks-cluster" # Name of karpenter Node Role ( NOT THE ARN )
+    amiFamily: AL2  # Amazon Linux 2 AMI family
+    role:                    #"KarpenterNodeRole-my-eks-cluster" # Name of karpenter Node Role ( NOT THE ARN )
     amiSelector:
-      arm: ami-arm-id # ARM_AMI_ID="$(aws ssm get-parameter --name /aws/service/eks/optimized-ami/${K8S_VERSION}/amazon-linux-2-arm64/recommended/image_id --query Parameter.Value --output text)"
-      amd: ami-amd-id # AMD_AMI_ID="$(aws ssm get-parameter --name /aws/service/eks/optimized-ami/${K8S_VERSION}/amazon-linux-2/recommended/image_id --query Parameter.Value --output text)"
-      gpu: ami-gpu-id # GPU_AMI_ID="$(aws ssm get-parameter --name /aws/service/eks/optimized-ami/${K8S_VERSION}/amazon-linux-2-gpu/recommended/image_id --query Parameter.Value --output text)"
-
-
+      # To get the AMI ID, run the commands below in the AWS CLI
+      arm:             # ARM_AMI_ID="$(aws ssm get-parameter --name /aws/service/eks/optimized-ami/${K8S_VERSION}/amazon-linux-2-arm64/recommended/image_id --query Parameter.Value --output text)"
+      amd:             # AMD_AMI_ID="$(aws ssm get-parameter --name /aws/service/eks/optimized-ami/${K8S_VERSION}/amazon-linux-2/recommended/image_id --query Parameter.Value --output text)"
+      #gpu: ami-gpu-id # GPU_AMI_ID="$(aws ssm get-parameter --name /aws/service/eks/optimized-ami/${K8S_VERSION}/amazon-linux-2-gpu/recommended/image_id --query Parameter.Value --output text)"
+      #name:                 #amazon-eks-node-1.27-*  # Optional: EKS Node Name
+    tags:
+      environment: production
+      team: "engineering"
+      owner: "admin@company.com"
 
 # NodePools define groups of nodes with specific requirements
 nodePools:

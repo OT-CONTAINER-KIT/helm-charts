@@ -18,4 +18,13 @@ spec:
 {{- if .amiSelector.gpu }}
     - id: "{{ .amiSelector.gpu }}"
 {{- end }}
+{{- if .amiSelector.name }}
+    - name: "{{ .amiSelector.name }}"
+{{- end }}
+{{- if .tags }}
+  tags:
+{{- range $key, $value := .tags }}
+    {{ $key }}: "{{ $value }}"
+{{- end }}
+{{- end }}
 {{- end }}
