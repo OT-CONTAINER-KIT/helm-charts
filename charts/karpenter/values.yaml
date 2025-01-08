@@ -2,7 +2,6 @@
 clusterName: ""  # Name of the EKS cluster (for identification in the chart and Karpenter)
 awsPartition: ""  # AWS partition, default is 'aws' (used in multi-region or partitioned environments)
 awsAccountId: 3333  # AWS account ID where the resources will be provisioned
-karpenterVersion: 1.1.1  # Version of Karpenter to be installed
 
 # Karpenter chart overrides
 karpenter:
@@ -11,136 +10,65 @@ karpenter:
 
   serviceAccount:
     annotations:
-      eks.amazonaws.com/role-arn: arn:aws:iam::3333:role/KarpenterControllerRole-demo-eks  # IAM role for Karpenter controller's access to AWS services
+      eks.amazonaws.com/role-arn: #arn:aws:iam::3333:role/KarpenterControllerRole-demo-eks  # IAM role ARN for Karpenter controller's access to AWS services
 
-  controller:
-    resources:
-      requests:
-        cpu: "1"  # CPU resource request for the Karpenter controller (minimum resources Karpenter will be allocated)
-        memory: "1Gi"  # Memory resource request for the Karpenter controller
-      limits:
-        cpu: "1"  # CPU resource limit for the Karpenter controller (maximum resources Karpenter can consume)
-        memory: "1Gi"  # Memory resource limit for the Karpenter controller
+  # Karpenter controller resources can be customized in this section below 
+  # controller:
+  #   resources:
+  #     requests:
+  #       cpu: "1"  # CPU resource request for the Karpenter controller (minimum resources Karpenter will be allocated)
+  #       memory: "1Gi"  # Memory resource request for the Karpenter controller
+  #     limits:
+  #       cpu: "1"  # CPU resource limit for the Karpenter controller (maximum resources Karpenter can consume)
+  #       memory: "1Gi"  # Memory resource limit for the Karpenter controller
 
 # NodePools define groups of nodes with specific requirements
 nodePools:
-  - name: default  # Name of the node pool, used for identification
-    limits:        # Required Field 
-      cpu: "1000"
-      memory: "1000Gi"
-    disruption:    # Required Field 
-      consolidationPolicy: WhenEmptyOrUnderutilized
-      consolidateAfter: 1m
-    requirements:  # Node pool requirements for instance types and other properties
-      - key: kubernetes.io/arch
-        operator: In  # Specifies the architecture for nodes
+  - name: default  # Name of the node pool, preset here is set to default nodepool
+    requirements:  # List of node requirements for scheduling
+      - key: kubernetes.io/arch  # Architecture requirement (e.g., amd64, arm64)
+        operator: In  # Only nodes with the specified architecture will be selected
         values:
-          - "amd64"  
-      - key: kubernetes.io/os
-        operator: In  # Specifies the OS type for nodes
+          - "amd64"  # Specifies that the node should have an amd64 architecture
+      - key: kubernetes.io/os  # OS requirement (e.g., linux, windows)
+        operator: In  # Only nodes with the specified OS will be selected
         values:
-          - "linux"  # The node pool requires Linux OS
-      - key: karpenter.sh/capacity-type
-        operator: In  # Specifies the capacity type for nodes
+          - "linux"  # Specifies that the node should run Linux
+      - key: karpenter.sh/capacity-type  # Defines the instance's capacity type
+        operator: In  # Only nodes with the specified capacity type will be selected
         values:
-          - "on-demand"  
-      - key: karpenter.k8s.aws/instance-category
-        operator: In  # Specifies allowed EC2 instance categories
+          - "on-demand"  # Specifies that the node should be an on-demand instance, can be "spot" as well 
+      - key: karpenter.k8s.aws/instance-category  # Defines the instance category (e.g., t, m, r)
+        operator: In  # Only nodes with the specified instance category will be selected
         values:
-          - "t"  # Instance category t (e.g., T2, T3)
+          - "t"  # These can be customized as per need 
           - "m"  
           - "r"  
-        minValues: 2  # Minimum number of instances of each category
-
-      - key: karpenter.k8s.aws/instance-family
-        operator: Exists  # Specifies that instances in the family must exist (e.g., m5, r5)
-        minValues: 5  # Minimum number of instances in the specified family
-
-      - key: karpenter.k8s.aws/instance-family
-        operator: In  # Specifies that the instance family must match one of the listed values
+      - key: karpenter.k8s.aws/instance-generation  # Instance generation requirement
+        operator: Gt  # Greater than the specified value
         values:
-          - "m5"  
-          - "m5d"  
-          - "c5"  
-          - "c5d"  
-          - "c4"  
-          - "r4"  
-        minValues: 3  # Minimum number of instances from these families
-
-      - key: node.kubernetes.io/instance-type
-        operator: Exists  # Ensures that the node pool has specific instance types
-        minValues: 10  # Minimum number of instances of the specified types
-
-      - key: karpenter.k8s.aws/instance-generation
-        operator: Gt  # Specifies that the instance generation must be greater than a particular value
-        values:
-          - "2"  # Instance generation must be greater than 2 (i.e., newer generation)
-
-    nodeClass:
-      group: karpenter.k8s.aws  # Node class group for Karpenter
-      kind: EC2NodeClass  # Kind of node class, EC2NodeClass indicates AWS EC2 instances
-      name: default  # The name of the node class (default for this pool)
-  - name: default1
-    expireAfter: 720h
-    labels:
-      billing-team: my-team
-      environment: production
-    annotations:
-      example.com/owner: "my-team"
-      example.com/maintainer: "admin@company.com"
-    limits:
-      cpu: "1000"
-      memory: "1000Gi"
-    disruption:
-      consolidationPolicy: WhenEmptyOrUnderutilized
-      consolidateAfter: 1m
-    nodeClass:
-      group: karpenter.k8s.aws
-      kind: EC2NodeClass
-      name: default
-    taints:
-      - key: "example.com/special-taint"
-        value: "my-value"
-        effect: "NoSchedule"
-      - key: "example.com/another-taint"
-        effect: "NoExecute"
-    requirements:
-      - key: kubernetes.io/arch
-        operator: In
-        values:
-          - "amd64"
-      - key: kubernetes.io/os
-        operator: In
-        values:
-          - "linux"
-      - key: karpenter.sh/capacity-type
-        operator: In
-        values:
-          - "on-demand"
-      - key: karpenter.k8s.aws/instance-category
-        operator: In
-        values:
-          - "t"
-          - "m"
-          - "r"
-        minValues: 2
-      - key: karpenter.k8s.aws/instance-family
-        operator: Exists
-        minValues: 5
-      - key: karpenter.k8s.aws/instance-family
-        operator: In
-        values:
-          - "m5"
-          - "m5d"
-          - "c5"
-          - "c5d"
-          - "c4"
-          - "r4"
-        minValues: 3
-      - key: node.kubernetes.io/instance-type
-        operator: Exists
-        minValues: 10
-      - key: karpenter.k8s.aws/instance-generation
-        operator: Gt
-        values:
-          - "2"
+          - "2"  # Specifies that only instance generations greater than 2 are allowed
+    nodeClass:  # Defines the node class, which is linked to EC2NodeClass
+      group: karpenter.k8s.aws  # Group of the EC2NodeClass
+      kind: EC2NodeClass  # Type of node class, which is EC2NodeClass in this case
+      name: default  # Name of the EC2NodeClass to use for the node pool (name of the EC2 instance class)
+    expireAfter: 720h  # Maximum lifetime of the node pool before it expires (720 hours = 30 days)
+    limits:  # Resource limits for the node pool
+      cpu: "1000"  # Maximum CPU limit for the node pool
+      #memory: "1Gi"
+    disruption:  # Policy for handling disruption in the node pool
+      consolidationPolicy: WhenEmptyOrUnderutilized  # Consolidate nodes when they are empty or underutilized
+      consolidateAfter: 1m  # Time after which consolidation will occur, in this case, 1 minute
+    #Uncomment Below annotations key ( next 3 Lines ) if you want to use annotations 
+    # annotations:  # Annotations are key-value pairs that provide additional metadata for the node pool
+    #   example.com/owner: "my-team"  # An example annotation that associates the node pool with a team
+    #   example.com/maintainer: "admin@company.com"  # Example annotation for the maintainer's contact information
+    #Uncomment below taint key ( next 4 Lines ) if you want to use taints 
+    # taints:  # Taints are used to control which pods can be scheduled on the node pool
+    #   - key: "example.com/special-taint"  # Taint key that identifies the taint
+    #     value: "special-value"  # Value associated with the taint
+    #     effect: "NoExecute"  # Effect of the taint. In this case, NoExecute means pods won't be scheduled on tainted nodes
+    # Comment Labels Key below if you dont want to use Labels 
+    labels:  # Labels are key-value pairs used for categorizing the node pool
+      environment: production  # Label indicating that this node pool is for production use
+      team: "engineering"  # Label associating the node pool with the engineering team
