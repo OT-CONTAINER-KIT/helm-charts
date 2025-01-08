@@ -6,6 +6,9 @@ metadata:
 spec:
   amiFamily: {{ .amiFamily | default "AL2" }}
   role: {{ .role }}
+  {{- if .detailedMonitoring }}
+  detailedMonitoring: {{ .detailedMonitoring }}
+{{- end }}
   subnetSelectorTerms:
     - tags:
         karpenter.sh/discovery: "{{ $.Values.clusterName }}"
