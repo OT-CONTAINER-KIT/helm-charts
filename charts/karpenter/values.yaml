@@ -7,6 +7,7 @@ awsAccountId: 3333  # AWS account ID where the resources will be provisioned
 karpenter:
   settings:
     clusterName: ""  # Cluster name for the Karpenter controller to identify and manage nodes in this cluster
+    interruptionQueue: ""  # Name of SQS queue for handling EC2 instance interruptions
 
   serviceAccount:
     annotations:
@@ -28,11 +29,11 @@ ec2NodeClasses:
     amiFamily: AL2              # Amazon Linux 2 AMI family
     role:                       #"KarpenterNodeRole-my-eks-cluster" # Name of karpenter Node Role ( NOT THE ARN )
     amiSelector:
-      # To get the AMI ID, run the commands below in the AWS CLI
+      # To get the AMI ID, run the commands below in the AWS CLI and replace the AMI ID in the values.yaml file
       arm:                      # ARM_AMI_ID="$(aws ssm get-parameter --name /aws/service/eks/optimized-ami/${K8S_VERSION}/amazon-linux-2-arm64/recommended/image_id --query Parameter.Value --output text)"
       amd:                      # AMD_AMI_ID="$(aws ssm get-parameter --name /aws/service/eks/optimized-ami/${K8S_VERSION}/amazon-linux-2/recommended/image_id --query Parameter.Value --output text)"
       #gpu: ami-gpu-id          # GPU_AMI_ID="$(aws ssm get-parameter --name /aws/service/eks/optimized-ami/${K8S_VERSION}/amazon-linux-2-gpu/recommended/image_id --query Parameter.Value --output text)"
-      #name:                    #amazon-eks-node-1.27-*  # Optional: EKS Node Name
+      #name:                    #amazon-eks-node-1.27-*  # Optional: EKS Node AMI Name
     # tags:                     # Optional, propagates tags to underlying EC2 resources
     #   environment: production
     #   team: "engineering"
@@ -59,8 +60,12 @@ nodePools:
         operator: In  # Only nodes with the specified instance category will be selected
         values:
           - "t"  # These can be customized as per need 
-          - "m"  
-          - "r"  
+          - "m"
+          - "r"
+      # - key: karpenter.k8s.aws/instance-family         # Uncomment to define the instance family (e.g., t3, m5, r5)
+      #   operator: In
+      #   values:
+      #     - "t3a"
       - key: karpenter.k8s.aws/instance-generation  # Instance generation requirement
         operator: Gt  # Greater than the specified value
         values:
