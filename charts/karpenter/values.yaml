@@ -7,7 +7,7 @@ awsAccountId: 3333  # AWS account ID where the resources will be provisioned
 karpenter:
   settings:
     clusterName: ""  # Cluster name for the Karpenter controller to identify and manage nodes in this cluster
-    interruptionQueue: ""  # Name of SQS queue for handling EC2 instance interruptions
+    #interruptionQueue: ""  # Name of SQS queue for handling EC2 instance interruptions
 
   serviceAccount:
     annotations:
