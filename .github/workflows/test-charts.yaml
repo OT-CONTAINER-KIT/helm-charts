@@ -8,7 +8,9 @@ jobs:
 
     steps:
     - name: Check out code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Create k8s Kind Cluster
       uses: helm/kind-action@v1.5.0
@@ -18,24 +20,18 @@ jobs:
     - name: Install Helm
       uses: azure/setup-helm@v3
       with:
-        version: v3.5.4
+        version: v3.16.2
 
-    - name: Install yq
-      run: |
-        sudo snap install yq
+    - name: Set up chart-testing
+      uses: helm/chart-testing-action@v2.6.0
 
-    - name: Install and test Redis Related Helm charts
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        check-latest: true
+
+    - name: Install and test Helm charts
       run: |
         kubectl cluster-info --context kind-kind
-        chart_dirs=("redis-operator" "redis" "redis-cluster" "redis-replication" "redis-sentinel")
-        for dir in "${chart_dirs[@]}"
-        do
-          if [[ -f ./charts/$dir/Chart.yaml ]]; then
-            helm dependency update ./charts/$dir/
-          fi
-          chart_version=$(yq e .version ./charts/$dir/Chart.yaml)
-          echo "Installing $dir chart with version $chart_version..."
-          helm install $dir ./charts/$dir/
-          helm test $dir
-        done
-        echo "Listing installed Helm charts..."
+        changed=$(ct list-changed --config ct.yaml)
+        ct install --config ct.yaml
