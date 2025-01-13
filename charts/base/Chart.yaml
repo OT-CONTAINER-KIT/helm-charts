@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+description: A base helm chart which will be used by different helm charts
+engine: gotpl
+maintainers:
+  - name: iamabhishek-dubey
+    email: "abhishek.dubey@opstree.com"
+    url: https://github.com/iamabhishek-dubey
+name: base
+sources:
+  - https://github.com/ot-container-kit/helm-charts
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://github.com/ot-container-kit/helm-charts
+keywords:
+  - deployment
+  - base
+  - opstree
+  - kubernetes
+  - openshift
+icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/helm-charts/main/static/helm-chart-logo.svg
