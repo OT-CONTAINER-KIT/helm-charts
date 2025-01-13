@@ -18,9 +18,12 @@ jobs:
     - name: Install Helm
       uses: azure/setup-helm@v3
       with:
-        version: v3.5.4
+        version: v3.16.2
 
-    - name: Install and test Redis Related Helm charts
+    - name: Set up chart-testing
+      uses: helm/chart-testing-action@v2.6.0
+
+    - name: Install and test Helm charts
       run: |
         kubectl cluster-info --context kind-kind
         changed=$(ct list-changed --config ct.yaml)
