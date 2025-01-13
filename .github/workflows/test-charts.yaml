@@ -20,22 +20,8 @@ jobs:
       with:
         version: v3.5.4
 
-    - name: Install yq
-      run: |
-        sudo snap install yq
-
     - name: Install and test Redis Related Helm charts
       run: |
         kubectl cluster-info --context kind-kind
-        chart_dirs=("redis-operator" "redis" "redis-cluster" "redis-replication" "redis-sentinel")
-        for dir in "${chart_dirs[@]}"
-        do
-          if [[ -f ./charts/$dir/Chart.yaml ]]; then
-            helm dependency update ./charts/$dir/
-          fi
-          chart_version=$(yq e .version ./charts/$dir/Chart.yaml)
-          echo "Installing $dir chart with version $chart_version..."
-          helm install $dir ./charts/$dir/
-          helm test $dir
-        done
-        echo "Listing installed Helm charts..."
+        changed=$(ct list-changed --config ct.yaml)
+        ct install --config ct.yaml
