@@ -1,5 +1,29 @@
 apiVersion: v1
 entries:
+  base:
+  - apiVersion: v1
+    appVersion: 0.1.0
+    created: "2025-01-13T07:41:03.060170478Z"
+    description: A base helm chart which will be used by different helm charts
+    digest: ae6837787fb25603ac0ef412f2237c9be151ea3abf605fbdd73e81de318ec627
+    home: https://github.com/ot-container-kit/helm-charts
+    icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/helm-charts/main/static/helm-chart-logo.svg
+    keywords:
+    - deployment
+    - base
+    - opstree
+    - kubernetes
+    - openshift
+    maintainers:
+    - email: abhishek.dubey@opstree.com
+      name: iamabhishek-dubey
+      url: https://github.com/iamabhishek-dubey
+    name: base
+    sources:
+    - https://github.com/ot-container-kit/helm-charts
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/base-0.1.0/base-0.1.0.tgz
+    version: 0.1.0
   elasticsearch:
   - apiVersion: v1
     appVersion: 0.4.0
@@ -4498,4 +4522,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/vm-0.0.1/vm-0.0.1.tgz
     version: 0.0.1
-generated: "2025-01-12T06:05:08.558352478Z"
+generated: "2025-01-13T07:41:03.060530365Z"
