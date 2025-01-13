@@ -8,7 +8,9 @@ jobs:
 
     steps:
     - name: Check out code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Create k8s Kind Cluster
       uses: helm/kind-action@v1.5.0
@@ -22,6 +24,11 @@ jobs:
 
     - name: Set up chart-testing
       uses: helm/chart-testing-action@v2.6.0
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        check-latest: true
 
     - name: Install and test Helm charts
       run: |
