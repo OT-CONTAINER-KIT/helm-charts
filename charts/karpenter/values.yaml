@@ -7,6 +7,7 @@ awsAccountId: 3333  # AWS account ID where the resources will be provisioned
 karpenter:
   settings:
     clusterName: ""  # Cluster name for the Karpenter controller to identify and manage nodes in this cluster
+    #interruptionQueue: ""  # Name of SQS queue for handling EC2 instance interruptions
 
   serviceAccount:
     annotations:
@@ -22,6 +23,23 @@ karpenter:
   #       cpu: "1"  # CPU resource limit for the Karpenter controller (maximum resources Karpenter can consume)
   #       memory: "1Gi"  # Memory resource limit for the Karpenter controller
 
+# EC2NodeClasses define the EC2 instance classes that Karpenter can use
+ec2NodeClasses:
+  - name: default
+    amiFamily: AL2              # Amazon Linux 2 AMI family
+    role:                       #"KarpenterNodeRole-my-eks-cluster" # Name of karpenter Node Role ( NOT THE ARN )
+    amiSelector:
+      # To get the AMI ID, run the commands below in the AWS CLI and replace the AMI ID in the values.yaml file
+      arm:                      # ARM_AMI_ID="$(aws ssm get-parameter --name /aws/service/eks/optimized-ami/${K8S_VERSION}/amazon-linux-2-arm64/recommended/image_id --query Parameter.Value --output text)"
+      amd:                      # AMD_AMI_ID="$(aws ssm get-parameter --name /aws/service/eks/optimized-ami/${K8S_VERSION}/amazon-linux-2/recommended/image_id --query Parameter.Value --output text)"
+      #gpu: ami-gpu-id          # GPU_AMI_ID="$(aws ssm get-parameter --name /aws/service/eks/optimized-ami/${K8S_VERSION}/amazon-linux-2-gpu/recommended/image_id --query Parameter.Value --output text)"
+      #name:                    #amazon-eks-node-1.27-*  # Optional: EKS Node AMI Name
+    # tags:                     # Optional, propagates tags to underlying EC2 resources
+    #   environment: production
+    #   team: "engineering"
+    #   owner: "admin@company.com"
+    #detailedMonitoring: true    # Enable detailed monitoring for the EC2 instance
+  
 # NodePools define groups of nodes with specific requirements
 nodePools:
   - name: default  # Name of the node pool, preset here is set to default nodepool
@@ -42,8 +60,12 @@ nodePools:
         operator: In  # Only nodes with the specified instance category will be selected
         values:
           - "t"  # These can be customized as per need 
-          - "m"  
-          - "r"  
+          - "m"
+          - "r"
+      # - key: karpenter.k8s.aws/instance-family         # Uncomment to define the instance family (e.g., t3, m5, r5)
+      #   operator: In
+      #   values:
+      #     - "t3a"
       - key: karpenter.k8s.aws/instance-generation  # Instance generation requirement
         operator: Gt  # Greater than the specified value
         values:
