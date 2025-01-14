@@ -2465,6 +2465,36 @@ entries:
   redis-operator:
   - apiVersion: v2
     appVersion: 0.19.0
+    created: "2025-01-14T03:49:54.151771044Z"
+    dependencies:
+    - alias: certmanager
+      condition: certmanager.enabled
+      name: cert-manager
+      repository: https://charts.jetstack.io
+      version: v1.12.4
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: 331b54f71384ca0b4a2e0389ca1740d9b1908cb8b69f2ec8f85c58216bd0f6eb
+    home: https://github.com/OT-CONTAINER-KIT/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/master/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    maintainers:
+    - name: iamabhishek-dubey
+    - name: sandy724
+    - name: shubham-cmyk
+    name: redis-operator
+    sources:
+    - https://github.com/OT-CONTAINER-KIT/redis-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-operator-0.19.1/redis-operator-0.19.1.tgz
+    version: 0.19.1
+  - apiVersion: v2
+    appVersion: 0.19.0
     created: "2025-01-12T06:05:08.258476187Z"
     dependencies:
     - alias: certmanager
@@ -4522,4 +4552,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/vm-0.0.1/vm-0.0.1.tgz
     version: 0.0.1
-generated: "2025-01-13T07:41:03.060530365Z"
+generated: "2025-01-14T03:49:55.05469119Z"
