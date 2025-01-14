@@ -906,6 +906,19 @@ entries:
     version: 0.1.0
   ot-karpenter:
   - apiVersion: v2
+    created: "2025-01-14T06:39:26.677411433Z"
+    dependencies:
+    - name: karpenter
+      repository: oci://public.ecr.aws/karpenter
+      version: 1.1.1
+    digest: 577d1f15f16d9a9b1c427f7766ecc0ea6ba00f0be95cd6c1cefd8435822dee81
+    maintainers:
+    - name: opstree
+    name: ot-karpenter
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/ot-karpenter-0.3.0/ot-karpenter-0.3.0.tgz
+    version: 0.3.0
+  - apiVersion: v2
     created: "2025-01-08T06:25:33.587429334Z"
     dependencies:
     - name: karpenter
@@ -4552,4 +4565,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/vm-0.0.1/vm-0.0.1.tgz
     version: 0.0.1
-generated: "2025-01-14T03:49:55.05469119Z"
+generated: "2025-01-14T06:39:26.67767699Z"
