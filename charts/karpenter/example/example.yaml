@@ -80,4 +80,3 @@ nodePools:
       group: karpenter.k8s.aws  # Node class group for Karpenter
       kind: EC2NodeClass  # Kind of node class, EC2NodeClass indicates AWS EC2 instances
       name: default  # The name of the node class (default for this pool)
-  

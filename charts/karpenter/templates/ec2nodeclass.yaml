@@ -1,0 +1,33 @@
+{{- range .Values.ec2NodeClasses }}
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: {{ .name }}
+spec:
+  amiFamily: {{ .amiFamily | default "AL2" }}
+  role: {{ .role }}
+  {{- if .detailedMonitoring }}
+  detailedMonitoring: {{ .detailedMonitoring }}
+{{- end }}
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "{{ $.Values.clusterName }}"
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "{{ $.Values.clusterName }}"
+  amiSelectorTerms:
+    - id: "{{ .amiSelector.arm }}"
+    - id: "{{ .amiSelector.amd }}"
+{{- if .amiSelector.gpu }}
+    - id: "{{ .amiSelector.gpu }}"
+{{- end }}
+{{- if .amiSelector.name }}
+    - name: "{{ .amiSelector.name }}"
+{{- end }}
+{{- if .tags }}
+  tags:
+{{- range $key, $value := .tags }}
+    {{ $key }}: "{{ $value }}"
+{{- end }}
+{{- end }}
+{{- end }}
