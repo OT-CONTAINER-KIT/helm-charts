@@ -1,0 +1,39 @@
+---
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.ingress.class }}
+  labels:
+    {{- include "base.labels" . | nindent 4 }}
+  name: {{ include "base.fullname" . }}-external-ing
+spec:
+  ingressClassName: {{ .Values.ingress.class }}
+  rules:
+{{- range $rule := .Values.ingress.rules }}
+    - host: {{ $rule.hostname }}
+      http:
+        paths:
+        {{- if (kindIs "slice" $rule.path) }}
+        {{- range $path := $rule.path }}
+          - path: {{ $path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "base.fullname" $ }}
+                port:
+                  number: {{ $.Values.service.port }}
+        {{- end }}
+        {{- end }}
+        {{- if (kindIs "string" $rule.path) }}
+          - path: {{ $rule.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "base.fullname" $ }}
+                port:
+                  number: {{ $.Values.service.port }}
+        {{- end }}
+        {{- end }}
+{{- end }}
