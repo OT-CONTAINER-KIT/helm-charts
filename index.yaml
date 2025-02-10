@@ -4589,4 +4589,35 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/vm-0.0.1/vm-0.0.1.tgz
     version: 0.0.1
-generated: "2025-01-26T07:47:49.637415779Z"
+  web:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2025-02-10T11:22:00.600583626Z"
+    dependencies:
+    - name: base
+      repository: https://ot-container-kit.github.io/helm-charts
+      version: 0.1.0
+    description: A deployment helm chart which will be used to deploy any type of
+      stateless application
+    digest: 9c5586e27e954f5c7f97721a5468953e13849d7d721805caa20866a0f75c42a8
+    home: https://github.com/ot-container-kit/helm-charts
+    icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/helm-charts/main/static/helm-chart-logo.svg
+    keywords:
+    - deployment
+    - base
+    - opstree
+    - kubernetes
+    - openshift
+    - microservice
+    - stateless
+    maintainers:
+    - email: abhishek.dubey@opstree.com
+      name: iamabhishek-dubey
+      url: https://github.com/iamabhishek-dubey
+    name: web
+    sources:
+    - https://github.com/ot-container-kit/helm-charts
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/web-0.1.0/web-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-02-10T11:22:00.600895928Z"
