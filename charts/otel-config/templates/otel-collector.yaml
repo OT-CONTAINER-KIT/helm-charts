@@ -1,0 +1,22 @@
+{{- if .Values.collector.enabled }}
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: {{ .Values.collector.name }}
+  namespace: {{ .Values.collector.namespace }}
+spec:
+  mode: {{ .Values.collector.mode }}
+  resources:
+    requests:
+      cpu: {{ .Values.collector.resources.requests.cpu }}
+      memory: {{ .Values.collector.resources.requests.memory }}
+    limits:
+      cpu: {{ .Values.collector.resources.limits.cpu }}
+      memory: {{ .Values.collector.resources.limits.memory }}
+  autoscaler:
+    minReplicas: {{ .Values.collector.autoscaler.minReplicas }}
+    maxReplicas: {{ .Values.collector.autoscaler.maxReplicas }}
+    targetCPUUtilization: {{ .Values.collector.autoscaler.targetCPUUtilization }}
+    targetMemoryUtilization: {{ .Values.collector.autoscaler.targetMemoryUtilization }}
+  config: {{ .Values.collector.config | toYaml | nindent 4 }}
+{{- end }}
