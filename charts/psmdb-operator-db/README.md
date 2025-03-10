@@ -21,7 +21,35 @@ helm dependency build
 helm install my-db <path-to-chart> --namespace my-namespace
 ```
 
-The chart can be customized using the following configurable parameters:
+#These parameters are for psmdb-operator:
+
+| Parameter                    | Description                                                                                         | Default                                   |
+| ---------------------------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `image.repository`           | PSMDB Operator Container image name                                                                 | `percona/percona-server-mongodb-operator` |
+| `image.tag`                  | PSMDB Operator Container image tag                                                                  | `1.18.0`                                  |
+| `image.pullPolicy`           | PSMDB Operator Container pull policy                                                                | `Always`                                  |
+| `image.pullSecrets`          | PSMDB Operator Pod pull secret                                                                      | `[]`                                      |
+| `replicaCount`               | PSMDB Operator Pod quantity                                                                         | `1`                                       |
+| `tolerations`                | List of node taints to tolerate                                                                     | `[]`                                      |
+| `annotations`                | PSMDB Operator Deployment annotations                                                               | `{}`                                      |
+| `podAnnotations`             | PSMDB Operator Pod annotations                                                                      | `{}`                                      |
+| `labels`                     | PSMDB Operator Deployment labels                                                                    | `{}`                                      |
+| `podLabels`                  | PSMDB Operator Pod labels                                                                           | `{}`                                      |
+| `resources`                  | Resource requests and limits                                                                        | `{}`                                      |
+| `nodeSelector`               | Labels for Pod assignment                                                                           | `{}`                                      |
+| `podAnnotations`             | Annotations for pod                                                                                 | `{}`                                      |
+| `podSecurityContext`         | Pod Security Context                                                                                | `{}`                                      |
+| `watchNamespace`             | Set when a different from default namespace is needed to watch (comma separated if multiple needed) | `""`                                      |
+| `createNamespace`            | Set if you want to create watched namespaces with helm                                              | `false`                                   |
+| `rbac.create`                | If false RBAC will not be created. RBAC resources will need to be created manually                  | `true`                                    |
+| `securityContext`            | Container Security Context                                                                          | `{}`                                      |
+| `serviceAccount.create`      | If false the ServiceAccounts will not be created. The ServiceAccounts must be created manually      | `true`                                    |
+| `serviceAccount.annotations` | PSMDB Operator ServiceAccount annotations                                                           | `{}`                                      |
+| `logStructured`              | Force PSMDB operator to print JSON-wrapped log messages                                             | `false`                                   |
+| `logLevel`                   | PSMDB Operator logging level                                                                        | `INFO`                                    |
+| `disableTelemetry`           | Disable sending PSMDB Operator telemetry data to Percona                                            | `false`                                   |
+
+#These parameters are for psmdb-db:
 
 | Parameter                       | Description                                                                   | Default                               |
 | ------------------------------- | ------------------------------------------------------------------------------|---------------------------------------|
@@ -249,6 +277,26 @@ The chart can be customized using the following configurable parameters:
 | `backup.tasks`              | Backup working schedule                  | `{}`                                  |
 | `users`                     | PSMDB essential users                    | `{}`                                  |
 
+#These parameters are for backup:
+
+| Parameter       | Description                                        |
+| --------------- | -------------------------------------------------- |
+| `annotations`   | Annotations for the resource                      |
+| `name`          | Name of the backup resource                       |
+| `labels`        | Labels for the resource                           |
+| `clusterName`   | Name of the MongoDB cluster to backup             |
+| `storageName`   | Name of the storage configuration for the backup  |
+| `type`          | Type of the backup operation                      |
+
+#These parameters are for restore:
+
+| Parameter       | Description                                        |
+| --------------- | -------------------------------------------------- |
+| `annotations`   | Annotations for the resource                      |
+| `name`          | Name of the restore resource                      |
+| `labels`        | Labels for the resource                           |
+| `clusterName`   | Name of the MongoDB cluster to restore            |
+| `backupName`    | Name of the backup to restore from                |
 
 Specify parameters using `--set key=value[,key=value]` argument to `helm install`
 Notice that you can use multiple replica sets only with sharding enabled.
