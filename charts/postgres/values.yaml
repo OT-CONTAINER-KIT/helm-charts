@@ -1,0 +1,32 @@
+replicaCount: 1
+
+image:
+  repository: postgres
+  tag: "12.6"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5432
+
+configMap:
+  databaseName: mydatabase
+  user: myuser
+
+secret:
+  password: changeme
+
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "500m"
+  limits:
+    memory: "10Gi"
+    cpu: "1"
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
