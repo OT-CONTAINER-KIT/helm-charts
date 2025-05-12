@@ -1,0 +1,30 @@
+namespace: worker
+
+secret:
+  enabled: true
+  name: my-secret
+  data:
+    username: dXNlcm5hbWU=  
+    password: cGFzc3dvcmQ=  
+
+deployment:
+  name: myapp
+  replicas: 2
+  image: nginx:latest
+  containerPort: 80
+
+hpa:
+  enabled: true
+  name: worker
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPU: 70
+  targetMemory: 70
+  targetDeployment: worker
+
+configMap:
+  enabled: true
+  name: my-configmap
+  data:
+    key1: value1
+    key2: value2
