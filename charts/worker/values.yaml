@@ -1,30 +1,62 @@
-namespace: worker
+config:
+  APP_ENV: production
+  LOG_LEVEL: info
+  CONFIG_VERSION: "1.0.0"
+
+replicaCount: 2
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: nginx
+  tag: latest
+
+resources:
+  limits:
+    memory: "128Mi"
+    cpu: "500m"
+
+probes:
+  liveness:
+    path: /
+    port: 80
+    initialDelaySeconds: 10
+    periodSeconds: 5
+  readiness:
+    path: /
+    port: 80
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+volume:
+  name: myapp-volume
+  mountPath: /usr/share/nginx/html
+  initContent: "<h1>Hello from Nginx</h1>"
+
+
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 70
 
 secret:
   enabled: true
-  name: my-secret
+  name: myapp-secret
   data:
-    username: dXNlcm5hbWU=  
-    password: cGFzc3dvcmQ=  
-
-deployment:
-  name: myapp
-  replicas: 2
-  image: nginx:latest
-  containerPort: 80
-
-hpa:
-  enabled: true
-  name: worker
-  minReplicas: 1
-  maxReplicas: 3
-  targetCPU: 70
-  targetMemory: 70
-  targetDeployment: worker
-
-configMap:
-  enabled: true
-  name: my-configmap
-  data:
-    key1: value1
-    key2: value2
+    username: "admin"
+    password: "secret123"
