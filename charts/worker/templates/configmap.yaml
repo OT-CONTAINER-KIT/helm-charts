@@ -1,11 +1,10 @@
-{{- if .Values.configMap.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.configMap.name }}
-  namespace: {{ .Values.namespace }}
+  name: {{ include "base.fullname" . }}-config
+  labels:
+    {{- include "base.labels" . | nindent 4 }}
 data:
-  {{- range $key, $value := .Values.configMap.data }}
-  {{ $key }}: {{ $value }}
+  {{- range $key, $value := .Values.config }}
+  {{ $key }}: {{ $value | quote }}
   {{- end }}
-{{- end }}
