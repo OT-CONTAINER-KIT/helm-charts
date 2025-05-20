@@ -1,74 +1,30 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ .Values.deployment.name }}
+  name: {{ .Values.hpa.name }}
   labels:
     {{- include "base.labels" $ | nindent 4 }}
 spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      {{- include "base.labels" $ | nindent 6 }}
-  template:
-    metadata:
-      labels:
-        {{- include "base.labels" $ | nindent 8 }}
-    spec:
-      imagePullSecrets:
-        - name: {{ .Values.image.pullSecrets }}
-      serviceAccountName: {{ .Values.serviceAccount.name }}
-      terminationGracePeriodSeconds: 120
-      containers:
-        - name: {{ include "base.containername" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.image.enabled }}
-          command:
-            {{- toYaml .Values.image.command | nindent 12 }}
-          {{- end }}
-          ports:
-            - name: http
-              containerPort: 8080
-              protocol: TCP
-          resources:
-            limits:
-              cpu: "500m"
-              memory: "512Mi"
-            requests:
-              cpu: "200m"
-              memory: "256Mi"
-          livenessProbe:
-            httpGet:
-              path: "{{ .Values.healthcheck.statusPath }}"
-              port: http
-            initialDelaySeconds: 30
-            periodSeconds: 60
-            successThreshold: 1
-            timeoutSeconds: 1
-            failureThreshold: 3
-          readinessProbe:
-            httpGet:
-              path: "{{ .Values.healthcheck.statusPath }}"
-              port: http
-            initialDelaySeconds: 30
-            periodSeconds: 60
-            successThreshold: 1
-            timeoutSeconds: 1
-            failureThreshold: 3
-          envFrom:
-            - configMapRef:
-                name: {{ .Values.config.name }}
-            {{- if .Values.secret.enabled }}
-            - secretRef:
-                name: {{ .Values.secret.name }}
-            {{- end }}
-
-         {{- if .Values.volume.enabled }}
-          volumeMounts:
-            - name: {{ .Values.volumeMounts.name }}
-              mountPath: {{ .Values.volumeMounts.mountPath }}
-         {{- end }}
-      volumes:
-        - name: {{ .Values.volume.name }}
-          configMap:
-            name: {{ .Values.config.name }}
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Values.hpa.name }}
+  minReplicas: {{ .Values.hpa.minReplicas }}
+  maxReplicas: {{ .Values.hpa.maxReplicas }}
+  metrics:
+    {{- if .Values.hpa.enabled }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.hpa.enabled }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.targetMemoryUtilizationPercentage }}
+    {{- end }}
