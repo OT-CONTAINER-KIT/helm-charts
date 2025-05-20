@@ -1,6 +1,6 @@
 apiVersion: v2
 name: worker
-description: A deployment helm chart which will be used to deploy any type of stateless application
+description: A deployment helm chart which will be used to deploy any type of stateless worker application
 maintainers:
   - name: pritam kondapratiwar
 sources:
