@@ -1,53 +1,74 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "base.fullname" . }}
+  name: {{ .Values.deployment.name }}
   labels:
-    {{- include "base.labels" . | nindent 4 }}
+    {{- include "base.labels" $ | nindent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 3
   selector:
     matchLabels:
-      {{- include "base.selectorLabels" . | nindent 6 }}
+      {{- include "base.labels" $ | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "base.selectorLabels" . | nindent 8 }}
+        {{- include "base.labels" $ | nindent 8 }}
     spec:
-      initContainers:
-      - name: init-html
-        image: busybox
-        command:
-          - sh
-          - -c
-          - echo "{{ .Values.volume.initContent }}" > {{ .Values.volume.mountPath }}/index.html
-        volumeMounts:
-        - name: {{ .Values.volume.name }}
-          mountPath: {{ .Values.volume.mountPath }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecrets }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      terminationGracePeriodSeconds: 120
       containers:
-      - name: {{ include "base.fullname" . }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        resources:
-          limits:
-            memory: {{ .Values.resources.limits.memory | quote }}
-            cpu: {{ .Values.resources.limits.cpu | quote }}
-        ports:
-        - containerPort: {{ .Values.probes.liveness.port }}
-        volumeMounts:
-        - name: {{ .Values.volume.name }}
-          mountPath: {{ .Values.volume.mountPath }}
-        livenessProbe:
-          httpGet:
-            path: {{ .Values.probes.liveness.path }}
-            port: {{ .Values.probes.liveness.port }}
-          initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
-          periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
-        readinessProbe:
-          httpGet:
-            path: {{ .Values.probes.readiness.path }}
-            port: {{ .Values.probes.readiness.port }}
-          initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
-          periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+        - name: {{ include "base.containername" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.image.enabled }}
+          command:
+            {{- toYaml .Values.image.command | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: "{{ .Values.healthcheck.statusPath }}"
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: "{{ .Values.healthcheck.statusPath }}"
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 1
+            failureThreshold: 3
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.config.name }}
+            {{- if .Values.secret.enabled }}
+            - secretRef:
+                name: {{ .Values.secret.name }}
+            {{- end }}
+
+         {{- if .Values.volume.enabled }}
+          volumeMounts:
+            - name: {{ .Values.volumeMounts.name }}
+              mountPath: {{ .Values.volumeMounts.mountPath }}
+         {{- end }}
       volumes:
-      - name: {{ .Values.volume.name }}
-        emptyDir: {}
+        - name: {{ .Values.volume.name }}
+          configMap:
+            name: {{ .Values.config.name }}
