@@ -1,45 +1,47 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.deployment.name }}
+  name: {{ include "base.fullname" . }}
   labels:
-    {{- include "base.labels" $ | nindent 4 }}
+    {{- include "base.labels" . | nindent 4 }}
 spec:
-  replicas: 3
+{{- if not .Values.autoscaling.enabled }}
+{{- with .Values.replicaCount }}
+  replicas: {{ . }}
+{{- end }}
+{{- end }}
   selector:
     matchLabels:
-      {{- include "base.labels" $ | nindent 6 }}
+      {{- include "base.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "base.labels" $ | nindent 8 }}
+        {{- include "base.selectorLabels" . | nindent 8 }}
     spec:
+    {{- if .Values.base.image.pullSecrets }}
       imagePullSecrets:
-        - name: {{ .Values.image.pullSecrets }}
-      serviceAccountName: {{ .Values.serviceAccount.name }}
+        - name: {{ .Values.base.image.pullSecrets }}
+    {{- end }}
+      serviceAccountName: {{ include "base.serviceAccountName" . }}
       terminationGracePeriodSeconds: 120
       containers:
-        - name: {{ include "base.containername" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.image.enabled }}
+        - name: {{ include "base.fullname" . }}
+          image: "{{ .Values.base.image.repository }}:{{ .Values.base.image.tag }}"
+          imagePullPolicy: {{ .Values.base.image.pullPolicy }}
+          {{- if .Values.base.image.command }}
           command:
-            {{- toYaml .Values.image.command | nindent 12 }}
+            {{- toYaml .Values.base.image.command | nindent 12 }}
           {{- end }}
           ports:
             - name: http
-              containerPort: 8080
+              containerPort: {{ .Values.service.port }}
               protocol: TCP
           resources:
-            limits:
-              cpu: "500m"
-              memory: "512Mi"
-            requests:
-              cpu: "200m"
-              memory: "256Mi"
+            {{- toYaml .Values.resources | nindent 12 }}
           livenessProbe:
             httpGet:
-              path: "{{ .Values.healthcheck.statusPath }}"
+              path: {{ .Values.healthcheck.statusPath }}
               port: http
             initialDelaySeconds: 30
             periodSeconds: 60
@@ -48,27 +50,38 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: "{{ .Values.healthcheck.statusPath }}"
+              path: {{ .Values.healthcheck.statusPath }}
               port: http
             initialDelaySeconds: 30
             periodSeconds: 60
             successThreshold: 1
             timeoutSeconds: 1
             failureThreshold: 3
+          {{- if .Values.base.config }}
           envFrom:
             - configMapRef:
-                name: {{ .Values.config.name }}
-            {{- if .Values.secret.enabled }}
+                name: {{ include "base.fullname" . }}
+          {{- end }}
+          {{- if .Values.base.secret }}
             - secretRef:
-                name: {{ .Values.secret.name }}
-            {{- end }}
-
-         {{- if .Values.volume.enabled }}
+                name: {{ include "base.fullname" . }}
+          {{- end }}
+          {{- if .Values.volumes }}
           volumeMounts:
-            - name: {{ .Values.volumeMounts.name }}
-              mountPath: {{ .Values.volumeMounts.mountPath }}
-         {{- end }}
+            {{- if .Values.volumes.configMaps }}
+            {{- range $conf := .Values.volumes.configMaps }}
+            - mountPath: {{ $conf.mountPath }}
+              name: {{ $conf.name }}-volume
+            {{- end }}
+            {{- end }}
+          {{- end }}
+      {{- if .Values.volumes }}
       volumes:
-        - name: {{ .Values.volume.name }}
+      {{- if .Values.volumes.configMaps }}
+      {{- range $conf := .Values.volumes.configMaps }}
+        - name: {{ $conf.name }}-volume
           configMap:
-            name: {{ .Values.config.name }}
+            name: {{ $conf.name }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
