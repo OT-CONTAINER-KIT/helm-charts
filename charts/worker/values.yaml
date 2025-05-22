@@ -1,51 +1,43 @@
-config:
-  APP_ENV: production
-  LOG_LEVEL: info
-  CONFIG_VERSION: "1.0.0"
-  name: myapp-config
-  env: production
+volumes:
+# -- List of configmaps with mount path and data
+#  configMaps:
+#    - name: web
+#      mountPath: /test
+#      data:
+#        test.txt: |-
+#          Dummy text
 
 
-hpa:
-  name: myapp-hpa
-  minReplicas: 1
-  maxReplicas: 3
+base:
+  image:
+    pullPolicy: "IfNotPresent"
+    command: []
+    # -- Default image repository
+    repository: nginx
+    # -- Default image tag
+    tag: latest
+    # -- Image pull secrets for private repository authentication
+    pullSecrets: ""
+#  secret:
+#    FOO_SECRET: BAR
+#  config:
+#    FOO_CONFIG: BAR
+
+autoscaling:
   enabled: false
-  targetCPUUtilizationPercentage: 60
-  targetMemoryUtilizationPercentage: 60
+  targetCPUUtilizationPercentage: 65
+  targetMemoryUtilizationPercentage: 65
+  minReplicas: 10
+  maxReplicas: 50
 
+replicaCount: 2
 
-serviceAccount:
-  name: my-service-account
-  
+service:
+  port: 80
 
-secret:
-  enabled: true
-  name: myapp-secret
-  FOO_SECRET: BAR
-  
-deployment: 
-  name: my-deployment
+resources: {}
 
-
-
-image:
-  enabled: false
-  pullSecrets: ""
-  name: my-container
-  repository: myregistry/myapp
-  tag: "1.0.0"
-  pullPolicy: IfNotPresent
-  command: []
 
 healthcheck:
-  statusPath: /health
-
-
-volume:
-  name: myapp-volume
   enabled: true
-
-volumeMounts:
-  name: myapp-volume-mount
-  mountPath: /data
+  statusPath: /
