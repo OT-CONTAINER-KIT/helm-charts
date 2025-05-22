@@ -1,11 +1,18 @@
+{{- if .Values.volumes }}
+{{- if .Values.volumes.configMaps }}
+{{ range $cm := .Values.volumes.configMaps}}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.config.name }}
+  name: {{ $cm.name }}
   labels:
     {{- include "base.labels" $ | nindent 4 }}
 data:
-  {{- range $key, $value := .Values.config }}
-  {{ $key }}: {{ $value | quote }}
+  {{- range $filename, $content := $cm.data }}
+  {{ $filename }}: |-
+{{ $content | toString | indent 4}}
   {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
