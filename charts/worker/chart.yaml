@@ -1,0 +1,14 @@
+apiVersion: v2
+name: worker
+description: A deployment helm chart which will be used to deploy any type of stateless worker application
+maintainers:
+  - name: pritam kondapratiwar
+sources:
+  - https://github.com/ot-container-kit/helm-charts
+dependencies:
+  - name: base
+    version: 0.1.0
+    repository: https://ot-container-kit.github.io/helm-charts
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://github.com/ot-container-kit/helm-charts
