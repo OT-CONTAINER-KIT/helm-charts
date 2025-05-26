@@ -6,11 +6,11 @@ metadata:
   labels:
     {{- include "base.labels" . | nindent 4 }}
 spec:
-{{- if not .Values.autoscaling.enabled }}
-{{- with .Values.replicaCount }}
+  {{- if not .Values.autoscaling.enabled }}
+  {{- with .Values.replicaCount }}
   replicas: {{ . }}
-{{- end }}
-{{- end }}
+  {{- end }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "base.selectorLabels" . | nindent 6 }}
@@ -19,10 +19,10 @@ spec:
       labels:
         {{- include "base.selectorLabels" . | nindent 8 }}
     spec:
-    {{- if .Values.base.image.pullSecrets }}
+      {{- if .Values.base.image.pullSecrets }}
       imagePullSecrets:
         - name: {{ .Values.base.image.pullSecrets }}
-    {{- end }}
+      {{- end }}
       serviceAccountName: {{ include "base.serviceAccountName" . }}
       terminationGracePeriodSeconds: 120
       containers:
@@ -57,14 +57,16 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
             failureThreshold: 3
-          {{- if .Values.base.config }}
+          {{- if or .Values.base.config .Values.base.secret }}
           envFrom:
+            {{- if .Values.base.config }}
             - configMapRef:
                 name: {{ include "base.fullname" . }}
-          {{- end }}
-          {{- if .Values.base.secret }}
+            {{- end }}
+            {{- if .Values.base.secret }}
             - secretRef:
                 name: {{ include "base.fullname" . }}
+            {{- end }}
           {{- end }}
           {{- if .Values.volumes }}
           volumeMounts:
@@ -77,11 +79,11 @@ spec:
           {{- end }}
       {{- if .Values.volumes }}
       volumes:
-      {{- if .Values.volumes.configMaps }}
-      {{- range $conf := .Values.volumes.configMaps }}
+        {{- if .Values.volumes.configMaps }}
+        {{- range $conf := .Values.volumes.configMaps }}
         - name: {{ $conf.name }}-volume
           configMap:
             name: {{ $conf.name }}
-      {{- end }}
-      {{- end }}
+        {{- end }}
+        {{- end }}
       {{- end }}
