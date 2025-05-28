@@ -1,0 +1,27 @@
+volumes:
+# -- List of configmaps with mount path and data
+#  configMaps:
+#    - name: web
+#      mountPath: /test
+#      data:
+#        test.txt: |-
+#          Dummy text
+
+cronjob:
+  schedule: "*/5 * * * *"
+  
+base:
+  image:
+    pullPolicy: "IfNotPresent"
+    command: []
+    # -- Default image repository
+    repository: nginx
+    # -- Default image tag
+    tag: latest
+    # -- Image pull secrets for private repository authentication
+    pullSecrets: ""
+#  secret:
+#    FOO_SECRET: BAR
+#  config:
+#    FOO_CONFIG: BAR
+
