@@ -25,21 +25,3 @@ base:
 #  config:
 #    FOO_CONFIG: BAR
 
-autoscaling:
-  enabled: false
-  targetCPUUtilizationPercentage: 65
-  targetMemoryUtilizationPercentage: 65
-  minReplicas: 10
-  maxReplicas: 50
-
-replicaCount: 2
-
-service:
-  port: 80
-
-resources: {}
-
-
-healthcheck:
-  enabled: true
-  statusPath: /
