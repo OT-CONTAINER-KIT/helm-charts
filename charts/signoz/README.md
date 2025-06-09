@@ -43,7 +43,7 @@ This `values.yaml` is a lean and optimized version crafted for production use in
 ### 1. Add SigNoz Helm Repo
 
 ```bash
-helm repo add signoz https://charts.signoz.io
+helm repo add ot-helm https://ot-container-kit.github.io/helm-charts/
 helm repo update
 ```
 
@@ -58,7 +58,7 @@ kubectl create namespace signoz
 ```bash
 helm upgrade --install signoz signoz/signoz \
   -n signoz \
-  -f signoz-values.yaml \
+  -f values.yaml \
   --wait
 ```
 
