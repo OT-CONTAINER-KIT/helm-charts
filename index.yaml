@@ -555,6 +555,21 @@ entries:
   microservice:
   - apiVersion: v2
     appVersion: 0.1.2
+    created: "2025-06-30T14:38:10.841792193Z"
+    description: Basic helm chart for deploying microservices on kubernetes with best
+      practices
+    digest: a9792332f638bd74496c3fe7d3ea9b811f875624362a1c6a7a6fe35d5b3e2e08
+    maintainers:
+    - name: ashwani-opstree
+    - name: tripathishikha1
+    - name: khushimalhoz
+    name: microservice
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/microservice-0.1.8/microservice-0.1.8.tgz
+    version: 0.1.8
+  - apiVersion: v2
+    appVersion: 0.1.2
     created: "2025-06-30T13:05:01.825434949Z"
     description: Basic helm chart for deploying microservices on kubernetes with best
       practices
@@ -4805,4 +4820,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/web-0.1.0/web-0.1.0.tgz
     version: 0.1.0
-generated: "2025-06-30T13:05:01.825966842Z"
+generated: "2025-06-30T14:38:10.842068122Z"
