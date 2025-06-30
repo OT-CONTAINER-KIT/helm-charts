@@ -67,11 +67,11 @@ spec:
             value: {{ $value | quote }}
           {{- end }}
           {{- end }}
-          {{- if and .Values.deployment.healthProbes.enabled .Values.deployment.livenessProbe }}
+          {{- if and .Values.deployment.healthProbes.enabled .Values.deployment.livenessProbe.httpGet }}
           livenessProbe:
             {{- toYaml .Values.deployment.livenessProbe | nindent 12 }}
           {{- end }}
-          {{- if and .Values.deployment.healthProbes.enabled .Values.deployment.readinessProbe }}
+          {{- if and .Values.deployment.healthProbes.enabled .Values.deployment.readinessProbe.httpGet }}
           readinessProbe:
             {{- toYaml .Values.deployment.readinessProbe | nindent 12 }}
           {{- end }}
