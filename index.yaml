@@ -2534,6 +2534,30 @@ entries:
   redis-operator:
   - apiVersion: v2
     appVersion: 0.21.0
+    created: "2025-07-01T06:30:23.198719183Z"
+    description: Provides easy redis setup definitions for Kubernetes services, and
+      deployment.
+    digest: c83bc998548b6bff4e894375c6a9e929642695eeffbfd85b156358da4315afeb
+    home: https://github.com/OT-CONTAINER-KIT/redis-operator
+    icon: https://github.com/OT-CONTAINER-KIT/redis-operator/raw/main/static/redis-operator-logo.svg
+    keywords:
+    - operator
+    - redis
+    - opstree
+    - kubernetes
+    - openshift
+    maintainers:
+    - name: iamabhishek-dubey
+    - name: sandy724
+    - name: shubham-cmyk
+    name: redis-operator
+    sources:
+    - https://github.com/OT-CONTAINER-KIT/redis-operator
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/redis-operator-0.21.1/redis-operator-0.21.1.tgz
+    version: 0.21.1
+  - apiVersion: v2
+    appVersion: 0.21.0
     created: "2025-06-30T10:01:29.706748979Z"
     description: Provides easy redis setup definitions for Kubernetes services, and
       deployment.
@@ -4820,4 +4844,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/web-0.1.0/web-0.1.0.tgz
     version: 0.1.0
-generated: "2025-06-30T14:38:10.842068122Z"
+generated: "2025-07-01T06:30:23.441857123Z"
