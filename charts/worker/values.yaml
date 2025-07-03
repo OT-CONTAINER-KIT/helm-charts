@@ -1,0 +1,43 @@
+# -- Base block to define the inputs for image, secret and configmap env
+base:
+  # -- Image block with all image details
+  image:
+    # -- Default image pull policy
+    pullPolicy: "IfNotPresent"
+    # -- Additional command arguments which needs to be passed
+    command: []
+    # -- Default image repository
+    repository: nginx
+    # -- Default image tag
+    tag: latest
+    # -- Image pull secrets for private repository authentication
+    pullSecrets: ""
+#  secret:
+#    FOO_SECRET: BAR
+#  config:
+#    FOO_CONFIG: BAR
+
+
+# -- Autoscaling properties with target CPU and Memory details
+autoscaling:
+  enabled: false
+  targetCPUUtilizationPercentage: 65
+  targetMemoryUtilizationPercentage: 65
+  minReplicas: 10
+  maxReplicas: 50
+
+# -- Kubernetes resource in terms of requests and limits
+resources: {}
+
+# -- Number of replicas for deployment, it will be overridden in case autoscaling is enabled
+replicaCount: 2
+
+# -- Kubernetes volumes definition which needs to be mounted
+volumes:
+# -- List of configmaps with mount path and data
+#  configMaps:
+#    - name: web
+#      mountPath: /test
+#      data:
+#        test.txt: |-
+#          Dummy text
