@@ -33,10 +33,6 @@ spec:
           command:
             {{- toYaml .Values.base.image.command | nindent 12 }}
           {{- end }}
-          ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
-              protocol: TCP
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           {{- if .Values.base.config }}
