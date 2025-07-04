@@ -1,0 +1,45 @@
+namespace: default
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    # nginx.ingress.kubernetes.io/rewrite-target: /
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: grafana.example.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+    - host: otel.example.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+    - host: logging.example.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+    - host: vma.example.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+    - host: vmalert.example.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+    - host: vmalertmanager.example.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: tls-secret
+      hosts:
+        - grafana.example.com
+        - otel.example.com
+        - logging.example.com
+        - vma.example.com
+        - vmalert.example.com
+        - vmalertmanager.example.com
+service:
+  port: 80
