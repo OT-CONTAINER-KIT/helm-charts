@@ -2,7 +2,7 @@ base:
   image:
     pullPolicy: "Always"
     command: []
-    repository: registry.ldc.opstree.dev/sentryfuse/gitguard-consumer
+    repository: registry.ldc.opstree.dev/sentryfuse/gitguard-backend-api
     tag: latest
     pullSecrets: "sentryfuse-harbor-secret"
   config:
