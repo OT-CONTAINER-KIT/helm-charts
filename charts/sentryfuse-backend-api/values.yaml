@@ -2,11 +2,11 @@ base:
   image:
     pullPolicy: "Always"
     command: []
-    repository: sharvari1304/gitguard-backend-api
+    repository: registry.ldc.opstree.dev/sentryfuse/gitguard-consumer
     tag: latest
-    pullSecrets: ""
+    pullSecrets: "sentryfuse-harbor-secret"
   config:
-    POSTGRES_ADDR: "192.168.10.52:5432"
+    POSTGRES_ADDR: ""
     POSTGRES_USER: "postgres"
     POSTGRES_PASSWORD: "password"
 
@@ -41,7 +41,7 @@ volumes:
       data:
         config.yaml: |
           postgres:
-            addr: "192.168.10.52:5432"
+            addr: ""
             user: "postgres"
             password: "password"
             dbname: "git_guard"
