@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "base.fullname" . }}
+  labels:
+    {{- include "base.labels" . | nindent 4 }}
+  {{- with .Values.service.metrics }}
+  annotations:
+    prometheus.io/path: "{{ .path }}"
+    prometheus.io/port: "{{ .port }}"
+    prometheus.io/scrape: "true"
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    {{- include "base.selectorLabels" . | nindent 4 }}
+  ports:
+    {{- range .Values.service.ports }}
+    - name: {{ .name }}
+      port: {{ .port }}
+      targetPort: {{ .targetPort }}
+      protocol: {{ .protocol }}
+      {{- if and (eq $.Values.service.type "NodePort") .nodePort }}
+      nodePort: {{ .nodePort }}
+      {{- end }}
+    {{- end }}

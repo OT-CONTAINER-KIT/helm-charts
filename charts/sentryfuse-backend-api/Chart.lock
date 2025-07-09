@@ -1,0 +1,6 @@
+dependencies:
+- name: base
+  repository: https://ot-container-kit.github.io/helm-charts
+  version: 0.1.0
+digest: sha256:ec10c288cb3d11b204ab82792223585fba856dd4551697c21fce0038b79e9b0e
+generated: "2025-06-24T15:33:44.012581374Z"
