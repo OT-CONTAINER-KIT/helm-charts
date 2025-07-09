@@ -2,9 +2,9 @@ base:
   image:
     pullPolicy: "Always"
     command: ["./gitguard-consumer", "events"]
-    repository: sharvari1304/gitguard-consumer
+    repository:  registry.ldc.opstree.dev/sentryfuse/gitguard-consumer
     tag: latest
-    pullSecrets: ""
+    pullSecrets: "sentryfuse-harbor-secret"
   env:
     - name: FORCE_ROLLOUT
       value: "{{ .Release.Time }}"
