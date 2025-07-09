@@ -1,0 +1,41 @@
+{{- if .Values.internalIngress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "base.fullname" . }}-internal-ing
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.internalIngress.class }}
+{{- if .Values.internalIngress.annotations }}
+  {{ toYaml .Values.internalIngress.annotations | nindent 4 }}
+{{- end }}
+  labels:
+    {{- include "base.labels" . | nindent 4 }}
+spec:
+  ingressClassName: {{ .Values.internalIngress.class }}
+  rules:
+{{- range $rule := .Values.internalIngress.rules }}
+    - host: {{ $rule.hostname }}
+      http:
+        paths:
+        {{- if (kindIs "slice" $rule.path) }}
+        {{- range $path := $rule.path }}
+          - path: {{ $path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "base.fullname" $ }}
+                port:
+                  number: {{ $.Values.service.port }}
+        {{- end }}
+        {{- end }}
+        {{- if (kindIs "string" $rule.path) }}
+          - path: {{ $rule.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "base.fullname" $ }}
+                port:
+                  number: {{ $.Values.service.port }}
+        {{- end }}
+        {{- end }}
+{{- end }}
