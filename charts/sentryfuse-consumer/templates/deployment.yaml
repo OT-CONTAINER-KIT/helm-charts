@@ -2,14 +2,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "base.fullname" . }}
+  name: {{ .Values.nameOverride | default .Chart.Name }}
   labels:
     {{- include "base.labels" . | nindent 4 }}
 spec:
 {{- if not .Values.autoscaling.enabled }}
-{{- with .Values.replicaCount }}
-  replicas: {{ . }}
-{{- end }}
+  replicas: {{ .Values.replicaCount | default 1 }}
 {{- end }}
   selector:
     matchLabels:
@@ -19,24 +17,27 @@ spec:
       labels:
         {{- include "base.selectorLabels" . | nindent 8 }}
     spec:
-    {{- if .Values.base.image.pullSecrets }}
+      {{- if .Values.base.image.pullSecrets }}
       imagePullSecrets:
         - name: {{ .Values.base.image.pullSecrets }}
-    {{- end }}
+      {{- end }}
       serviceAccountName: {{ include "base.serviceAccountName" . }}
       terminationGracePeriodSeconds: 120
       containers:
-        - name: {{ include "base.fullname" . }}
+        - name: {{ .Values.nameOverride | default .Chart.Name }}
           image: "{{ .Values.base.image.repository }}:{{ .Values.base.image.tag }}"
-          imagePullPolicy: {{ .Values.base.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.base.image.pullPolicy | default "IfNotPresent" }}
+
           {{- if .Values.base.image.command }}
           command:
             {{- toYaml .Values.base.image.command | nindent 12 }}
           {{- end }}
+
           ports:
             - name: http
-              containerPort: {{ .Values.service.port }}
+              containerPort: {{ .Values.service.port | default 8080 }}
               protocol: TCP
+
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
@@ -55,6 +56,7 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
             failureThreshold: 3
+
           readinessProbe:
             httpGet:
               path: {{ .Values.healthcheck.statusPath }}
@@ -66,32 +68,5 @@ spec:
             failureThreshold: 3
           {{- end }}
 
-          {{- if .Values.base.config }}
+          {{- if or .Values.base.config .Values.base.secret }}
           envFrom:
-            - configMapRef:
-                name: {{ include "base.fullname" . }}
-          {{- end }}
-          {{- if .Values.base.secret }}
-            - secretRef:
-                name: {{ include "base.fullname" . }}
-          {{- end }}
-
-          {{- if .Values.volumes }}
-          volumeMounts:
-            {{- if .Values.volumes.configMaps }}
-            {{- range $conf := .Values.volumes.configMaps }}
-            - mountPath: {{ $conf.mountPath }}
-              name: {{ $conf.name }}-volume
-            {{- end }}
-            {{- end }}
-          {{- end }}
-      {{- if .Values.volumes }}
-      volumes:
-      {{- if .Values.volumes.configMaps }}
-      {{- range $conf := .Values.volumes.configMaps }}
-        - name: {{ $conf.name }}-volume
-          configMap:
-            name: {{ $conf.name }}
-      {{- end }}
-      {{- end }}
-      {{- end }}
