@@ -70,3 +70,33 @@ spec:
 
           {{- if or .Values.base.config .Values.base.secret }}
           envFrom:
+          {{- if .Values.base.config }}
+            - configMapRef:
+                name: {{ include "base.fullname" . }}
+          {{- end }}
+          {{- if .Values.base.secret }}
+            - secretRef:
+                name: {{ include "base.fullname" . }}
+          {{- end }}
+          {{- end }}
+
+          {{- if .Values.volumes }}
+          volumeMounts:
+            {{- if .Values.volumes.configMaps }}
+            {{- range $conf := .Values.volumes.configMaps }}
+            - mountPath: {{ $conf.mountPath }}
+              name: {{ $conf.name }}-volume
+            {{- end }}
+            {{- end }}
+          {{- end }}
+
+      {{- if .Values.volumes }}
+      volumes:
+        {{- if .Values.volumes.configMaps }}
+        {{- range $conf := .Values.volumes.configMaps }}
+        - name: {{ $conf.name }}-volume
+          configMap:
+            name: {{ $conf.name }}
+        {{- end }}
+        {{- end }}
+      {{- end }}
