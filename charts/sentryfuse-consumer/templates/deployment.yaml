@@ -40,6 +40,11 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
+          {{- if .Values.base.env }}
+          env:
+            {{- toYaml .Values.base.env | nindent 12 }}
+          {{- end }}
+
           {{- if .Values.healthcheck.enabled }}
           livenessProbe:
             httpGet:
@@ -70,6 +75,7 @@ spec:
             - secretRef:
                 name: {{ include "base.fullname" . }}
           {{- end }}
+
           {{- if .Values.volumes }}
           volumeMounts:
             {{- if .Values.volumes.configMaps }}
