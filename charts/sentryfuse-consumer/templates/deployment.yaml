@@ -1,0 +1,102 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.nameOverride | default .Chart.Name }}
+  labels:
+    {{- include "base.labels" . | nindent 4 }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount | default 1 }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "base.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "base.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.base.image.pullSecrets }}
+      imagePullSecrets:
+        - name: {{ .Values.base.image.pullSecrets }}
+      {{- end }}
+      serviceAccountName: {{ include "base.serviceAccountName" . }}
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: {{ .Values.nameOverride | default .Chart.Name }}
+          image: "{{ .Values.base.image.repository }}:{{ .Values.base.image.tag }}"
+          imagePullPolicy: {{ .Values.base.image.pullPolicy | default "IfNotPresent" }}
+
+          {{- if .Values.base.image.command }}
+          command:
+            {{- toYaml .Values.base.image.command | nindent 12 }}
+          {{- end }}
+
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port | default 8080 }}
+              protocol: TCP
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          {{- if .Values.base.env }}
+          env:
+            {{- toYaml .Values.base.env | nindent 12 }}
+          {{- end }}
+
+          {{- if .Values.healthcheck.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.healthcheck.statusPath }}
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 1
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.healthcheck.statusPath }}
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 1
+            failureThreshold: 3
+          {{- end }}
+
+          {{- if or .Values.base.config .Values.base.secret }}
+          envFrom:
+          {{- if .Values.base.config }}
+            - configMapRef:
+                name: {{ include "base.fullname" . }}
+          {{- end }}
+          {{- if .Values.base.secret }}
+            - secretRef:
+                name: {{ include "base.fullname" . }}
+          {{- end }}
+          {{- end }}
+
+          {{- if .Values.volumes }}
+          volumeMounts:
+            {{- if .Values.volumes.configMaps }}
+            {{- range $conf := .Values.volumes.configMaps }}
+            - mountPath: {{ $conf.mountPath }}
+              name: {{ $conf.name }}-volume
+            {{- end }}
+            {{- end }}
+          {{- end }}
+
+      {{- if .Values.volumes }}
+      volumes:
+        {{- if .Values.volumes.configMaps }}
+        {{- range $conf := .Values.volumes.configMaps }}
+        - name: {{ $conf.name }}-volume
+          configMap:
+            name: {{ $conf.name }}
+        {{- end }}
+        {{- end }}
+      {{- end }}
