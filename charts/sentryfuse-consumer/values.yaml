@@ -41,7 +41,7 @@ volumes:
 
           slack:
             enabled: true
-            channel_id: C08L2MYFVCH
+            channel_id: C095VP1JLJ0
 
           rules:
             - regex: |-
