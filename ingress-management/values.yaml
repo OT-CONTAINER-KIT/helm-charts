@@ -1,0 +1,12 @@
+# charts/ingress-management/values.yaml
+
+name: open-webui
+namespace: default
+host: bp-ai.opstree.dev
+path: /
+service:
+  name: open-webui
+  kind: Service
+  port: 80
+
+

@@ -1,0 +1,24 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    konghq.com/protocols: https
+    konghq.com/https-redirect-status-code: "301"
+spec:
+  parentRefs:
+    - name: kong
+      namespace: {{ .Release.Namespace }}
+  hostnames:
+    - "{{ .Values.host }}"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: "{{ .Values.path }}"
+      backendRefs:
+        - name: {{ .Values.service.name }}
+          kind: Service
+          port: {{ .Values.service.port }}
+
