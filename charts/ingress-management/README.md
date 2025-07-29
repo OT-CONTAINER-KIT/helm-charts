@@ -29,33 +29,6 @@ This chart helps manage HTTPRoute resources to expose services using Kubernetes 
 | [https://ot-container-kit.github.io/helm-charts](https://ot-container-kit.github.io/helm-charts)   | base | 0.1.0   |
 
 
-
-## Values
-
-# Web Deployment Helm Chart
-
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
-
-A deployment helm chart which will be used to deploy any type of stateless application
-
-**Homepage:** <https://github.com/ot-container-kit/helm-charts>
-
-## Maintainers
-
-| Name              | Email                        | Url                                    |
-|-------------------|------------------------------|----------------------------------------|
-| iamabhishek-dubey | <abhishek.dubey@opstree.com> | <https://github.com/iamabhishek-dubey> |
-
-## Source Code
-
-* <https://github.com/ot-container-kit/helm-charts>
-
-## Requirements
-
-| Repository                                     | Name | Version |
-|------------------------------------------------|------|---------|
-| https://ot-container-kit.github.io/helm-charts | base | 0.1.0   |
-
 ## Values
 
 | **Attribute**     | **Scope**        | **Example**           | **Description**                                                        | **Default**  |
