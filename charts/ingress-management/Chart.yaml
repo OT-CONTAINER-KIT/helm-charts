@@ -4,7 +4,6 @@ description: A Helm chart to manage HTTPRoute resources
 version: 0.1.0
 appVersion: "1.0"
 home: https://github.com/ot-container-kit/helm-charts
-repository: https://ot-container-kit.github.io/helm-charts
 maintainers:
   - name: Sharvari Khamkar
 keywords:
