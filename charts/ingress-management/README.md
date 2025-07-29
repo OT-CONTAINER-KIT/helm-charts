@@ -3,15 +3,14 @@
 
 A simple and reusable Helm chart to manage Kubernetes Gateway API HTTPRoutes for routing traffic to backend services.
 
-This chart helps manage `HTTPRoute` resources to expose services using the Kubernetes Gateway API. You can customize `host`, `path`, `service`, and `namespace` via values.
+This chart helps manage HTTPRoute resources to expose services using the Kubernetes Gateway API. You can customize host, path, service, and namespace via values.
 
----
 
 ## Homepage
 
 [https://github.com/ot-container-kit/helm-charts](https://github.com/ot-container-kit/helm-charts)
 
----
+
 
 ## Maintainers
 
@@ -19,13 +18,13 @@ This chart helps manage `HTTPRoute` resources to expose services using the Kuber
 | ---------------- | --------------------------------------------- |
 | sharvari-khamkar | [GitHub](https://github.com/sharvari-khamkar) |
 
----
+
 
 ## Source Code
 
 [GitHub - ot-container-kit/helm-charts](https://github.com/ot-container-kit/helm-charts)
 
----
+
 
 ## Requirements
 
@@ -33,7 +32,7 @@ This chart helps manage `HTTPRoute` resources to expose services using the Kuber
 | ------------------------------------------------------------------------------------------------ | ---- | ------- |
 | [https://ot-container-kit.github.io/helm-charts](https://ot-container-kit.github.io/helm-charts) | base | 0.1.0   |
 
----
+
 
 ## Values
 
