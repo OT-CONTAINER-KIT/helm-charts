@@ -21,12 +21,10 @@ parentRefs:
 hostnames: []
 
 # -- Routing rules for HTTPRoute
-rules:
-  - matches:
-      - path:
-          type: PathPrefix
-          value: ""
-    backendRefs:
+path:
+  - type: PathPrefix
+    value: ""
+backendRefs:
       - name: ""
         kind: Service
         port: 80
@@ -43,16 +41,15 @@ rules:
 
 # parentRefs:
 #  - name: kong
-#    namespace: default
 
 # hostnames:
 #  - bp-ai.opstree.dev
 
-# rules:
-#  - matches:
-#      - type: PathPrefix
-#        value: /
-#    backendRefs:
-#      - name: open-webui
-#        kind: Service
-#        port: 80
+# paths:
+#  - type: PathPrefix
+#    value: /
+
+# backendRefs:
+#  - name: open-webui
+#    kind: Service
+#    port: 80
