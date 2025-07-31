@@ -15,7 +15,6 @@ annotations: {}
 # -- Reference to the Gateway (parentRefs)
 parentRefs:
   - name: ""
-    namespace: default
 
 # -- Hostnames to be matched in the HTTPRoute
 hostnames: []
