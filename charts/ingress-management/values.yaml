@@ -1,10 +1,12 @@
 ---
+
 # charts/ingress-management/values.yaml
 
 # -- Name of the HTTPRoute and backend service (typically the app name)
 name: ""
 
-# -- Kubernetes namespace where the ingress-traffic and referenced resources will be created
+# -- Kubernetes namespace where the ingress-traffic
+# -- referenced resources will be created
 namespace: ""
 
 # -- Optional annotations to apply to the HTTPRoute resource
@@ -28,9 +30,10 @@ rules:
       - name: ""
         kind: Service
         port: 80
-# ----------------------------------------------------------------------------------
-# Example values.yaml File 
-# ----------------------------------------------------------------------------------
+
+# -----------------------------------------------------
+# Example values.yaml File
+# -----------------------------------------------------
 # name: open-webui
 # namespace: default
 # annotations:
