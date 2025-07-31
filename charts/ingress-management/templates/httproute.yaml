@@ -4,8 +4,8 @@ metadata:
   name: {{ .Values.name }}
   namespace: {{ .Values.namespace }}
   annotations:
-{{- range $key, $value := .Values.annotations }}
-    {{ $key }}: {{ $value | quote }}
+{{- with .Values.annotations }}
+{{ toYaml . | indent 4 }}
 {{- end }}
 spec:
   parentRefs:
@@ -15,15 +15,15 @@ spec:
 {{- end }}
   hostnames:
 {{- range .Values.hostnames }}
-  - {{ . | quote }}
+  - "{{ . }}"
 {{- end }}
   rules:
 {{- range .Values.rules }}
   - matches:
 {{- range .matches }}
     - path:
-        type: {{ .path.type }}
-        value: {{ .path.value | quote }}
+        type: {{ .type }}
+        value: {{ .value | quote }}
 {{- end }}
     backendRefs:
 {{- range .backendRefs }}
