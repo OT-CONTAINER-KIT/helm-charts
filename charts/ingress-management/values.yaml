@@ -15,6 +15,7 @@ annotations: {}
 # -- Reference to the Gateway (parentRefs)
 parentRefs:
   - name: ""
+    namespace: default
 
 # -- Hostnames to be matched in the HTTPRoute
 hostnames: []
@@ -35,22 +36,23 @@ rules:
 # -----------------------------------------------------
 # name: open-webui
 # namespace: default
+
 # annotations:
-#   konghq.com/protocols: "https"
+#   konghq.com/protocols: https
 #   konghq.com/https-redirect-status-code: "301"
-#
+
 # parentRefs:
-#   - name: kong
-#
+#  - name: kong
+#    namespace: default
+
 # hostnames:
-#   - bp-ai.opstree.dev
-#
+#  - bp-ai.opstree.dev
+
 # rules:
-#   - matches:
-#       - path:
-#           type: PathPrefix
-#           value: /
-#     backendRefs:
-#       - name: open-webui
-#         kind: Service
-#         port: 80
+#  - matches:
+#      - type: PathPrefix
+#        value: /
+#    backendRefs:
+#      - name: open-webui
+#        kind: Service
+#        port: 80
