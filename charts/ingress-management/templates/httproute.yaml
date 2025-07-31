@@ -1,3 +1,4 @@
+---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -11,24 +12,21 @@ spec:
   parentRefs:
 {{- range .Values.parentRefs }}
   - name: {{ .name }}
-    namespace: {{ .namespace }}
 {{- end }}
   hostnames:
 {{- range .Values.hostnames }}
   - "{{ . }}"
 {{- end }}
   rules:
-{{- range .Values.rules }}
   - matches:
-{{- range .matches }}
+{{- range .Values.paths }}
     - path:
         type: {{ .type }}
         value: {{ .value | quote }}
 {{- end }}
     backendRefs:
-{{- range .backendRefs }}
+{{- range .Values.backendRefs }}
     - name: {{ .name }}
       kind: {{ .kind }}
       port: {{ .port }}
-{{- end }}
 {{- end }}
