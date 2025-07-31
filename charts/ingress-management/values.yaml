@@ -15,7 +15,6 @@ annotations: {}
 # -- Reference to the Gateway (parentRefs)
 parentRefs:
   - name: ""
-    namespace: ""
 
 # -- Hostnames to be matched in the HTTPRoute
 hostnames: []
@@ -42,7 +41,6 @@ rules:
 #
 # parentRefs:
 #   - name: kong
-#     namespace: default
 #
 # hostnames:
 #   - bp-ai.opstree.dev
