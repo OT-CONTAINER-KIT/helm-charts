@@ -4,21 +4,31 @@ metadata:
   name: {{ .Values.name }}
   namespace: {{ .Values.namespace }}
   annotations:
-    konghq.com/protocols: https
-    konghq.com/https-redirect-status-code: "301"
+{{- range $key, $value := .Values.annotations }}
+    {{ $key }}: {{ $value | quote }}
+{{- end }}
 spec:
   parentRefs:
-    - name: kong
-      namespace: {{ .Release.Namespace }}
+{{- range .Values.parentRefs }}
+  - name: {{ .name }}
+    namespace: {{ .namespace }}
+{{- end }}
   hostnames:
-    - "{{ .Values.host }}"
+{{- range .Values.hostnames }}
+  - {{ . | quote }}
+{{- end }}
   rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: "{{ .Values.path }}"
-      backendRefs:
-        - name: {{ .Values.service.name }}
-          kind: Service
-          port: {{ .Values.service.port }}
-
+{{- range .Values.rules }}
+  - matches:
+{{- range .matches }}
+    - path:
+        type: {{ .path.type }}
+        value: {{ .path.value | quote }}
+{{- end }}
+    backendRefs:
+{{- range .backendRefs }}
+    - name: {{ .name }}
+      kind: {{ .kind }}
+      port: {{ .port }}
+{{- end }}
+{{- end }}

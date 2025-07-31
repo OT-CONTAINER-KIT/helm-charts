@@ -1,36 +1,23 @@
-# charts/ingress-management/values.yaml
+name: open-webui
+namespace: default
+annotations:
+  konghq.com/protocols: "https"
+  konghq.com/https-redirect-status-code: "301"
 
-# -- Name of the HTTPRoute and also the backend service name (typically the app name)
-name: ""
+parentRefs:
+  - name: kong
+    namespace: default
 
-# -- Kubernetes namespace where resources like HTTPRoute will be deployed
-namespace: ""
+hostnames:
+  - bp-ai.opstree.dev
 
-# -- The hostname to expose your app (e.g., bp-ai.opstree.dev)
-host: ""
+rules:
+  - matches:
+      - path:
+          type: PathPrefix
+          value: /
+    backendRefs:
+      - name: open-webui
+        kind: Service
+        port: 80
 
-# -- The path on the domain (e.g., /, /api)
-path: ""
-
-service:
-  # -- Backend service name to which traffic will be routed
-  name: ""
-
-  # -- Type of backend resource (usually Service)
-  kind: Service
-
-  # -- Port number the backend service listens on
-  port: 80
-
-
-# ----------------------------------------------------------------------------------
-# Example Override File (custom-values.yaml)
-# ----------------------------------------------------------------------------------
-# name: open-webui
-# namespace: default
-# host: bp-ai.opstree.dev
-# path: /
-# service:
-#   name: open-webui
-#   kind: Service
-#   port: 80

@@ -1,6 +1,6 @@
 apiVersion: v2
 name: ingress-management
-description: A Helm chart to manage HTTPRoute resources
+description: A Helm chart to manage Ingress traffic
 version: 0.1.0
 appVersion: "1.0"
 home: https://github.com/ot-container-kit/helm-charts
