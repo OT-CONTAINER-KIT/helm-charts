@@ -1,5 +1,4 @@
 ---
-
 # charts/ingress-management/values.yaml
 
 # -- Name of the HTTPRoute and backend service (typically the app name)
@@ -29,7 +28,6 @@ rules:
       - name: ""
         kind: Service
         port: 80
-
 # ----------------------------------------------------------------------------------
 # Example values.yaml File 
 # ----------------------------------------------------------------------------------
