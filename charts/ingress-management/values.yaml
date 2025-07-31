@@ -5,8 +5,7 @@
 # -- Name of the HTTPRoute and backend service (typically the app name)
 name: ""
 
-# -- Kubernetes namespace where the ingress-traffic
-# -- referenced resources will be created
+# -- Kubernetes namespace where the resources will be created
 namespace: ""
 
 # -- Optional annotations to apply to the HTTPRoute resource
@@ -20,13 +19,15 @@ parentRefs:
 hostnames: []
 
 # -- Routing rules for HTTPRoute
-path:
+paths:
   - type: PathPrefix
     value: ""
+
 backendRefs:
-      - name: ""
-        kind: Service
-        port: 80
+  - name: ""
+    kind: Service
+    port: 80
+
 
 # -----------------------------------------------------
 # Example values.yaml File
