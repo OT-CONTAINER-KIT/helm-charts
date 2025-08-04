@@ -39,8 +39,8 @@ rules:
 #  app: open-webui
 
 # annotations:
-#  konghq.com/protocols: https
-#  konghq.com/https-redirect-status-code: "301"
+#   konghq.com/protocols: https
+#   konghq.com/https-redirect-status-code: "301"
 
 # parentRefs:
 #  - name: kong
