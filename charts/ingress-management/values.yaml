@@ -1,55 +1,60 @@
----
-
 # charts/ingress-management/values.yaml
 
 # -- Name of the HTTPRoute and backend service (typically the app name)
 name: ""
 
-# -- Kubernetes namespace where the resources will be created
-namespace: ""
+# -- Labels to apply to the HTTPRoute metadata
+labels:
+  app: ""
 
 # -- Optional annotations to apply to the HTTPRoute resource
 annotations: {}
+  
 
 # -- Reference to the Gateway (parentRefs)
 parentRefs:
   - name: ""
-
+    namespace: ""
 # -- Hostnames to be matched in the HTTPRoute
-hostnames: []
+hostnames:
+  - ""
 
 # -- Routing rules for HTTPRoute
-paths:
-  - type: PathPrefix
-    value: ""
-
-backendRefs:
-  - name: ""
-    kind: Service
-    port: 80
-
-
+rules:
+  - matches:
+      - path:
+          type: PathPrefix
+          value: ""
+    backendRefs:
+      - name: ""
+        kind: Service
+        port: 80
+        
 # -----------------------------------------------------
 # Example values.yaml File
 # -----------------------------------------------------
 # name: open-webui
-# namespace: default
+
+# labels:
+#  app: open-webui
 
 # annotations:
-#   konghq.com/protocols: https
-#   konghq.com/https-redirect-status-code: "301"
+#  konghq.com/protocols: https
+#  konghq.com/https-redirect-status-code: "301"
 
 # parentRefs:
 #  - name: kong
+#    namespace: default
 
 # hostnames:
 #  - bp-ai.opstree.dev
 
-# paths:
-#  - type: PathPrefix
-#    value: /
-
-# backendRefs:
-#  - name: open-webui
-#    kind: Service
-#    port: 80
+# rules:
+#  - matches:
+#      - path:
+#          type: PathPrefix
+#          value: /
+#    backendRefs:
+#      - name: open-webui
+#        kind: Service
+#        port: 80
