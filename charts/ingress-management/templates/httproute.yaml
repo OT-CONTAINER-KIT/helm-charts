@@ -2,31 +2,45 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: {{ .Values.name }}
-  namespace: {{ .Values.namespace }}
+  name: {{ required "A valid 'name' is required!" .Values.name }}
+{{- if .Values.labels }}
+  labels:
+{{ toYaml .Values.labels | indent 4 }}
+{{- end }}
+{{- if .Values.annotations }}
   annotations:
-{{- with .Values.annotations }}
-{{ toYaml . | indent 4 }}
+{{ toYaml .Values.annotations | indent 4 }}
 {{- end }}
 spec:
+{{- if .Values.parentRefs }}
   parentRefs:
 {{- range .Values.parentRefs }}
-  - name: {{ .name }}
+    - name: {{ .name }}
+{{- if .namespace }}
+      namespace: {{ .namespace }}
 {{- end }}
+{{- end }}
+{{- end }}
+
+{{- if .Values.hostnames }}
   hostnames:
 {{- range .Values.hostnames }}
-  - "{{ . }}"
+    - "{{ . }}"
 {{- end }}
+{{- end }}
+
   rules:
-  - matches:
-{{- range .Values.paths }}
-    - path:
-        type: {{ .type }}
-        value: {{ .value | quote }}
+{{- range .Values.rules }}
+    - matches:
+{{- range .matches }}
+        - path:
+            type: {{ .path.type }}
+            value: {{ .path.value | quote }}
 {{- end }}
-    backendRefs:
-{{- range .Values.backendRefs }}
-    - name: {{ .name }}
-      kind: {{ .kind }}
-      port: {{ .port }}
+      backendRefs:
+{{- range .backendRefs }}
+        - name: {{ .name }}
+          kind: {{ .kind | default "Service" }}
+          port: {{ .port }}
+{{- end }}
 {{- end }}
