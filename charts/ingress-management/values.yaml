@@ -10,12 +10,11 @@ labels:
 
 # -- Optional annotations to apply to the HTTPRoute resource
 annotations: {}
-  
+
 # -- Reference to the Gateway (parentRefs)
 parentRefs:
   - name: ""
     namespace: ""
-    
 # -- Hostnames to be matched in the HTTPRoute
 hostnames:
   - ""
@@ -30,7 +29,7 @@ rules:
       - name: ""
         kind: Service
         port: 80
-        
+
 # -----------------------------------------------------
 # Example values.yaml File
 # -----------------------------------------------------
