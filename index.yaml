@@ -242,6 +242,27 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/fluentd-0.3.0/fluentd-0.3.0.tgz
     version: 0.3.0
+  ingress-management:
+  - apiVersion: v2
+    appVersion: "1.0"
+    created: "2025-08-05T08:11:47.548803242Z"
+    description: A Helm chart to manage Ingress traffic
+    digest: 32978ddb5c6725aa1f19cb9d26129553f3efee90f867ce37dd12b83a99af043c
+    home: https://github.com/ot-container-kit/helm-charts
+    icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/helm-charts/main/static/helm-chart-logo.svg
+    keywords:
+    - ingress
+    - kong
+    - httpRoute
+    - kubernetes
+    maintainers:
+    - name: sharvarikhamkar1304
+    name: ingress-management
+    sources:
+    - https://github.com/ot-container-kit/helm-charts
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/ingress-management-0.1.0/ingress-management-0.1.0.tgz
+    version: 0.1.0
   k8s-vault-webhook:
   - apiVersion: v1
     created: "2021-05-08T12:42:35.711946529Z"
@@ -4925,4 +4946,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/worker-0.1.0/worker-0.1.0.tgz
     version: 0.1.0
-generated: "2025-07-28T03:27:41.761270281Z"
+generated: "2025-08-05T08:11:47.549094819Z"
