@@ -1,0 +1,21 @@
+{{- if .Values.restore.enabled }}
+apiVersion: pgv2.percona.com/v2
+kind: PerconaPGRestore
+metadata:
+  name: {{ .Values.restore.name }}
+{{- if .Values.restore.annotations }}
+  annotations:
+{{ .Values.restore.annotations | toYaml | indent 4 }}
+{{- end }}
+{{- if .Values.restore.labels }}
+  labels:
+{{ .Values.restore.labels | toYaml | indent 4 }}
+{{- end }}
+spec:
+  pgCluster: {{ .Values.restore.pgCluster }}
+  repoName: {{ .Values.restore.repoName }}
+  options:
+{{- range .Values.restore.options }}
+  - {{ . }}
+{{- end }}
+{{- end }}
