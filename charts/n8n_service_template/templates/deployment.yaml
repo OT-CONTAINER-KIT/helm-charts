@@ -1,0 +1,153 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}
+  labels:
+    {{- toYaml .Values.labels | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- toYaml .Values.labels | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- toYaml .Values.labels | nindent 8 }}
+      annotations:
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ .Values.name }}-sa
+
+      {{- if .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- end }}
+
+      # -------------------- VOLUMES ----------------------
+      volumes:
+        {{- if .Values.extraVolumeMounts }}
+        - name: {{ .Values.extraVolumeMounts.name }}
+          configMap:
+            name: {{ .Values.extraVolumeMounts.name }}
+        {{- end }}
+
+        {{- if .Values.csiVolume.enabled }}
+        {{- range $index, $name := .Values.csiVolume.name }}
+        - name: {{ $name }}
+          csi:
+            driver: {{ $.Values.csiVolume.driver }}
+            readOnly: {{ $.Values.csiVolume.readOnly }}
+            volumeAttributes:
+              secretProviderClass: {{ index $.Values.csiVolume.secretProviderClass $index }}
+        {{- end }}
+        {{- end }}
+
+      # -------------------- CONTAINERS --------------------
+      containers:
+        - name: {{ .Values.name }}-container
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullpolicy }}
+
+          {{- if and .Values.container .Values.container.command }}
+          command: {{- toYaml .Values.container.command | nindent 12 }}
+          {{- end }}
+
+          {{- if and .Values.container .Values.container.args }}
+          args: {{- toYaml .Values.container.args | nindent 12 }}
+          {{- end }}
+
+          env:
+          {{- range .Values.env }}
+            - name: {{ .name }}
+              {{- if .value }}
+              value: {{ .value | quote }}
+              {{- end }}
+              {{- if .secretKeyRef }}
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .secretKeyRef.key }}
+                  name: {{ .secretKeyRef.name }}
+              {{- end }}
+              {{- if .configMapKeyRef }}
+              valueFrom:
+                configMapKeyRef:
+                  key: {{ .configMapKeyRef.key }}
+                  name: {{ .configMapKeyRef.name }}
+              {{- end }}
+              {{- if .fieldRef }}
+              valueFrom:
+                fieldRef:
+                  fieldPath: {{ .fieldRef.fieldPath }}
+              {{- end }}
+          {{- end }}
+
+          {{- if .Values.securityContext }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- end }}
+
+          ports:
+            - containerPort: {{ .Values.port }}
+
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.path }}
+              port: {{ .Values.port }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            {{- if .Values.livenessProbe.initialDelaySeconds }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            {{- end }}
+          {{- end }}
+
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.path }}
+              port: {{ .Values.port }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            {{- if .Values.readinessProbe.initialDelaySeconds }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            {{- end }}
+          {{- end }}
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          # -------------------- VOLUME MOUNTS -----------------------
+          volumeMounts:
+            {{- if .Values.extraVolumeMounts }}
+            - name: {{ .Values.extraVolumeMounts.name }}
+              mountPath: {{ .Values.extraVolumeMounts.mountPath }}
+              {{- if .Values.extraVolumeMounts.subPath }}
+              subPath: {{ .Values.extraVolumeMounts.subPath }}
+              {{- end }}
+            {{- end }}
+
+            {{- if .Values.csiVolume.enabled }}
+            {{- range $index, $mountPath := .Values.csiVolume.mountPath }}
+            - name: {{ index $.Values.csiVolume.name $index }}
+              mountPath: {{ $mountPath }}
+              readOnly: {{ $.Values.csiVolume.readOnly }}
+            {{- end }}
+            {{- end }}
+
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
+
+      {{- if .Values.affinity }}
+      affinity:
+        {{- toYaml .Values.affinity | nindent 8 }}
+      {{- end }}
+
+      {{- if .Values.tolerations }}
+      tolerations:
+        {{- toYaml .Values.tolerations | nindent 8 }}
+      {{- end }}
