@@ -1,0 +1,14 @@
+controller:
+  type: kong        # kong | istio | aws | gcp
+
+gateway:
+  name: platform-gateway
+  className: platform-gateway-class
+  namespace: kong
+
+policies:
+  enabled: true
+  rateLimit:
+    enabled: false
+  auth:
+    enabled: false
