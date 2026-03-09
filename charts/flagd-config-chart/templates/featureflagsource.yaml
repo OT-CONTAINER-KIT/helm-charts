@@ -1,0 +1,14 @@
+apiVersion: core.openfeature.dev/v1beta1
+kind: FeatureFlagSource
+metadata:
+  name: flag-source
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "flagd.labels" . | nindent 4 }}
+spec:
+  sources:
+    - source: {{ .Values.namespace }}/{{ include "flagd.name" . }}-flags
+      provider: kubernetes
+  port: 8013
+  managementPort: 8014
+  evaluator: json

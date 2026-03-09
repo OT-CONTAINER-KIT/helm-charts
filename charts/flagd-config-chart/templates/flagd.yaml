@@ -1,0 +1,11 @@
+apiVersion: core.openfeature.dev/v1beta1
+kind: Flagd
+metadata:
+  name: {{ include "flagd.name" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "flagd.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  serviceType: ClusterIP
+  featureFlagSource: flag-source

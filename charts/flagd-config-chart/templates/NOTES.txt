@@ -1,0 +1,26 @@
+***************************************************************
+  Flagd Deployed via OpenFeature Operator!
+***************************************************************
+
+Release    : {{ .Release.Name }}
+Namespace  : {{ .Values.namespace }}
+Version    : {{ .Chart.AppVersion }}
+
+Operator manages:
+  FeatureFlag     → {{ include "flagd.name" . }}-flags
+  FeatureFlagSource → flag-source
+  Flagd instance  → {{ include "flagd.name" . }}
+
+Test karne ke liye:
+  kubectl port-forward svc/flagd -n {{ .Values.namespace }} 8016:8016
+
+  curl -X POST http://localhost:8016/ofrep/v1/evaluate/flags/my-feature \
+    -H "Content-Type: application/json" \
+    -d '{"context": {}}'
+
+Flag change karne ke liye:
+  flagd-config-values.yaml mein change karo
+  helm upgrade flagd-config ~/flagd-config-chart \
+    -f ~/flagd-config-chart/flagd-config-values.yaml
+
+***************************************************************
