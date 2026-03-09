@@ -11,14 +11,14 @@ Operator manages:
   FeatureFlagSource → flag-source
   Flagd instance  → {{ include "flagd.name" . }}
 
-Test karne ke liye:
+For Test :
   kubectl port-forward svc/flagd -n {{ .Values.namespace }} 8016:8016
 
   curl -X POST http://localhost:8016/ofrep/v1/evaluate/flags/my-feature \
     -H "Content-Type: application/json" \
     -d '{"context": {}}'
 
-Flag change karne ke liye:
+For Flag change:
   flagd-config-values.yaml mein change karo
   helm upgrade flagd-config ~/flagd-config-chart \
     -f ~/flagd-config-chart/flagd-config-values.yaml
