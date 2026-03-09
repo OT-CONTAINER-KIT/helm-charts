@@ -4,3 +4,6 @@ description: A Helm chart for Flagd deployment via OpenFeature Operator
 type: application
 version: 1.0.0
 appVersion: "v0.12.4"
+maintainers:
+  - name: Sneha Joshi
+    email: sneha.joshi.snaatak@mygurukulam.co
