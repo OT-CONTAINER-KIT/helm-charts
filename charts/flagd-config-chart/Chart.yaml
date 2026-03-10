@@ -5,5 +5,6 @@ type: application
 version: 1.0.0
 appVersion: "v0.12.4"
 maintainers:
-  - name: Sneha Joshi
+  - name: snatakSneha
     email: sneha.joshi.snaatak@mygurukulam.co
+    url: https://github.com/snatakSneha
