@@ -3,7 +3,8 @@ name: flagd-config-chart
 description: A Helm chart for Flagd deployment via OpenFeature Operator
 type: application
 version: 1.0.0
-appVersion: "v0.12.4"
+appVersion: "0.12.4"
+
 maintainers:
   - name: snatakSneha
     email: sneha.joshi.snaatak@mygurukulam.co
