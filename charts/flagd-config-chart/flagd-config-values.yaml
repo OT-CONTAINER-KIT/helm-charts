@@ -34,3 +34,6 @@ flags:
       "on": true
       "off": false
     defaultVariant: "off"
+
+crds:
+  enabled: true
