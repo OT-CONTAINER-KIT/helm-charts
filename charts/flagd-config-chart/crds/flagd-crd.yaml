@@ -1,0 +1,324 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.5
+  name: flagds.core.openfeature.dev
+spec:
+  group: core.openfeature.dev
+  names:
+    kind: Flagd
+    listKind: FlagdList
+    plural: flagds
+    singular: flagd
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Flagd is the Schema for the flagds API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: FlagdSpec defines the desired state of Flagd
+            properties:
+              featureFlagSource:
+                description: |-
+                  FeatureFlagSource references to a FeatureFlagSource from which the created flagd instance retrieves
+                  the feature flag configurations
+                type: string
+              gatewayApiRoutes:
+                description: GatewayApiRoutes
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    description: Annotations to be added to the Gateway API routes
+                    type: object
+                  enabled:
+                    description: Enabled enables/disables the Gateway API routes for
+                      flagd
+                    type: boolean
+                  hosts:
+                    description: |-
+                      Hosts list of hosts to be added to the ingress.
+                      Empty string corresponds to rule with no host.
+                    items:
+                      type: string
+                    type: array
+                  parentRefs:
+                    description: |-
+                      ParentRefs references the resources (usually Gateways) that the Routes should
+                      be attached to.
+                    items:
+                      description: |-
+                        ParentReference identifies an API object (usually a Gateway) that can be considered
+                        a parent of this resource (usually a route). There are two kinds of parent resources
+                        with "Core" support:
+
+                        * Gateway (Gateway conformance profile)
+                        * Service (Mesh conformance profile, ClusterIP Services only)
+
+                        This API may be extended in the future to support additional kinds of parent
+                        resources.
+
+                        The API object must be valid in the cluster; the Group and Kind must
+                        be registered in the cluster for this reference to be valid.
+                      properties:
+                        group:
+                          default: gateway.networking.k8s.io
+                          description: |-
+                            Group is the group of the referent.
+                            When unspecified, "gateway.networking.k8s.io" is inferred.
+                            To set the core API group (such as for a "Service" kind referent),
+                            Group must be explicitly set to "" (empty string).
+
+                            Support: Core
+                          maxLength: 253
+                          pattern: ^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
+                          type: string
+                        kind:
+                          default: Gateway
+                          description: |-
+                            Kind is kind of the referent.
+
+                            There are two kinds of parent resources with "Core" support:
+
+                            * Gateway (Gateway conformance profile)
+                            * Service (Mesh conformance profile, ClusterIP Services only)
+
+                            Support for other resources is Implementation-Specific.
+                          maxLength: 63
+                          minLength: 1
+                          pattern: ^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$
+                          type: string
+                        name:
+                          description: |-
+                            Name is the name of the referent.
+
+                            Support: Core
+                          maxLength: 253
+                          minLength: 1
+                          type: string
+                        namespace:
+                          description: |-
+                            Namespace is the namespace of the referent. When unspecified, this refers
+                            to the local namespace of the Route.
+
+                            Note that there are specific rules for ParentRefs which cross namespace
+                            boundaries. Cross-namespace references are only valid if they are explicitly
+                            allowed by something in the namespace they are referring to. For example:
+                            Gateway has the AllowedRoutes field, and ReferenceGrant provides a
+                            generic way to enable any other kind of cross-namespace reference.
+
+                            <gateway:experimental:description>
+                            ParentRefs from a Route to a Service in the same namespace are "producer"
+                            routes, which apply default routing rules to inbound connections from
+                            any namespace to the Service.
+
+                            ParentRefs from a Route to a Service in a different namespace are
+                            "consumer" routes, and these routing rules are only applied to outbound
+                            connections originating from the same namespace as the Route, for which
+                            the intended destination of the connections are a Service targeted as a
+                            ParentRef of the Route.
+                            </gateway:experimental:description>
+
+                            Support: Core
+                          maxLength: 63
+                          minLength: 1
+                          pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+                          type: string
+                        port:
+                          description: |-
+                            Port is the network port this Route targets. It can be interpreted
+                            differently based on the type of parent resource.
+
+                            When the parent resource is a Gateway, this targets all listeners
+                            listening on the specified port that also support this kind of Route(and
+                            select this Route). It's not recommended to set `Port` unless the
+                            networking behaviors specified in a Route must apply to a specific port
+                            as opposed to a listener(s) whose port(s) may be changed. When both Port
+                            and SectionName are specified, the name and port of the selected listener
+                            must match both specified values.
+
+                            <gateway:experimental:description>
+                            When the parent resource is a Service, this targets a specific port in the
+                            Service spec. When both Port (experimental) and SectionName are specified,
+                            the name and port of the selected port must match both specified values.
+                            </gateway:experimental:description>
+
+                            Implementations MAY choose to support other parent resources.
+                            Implementations supporting other types of parent resources MUST clearly
+                            document how/if Port is interpreted.
+
+                            For the purpose of status, an attachment is considered successful as
+                            long as the parent resource accepts it partially. For example, Gateway
+                            listeners can restrict which Routes can attach to them by Route kind,
+                            namespace, or hostname. If 1 of 2 Gateway listeners accept attachment
+                            from the referencing Route, the Route MUST be considered successfully
+                            attached. If no Gateway listeners accept attachment from this Route,
+                            the Route MUST be considered detached from the Gateway.
+
+                            Support: Extended
+                          format: int32
+                          maximum: 65535
+                          minimum: 1
+                          type: integer
+                        sectionName:
+                          description: |-
+                            SectionName is the name of a section within the target resource. In the
+                            following resources, SectionName is interpreted as the following:
+
+                            * Gateway: Listener name. When both Port (experimental) and SectionName
+                            are specified, the name and port of the selected listener must match
+                            both specified values.
+                            * Service: Port name. When both Port (experimental) and SectionName
+                            are specified, the name and port of the selected listener must match
+                            both specified values.
+
+                            Implementations MAY choose to support attaching Routes to other resources.
+                            If that is the case, they MUST clearly document how SectionName is
+                            interpreted.
+
+                            When unspecified (empty string), this will reference the entire resource.
+                            For the purpose of status, an attachment is considered successful if at
+                            least one section in the parent resource accepts it. For example, Gateway
+                            listeners can restrict which Routes can attach to them by Route kind,
+                            namespace, or hostname. If 1 of 2 Gateway listeners accept attachment from
+                            the referencing Route, the Route MUST be considered successfully
+                            attached. If no Gateway listeners accept attachment from this Route, the
+                            Route MUST be considered detached from the Gateway.
+
+                            Support: Core
+                          maxLength: 253
+                          minLength: 1
+                          pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                required:
+                - parentRefs
+                type: object
+              ingress:
+                description: Ingress
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    description: Annotations the annotations to be added to the ingress
+                    type: object
+                  enabled:
+                    description: Enabled enables/disables the ingress for flagd
+                    type: boolean
+                  flagdPath:
+                    description: |-
+                      FlagdPath is the path to be used for accessing the flagd flag evaluation API
+                      Default: /flagd.evaluation.v1.Service
+                    type: string
+                  hosts:
+                    description: |-
+                      Hosts list of hosts to be added to the ingress.
+                      Empty string corresponds to rule with no host.
+                    items:
+                      type: string
+                    type: array
+                  ingressClassName:
+                    description: IngressClassName defines the name if the ingress
+                      class to be used for flagd
+                    type: string
+                  ofrepPath:
+                    description: |-
+                      OFREPPath is the path to be used for accessing the OFREP API
+                      Default: /ofrep
+                    type: string
+                  pathType:
+                    description: PathType is the path type to be used for the ingress
+                      rules
+                    type: string
+                  syncPath:
+                    description: |-
+                      SyncPath is the path to be used for accessing the sync API
+                      Default: /flagd.sync.v1.Service
+                    type: string
+                  tls:
+                    description: TLS configuration for the ingress
+                    items:
+                      description: IngressTLS describes the transport layer security
+                        associated with an ingress.
+                      properties:
+                        hosts:
+                          description: |-
+                            hosts is a list of hosts included in the TLS certificate. The values in
+                            this list must match the name/s used in the tlsSecret. Defaults to the
+                            wildcard host setting for the loadbalancer controller fulfilling this
+                            Ingress, if left unspecified.
+                          items:
+                            type: string
+                          type: array
+                          x-kubernetes-list-type: atomic
+                        secretName:
+                          description: |-
+                            secretName is the name of the secret used to terminate TLS traffic on
+                            port 443. Field is left optional to allow TLS routing based on SNI
+                            hostname alone. If the SNI host in a listener conflicts with the "Host"
+                            header field used by an IngressRule, the SNI host is used for termination
+                            and value of the "Host" header is used for routing.
+                          type: string
+                      type: object
+                    type: array
+                required:
+                - hosts
+                type: object
+              replicas:
+                default: 1
+                description: |-
+                  Replicas defines the number of replicas to create for the service.
+                  Default: 1
+                format: int32
+                type: integer
+              serviceAccountName:
+                description: ServiceAccountName the service account name for the flagd
+                  deployment
+                type: string
+              serviceType:
+                default: ClusterIP
+                description: |-
+                  ServiceType represents the type of Service to create.
+                  Must be one of: ClusterIP, NodePort, LoadBalancer, and ExternalName.
+                  Default: ClusterIP
+                enum:
+                - ClusterIP
+                - NodePort
+                - LoadBalancer
+                - ExternalName
+                type: string
+            required:
+            - featureFlagSource
+            type: object
+          status:
+            description: FlagdStatus defines the observed state of Flagd
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
