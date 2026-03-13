@@ -3,12 +3,7 @@ kind: FeatureFlagSource
 metadata:
   name: flag-source
   namespace: {{ .Values.namespace }}
-  labels:
-    {{- include "flagd.labels" . | nindent 4 }}
 spec:
   sources:
-    - source: {{ .Values.namespace }}/{{ include "flagd.name" . }}-flags
+    - source: {{ .Values.namespace }}/flagd-flags
       provider: kubernetes
-  port: 8013
-  managementPort: 8014
-  evaluator: json
