@@ -1,1 +1,8 @@
+namespace: flagd-non-prod
 
+crds:
+  enabled: true
+
+labels:
+  app: flagd
+  environment: dev
