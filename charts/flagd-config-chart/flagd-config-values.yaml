@@ -1,6 +1,6 @@
 name: flagd
 environment: dev
-namespace: flagd
+namespace: flagd-non-prod
 
 image:
   tag: v0.12.4
