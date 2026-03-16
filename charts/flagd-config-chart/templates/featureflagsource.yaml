@@ -5,5 +5,5 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   sources:
-    - source: {{ .Values.namespace }}/flagd-flags
+    - source: {{ .Values.namespace }}/{{ include "flagd.name" . }}-flags
       provider: kubernetes
