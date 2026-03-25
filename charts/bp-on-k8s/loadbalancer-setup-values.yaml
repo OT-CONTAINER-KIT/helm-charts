@@ -1,0 +1,365 @@
+---
+# Global Work load Section
+
+envJson:
+  # In case of internal request
+  publicapi: "http://publicapi.default.svc.cluster.local:9001/"
+  # In case of external request
+  # publicapi: <k8sClusterIP>:<nodeport>
+  organisationName: ""
+  organisationLogoUrl: ""
+  logoHeight: ""
+  logoWidth: ""
+  isBeta: ""
+  loginVia: ""
+  insightUrl: ""
+  workspaceApi: ""
+  platform: "PAAS"
+  awsMarketPlace: "FALSE"
+
+apiJson:
+  groupId: null # [0123, 1234]
+  database:
+    username: ""
+    password: ""  
+    host: "db-mysql"
+    port: 3306
+  redis:
+    host: "redis"
+    port: 6379
+  secretKey: ""
+  fernetKey: ""
+  superAdmin:
+    email: opstree@opstree.com
+    password: Opstree@12345
+  email:
+    host: smtp.gmail.com
+    port: 587
+    user: "support@opstree.com"
+    password: ""
+
+maturityDashboard:
+  enabled: false 
+  envJson:
+    # In case of internal request
+    api: "http://maturity-dashboard-api:9004/"
+    frontend: "http://frontend:80/"
+
+# We could have a secret for the registry credentials
+imagePullSecrets:
+  name: bp-regcred
+  dockerConfig:
+    registry: registry.buildpiper.in
+    username: ""
+    password: ""
+    email: ""
+
+# VGlobal Volumes Section
+# Global values for the volumes can be overridden by the individual components
+storageClass:
+  nfs:
+    csi:
+      enabled: false
+      mountOptions:
+      - nfsvers=4
+      parameters:
+        server: 34.xx.xx.xx
+        share: /zfs-pool/nfs-dataset
+  eks:
+    efs:
+      enabled: true
+      fileSystemId: fs-000xxxyyyzzz
+
+
+# Workload Section 
+
+deployapi:
+  name: deployapi
+  replicas: 1
+  imagePullPolicy: Always # IfNotPresent
+  nodeSelector:
+    enabled: true
+    labels:
+      kubernetes.io/arch: amd64
+  resources:
+    enabled: true 
+  readinessProbe:
+    enabled: true
+  livenessProbe:
+    enabled: true
+  startupProbe:
+    enabled: true 
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+
+frontend:
+  name: frontend
+  replicas: 1
+  labels: 
+    io.buildpiper.app: frontend
+  imagePullPolicy: Always # IfNotPresent
+  nodeSelector:
+    enabled: true
+    labels:
+      kubernetes.io/arch: amd64
+  resources:
+    enabled: true
+  readinessProbe:
+    enabled: true
+  livenessProbe:
+    enabled: true
+  startupProbe:
+    enabled: true
+  ingress:
+    enabled: false
+  service:
+    type: LoadBalancer
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+
+mysql:
+  enabled: true
+  name: db-mysql
+  replicas: 1
+  secret:
+    database: buildpiper
+    password: password
+  imagePullPolicy: Always # IfNotPresent
+  nodeSelector:
+    enabled: true
+    labels:
+      kubernetes.io/arch: amd64
+  resources:
+    enabled: true 
+  readinessProbe:
+    enabled: true
+  livenessProbe:
+    enabled: true
+  startupProbe:
+    enabled: true
+
+publicapi: 
+  name: publicapi
+  replicas: 1
+  imagePullPolicy: Always # IfNotPresent
+  nodeSelector:
+    enabled: true
+    labels:
+      kubernetes.io/arch: amd64
+  resources:
+    enabled: true 
+  startupProbe:
+    enabled: true
+  readinessProbe:
+    enabled: true
+  livenessProbe:
+    enabled: true
+  ingress:
+    enabled: false
+    name: publicapi-ingress
+    host: my-app.example.com
+    serviceName: publicapi
+    servicePort: 9001
+    annotations: 
+      nginx.ingress.kubernetes.io/rewrite-target: /
+    tls: false
+    tlsSecret: publicapi-tls-secret
+  service:
+    type: LoadBalancer
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+
+redis:
+  enabled: true
+  name: redis
+  replicas: 1
+  imagePullPolicy: Always # IfNotPresent
+  nodeSelector:
+    enabled: true
+    labels:
+      kubernetes.io/arch: amd64
+  resources:
+    enabled: true 
+  readinessProbe:
+    enabled: true
+  livenessProbe:
+    enabled: true
+  startupProbe:
+    enabled: true
+
+scheduleapi: 
+  name: scheduleapi
+  replicas: 1
+  imagePullPolicy: Always
+  # imagePullPolicy: Always # IfNotPresent
+  nodeSelector:
+    enabled: true
+    labels:
+      kubernetes.io/arch: amd64
+  resources:
+    enabled: true 
+  readinessProbe:
+    enabled: true
+  livenessProbe:
+    enabled: true
+  startupProbe:
+    enabled: true 
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+
+bpagent: 
+  name: bpagent
+  celeryWorkers:
+    distributed: false
+    processes: []
+    # - name: build
+    #   instances: "bp_agent_build|bp_agent_parallel_build"
+    #   concurrency: 2
+    #   replicas: 1
+    #   hpa:
+    #     enabled: true
+    #     minReplicas: 1
+    #     maxReplicas: 2
+    #     targetCPUUtilizationPercentage: 75      
+    # - name: deploy
+    #   instances: "bp_agent_deploy|bp_agent_canary_analysis"
+    #   concurrency: 2
+    #   replicas: 1
+    #   hpa:
+    #     enabled: true
+    #     minReplicas: 1
+    #     maxReplicas: 2
+    #     targetCPUUtilizationPercentage: 75      
+    # - name: core
+    #   instances: "bp_agent_insight|bp_agent_parallel_build_decision"
+    #   concurrency: 2
+    #   replicas: 1
+    #   hpa:
+    #     enabled: true
+    #     minReplicas: 1
+    #     maxReplicas: 2
+    #     targetCPUUtilizationPercentage: 75      
+  replicas: 2
+  # imagePullPolicy: Always # IfNotPresent
+  imagePullPolicy: Always
+  env:
+  - name: PYTHONUNBUFFERED
+    value: "1"
+  - name: CAPABILITIES_LEVELS_SET
+    value: "3"
+  nodeSelector:
+    enabled: true
+    labels:
+      kubernetes.io/arch: amd64
+  resources:
+    enabled: true 
+  readinessProbe:
+    enabled: true
+  livenessProbe:
+    enabled: true
+  startupProbe:
+    enabled: true 
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+
+maturityDashboardAgent: 
+  enabled: false
+  name: maturity-dashboard-agent
+  replicas: 1
+  # imagePullPolicy: Always # IfNotPresent
+  imagePullPolicy: Always
+  env:
+  - name: AGENT_CONCURRENCY
+    value: 2
+  nodeSelector:
+    enabled: true
+    labels:
+      kubernetes.io/arch: amd64
+  resources:
+    enabled: false 
+  readinessProbe:
+    enabled: false
+  livenessProbe:
+    enabled: false
+  startupProbe:
+    enabled: false 
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+
+maturityDashboardApi: 
+  enabled: false
+  name: maturity-dashboard-api
+  replicas: 1
+  imagePullPolicy: Always # IfNotPresent
+  nodeSelector:
+    enabled: true
+    labels:
+      kubernetes.io/arch: amd64
+  resources:
+    enabled: false
+  readinessProbe:
+    enabled: false
+  livenessProbe:
+    enabled: false
+  startupProbe:
+    enabled: false 
+  ingress:
+    enabled: false
+  service:
+    type: LoadBalancer
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+
+maturityDashboardFrontend:
+  enabled: false
+  name: maturity-dashboard-frontend
+  replicas: 1
+  labels: 
+    io.buildpiper.app: maturity-dashboard-frontend
+  imagePullPolicy: Always # IfNotPresent
+  nodeSelector:
+    enabled: true
+    labels:
+      kubernetes.io/arch: amd64
+  resources:
+    enabled: false
+  readinessProbe:
+    enabled: false
+  livenessProbe:
+    enabled: false
+  startupProbe:
+    enabled: false 
+  ingress:
+    enabled: false
+  service:
+    type: LoadBalancer
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+
+# Individual volume components
+volumes:
+  enabled: true

@@ -1,0 +1,71 @@
+{{- if .Values.mysql.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{  .Values.mysql.name }}
+  labels: 
+    app.kubernetes.io/name: {{ .Values.mysql.name | default .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    {{- include "global.labels" .Values.mysql | indent 4 }}
+spec:
+  replicas: {{ .Values.mysql.replicas }}
+  # serviceName: {{  .Values.mysql.service.name }}
+  selector:
+    matchLabels:
+      {{- include "global.labels" .Values.mysql | indent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "global.labels" .Values.mysql | indent 8 }}
+    spec:
+      {{- if ne .Values.commonServiceAccount "" }}
+      serviceAccountName: {{ .Values.commonServiceAccount }}
+      {{- end }}
+      {{- include "workload.imagePullSecrets" .Values | nindent 6 }}
+      securityContext:
+        runAsUser: {{ .Values.common.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.common.securityContext.runAsGroup }}
+        fsGroup: {{ .Values.common.securityContext.fsGroup }}
+        # {{- if .Values.common.securityContext.fsGroupChangePolicy }}
+        # fsGroupChangePolicy: "{{- .Values.common.securityContext.fsGroupChangePolicy -}}"
+        # {{- end }}
+        supplementalGroups: [999]
+      containers:
+        - name: {{  .Values.mysql.name  }}
+          image: "{{- .Values.imagePullSecrets.dockerConfig.registry -}}/{{- .Values.mysql.image.name -}}:{{- .Values.mysql.image.tag -}}"
+          securityContext:
+            privileged: true
+          imagePullPolicy: {{ .Values.mysql.imagePullPolicy }}
+          ports:
+            {{- include "workload.ports" .Values.mysql.service | indent 12 }}
+          # args: 
+          #   - "--ignore-db-dir=lost+found"
+          tty: true
+          env:
+            # - name: MYSQL_DATABASE
+            #   valueFrom:
+            #     secretKeyRef:
+            #       key: MYSQL_DATABASE
+            #       name: {{  .Values.mysql.name }}
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: MYSQL_ROOT_PASSWORD
+                  name: {{  .Values.mysql.name }}
+          volumeMounts:
+            {{- include "workload.volumeMounts" .Values.mysql | indent 12 }}
+          {{- include "workload.resources" .Values.mysql | indent 10 }}
+          {{- include "workload.startupProbe" .Values.mysql | indent 10 }}
+          {{- include "workload.livenessProbe" .Values.mysql | indent 10 }}
+          {{- include "workload.readinessProbe" .Values.mysql | indent 10 }}
+      {{- if .Values.mysql.nodeSelector.enabled }}
+      nodeSelector:
+        {{- toYaml .Values.mysql.nodeSelector.labels | nindent 8 }}
+      {{- end }}
+      restartPolicy: Always
+      volumes:
+        {{- include "workload.volumes" .Values.mysql | indent 8 }}
+{{- end }}

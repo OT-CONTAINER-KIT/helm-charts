@@ -1,0 +1,23 @@
+
+{{- if (hasKey .Values.storageClass "nfs") }}
+{{- if (hasKey .Values.storageClass.nfs "csi") }}
+{{- if .Values.storageClass.nfs.csi.enabled }}
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.storageClass.name }}
+mountOptions:
+  {{- range .Values.storageClass.nfs.csi.mountOptions }}
+- {{ . }}
+  {{- end }}
+  {{- $parameters := .Values.storageClass.nfs.csi.parameters }}
+parameters:
+  server: {{ $parameters.server }}
+  share: {{ $parameters.share }}
+provisioner: nfs.csi.k8s.io
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+volumeBindingMode: WaitForFirstConsumer
+{{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,22 @@
+{{- if .Values.volumes.enabled }}
+  {{- if .Values.redis.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.volumes.redisData.name }}
+  labels: 
+    app.kubernetes.io/name: {{ .Values.volumes.redisData.name | default .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    {{- include "global.labels" .Values.volumes.redisData | indent 4 }}
+spec:
+  {{- if or .Values.storageClass.name .Values.volumes.redisData.storageClassName }}
+  storageClassName: {{ default .Values.storageClass.name .Values.volumes.redisData.storageClassName }}
+  {{- end }}
+  accessModes:
+    {{- include "volume.volumeAccessModes" .Values.volumes.redisData | indent 4 }}
+  resources: {{- include "volume.volumeResources" .Values.volumes.redisData | nindent 4 }}
+  {{- end }}
+{{- end }}

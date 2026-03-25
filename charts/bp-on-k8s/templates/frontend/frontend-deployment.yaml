@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{  .Values.frontend.name }}
+  labels: 
+    app.kubernetes.io/name: {{ .Values.frontend.name | default .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    {{- include "global.labels" .Values.frontend | indent 4 }}
+spec:
+  {{- if not .Values.frontend.hpa.enabled }}
+  replicas: {{ .Values.frontend.replicas }}
+  {{- end }}  
+  selector:
+    matchLabels:
+      {{- include "global.labels" .Values.frontend | indent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "global.labels" .Values.frontend | indent 8 }}
+    spec:
+      {{- if ne .Values.commonServiceAccount "" }}
+      serviceAccountName: {{ .Values.commonServiceAccount }}
+      {{- end }}
+      securityContext:
+        runAsUser: {{ .Values.common.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.common.securityContext.runAsGroup }}
+        fsGroup: {{ .Values.common.securityContext.fsGroup }}
+        {{- if .Values.common.securityContext.fsGroupChangePolicy }}
+        fsGroupChangePolicy: "{{- .Values.common.securityContext.fsGroupChangePolicy -}}"
+        {{- end }}
+        {{- if .Values.common.securityContext.supplementalGroups }}
+        supplementalGroups:
+          {{- range $supplementalGroup := .Values.common.securityContext.supplementalGroups }}
+        - {{- $supplementalGroup -}}
+          {{- end }}
+        {{- end }}
+      {{- include "workload.imagePullSecrets" .Values | nindent 6 }}
+      containers:
+        - image: "{{- .Values.imagePullSecrets.dockerConfig.registry -}}/{{- .Values.frontend.image.name -}}:{{- .Values.frontend.image.tag -}}"
+          imagePullPolicy: {{ .Values.frontend.imagePullPolicy }}
+          name: {{  .Values.frontend.name }}
+          env:
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          ports:
+            {{- include "workload.ports" .Values.frontend.service | indent 12 }}
+          tty: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            # capabilities:
+            #   drop:
+            #   - ALL
+          volumeMounts:
+            {{- include "workload.volumeMounts" .Values.frontend | indent 12 }}
+          {{- include "workload.resources" .Values.frontend | indent 10 }}
+          {{- include "workload.startupProbe" .Values.frontend | indent 10 }}
+          {{- include "workload.livenessProbe" .Values.frontend | indent 10 }}
+          {{- include "workload.readinessProbe" .Values.frontend | indent 10 }}
+      {{- if .Values.frontend.nodeSelector.enabled }}
+      nodeSelector:
+        {{- toYaml .Values.frontend.nodeSelector.labels | nindent 8 }}
+      {{- end }}
+      restartPolicy: Always
+      volumes:
+        {{- include "workload.volumes" .Values.frontend | indent 8 }}
+

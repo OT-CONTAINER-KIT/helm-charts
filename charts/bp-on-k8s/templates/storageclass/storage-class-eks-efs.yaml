@@ -1,0 +1,27 @@
+
+{{- if (hasKey .Values.storageClass "eks") }}
+{{- if (hasKey .Values.storageClass.eks "efs") }}
+{{- if .Values.storageClass.eks.efs.enabled }}
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: {{ .Values.storageClass.name }}
+provisioner: efs.csi.aws.com
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  provisioningMode: efs-ap
+  fileSystemId: {{ .Values.storageClass.eks.efs.fileSystemId }}
+  directoryPerms: "777"
+  uid: "{{- .Values.common.securityContext.runAsUser -}}"
+  gid: "{{- .Values.common.securityContext.runAsGroup -}}"
+  #gidRangeStart: "1001" # optional
+  #gidRangeEnd: "1001" # optional
+  #basePath: "/dynamic_provisioning" # optional
+  subPathPattern: "${.PVC.namespace}/${.PVC.name}" # optional
+  ensureUniqueDirectory: "true" # optional
+  reuseAccessPoint: "false" # optional
+{{- end }}
+{{- end }}
+{{- end }}

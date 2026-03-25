@@ -1,0 +1,31 @@
+{{- if .Values.publicapi.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.publicapi.ingress.name }}
+  labels: 
+    app.kubernetes.io/name: {{ .Values.publicapi.service.name | default .Release.Name }}
+  annotations:
+    {{- range $key, $value := .Values.publicapi.ingress.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  ingressClassName: {{ .Values.publicapi.ingress.className }}
+  rules:
+  - host: {{ .Values.publicapi.ingress.host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.publicapi.ingress.serviceName }}
+            port:
+              number: {{ .Values.publicapi.ingress.servicePort }}
+  {{- if .Values.publicapi.ingress.tls }}
+  tls:
+  - hosts:
+    - {{ .Values.publicapi.ingress.host }}
+    secretName: {{ .Values.publicapi.ingress.tlsSecret }}
+  {{- end }}
+{{- end }}

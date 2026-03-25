@@ -1,0 +1,74 @@
+{{- if .Values.maturityDashboard.enabled }}
+  {{- if .Values.maturityDashboardFrontend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{  .Values.maturityDashboardFrontend.name }}
+  labels: 
+    app.kubernetes.io/name: {{ .Values.maturityDashboardFrontend.name | default .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    {{- include "global.labels" .Values.maturityDashboardFrontend | indent 4 }}
+spec:
+  {{- if not .Values.maturityDashboardFrontend.hpa.enabled }}
+  replicas: {{ .Values.maturityDashboardFrontend.replicas }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "global.labels" .Values.maturityDashboardFrontend | indent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "global.labels" .Values.maturityDashboardFrontend | indent 8 }}
+    spec:
+      {{- if ne .Values.commonServiceAccount "" }}
+      serviceAccountName: {{ .Values.commonServiceAccount }}
+      {{- end }}
+      securityContext:
+        runAsUser: {{ .Values.common.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.common.securityContext.runAsGroup }}
+        fsGroup: {{ .Values.common.securityContext.fsGroup }}
+        {{- if .Values.common.securityContext.fsGroupChangePolicy }}
+        fsGroupChangePolicy: "{{- .Values.common.securityContext.fsGroupChangePolicy -}}"
+        {{- end }}
+        {{- if .Values.common.securityContext.supplementalGroups }}
+        supplementalGroups:
+          {{- range $supplementalGroup := .Values.common.securityContext.supplementalGroups }}
+        - {{- $supplementalGroup -}}
+          {{- end }}
+        {{- end }}
+      {{- include "workload.imagePullSecrets" .Values | nindent 6 }}
+      containers:
+        - image: "{{- .Values.imagePullSecrets.dockerConfig.registry -}}/{{- .Values.maturityDashboardFrontend.image.name -}}:{{- .Values.maturityDashboardFrontend.image.tag -}}"
+          imagePullPolicy: {{ .Values.maturityDashboardFrontend.imagePullPolicy }}
+          name: {{  .Values.maturityDashboardFrontend.name }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            # capabilities:
+            #   drop:
+            #   - ALL
+          env:
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          ports:
+            {{- include "workload.ports" .Values.maturityDashboardFrontend.service | indent 12 }}
+          tty: true
+          volumeMounts:
+            {{- include "workload.volumeMounts" .Values.maturityDashboardFrontend | indent 12 }}
+          {{- include "workload.resources" .Values.maturityDashboardFrontend | indent 10 }}
+          {{- include "workload.startupProbe" .Values.maturityDashboardFrontend | indent 10 }}
+          {{- include "workload.livenessProbe" .Values.maturityDashboardFrontend | indent 10 }}
+          {{- include "workload.readinessProbe" .Values.maturityDashboardFrontend | indent 10 }}
+      {{- if .Values.maturityDashboardFrontend.nodeSelector.enabled }}
+      nodeSelector:
+        {{- toYaml .Values.maturityDashboardFrontend.nodeSelector.labels | nindent 8 }}
+      {{- end }}
+      restartPolicy: Always
+      volumes:
+        {{- include "workload.volumes" .Values.maturityDashboardFrontend | indent 8 }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,20 @@
+{{- if .Values.volumes.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.volumes.logBuildpiper.name }}
+  labels: 
+    app.kubernetes.io/name: {{ .Values.volumes.logBuildpiper.name | default .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    {{- include "global.labels" .Values.volumes.logBuildpiper | indent 4 }}
+spec:
+  {{- if or .Values.storageClass.name .Values.volumes.logBuildpiper.storageClassName }}
+  storageClassName: {{ default .Values.storageClass.name .Values.volumes.logBuildpiper.storageClassName }}
+  {{- end }}
+  accessModes:
+    {{- include "volume.volumeAccessModes" .Values.volumes.logBuildpiper | indent 4 }}
+  resources: {{- include "volume.volumeResources" .Values.volumes.logBuildpiper | nindent 4 }}
+{{- end }}

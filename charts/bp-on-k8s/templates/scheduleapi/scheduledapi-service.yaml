@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{  .Values.scheduleapi.service.name }}
+  labels: 
+    app.kubernetes.io/name: {{ .Values.scheduleapi.service.name | default .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    {{- include "global.labels" .Values.scheduleapi | indent 4 }}
+spec:
+  selector:
+    {{- include "global.labels" .Values.scheduleapi | indent 4 }}
+  type: {{ .Values.scheduleapi.service.type}}
+  ports:
+    {{- include "service.servicePorts" .Values.scheduleapi.service | indent 4 -}}
+    

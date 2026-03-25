@@ -1,0 +1,35 @@
+{{- if .Values.maturityDashboard.enabled }}
+  {{- if .Values.maturityDashboardFrontend.enabled }}
+    {{- if .Values.maturityDashboardFrontend.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.maturityDashboardFrontend.ingress.name }}
+  labels: 
+    app.kubernetes.io/name: {{ .Values.publicapi.service.name | default .Release.Name }}
+  annotations:
+    {{- range $key, $value := .Values.maturityDashboardFrontend.ingress.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  ingressClassName: {{ .Values.maturityDashboardFrontend.ingress.className }}
+  rules:
+  - host: {{ .Values.maturityDashboardFrontend.ingress.host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.maturityDashboardFrontend.ingress.serviceName }}
+            port:
+              number: {{ .Values.maturityDashboardFrontend.ingress.servicePort }}
+      {{- if .Values.maturityDashboardFrontend.ingress.tls }}
+  tls:
+  - hosts:
+    - {{ .Values.maturityDashboardFrontend.ingress.host }}
+    secretName: {{ .Values.maturityDashboardFrontend.ingress.tlsSecret }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}

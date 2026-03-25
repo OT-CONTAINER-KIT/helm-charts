@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: env-json
+  labels: 
+    app.kubernetes.io/name: "env-json"
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+data:
+  env.json: |-
+    {
+      "PUBLIC_API": {{ .Values.maturityDashboard.envJson.api | quote }},
+      "BP_URL": {{ .Values.maturityDashboard.envJson.frontend | quote }},
+      "TENENT": "bp",
+      {{- if .Values.envJson.organisationName }}
+      "ORGANISATION_NAME": "{{ .Values.envJson.organisationName }}",
+      {{- end }}
+      {{- if .Values.envJson.organisationLogoUrl }}
+      "ORGANISATION_LOGO_URL": "{{ .Values.envJson.organisationLogoUrl }}",
+      {{- end }}
+      {{- if .Values.envJson.logoHeight }}
+      "LOGO_HEIGHT": "{{ .Values.envJson.logoHeight }}",
+      {{- end }}
+      {{- if .Values.envJson.logoWidth }}
+      "LOGO_WIDTH": "{{ .Values.envJson.logoWidth }}",
+      {{- end }}
+      {{- if .Values.envJson.isBeta }}
+      "IS_BETA": "{{ .Values.envJson.isBeta }}",
+      {{- end }}
+      {{- if .Values.envJson.loginVia }}
+      "LOGIN_VIA": "{{ .Values.envJson.loginVia }}",
+      {{- end }}
+      {{- if .Values.envJson.insightUrl }}
+      "INSIGHT_URL": "{{ .Values.envJson.insightUrl }}",
+      {{- end }}
+      {{- if .Values.envJson.workspaceApi }}
+      "WORKSPACE_API": "{{ .Values.envJson.workspaceApi }}",
+      {{- end }}
+      {{- if .Values.envJson.platform }}
+      "PLATFORM": "{{ .Values.envJson.platform }}",
+      {{- end }}
+      {{- if .Values.envJson.awsMarketPlace }}
+      "AWS_MARKET_PLACE": "{{ .Values.envJson.awsMarketPlace }}",
+      {{- end }}
+      "SIGNUP_PARTNER_LIST":[
+        {
+          "img_url":"/images/products/product_5.png",
+          "link":"https://github.com/login/oauth/authorize/?client_id=XXXscope=user:email",
+          "provider":"GitHub"
+        },
+        {
+          "img_url":"/images/products/product_8.png",
+          "link":"https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?response_type=code&scope=profile email&redirect_uri=https://app.buildpiper.io/auth/complete/google&client_id=978190062445-2fmbctigpjm7g942peuuv4sb4bp9ibip.apps.googleusercontent.com",
+          "provider":"Google"
+        },
+        {
+          "img_url":"/images/products/product_6.png",
+          "link":"https://bitbucket.org/site/oauth2/authorize?client_id=qYxxhgMyRxnJsfHBHs&response_type=code",
+          "provider":"BitBucket"
+        },
+        {
+          "img_url":"/images/products/product_9.png",
+          "link":"https://login.microsoftonline.com/organizations/oauth2/v2.0/authorize?client_id=d38af328-7966-4525-8c86-a443b94d3518&response_type=code&redirect_uri=http://localhost:3000/auth/complete/microsoft&response_mode=query&scope=https://graph.microsoft.com/User.Read&state=12345",
+          "provider":"Microsoft"
+        }
+      ]
+    }

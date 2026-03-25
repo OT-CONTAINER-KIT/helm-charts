@@ -1,0 +1,88 @@
+{{- if .Values.maturityDashboard.enabled }}
+  {{- if .Values.maturityDashboardAgent.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.maturityDashboardAgent.name }}
+  labels: 
+    app.kubernetes.io/name: {{ .Values.maturityDashboardAgent.name | default .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    {{- include "global.labels" .Values.maturityDashboardAgent | indent 4 }}
+spec:
+  {{- if not .Values.maturityDashboardAgent.hpa.enabled }}
+  replicas: {{ .Values.maturityDashboardAgent.replicas }}
+  {{- end }}
+  selector:
+    matchLabels: 
+      {{- include "global.labels" .Values.maturityDashboardAgent | indent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "global.labels" .Values.maturityDashboardAgent | indent 8 }}
+    spec:
+      {{- if ne .Values.commonServiceAccount "" }}
+      serviceAccountName: {{ .Values.commonServiceAccount }}
+      {{- end }}
+      securityContext:
+        runAsUser: {{ .Values.common.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.common.securityContext.runAsGroup }}
+        fsGroup: {{ .Values.common.securityContext.fsGroup }}
+        {{- if .Values.common.securityContext.fsGroupChangePolicy }}
+        fsGroupChangePolicy: "{{- .Values.common.securityContext.fsGroupChangePolicy -}}"
+        {{- end }}
+        {{- if .Values.common.securityContext.supplementalGroups }}
+        supplementalGroups:
+          {{- range $supplementalGroup := .Values.common.securityContext.supplementalGroups }}
+        - {{- $supplementalGroup -}}
+          {{- end }}
+        {{- end }}
+      {{- include "workload.imagePullSecrets" .Values | nindent 6 }}
+      containers:
+        - image: "{{- .Values.imagePullSecrets.dockerConfig.registry -}}/{{- .Values.maturityDashboardAgent.image.name -}}:{{- .Values.maturityDashboardAgent.image.tag -}}"
+          imagePullPolicy: {{ .Values.maturityDashboardAgent.imagePullPolicy }}
+          name: {{ .Values.maturityDashboardAgent.name }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            # capabilities:
+            #   drop:
+            #   - ALL
+          args:
+          - maturity_dashboard_agent
+          tty: true
+          env:
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: PYTHONUNBUFFERED
+            value: "1"
+          - name: AGENT_IMAGE_PULL_SECRET
+            value: "{{ .Values.imagePullSecrets.name }},"
+          - name: HOME_DIRECTORY_FOR_STEPS
+            value: "{{ .Values.maturityDashboard.envJson.homeDirectoryForSteps }}"
+          - name: AGENT_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          {{- if .Values.maturityDashboardAgent.nodeSelector.enabled }}
+          - name: DEFAULT_NODE_SELECTOR
+            value: {{ .Values.maturityDashboardAgent.nodeSelector.labels  | toJson | quote }}
+          {{- end }}
+          {{- include "workload.env" .Values.maturityDashboardAgent | indent 10 }}
+          {{- include "workload.resources" .Values.maturityDashboardAgent | indent 10 }}
+          {{- include "workload.startupProbe" .Values.maturityDashboardAgent | indent 10 }}
+          {{- include "workload.livenessProbe" .Values.maturityDashboardAgent | indent 10 }}
+          {{- include "workload.readinessProbe" .Values.maturityDashboardAgent | indent 10 }}
+          volumeMounts:
+            {{- include "workload.volumeMounts" .Values.maturityDashboardAgent | indent 12 }}
+      {{- if .Values.maturityDashboardAgent.nodeSelector.enabled }}
+      nodeSelector:
+        {{- toYaml .Values.maturityDashboardAgent.nodeSelector.labels | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- include "workload.volumes" .Values.maturityDashboardAgent | indent 8 }}
+  {{- end }}
+{{- end }}

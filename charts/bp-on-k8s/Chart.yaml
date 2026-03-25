@@ -1,0 +1,6 @@
+name: buildpiper
+description: Helm chart for buildpiper
+version: 0.0.1
+appVersion: 0.0.1
+apiVersion: v2
+type: application

@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-default
+  labels: 
+    app.kubernetes.io/name: "nginx"
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+data:
+  default.conf: |
+    user  buildpiper;
+    worker_processes  auto;
+
+    error_log  /home/buildpiper/.log/nginx/error.log warn;
+    pid        /home/buildpiper/.run/nginx.pid;
+
+    events {
+        worker_connections  1024;
+    }
+
+    http {
+        sendfile on;
+        tcp_nopush on;
+        tcp_nodelay on;
+        keepalive_timeout 65;
+        types_hash_max_size 2048;
+        include       /etc/nginx/mime.types;
+        default_type text/html;
+
+        log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                          '$status $body_bytes_sent "$http_referer" '
+                          '"$http_user_agent" "$http_x_forwarded_for"';
+
+        access_log  /home/buildpiper/.log/nginx/access.log  main;
+        error_log  /home/buildpiper/.log/nginx/error.log  warn;
+        gzip  on;
+
+        include /etc/nginx/conf.d/*.conf;
+
+        # Additional server block
+        server {
+            listen       80;
+            server_name  localhost;
+
+            location / {
+                include       /etc/nginx/mime.types;
+                root   /tmp/workspaces/;
+                index  index.html index.htm;
+                autoindex on;
+                types {}
+                default_type text/html;
+            }
+
+            error_page   500 502 503 504  /50x.html;
+            location = /50x.html {
+                root   /usr/share/nginx/html;
+            }
+        }
+    }

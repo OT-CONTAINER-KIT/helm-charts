@@ -1,0 +1,213 @@
+{{- if .Values.bpagent.celeryWorkers.distributed }}
+  {{- $chart := .Chart }}
+  {{- $values := .Values }}
+  {{- $release := .Release }}
+  {{- range $process := $values.bpagent.celeryWorkers.processes }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{- $values.bpagent.name -}}-{{ $process.name }}"
+  labels: 
+    app.kubernetes.io/name: "{{- $values.bpagent.name | default $release.Name -}}-{{ $process.name }}"
+    app.kubernetes.io/instance: {{ $release.Name }}
+    helm.sh/chart: {{ $chart.Name }}-{{ $chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ $release.Service }}
+    app.kubernetes.io/version: {{ $chart.AppVersion }}
+    {{- include "global.labels" $values.bpagent | indent 4 }}
+spec:
+  {{- if not $values.bpagent.hpa.enabled }}
+  replicas: {{ $process.replicas | default $values.bpagent.replicas }}
+  {{- end }}
+  selector:
+    matchLabels: 
+      {{- include "global.labels" $values.bpagent | indent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "global.labels" $values.bpagent | indent 8 }}
+        agent-type: "{{ $process.name }}"
+    spec:
+      {{- if ne $values.commonServiceAccount "" }}
+      serviceAccountName: {{ $values.commonServiceAccount }}
+      {{- end }}
+      securityContext:
+        runAsUser: {{ $values.common.securityContext.runAsUser }}
+        runAsGroup: {{ $values.common.securityContext.runAsGroup }}
+        fsGroup: {{ $values.common.securityContext.fsGroup }}
+        {{- if $values.common.securityContext.fsGroupChangePolicy }}
+        fsGroupChangePolicy: "{{- $values.common.securityContext.fsGroupChangePolicy -}}"
+        {{- end }}
+        {{- if $values.common.securityContext.supplementalGroups }}
+        supplementalGroups:
+          {{- range $supplementalGroup := $values.common.securityContext.supplementalGroups }}
+        - "{{- $supplementalGroup -}}"
+          {{- end }}
+        {{- end }}
+      {{- include "workload.imagePullSecrets" $values | nindent 6 }}
+      containers:
+        - image: "{{- $values.imagePullSecrets.dockerConfig.registry -}}/{{- $values.bpagent.image.name -}}:{{- $values.bpagent.image.tag -}}"
+          imagePullPolicy: {{ $values.bpagent.imagePullPolicy }}
+          name: "{{ $values.bpagent.name }}-{{ $process.name }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+            # capabilities:
+            #   drop:
+            #   - ALL
+          tty: true
+          env:
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: USER
+            value: "buildpiper"
+          {{- if $values.common.securityContext.runAsUser }}
+          - name: RUN_AS_USER
+            value: "{{- $values.common.securityContext.runAsUser -}}"
+          {{- end }}
+          {{- if $values.common.securityContext.runAsGroup }}
+          - name: RUN_AS_GROUP
+            value: "{{- $values.common.securityContext.runAsGroup -}}"
+          {{- end }}
+          {{- if $values.common.securityContext.fsGroup }}
+          - name: FS_GROUP
+            value: "{{- $values.common.securityContext.fsGroup -}}"
+          {{- end }}
+          {{- if $values.common.securityContext.fsGroupChangePolicy }}
+          - name: FS_GROUP_CHANGE_POLICY
+            value: "{{- $values.common.securityContext.fsGroupChangePolicy -}}"
+          {{- end }}
+          - name: AGENT_IMAGE_PULL_SECRET
+            value: "{{ $values.imagePullSecrets.name }},"
+          - name: HOME_DIRECTORY_FOR_STEPS
+            value: "{{ $values.envJson.homeDirectoryForSteps }}"
+          - name: AGENT_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: AGENT_CONCURRENCY
+            value: "{{- $process.concurrency | default $values.bpagent.defaultConcurrency -}}"
+          - name: BP_WORKER_PROCESSES
+            value: "{{- $process.instances | default $values.bpagent.defaultWorkersInstances -}}"
+          {{- if $values.bpagent.nodeSelector.enabled }}
+          - name: DEFAULT_NODE_SELECTOR
+            value: {{ $values.bpagent.nodeSelector.labels  | toJson | quote }}
+          {{- end }}
+          {{- include "workload.env" $values.bpagent | indent 10 }}
+          {{- include "workload.resources" $values.bpagent | indent 10 }}
+          {{- include "workload.startupProbe" $values.bpagent | indent 10 }}
+          {{- include "workload.livenessProbe" $values.bpagent | indent 10 }}
+          {{- include "workload.readinessProbe" $values.bpagent | indent 10 }}
+          volumeMounts:
+            {{- include "workload.volumeMounts" $values.bpagent | indent 12 }}
+      {{- if $values.bpagent.nodeSelector.enabled }}
+      nodeSelector:
+        {{- toYaml $values.bpagent.nodeSelector.labels | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- include "workload.volumes" $values.bpagent | indent 8 }}
+  {{- end -}}
+{{- else }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.bpagent.name }}
+  labels: 
+    app.kubernetes.io/name: {{ .Values.bpagent.name | default .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    {{- include "global.labels" .Values.bpagent | indent 4 }}
+spec:
+{{- if not .Values.bpagent.hpa.enabled }}
+  replicas: {{ .Values.bpagent.replicas }}
+{{- end }}
+  selector:
+    matchLabels: 
+      {{- include "global.labels" .Values.bpagent | indent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "global.labels" .Values.bpagent | indent 8 }}
+    spec:
+      {{- if ne .Values.commonServiceAccount "" }}
+      serviceAccountName: {{ .Values.commonServiceAccount }}
+      {{- end }}
+      securityContext:
+        runAsUser: {{ .Values.common.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.common.securityContext.runAsGroup }}
+        fsGroup: {{ .Values.common.securityContext.fsGroup }}
+        {{- if .Values.common.securityContext.fsGroupChangePolicy }}
+        fsGroupChangePolicy: "{{- .Values.common.securityContext.fsGroupChangePolicy -}}"
+        {{- end }}
+        {{- if .Values.common.securityContext.supplementalGroups }}
+        supplementalGroups:
+          {{- range $supplementalGroup := .Values.common.securityContext.supplementalGroups }}
+        - {{- $supplementalGroup -}}
+          {{- end }}
+        {{- end }}
+      {{- include "workload.imagePullSecrets" .Values | nindent 6 }}
+      containers:
+        - image: "{{- .Values.imagePullSecrets.dockerConfig.registry -}}/{{- .Values.bpagent.image.name -}}:{{- .Values.bpagent.image.tag -}}"
+          imagePullPolicy: {{ .Values.bpagent.imagePullPolicy }}
+          name: {{ .Values.bpagent.name }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            # capabilities:
+            #   drop:
+            #   - ALL
+          tty: true
+          env:
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          {{- if .Values.common.securityContext.runAsUser }}
+          - name: RUN_AS_USER
+            value: "{{- .Values.common.securityContext.runAsUser -}}"
+          {{- end }}
+          {{- if .Values.common.securityContext.runAsGroup }}
+          - name: RUN_AS_GROUP
+            value: "{{- .Values.common.securityContext.runAsGroup -}}"
+          {{- end }}
+          {{- if .Values.common.securityContext.fsGroup }}
+          - name: FS_GROUP
+            value: "{{- .Values.common.securityContext.fsGroup -}}"
+          {{- end }}
+          {{- if .Values.common.securityContext.fsGroupChangePolicy }}
+          - name: FS_GROUP_CHANGE_POLICY
+            value: "{{- .Values.common.securityContext.fsGroupChangePolicy -}}"
+          {{- end }}
+          - name: AGENT_IMAGE_PULL_SECRET
+            value: "{{ .Values.imagePullSecrets.name }},"
+          - name: HOME_DIRECTORY_FOR_STEPS
+            value: "{{ .Values.envJson.homeDirectoryForSteps }}"
+          - name: AGENT_CONCURRENCY
+            value: "{{- .Values.bpagent.defaultConcurrency -}}"
+          - name: BP_WORKER_PROCESSES
+            value: "{{- .Values.bpagent.defaultWorkersInstances -}}"
+          - name: AGENT_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          {{- if .Values.bpagent.nodeSelector.enabled }}
+          - name: DEFAULT_NODE_SELECTOR
+            value: {{ .Values.bpagent.nodeSelector.labels  | toJson | quote }}
+          {{- end }}
+          {{- include "workload.env" .Values.bpagent | indent 10 }}
+          {{- include "workload.resources" .Values.bpagent | indent 10 }}
+          {{- include "workload.startupProbe" .Values.bpagent | indent 10 }}
+          {{- include "workload.livenessProbe" .Values.bpagent | indent 10 }}
+          {{- include "workload.readinessProbe" .Values.bpagent | indent 10 }}
+          volumeMounts:
+            {{- include "workload.volumeMounts" .Values.bpagent | indent 12 }}
+      {{- if .Values.bpagent.nodeSelector.enabled }}
+      nodeSelector:
+        {{- toYaml .Values.bpagent.nodeSelector.labels | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- include "workload.volumes" .Values.bpagent | indent 8 }}
+{{- end }}

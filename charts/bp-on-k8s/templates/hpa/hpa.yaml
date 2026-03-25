@@ -1,0 +1,44 @@
+{{- $values := .Values }}
+{{- $release := .Release }}
+
+{{- range $name := $values.hpaWorkloads }}
+  {{- $cfg := index $values $name }}
+
+  {{- /* Skip bpagent if distributed mode is enabled */ -}}
+  {{- if and (eq $name "bpagent") $values.bpagent.celeryWorkers.distributed }}
+    {{- continue }}
+  {{- end }}
+
+  {{- if and $cfg.hpa $cfg.hpa.enabled }}
+    {{ include "workload.hpa" (dict
+      "enabled" true
+      "name" (printf "%s-hpa" $cfg.name)
+      "targetDeployment" $cfg.name
+      "minReplicas" $cfg.hpa.minReplicas
+      "maxReplicas" $cfg.hpa.maxReplicas
+      "targetCPU" $cfg.hpa.targetCPUUtilizationPercentage
+      "Release" $release
+    ) }}
+---
+  {{- end }}
+{{- end }}
+
+{{- /* If distributed, create HPAs for bpagent-* automatically */ -}}
+{{- if $values.bpagent.celeryWorkers.distributed }}
+  {{- range $p := $values.bpagent.celeryWorkers.processes }}
+    {{- $name := printf "%s-%s" $values.bpagent.name $p.name }}
+
+    {{- if and $p.hpa $p.hpa.enabled }}
+      {{ include "workload.hpa" (dict
+        "enabled" true
+        "name" (printf "%s-hpa" $name)
+        "targetDeployment" $name
+        "minReplicas" $p.hpa.minReplicas
+        "maxReplicas" $p.hpa.maxReplicas
+        "targetCPU" $p.hpa.targetCPUUtilizationPercentage
+        "Release" $release
+      ) }}
+---
+    {{- end }}
+  {{- end }}
+{{- end }}

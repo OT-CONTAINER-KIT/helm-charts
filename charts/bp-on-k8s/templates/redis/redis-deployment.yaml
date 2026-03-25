@@ -1,0 +1,59 @@
+{{- if .Values.redis.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{  .Values.redis.name }}
+  labels: 
+    app.kubernetes.io/name: {{ .Values.redis.name | default .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    {{- include "global.labels" .Values.redis | indent 4 }}
+spec:
+  replicas: {{ .Values.redis.replicas }}
+  # serviceName: {{  .Values.redis.service.name }}
+  selector:
+    matchLabels:
+      {{- include "global.labels" .Values.redis | indent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "global.labels" .Values.redis | indent 8 }}
+    spec:
+      {{- if ne .Values.commonServiceAccount "" }}
+      serviceAccountName: {{ .Values.commonServiceAccount }}
+      {{- end }}
+      securityContext:
+        runAsUser: {{ .Values.common.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.common.securityContext.runAsGroup }}
+        fsGroup: {{ .Values.common.securityContext.fsGroup }}
+        # {{- if .Values.common.securityContext.fsGroupChangePolicy }}
+        # fsGroupChangePolicy: "{{- .Values.common.securityContext.fsGroupChangePolicy -}}"
+        # {{- end }}
+        supplementalGroups: [0]
+        # supplementalGroups: [1000]
+      {{- include "workload.imagePullSecrets" .Values | nindent 6 }}
+      containers:
+        - name: {{  .Values.redis.name }}
+          image: "{{- .Values.imagePullSecrets.dockerConfig.registry -}}/{{- .Values.redis.image.name -}}:{{- .Values.redis.image.tag -}}"
+          securityContext:
+            privileged: true
+          imagePullPolicy: {{ .Values.redis.imagePullPolicy }}
+          tty: true
+          ports:
+            {{- include "workload.ports" .Values.redis.service | indent 12 }}
+          volumeMounts:
+            {{- include "workload.volumeMounts" .Values.redis | indent 12 }}
+          {{- include "workload.resources" .Values.redis | indent 10 }}
+          {{- include "workload.startupProbe" .Values.redis | indent 10 }}
+          {{- include "workload.livenessProbe" .Values.redis | indent 10 }}
+          {{- include "workload.readinessProbe" .Values.redis | indent 10 }}
+      {{- if .Values.redis.nodeSelector.enabled }}
+      nodeSelector:
+        {{- toYaml .Values.redis.nodeSelector.labels | nindent 8 }}
+      {{- end }}
+      restartPolicy: Always
+      volumes:
+        {{- include "workload.volumes" .Values.redis | indent 8 }}
+{{- end }}

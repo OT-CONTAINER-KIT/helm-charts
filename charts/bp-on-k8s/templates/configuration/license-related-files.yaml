@@ -1,0 +1,51 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: license-related-files
+  labels: 
+    app.kubernetes.io/name: "license-related-files"
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+data:
+  lic.json: |-
+{{- if .Values.license.enabled }}
+    {
+      "Customer Details": {
+        "Name": "{{- .Values.license.customerDetails.name -}}",
+        "email": "{{- .Values.license.customerDetails.email -}}"
+      },
+      "no_of_ms": {{ .Values.license.noOfMicroServices }},
+      "no_of_users": {{ .Values.license.noOfUsers }},
+      "License_start_date": "{{- .Values.license.startDate -}}",
+      "License_end_date": "{{- .Values.license.endDate -}}",
+      "License_Type": "{{- .Values.license.type -}}",
+      "Premium_Features": {
+        "Velocity_insights": {
+          "Accessibility": "{{- .Values.license.premiumFeatures.velocityInsights.accessibility -}}",
+          "start_date": "{{- .Values.license.premiumFeatures.velocityInsights.startDate -}}",
+          "end_date": "{{- .Values.license.premiumFeatures.velocityInsights.endDate -}}"
+        },
+        "hyper_build": {
+          "Accessibility": "{{- .Values.license.premiumFeatures.hyperBuild.accessibility -}}",
+          "start_date": "{{- .Values.license.premiumFeatures.hyperBuild.startDate -}}",
+          "end_date": "{{- .Values.license.premiumFeatures.hyperBuild.endDate -}}"
+        },
+        "maturity_insights": {
+          "Accessibility": "{{- .Values.license.premiumFeatures.maturityInsights.accessibility -}}",
+          "start_date": "{{- .Values.license.premiumFeatures.maturityInsights.startDate -}}",
+          "end_date": "{{- .Values.license.premiumFeatures.maturityInsights.endDate -}}"
+        }
+      }
+    }
+{{- end }}
+
+  license-setup.py: |-
+{{- if .Values.license.enabled }}
+    from default.utils import generate_Assyemtric_key_pair, update_to_cache_lic, encrypt_lic
+    pr, p = generate_Assyemtric_key_pair()
+    p, l = encrypt_lic("/home/buildpiper/.common/licence", pr)
+    update_to_cache_lic(p, l)
+{{- end }}

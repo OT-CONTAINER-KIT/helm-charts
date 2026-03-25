@@ -1,0 +1,74 @@
+{{- if .Values.maturityDashboard.enabled }}
+  {{- if .Values.maturityDashboardApi.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{  .Values.maturityDashboardApi.name }}
+  labels: 
+    app.kubernetes.io/name: {{ .Values.maturityDashboardApi.name | default .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    {{- include "global.labels" .Values.maturityDashboardApi | indent 4 }}
+spec:
+  {{- if not .Values.maturityDashboardApi.hpa.enabled }}
+  replicas: {{ .Values.maturityDashboardApi.replicas }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "global.labels" .Values.maturityDashboardApi | indent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "global.labels" .Values.maturityDashboardApi | indent 8 }}
+    spec:
+      {{- if ne .Values.commonServiceAccount "" }}
+      serviceAccountName: {{ .Values.commonServiceAccount }}
+      {{- end }}
+      securityContext:
+        runAsUser: {{ .Values.common.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.common.securityContext.runAsGroup }}
+        fsGroup: {{ .Values.common.securityContext.fsGroup }}
+        {{- if .Values.common.securityContext.fsGroupChangePolicy }}
+        fsGroupChangePolicy: "{{- .Values.common.securityContext.fsGroupChangePolicy -}}"
+        {{- end }}
+        {{- if .Values.common.securityContext.supplementalGroups }}
+        supplementalGroups:
+          {{- range $supplementalGroup := .Values.common.securityContext.supplementalGroups }}
+        - {{- $supplementalGroup -}}
+          {{- end }}
+        {{- end }}
+      {{- include "workload.imagePullSecrets" .Values | nindent 6 }}
+      containers:
+        - tty: true
+          env:
+          - name: PYTHONUNBUFFERED
+            value: "1"
+          - name: HOME_PATH_OF_HOST
+            value: {{ .Values.maturityDashboard.envjson.homeDirectoryForSteps }}
+          image: "{{- .Values.imagePullSecrets.dockerConfig.registry -}}/{{- .Values.maturityDashboardApi.image.name -}}:{{- .Values.maturityDashboardApi.image.tag -}}"
+          imagePullPolicy: {{ .Values.maturityDashboardApi.imagePullPolicy }}
+          name: {{  .Values.maturityDashboardApi.name }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            # capabilities:
+            #   drop:
+            #   - ALL
+          ports:
+            {{- include "workload.ports" .Values.maturityDashboardApi.service | indent 12 }}
+          volumeMounts:
+            {{- include "workload.volumeMounts" .Values.maturityDashboardApi | indent 12 }}
+          {{- include "workload.resources" .Values.maturityDashboardApi | indent 10 }}
+          {{- include "workload.startupProbe" .Values.maturityDashboardApi | indent 10 }}
+          {{- include "workload.livenessProbe" .Values.maturityDashboardApi | indent 10 }}
+          {{- include "workload.readinessProbe" .Values.maturityDashboardApi | indent 10 }}
+      {{- if .Values.maturityDashboardApi.nodeSelector.enabled }}
+      nodeSelector:
+        {{- toYaml .Values.maturityDashboardApi.nodeSelector.labels | nindent 8 }}
+      {{- end }}
+      restartPolicy: Always
+      volumes:
+        {{- include "workload.volumes" .Values.maturityDashboardApi | indent 8 }} 
+  {{- end }}
+{{- end }}

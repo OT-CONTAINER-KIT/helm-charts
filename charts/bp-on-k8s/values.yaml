@@ -1,0 +1,1017 @@
+---
+# common service account and run as values
+common:
+  serviceAccount:
+    create: true
+    name: buildpiper-sa
+  securityContext:
+    runAsUser: 65522
+    runAsGroup: 65522
+    fsGroup: 65522
+    fsGroupChangePolicy: "OnRootMismatch" # or null
+    supplementalGroups: null # ["65522"] or null
+
+# license related values
+license:
+  enabled: true
+  customerDetails:
+    name: "Super Admin"
+    email: "opstree@opstree.com"
+  noOfMicroServices: 1000
+  noOfUsers: 100
+  startDate: "2024-05-10"  # format yyyy-mm-dd
+  endDate: "2028-06-10"
+  type: "Standard"
+  premiumFeatures:
+    velocityInsights:
+      accessibility: "Purchased"
+      startDate: "2024-05-10"
+      endDate: "2028-05-30"
+    hyperBuild:
+      accessibility: "Purchased"
+      startDate: "2028-05-10"
+      endDate: "2028-06-10"
+    maturityInsights:
+      accessibility: "Complimentry"
+      startDate: "2024-05-10"
+      endDate: "2028-06-10"
+
+# Global values for the volumes can be overridden by the individual components
+storageClass:
+  name: "bp-sc"
+
+# Global Work load Section
+optimizedRun:
+  firstTime: false
+  withPermission: false
+
+envJson:
+  homeDirectoryForSteps: "/home/buildpiper"
+
+apiJson:
+  database:
+    name: buildpiper
+
+
+maturityDashboard:
+  apiJson:
+    database:
+      name: maturity_dashboard
+  envjson:
+    homeDirectoryForSteps: "/home/buildpiper"
+
+# HPA Section
+
+hpaWorkloads:
+  - deployapi
+  - frontend
+  - publicapi
+  - scheduleapi
+  - bpagent
+  - bpagent-build
+  - bpagent-deploy
+  - bpagent-core
+
+# Workload Section 
+
+deployapi:
+  name: deployapi
+  labels: 
+    io.buildpiper.app: deployapi
+  image:
+    tag: Vindh-1.0.0 
+    name: okts/deploy_api
+  resources:
+    limits:
+      cpu: "1"
+      memory: "1Gi"
+    requests:
+      cpu: "1"
+      memory: "1Gi"    
+  volumeMounts:
+    - mountPath: /home/buildpiper/.ssh
+      name: ssh-volume
+    - mountPath: /home/buildpiper/.aws
+      name: aws-volume
+    - mountPath: /home/buildpiper/.kube
+      name: kube-volume
+    - mountPath: /home/buildpiper/.common
+      name: common
+    - mountPath: /home/buildpiper/.log/buildpiper
+      name: log-buildpiper
+    - mountPath: /home/buildpiper/conf.d/buildpiper/
+      name: api-json
+    # - mountPath: /home/buildpiper/conf.d/agent_monitoring
+    #   name: agent-monitoring-volume
+  readinessProbe:
+    initialDelaySeconds: 100
+    periodSeconds: 30
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 15
+    httpGet:
+    #   path: /
+    #   port: 80
+    exec:
+      command:
+      - celery
+      - -A
+      - okts
+      - status
+    tcpSocket:
+    #   port: 0 # 8080
+  livenessProbe:
+    initialDelaySeconds: 100
+    periodSeconds: 30
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 15
+    httpGet:
+    #   path: /
+    #   port: 80
+    exec:
+      command:
+      - celery
+      - -A
+      - okts
+      - status
+    tcpSocket:
+    #   port: 0 # 8080
+  startupProbe:
+    initialDelaySeconds: 500
+    periodSeconds: 50
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 50
+    httpGet:
+    #   path: /
+    #   port: 80
+    exec:
+      command:
+      - celery
+      - -A
+      - okts
+      - status
+    tcpSocket:
+    #   port: 0 # 8080
+  volumes:
+    - name: ssh-volume
+      persistentVolumeClaim:
+        claimName: ssh-volume
+    - name: aws-volume
+      persistentVolumeClaim:
+        claimName: aws-volume
+    - name: kube-volume
+      persistentVolumeClaim:
+        claimName: kube-volume
+    - name: common
+      persistentVolumeClaim:
+        claimName: common
+    - name: log-buildpiper
+      persistentVolumeClaim:
+        claimName: log-buildpiper
+    - name: api-json
+      configMap:
+        name: api-json
+    # - name: agent-monitoring-volume
+    #   configMap: 
+    #     name: deployapi-agent-monitoring
+
+frontend:
+  name: frontend
+  labels: 
+    io.buildpiper.app: frontend
+  image:
+    tag: air-Nonroot-0.6.0  
+    name: okts/front_end
+  resources:
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+    requests:
+      cpu: "2"
+      memory: "4Gi"    
+  service:
+    name: frontend
+    ports:
+      - name: http
+        port: 80
+        targetPort: 8080
+      - name: https
+        port: 443
+        targetPort: 443
+  readinessProbe:
+    httpGet:
+      path: /login/
+      port: 8080
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 3
+    successThreshold: 1
+  livenessProbe:
+    httpGet:
+      path: /login/
+      port: 8080
+    initialDelaySeconds: 60
+    periodSeconds: 20
+    failureThreshold: 3
+    successThreshold: 1
+  startupProbe:
+    httpGet:
+      path: /login/
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    failureThreshold: 60
+    successThreshold: 1
+  volumeMounts:
+    - name: env-json-volume
+      mountPath: /var/www/env/
+    - name: runtime-env-js
+      mountPath: /usr/share/nginx/html/runtime-env.js
+      subPath: runtime-env.js
+  volumes:
+    - name: env-json-volume
+      configMap:
+        name: env-json
+    - name: runtime-env-js
+      configMap:
+        name: runtime-env-js
+        items:
+          - key: runtime-env.js
+            path: runtime-env.js
+  ingress:
+    name: frontend-ingress
+    serviceName: frontend
+    servicePort: 80
+
+mysql:
+  name: db-mysql
+  labels: 
+    io.buildpiper.app: db-mysql
+  image:
+    tag: ERA-1.0-ver-8-0-43  
+    name: okts/mysql
+  resources:
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+    requests:
+      cpu: "2"
+      memory: "4Gi"    
+  service:
+    name: db-mysql
+    type: ClusterIP
+    ports:
+      - port: 3306
+        targetPort: 3306
+        protocol: TCP
+  volumeMounts:
+    - mountPath: /var/lib/mysql
+      name: db-mysql
+  readinessProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 15
+    httpGet:
+    #   path: /
+    #   port: 80
+    exec:
+      command:
+      - mysqladmin
+      - ping
+      - -u
+      - root
+      - -p$MYSQL_ROOT_PASSWORD
+    tcpSocket:
+    #   port: 0 # 8080
+  livenessProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 15
+    httpGet:
+    #   path: /
+    #   port: 80
+    exec:
+      command:
+      - mysqladmin
+      - ping
+      - -u
+      - root
+      - -p$MYSQL_ROOT_PASSWORD
+    tcpSocket:
+    #   port: 0 # 8080
+  volumes:
+    - name: db-mysql
+      persistentVolumeClaim:
+        claimName: db-mysql
+
+publicapi:
+  name: publicapi
+  labels: 
+    io.buildpiper.app: publicapi
+  image:
+    tag: Vindh-0.1.1  
+    name: okts/public_api
+  resources:
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+    requests:
+      cpu: "2"
+      memory: "4Gi"    
+  service:
+    name: publicapi
+    ports:
+      - name: "publicapi"
+        port: 9001
+        targetPort: 9111
+  volumeMounts:
+    - mountPath: /home/buildpiper/.ssh
+      name: ssh-volume
+    - mountPath: /home/buildpiper/.aws
+      name: aws-volume
+    - mountPath: /home/buildpiper/.kube
+      name: kube-volume
+    - mountPath: /home/buildpiper/.common
+      name: common
+    - mountPath: /home/buildpiper/.codebase
+      name: codebase
+    - mountPath: /home/buildpiper/.log/buildpiper
+      name: log-buildpiper
+    - mountPath: /home/buildpiper/conf.d/buildpiper
+      name: api-json-volume
+    # - mountPath: /home/buildpiper/conf.d/agent_monitoring
+    #   name: agent-monitoring-volume
+    - mountPath: /home/buildpiper/.common/tmp/license-setup.py
+      name: license-related-files-volume
+      subPath: license-setup.py
+    - mountPath: /home/buildpiper/.common/tmp/lic.json
+      name: license-related-files-volume
+      subPath: lic.json
+  startupProbe:
+    httpGet:
+      path: /api/v1/default/health/
+      port: 9111
+    initialDelaySeconds: 120     # start checking after 2 min
+    periodSeconds: 10
+    failureThreshold: 180        # allow 30 minutes total
+    successThreshold: 1
+  readinessProbe:
+    httpGet:
+      path: /api/v1/default/health/
+      port: 9111
+    periodSeconds: 10
+    successThreshold: 1
+  livenessProbe:
+    httpGet:
+      path: /api/v1/default/health/
+      port: 9111
+    initialDelaySeconds: 300
+    periodSeconds: 20
+    successThreshold: 1
+  volumes:
+    - name: ssh-volume
+      persistentVolumeClaim:
+        claimName: ssh-volume
+    - name: aws-volume
+      persistentVolumeClaim:
+        claimName: aws-volume
+    - name: kube-volume
+      persistentVolumeClaim:
+        claimName: kube-volume
+    - name: common
+      persistentVolumeClaim:
+        claimName: common
+    - name: codebase
+      persistentVolumeClaim:
+        claimName: codebase
+    - name: log-buildpiper
+      persistentVolumeClaim:
+        claimName: log-buildpiper
+    - name: api-json-volume
+      configMap: 
+        name: api-json
+    # - name: agent-monitoring-volume
+    #   configMap: 
+    #     name: publicapi-agent-monitoring
+    - name: license-related-files-volume
+      configMap: 
+        name: license-related-files
+        items:
+        - key: lic.json
+          path: lic.json
+        - key: license-setup.py
+          path: license-setup.py
+  ingress:
+    name: publicapi-ingress
+    serviceName: publicapi
+    servicePort: 9001
+
+redis:
+  name: redis
+  labels: 
+    io.buildpiper.app: redis
+  image:
+    tag: ERA-1.0-redis-update  
+    name: okts/redis
+  resources:
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+    requests:
+      cpu: "1"
+      memory: "2Gi"    
+  service:
+    name: redis
+    type: ClusterIP
+    ports:
+      - port: 6379
+        targetPort: 6379
+        protocol: TCP
+  volumeMounts:
+    - mountPath: /data
+      name: redis-data-volume
+  readinessProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 15
+    httpGet:
+    #   path: /
+    #   port: 80
+    exec:
+      command:
+      - redis-cli
+      - ping
+    tcpSocket:
+    #   port: 0 # 8080
+  livenessProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 15
+    httpGet:
+    #   path: /
+    #   port: 80
+    exec:
+      command:
+      - redis-cli
+      - ping
+    tcpSocket:
+    #   port: 0 # 8080
+  volumes:
+    - name: redis-data-volume
+      persistentVolumeClaim:
+        claimName: redis-data
+
+scheduleapi: 
+  name: scheduleapi
+  labels: 
+    io.buildpiper.app: scheduleapi
+  image:
+    tag: Vindh-0.1.1 
+    name: okts/public_api
+  resources:
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+    requests:
+      cpu: "2"
+      memory: "4Gi"    
+  service:
+    name: scheduleapi
+    type: ClusterIP
+    ports:
+      - name: "scheduleapi"
+        port: 9002
+        targetPort: 5555
+  volumeMounts:
+    - mountPath: /home/buildpiper/.ssh
+      name: ssh-volume
+    - mountPath: /home/buildpiper/.aws
+      name: aws-volume
+    - mountPath: /home/buildpiper/.kube
+      name: kube-volume
+    - mountPath: /home/buildpiper/.common
+      name: common
+    - mountPath: /home/buildpiper/.codebase
+      name: codebase
+    - mountPath: /home/buildpiper/.log/buildpiper
+      name: log-buildpiper
+    - mountPath: /home/buildpiper/conf.d/buildpiper
+      name: api-json-volume
+    # - mountPath: /home/buildpiper/conf.d/agent_monitoring
+    #   name: agent-monitoring-volume
+  readinessProbe:
+    initialDelaySeconds: 100
+    periodSeconds: 30
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 15
+    httpGet:
+    #   path: /
+    #   port: 80
+    exec:
+      command:
+      - celery
+      - -A
+      - api
+      - status
+    tcpSocket:
+    #   port: 0 # 8080
+  livenessProbe:
+    initialDelaySeconds: 100
+    periodSeconds: 30
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 15
+    httpGet:
+    #   path: /
+    #   port: 80
+    exec:
+      command:
+      - celery
+      - -A
+      - api
+      - status
+    tcpSocket:
+    #   port: 0 # 8080
+  startupProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    failureThreshold: 24
+    timeoutSeconds: 5
+    successThreshold: 1
+    httpGet:
+    #   path: /
+    #   port: 80
+    exec:
+      command:
+      - celery
+      - -A
+      - api
+      - status
+    tcpSocket:
+    #   port: 0 # 8080
+  volumes:
+    - name: ssh-volume
+      persistentVolumeClaim:
+        claimName: ssh-volume
+    - name: aws-volume
+      persistentVolumeClaim:
+        claimName: aws-volume
+    - name: kube-volume
+      persistentVolumeClaim:
+        claimName: kube-volume
+    - name: common
+      persistentVolumeClaim:
+        claimName: common
+    - name: codebase
+      persistentVolumeClaim:
+        claimName: codebase
+    - name: log-buildpiper
+      persistentVolumeClaim:
+        claimName: log-buildpiper
+    - name: api-json-volume
+      configMap: 
+        name: api-json
+    # - name: agent-monitoring-volume
+    #   configMap: 
+    #     name: publicapi-agent-monitoring
+
+bpagent: 
+  name: bpagent
+  defaultConcurrency: 2
+  defaultWorkersInstances: "bp_agent_build|bp_agent_deploy|bp_agent_parallel_build|bp_agent_parallel_build_decision|bp_agent_canary_analysis|bp_agent_insight"
+  labels: 
+    io.buildpiper.app: bpagent
+  image:
+    tag: Air-Nonroot-0.2  
+    name: okts/buildpiper-agent
+  resources:
+    limits:
+      cpu: "4"
+      memory: "8Gi"
+    requests:
+      cpu: "4"
+      memory: "8Gi"    
+  # imagePullPolicy: IfNotPresent
+  volumeMounts:
+    - mountPath: /home/buildpiper/.common
+      name: common
+    - mountPath: /home/buildpiper/.codebase
+      name: codebase
+    - mountPath: /home/buildpiper/.kube
+      name: kube-volume
+    - mountPath: /home/buildpiper/.log/buildpiper
+      name: log-buildpiper
+    - mountPath: /home/buildpiper/conf.d/buildpiper
+      name: api-json-volume
+    # - mountPath: /home/buildpiper/conf.d/agent_monitoring
+    #   name: agent-monitoring-volume
+    # - mountPath: /etc/init.d/celeryd
+    #   name: celery-initd-volume
+    #   subPath: celeryd
+  readinessProbe:
+    initialDelaySeconds: 100
+    periodSeconds: 30
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 15
+    httpGet:
+    #   path: /
+    #   port: 80
+    exec:
+      command:
+      - celery
+      - -A
+      - bp_agent
+      - --workdir
+      - ./bp_agent
+      - status
+    tcpSocket:
+    #   port: 0 # 8080
+  livenessProbe:
+    initialDelaySeconds: 100
+    periodSeconds: 30
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 15
+    httpGet:
+    #   path: /
+    #   port: 80
+    exec:
+      command:
+      - celery
+      - -A
+      - bp_agent
+      - --workdir
+      - ./bp_agent
+      - status
+    tcpSocket:
+    #   port: 0 # 8080
+  startupProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    failureThreshold: 24
+    timeoutSeconds: 5
+    successThreshold: 1
+    httpGet:
+    #   path: /
+    #   port: 80
+    exec:
+      command:
+      - celery
+      - -A
+      - bp_agent
+      - --workdir
+      - ./bp_agent
+      - status
+    tcpSocket:
+    #   port: 0 # 8080
+  volumes:
+    - name: common
+      persistentVolumeClaim:
+        claimName: common
+    - name: codebase
+      persistentVolumeClaim:
+        claimName: codebase
+    - name: kube-volume
+      persistentVolumeClaim:
+        claimName: kube-volume
+    - name: log-buildpiper
+      persistentVolumeClaim:
+        claimName: log-buildpiper
+    - name: api-json-volume
+      configMap: 
+        name: api-json
+    # - name: agent-monitoring-volume
+    #   configMap: 
+    #     name: bp-agent-monitoring
+    # - name: celery-initd-volume
+    #   configMap: 
+    #     name: celery-initd
+    #     items:
+    #     - key: celeryd
+    #       path: celeryd
+
+maturityDashboardAgent: 
+  name: maturity-dashboard-agent
+  labels: 
+    io.buildpiper.app: maturity-dashboard-agent
+  image:
+    tag: ERA-1.0  
+    name: okts/maturity_backend
+  resources:
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+    requests:
+      cpu: "2"
+      memory: "4Gi"   
+  volumeMounts:
+    - mountPath: /home/buildpiper/.common
+      name: common
+    - mountPath: /home/buildpiper/.log/maturity_dashboard
+      name: log-maturity-dashboard
+    - mountPath: /home/buildpiper/conf.d/maturity_dashboard
+      name: maturity-dashboard-api-json-volume
+  readinessProbe:
+    initialDelaySeconds: 100
+    periodSeconds: 30
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 15
+    httpGet:
+    #   path: /
+    #   port: 80
+    exec:
+      command:
+      - celery
+      - -A
+      - api
+      - status
+    tcpSocket:
+    #   port: 0 # 8080
+  livenessProbe:
+    initialDelaySeconds: 100
+    periodSeconds: 30
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 15
+    httpGet:
+    #   path: /
+    #   port: 80
+    exec:
+      command:
+      - celery
+      - -A
+      - api
+      - status
+    tcpSocket:
+    #   port: 0 # 8080
+  startupProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    failureThreshold: 24
+    timeoutSeconds: 5
+    successThreshold: 1
+    httpGet:
+    #   path: /
+    #   port: 80
+    exec:
+      command:
+      - celery
+      - -A
+      - api
+      - status
+    tcpSocket:
+    #   port: 0 # 8080
+  volumes:
+    - name: common
+      persistentVolumeClaim:
+        claimName: common
+    - name: log-maturity-dashboard
+      persistentVolumeClaim:
+        claimName: log-maturity-dashboard
+    - name: maturity-dashboard-api-json-volume
+      configMap: 
+        name: maturity-dashboard-api-json
+
+maturityDashboardApi: 
+  name: maturity-dashboard-api
+  labels: 
+    io.buildpiper.app: maturity-dashboard-api
+  image:
+    tag: ERA-1.0  
+    name: okts/maturity_backend
+  resources:
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+    requests:
+      cpu: "2"
+      memory: "4Gi"  
+  service:
+    name: maturity-dashboard-api
+    ports:
+      - name: "md-api"
+        port: 9004
+        targetPort: 9111
+  volumeMounts:
+    - mountPath: /home/buildpiper/.common
+      name: common
+    - mountPath: /home/buildpiper/.log/maturity_dashboard
+      name: log-maturity-dashboard
+    - mountPath: /home/buildpiper/conf.d/maturity_dashboard
+      name: maturity-dashboard-api-json-volume
+  startupProbe:
+    httpGet:
+      path: /api/v1/default/health/
+      port: 9111
+    initialDelaySeconds: 120     # start checking after 2 min
+    periodSeconds: 10
+    failureThreshold: 180        # allow 30 minutes total
+    successThreshold: 1
+  readinessProbe:
+    httpGet:
+      path: /api/v1/default/health/
+      port: 9111
+    periodSeconds: 10
+    successThreshold: 1
+  livenessProbe:
+    httpGet:
+      path: /api/v1/default/health/
+      port: 9111
+    initialDelaySeconds: 300
+    periodSeconds: 20
+    successThreshold: 1
+  volumes:
+    - name: common
+      persistentVolumeClaim:
+        claimName: common
+    - name: log-maturity-dashboard
+      persistentVolumeClaim:
+        claimName: log-maturity-dashboard
+    - name: maturity-dashboard-api-json-volume
+      configMap: 
+        name: maturity-dashboard-api-json
+
+maturityDashboardFrontend:
+  name: maturity-dashboard-frontend
+  labels: 
+    io.buildpiper.app: maturity-dashboard-frontend
+  image:
+    tag: ERA-1.0  
+    name: okts/maturity_frontend
+  resources:
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+    requests:
+      cpu: "2"
+      memory: "4Gi"    
+  service:
+    name: maturity-dashboard-frontend
+    ports:
+      - name: http
+        port: 85
+        targetPort: 8080
+      - name: https
+        port: 9443
+        targetPort: 443
+  readinessProbe:
+    httpGet:
+      path: /login/
+      port: 8080
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 3
+    successThreshold: 1
+  livenessProbe:
+    httpGet:
+      path: /login/
+      port: 8080
+    initialDelaySeconds: 60
+    periodSeconds: 20
+    failureThreshold: 3
+    successThreshold: 1
+  startupProbe:
+    httpGet:
+      path: /login/
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    failureThreshold: 60
+    successThreshold: 1
+  volumeMounts:
+    - name: env-json-volume
+      mountPath: /var/www/env/
+    - name: runtime-env-js-volume
+      mountPath: /usr/share/nginx/html/runtime-env.js
+      subPath: runtime-env.js
+  volumes:
+    - name: env-json-volume
+      configMap:
+        name: env-json
+    - name: runtime-env-js-volume
+      configMap:
+        name: runtime-env-js
+        items:
+          - key: runtime-env.js
+            path: runtime-env.js
+  ingress:
+    name: maturity-dashboard-frontend-ingress
+    serviceName: maturity-dashboard-frontend
+    servicePort: 85
+
+# Individual volume components
+volumes:
+  aws:
+    name: aws-volume
+    labels: 
+      io.buildpiper.app: aws
+    storageClassName: "bp-sc"
+    size: 10Gi
+    accessModes:
+      # - ReadWriteOnce
+      - ReadWriteMany
+
+  codebase:
+    name: codebase
+    labels: 
+      io.buildpiper.app: codebase
+    storageClassName: "bp-sc"
+    size: 10Gi
+    accessModes:
+      # - ReadWriteOnce
+      - ReadWriteMany
+
+  common:
+    name: common
+    labels: 
+      io.buildpiper.app: common
+    storageClassName: "bp-sc"
+    size: 10Gi
+    accessModes:
+      # - ReadWriteOnce
+      - ReadWriteMany
+
+  dbMysql:
+    name: db-mysql
+    labels: 
+      io.buildpiper.app: db-mysql
+    # storageClassName: "bp-sc-efs"
+    storageClassName: "bp-sc"
+    size: 10Gi
+    accessModes:
+      # - ReadWriteOnce
+      - ReadWriteMany
+
+  kubeVolume:
+    name: kube-volume
+    labels: 
+      io.buildpiper.app: kube-volume
+    storageClassName: "bp-sc"
+    size: 10Gi
+    accessModes:
+      # - ReadWriteOnce
+      - ReadWriteMany
+
+  sshVolume:
+    name: ssh-volume
+    labels: 
+      io.buildpiper.app: ssh-volume
+    storageClassName: "bp-sc"
+    size: 10Gi
+    accessModes:
+      # - ReadWriteOnce
+      - ReadWriteMany
+
+  logMaturityDashboard:
+    name: log-maturity-dashboard
+    labels: 
+      io.buildpiper.app: log-maturity-dashboard
+    storageClassName: "bp-sc"
+    size: 10Gi
+    accessModes:
+      # - ReadWriteOnce
+      - ReadWriteMany
+
+  logBuildpiper:
+    name: log-buildpiper
+    labels: 
+      io.buildpiper.app: log-buildpiper
+    storageClassName: "bp-sc"
+    size: 10Gi
+    accessModes:
+      # - ReadWriteOnce
+      - ReadWriteMany
+
+  varLibContainers:
+    name: var-lib-containers
+    labels: 
+      io.buildpiper.app: var-lib-containers
+    storageClassName: "bp-sc"
+    size: 10Gi
+    accessModes:
+      # - ReadWriteOnce
+      - ReadWriteMany
+  
+  redisData:
+    name: redis-data
+    labels: 
+      io.buildpiper.app: redis-data
+    # storageClassName: "bp-sc-efs"
+    storageClassName: "bp-sc"
+    size: 10Gi
+    accessModes:
+      # - ReadWriteOnce
+      - ReadWriteMany

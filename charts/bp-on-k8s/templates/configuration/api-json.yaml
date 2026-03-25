@@ -1,0 +1,107 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-json
+  labels: 
+    app.kubernetes.io/name: "api-json"
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+data:
+  api.json: |-
+    {
+      {{- if .Values.license.enabled }}
+      "ORGANISATION_NAME": "{{ .Values.license.customerDetails.name }}",
+      {{- end }}
+      "runtime_platform": "KUBERNETES",
+      {{- if .Values.apiJson.groupId }}
+      "group_id": {{ .Values.apiJson.groupId }},
+      {{- end }}
+      "secret_key": "{{ .Values.apiJson.secretKey }}",
+      "fernet_key": "{{ .Values.apiJson.fernetKey }}",
+      "tenent": "bp",
+      "deployment": {
+        "type": "SAAS",
+        "details": {
+          "cluster_id": null
+        }
+      },
+      "access_token_lifetime": 6,
+      "refresh_token_lifetime": 7,
+      "databases": {
+        "default": {
+          "name": "{{ .Values.apiJson.database.name }}",
+          "user": "{{ .Values.apiJson.database.username }}",
+          "password": "{{ .Values.apiJson.database.password }}",
+          "host": {{ include "mysql.host" . }},
+          "port": "{{ .Values.apiJson.database.port }}"
+        }
+      },
+      "caches": {
+        "default": {
+          "location": {{ include "redis.host" . }}
+        }
+      },
+      "celery": {
+        "broker_url": {{ include "redis.host" . }},
+        "time_zone": "Asia/Kolkata"
+      },
+      "super_admin": {
+        "name": "Super Admin",
+        "email": "{{ .Values.apiJson.superAdmin.email }}",
+        "password": "{{ .Values.apiJson.superAdmin.password }}",
+        "provider": "BUILDPIPER"
+      },
+      "email": {
+        "use_tls": true,
+        "host": "{{ .Values.apiJson.email.host }}",
+        "password": "{{ .Values.apiJson.email.password }}",
+        "user": "{{ .Values.apiJson.email.user }}",
+        "port": {{ .Values.apiJson.email.port }}
+      },
+      "cleanup": {
+        "db": false,
+        "log": false,
+        "images": false
+      },
+      "load_tags_from_database":false,
+      "ad_authentication": false,
+      "ldap_server_uri": "ldap://practice.net:389",
+      "ldap_manager_dn": "cn=admin,dc=practice,dc=net",
+      "ldap_manager_password": "password",
+      "ldap_user_search_base": "ou=Employee,dc=practice,dc=net",
+      "ldap_user_search_filter": "(uid={0})",
+      "ldap_group_search_base": "ou=Groups,dc=practice,dc=net",
+      "ldap_group_membership_filter": "(|(member={1})(uniqueMember={1})(memberUid={0}))",
+      "ldap_roles_mapping": {
+        "developers": [
+          {
+            "project": "app2",
+            "internal_role_code": "DEV"
+          },
+          {
+            "project": "app3",
+            "internal_role_code": "DEV"
+          }
+        ],
+        "qa": [
+          {
+            "project": "app2",
+            "internal_role_code": "QA"
+          }
+        ]
+      },
+      "webhooks_provider": {
+        "gitlab": [],
+        "bitbucket": [],
+        "github": []
+      },
+      "build_tag_suffix": "%Y%m%dT%H%M",
+      "deployment_name_suffix": "DEPLOY_NUMBER",
+      "env_hierarchy" : {"dev":["qa","uat","staging"], "qa":["uat", "staging", "prod"],"staging":["uat","prod"], "uat" : ["prod"], "prod":null},
+      "jira_transition":["TO DO", "TESTING", "DONE", "DEVOPS", "RESOLVED"],
+      "aws_marketplace_enabled":false,
+      "defined_workers": ["public_api", "admin_public_api", "admin_deploy_api", "deploy_api", "bp_agent_build","bp_agent_deploy", "scheduler","versioning_api"]
+    }
