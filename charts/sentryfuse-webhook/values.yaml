@@ -1,0 +1,44 @@
+base:
+  image:
+    pullPolicy: "Always"
+    command: [""]
+    repository: registry.ldc.opstree.dev/coe/sentryfuse-webhook
+    tag: latest
+    pullSecrets: "reg-ldc-coe-regcred"
+  env:
+    - name: FORCE_ROLLOUT
+      value: "{{ .Release.Time }}"
+
+replicaCount: 1
+
+healthcheck:
+  enabled: false
+  statusPath: /health
+
+service:
+  type: ClusterIP
+  port: 8080
+
+resources: {}
+
+volumes:
+  configMaps:
+    - name: sentryfuse-webhook-config
+      mountPath: /etc/sentryfuse/
+      data:
+        config.yaml: |
+          kafka:
+            brokers: ["192.168.10.52:9092"]
+
+
+livenessProbe: {}
+readinessProbe: {}
+
+ingress:
+  enabled: false
+
+internalIngress:
+  enabled: false
+
+autoscaling:
+  enabled: false
