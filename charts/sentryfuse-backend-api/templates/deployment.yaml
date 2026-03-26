@@ -60,6 +60,23 @@ spec:
             - name: {{ $key }}
               value: "{{ $value }}"
             {{- end }}
+          {{- if or .Values.base.config .Values.base.secret .Values.base.existingSecrets }}
+          envFrom:
+          {{- if .Values.base.config }}
+            - configMapRef:
+                name: {{ include "base.fullname" . }}
+          {{- end }}
+          {{- if .Values.base.secret }}
+            - secretRef:
+                name: {{ include "base.fullname" . }}
+          {{- end }}
+          {{- if .Values.base.existingSecrets }}
+          {{- range .Values.base.existingSecrets }}
+            - secretRef:
+                name: {{ . }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
           {{- if .Values.volumes }}
           volumeMounts:
             {{- range .Values.volumes.configMaps }}

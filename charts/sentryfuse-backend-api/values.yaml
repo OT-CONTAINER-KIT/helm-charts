@@ -9,6 +9,8 @@ base:
     POSTGRES_ADDR: "192.168.10.52:5432"
     POSTGRES_USER: "postgres"
     POSTGRES_PASSWORD: "password"
+  existingSecrets:
+    - sentryfuse-api
 
 healthcheck:
   enabled: true
