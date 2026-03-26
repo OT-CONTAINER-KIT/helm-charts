@@ -1,7 +1,6 @@
 base:
   image:
     pullPolicy: "Always"
-    command: [""]
     repository: registry.ldc.opstree.dev/coe/sentryfuse-webhook
     tag: latest
     pullSecrets: "reg-ldc-coe-regcred"
