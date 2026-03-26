@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "base.fullname" . }}
+  namespace: sentryfuse
   labels:
     {{- include "base.labels" . | nindent 4 }}
 spec:
@@ -60,21 +61,11 @@ spec:
             - name: {{ $key }}
               value: "{{ $value }}"
             {{- end }}
-          {{- if or .Values.base.config .Values.base.secret .Values.base.existingSecrets }}
-          envFrom:
-          {{- if .Values.base.config }}
-            - configMapRef:
-                name: {{ include "base.fullname" . }}
-          {{- end }}
-          {{- if .Values.base.secret }}
-            - secretRef:
-                name: {{ include "base.fullname" . }}
-          {{- end }}
           {{- if .Values.base.existingSecrets }}
+          envFrom:
           {{- range .Values.base.existingSecrets }}
             - secretRef:
                 name: {{ . }}
-          {{- end }}
           {{- end }}
           {{- end }}
           {{- if .Values.volumes }}
@@ -86,9 +77,11 @@ spec:
           {{- end }}
       {{- if .Values.volumes }}
       volumes:
+        {{- if .Values.volumes.configMaps }}
         {{- range .Values.volumes.configMaps }}
         - name: {{ .name }}-volume
           configMap:
             name: {{ .name }}
+        {{- end }}
         {{- end }}
       {{- end }}

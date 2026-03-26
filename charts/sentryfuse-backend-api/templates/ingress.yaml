@@ -8,6 +8,7 @@ metadata:
   labels:
     {{- include "base.labels" . | nindent 4 }}
   name: {{ include "base.fullname" . }}-external-ing
+  namespace: sentryfuse
 spec:
   ingressClassName: {{ .Values.ingress.class }}
   rules:
