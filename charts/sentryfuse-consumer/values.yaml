@@ -1,7 +1,7 @@
 base:
   image:
     pullPolicy: "Always"
-    command: ["./github-events-consumer", "events"]
+    args: ["events"]
     repository: registry.ldc.opstree.dev/coe/sentryfuse-consumer
     tag: latest
     pullSecrets: "reg-ldc-coe-regcred"
