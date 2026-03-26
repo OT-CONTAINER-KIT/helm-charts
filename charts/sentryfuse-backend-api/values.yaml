@@ -2,11 +2,11 @@ base:
   image:
     pullPolicy: "Always"
     command: []
-    repository: registry.ldc.opstree.dev/sentryfuse/gitguard-backend-api
+    repository: registry.ldc.opstree.dev/coe/sentryfuse-api
     tag: latest
-    pullSecrets: "sentryfuse-harbor-secret"
+    pullSecrets: "reg-ldc-coe-regcred"
   config:
-    POSTGRES_ADDR: ""
+    POSTGRES_ADDR: "192.168.10.52:5432"
     POSTGRES_USER: "postgres"
     POSTGRES_PASSWORD: "password"
 
@@ -36,12 +36,12 @@ replicaCount: 1
 
 volumes:
   configMaps:
-    - name: gitguard-config
-      mountPath: /etc/gitguard/
+    - name: sentryfuse-config
+      mountPath: /etc/sentryfuse/
       data:
         config.yaml: |
           postgres:
-            addr: ""
+            addr: "192.168.10.52:5432"
             user: "postgres"
             password: "password"
             dbname: "git_guard"
