@@ -1,10 +1,10 @@
 base:
   image:
     pullPolicy: "Always"
-    command: ["./gitguard-consumer", "events"]
-    repository: registry.ldc.opstree.dev/sentryfuse/gitguard-consumer
+    command: ["./github-events-consumer", "events"]
+    repository: registry.ldc.opstree.dev/coe/sentryfuse-consumer
     tag: latest
-    pullSecrets: "sentryfuse-harbor-secret"
+    pullSecrets: "reg-ldc-coe-regcred"
   env:
     - name: FORCE_ROLLOUT
       value: "{{ .Release.Time }}"
@@ -23,15 +23,15 @@ resources: {}
 
 volumes:
   configMaps:
-    - name: gitguard-consumer-config
-      mountPath: /etc/gitguard/
+    - name: sentryfuse-consumer-config
+      mountPath: /etc/sentryfuse/
       data:
         config.yaml: |
           kafka:
-            brokers: [""]
+            brokers: ["192.168.10.52:9092"]
 
           postgres:
-            addr: ""
+            addr: "192.168.10.52:5432"
             user: "postgres"
             password: "password"
             dbname: "git_guard"
@@ -48,13 +48,57 @@ volumes:
                 (A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}
               description: "AWS Access Key"
               tags: ["key", "AWS"]
+              severity: high
               entropy: 4.06
 
             - regex: |-
                 (?i)aws(.{0,20})?(?-i)['\"][0-9a-zA-Z\/+]{40}['\"]
               description: "AWS Secret Key"
               tags: ["key", "AWS"]
+              severity: high
               entropy: 4.06
+
+            - regex: |-
+                AIza[0-9A-Za-z\-_]{35}
+              description: "Google API Key"
+              tags: ["key", "google"]
+              entropy: 4.06
+              severity: high
+
+            - regex: |-
+                eyJ[A-Za-z0-9_-]{30,}\.[A-Za-z0-9_-]{30,}\.[A-Za-z0-9_-]{10,}
+              description: "Google OAuth 2.0"
+              tags: ["key", "google"]
+              entropy: 4.06
+              severity: high
+
+            - regex: |-
+                ghp_[A-Za-z0-9_]{36}
+              description: "GitHub Personal Access Token"
+              tags: ["key", "github"]
+              entropy: 4.06
+              severity: high
+
+            - regex: |-
+                (xox[pboar]-[A-Za-z0-9-]+)
+              description: "Slack tokens"
+              tags: ["key", "slack"]
+              entropy: 4.06
+              severity: medium
+
+            - regex: |-
+                (?i)(authorization:\s*bearer\s+|access_token["']\s*:\s*")[A-Za-z0-9\-\._~\+\/]+=*
+              description: "OAuth Bearer"
+              tags: ["key", "oauth2"]
+              entropy: 4.06
+              severity: medium
+
+            - regex: |-
+                -----BEGIN [A-Z ]*PRIVATE KEY-----
+              description: "SSH / PGP / Private keys"
+              tags: ["key", "ssh"]
+              entropy: 4.06
+              severity: medium
 
 livenessProbe: {}
 readinessProbe: {}
