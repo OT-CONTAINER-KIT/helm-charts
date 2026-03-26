@@ -5,7 +5,7 @@ maintainers:
   - name: iamabhishek-dubey
     email: "abhishek.dubey@opstree.com"
     url: https://github.com/iamabhishek-dubey
-name: web
+name: sentryfuse-api
 sources:
   - https://github.com/ot-container-kit/helm-charts
 dependencies:
