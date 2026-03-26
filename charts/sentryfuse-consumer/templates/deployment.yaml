@@ -20,7 +20,6 @@ spec:
     spec:
       imagePullSecrets:
         - name: {{ .Values.base.image.pullSecrets }}
-      serviceAccountName: {{ include "base.serviceAccountName" . }}
       terminationGracePeriodSeconds: 120
       containers:
         - name: {{ .Values.nameOverride | default .Chart.Name }}
