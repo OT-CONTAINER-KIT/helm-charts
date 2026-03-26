@@ -48,6 +48,9 @@ volumes:
             password: "password"
             dbname: "git_guard"
 
+web:
+  enabled: false
+
 ingress:
   enabled: false
   class: nginx
