@@ -78,6 +78,11 @@ spec:
             - secretRef:
                 name: {{ include "base.fullname" . }}
           {{- end }}
+          {{- if.Values.base.existingSecrets}}
+          {{- range .Values.base.existingSecrets }}
+            - secretRef:
+                name: {{ . }}
+          {{- end }}
           {{- end }}
 
           {{- if .Values.volumes }}
