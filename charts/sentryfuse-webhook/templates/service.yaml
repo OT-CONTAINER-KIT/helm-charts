@@ -3,6 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "base.fullname" . }}
+  namespace: sentryfuse
   annotations:
   {{- if .Values.service.metrics }}
     prometheus.io/path: "{{ .Values.service.metrics.path }}"

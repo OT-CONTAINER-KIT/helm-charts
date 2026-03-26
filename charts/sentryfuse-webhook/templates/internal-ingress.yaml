@@ -3,6 +3,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "base.fullname" . }}-internal-ing
+  namespace: sentryfuse
   annotations:
     kubernetes.io/ingress.class: {{ .Values.internalIngress.class }}
 {{- if .Values.internalIngress.annotations }}
