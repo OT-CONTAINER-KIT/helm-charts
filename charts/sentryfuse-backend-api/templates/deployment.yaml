@@ -22,7 +22,6 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.base.image.pullSecrets }}
       {{- end }}
-      serviceAccountName: {{ include "base.serviceAccountName" . }}
       terminationGracePeriodSeconds: 120
       containers:
         - name: {{ include "base.fullname" . }}
