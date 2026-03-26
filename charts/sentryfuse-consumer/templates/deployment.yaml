@@ -68,7 +68,7 @@ spec:
             failureThreshold: 3
           {{- end }}
 
-          {{- if or .Values.base.config .Values.base.secret }}
+          {{- if or .Values.base.config .Values.base.secret .Values.base.existingSecrets }}
           envFrom:
           {{- if .Values.base.config }}
             - configMapRef:
@@ -78,12 +78,13 @@ spec:
             - secretRef:
                 name: {{ include "base.fullname" . }}
           {{- end }}
-          {{- if.Values.base.existingSecrets}}
+            {{- if .Values.base.existingSecrets }}
           {{- range .Values.base.existingSecrets }}
             - secretRef:
                 name: {{ . }}
           {{- end }}
           {{- end }}
+            {{- end }}
 
           {{- if .Values.volumes }}
           volumeMounts:
