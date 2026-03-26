@@ -1,7 +1,7 @@
 base:
   image:
     pullPolicy: "Always"
-    args: ["events"]
+    args: ["events", "--config", "/etc/sentryfuse/config.yaml]
     repository: registry.ldc.opstree.dev/coe/sentryfuse-consumer
     tag: latest
     pullSecrets: "reg-ldc-coe-regcred"
