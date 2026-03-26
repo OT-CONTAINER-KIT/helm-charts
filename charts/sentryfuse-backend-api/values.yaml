@@ -36,7 +36,7 @@ replicaCount: 1
 
 volumes:
   configMaps:
-    - name: sentryfuse-config
+    - name: sentryfuse-api-config
       mountPath: /etc/sentryfuse/
       data:
         config.yaml: |
