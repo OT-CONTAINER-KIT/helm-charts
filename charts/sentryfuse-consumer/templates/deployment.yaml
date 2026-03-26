@@ -27,9 +27,9 @@ spec:
           image: "{{ .Values.base.image.repository }}:{{ .Values.base.image.tag }}"
           imagePullPolicy: {{ .Values.base.image.pullPolicy | default "IfNotPresent" }}
 
-          {{- if .Values.base.image.command }}
-          command:
-            {{- toYaml .Values.base.image.command | nindent 12 }}
+          {{- if .Values.base.image.args }}
+          args:
+            {{- toYaml .Values.base.image.args | nindent 12 }}
           {{- end }}
 
           ports:
