@@ -8,6 +8,8 @@ base:
   env:
     - name: FORCE_ROLLOUT
       value: "{{ .Release.Time }}"
+  existingSecrets:
+    - sentryfuse-webhook
 
 replicaCount: 1
 
