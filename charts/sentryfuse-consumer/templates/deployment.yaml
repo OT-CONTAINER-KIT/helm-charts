@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.nameOverride | default .Chart.Name }}
+  namesspace: sentryfuse
   labels:
     {{- include "base.labels" . | nindent 4 }}
 spec:
