@@ -2,21 +2,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.nameOverride | default .Chart.Name }}
+  name: {{ include "base.fullname" . }}
   namespace: sentryfuse
   labels:
-    {{- include "base.labels" . | nindent 4 }}
+    {{- include "sentryfuse.labels" . | nindent 4 }}
 spec:
 {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount | default 1 }}
 {{- end }}
   selector:
     matchLabels:
-      {{- include "base.selectorLabels" . | nindent 6 }}
+      {{- include "sentryfuse.labels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "base.selectorLabels" . | nindent 8 }}
+        {{- include "sentryfuse.labels" . | nindent 8 }}
     spec:
       {{- if .Values.base.image.pullSecrets }}
       imagePullSecrets:
@@ -24,7 +24,7 @@ spec:
       {{- end }}
       terminationGracePeriodSeconds: 120
       containers:
-        - name: {{ .Values.nameOverride | default .Chart.Name }}
+        - name: {{ include "base.fullname" . }}
           image: "{{ .Values.base.image.repository }}:{{ .Values.base.image.tag }}"
           imagePullPolicy: {{ .Values.base.image.pullPolicy | default "IfNotPresent" }}
 

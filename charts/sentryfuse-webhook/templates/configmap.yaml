@@ -8,7 +8,7 @@ metadata:
   name: {{ $cm.name }}
   namespace: sentryfuse
   labels:
-    {{- include "base.labels" $ | nindent 4 }}
+    {{- include "sentryfuse.labels" $ | nindent 4 }}
 data:
   {{- range $filename, $content := $cm.data }}
   {{ $filename }}: |-
