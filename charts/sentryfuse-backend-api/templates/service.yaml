@@ -5,6 +5,7 @@ metadata:
   namespace: sentryfuse
   labels:
     {{- include "base.labels" . | nindent 4 }}
+    {{- include "sentryfuse.labels" . | nindent 4 }}
   {{- with .Values.service.metrics }}
   annotations:
     prometheus.io/path: "{{ .path }}"

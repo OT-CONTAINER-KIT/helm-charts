@@ -1,3 +1,6 @@
+name: sentryfuse-api
+component: api
+
 base:
   image:
     pullPolicy: "Always"

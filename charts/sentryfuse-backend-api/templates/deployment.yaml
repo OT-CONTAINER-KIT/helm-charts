@@ -5,18 +5,18 @@ metadata:
   name: {{ include "base.fullname" . }}
   namespace: sentryfuse
   labels:
-    {{- include "base.labels" . | nindent 4 }}
+    {{- include "sentryfuse.labels" . | nindent 4 }}
 spec:
 {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
 {{- end }}
   selector:
     matchLabels:
-      {{- include "base.selectorLabels" . | nindent 6 }}
+      {{- include "sentryfuse.labels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "base.selectorLabels" . | nindent 8 }}
+        {{- include "sentryfuse.labels" . | nindent 8 }}
     spec:
       {{- if .Values.base.image.pullSecrets }}
       imagePullSecrets:
