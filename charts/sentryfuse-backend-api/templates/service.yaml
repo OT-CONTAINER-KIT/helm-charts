@@ -4,7 +4,6 @@ metadata:
   name: {{ include "base.fullname" . }}
   namespace: sentryfuse
   labels:
-    {{- include "base.labels" . | nindent 4 }}
     {{- include "sentryfuse.labels" . | nindent 4 }}
   {{- with .Values.service.metrics }}
   annotations:
@@ -15,7 +14,7 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   selector:
-    {{- include "base.selectorLabels" . | nindent 4 }}
+    {{- include "sentryfuse.labels" . | nindent 4 }}
   ports:
     {{- range .Values.service.ports }}
     - name: {{ .name }}

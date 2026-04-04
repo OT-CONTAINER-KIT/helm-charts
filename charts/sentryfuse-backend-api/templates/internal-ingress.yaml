@@ -9,7 +9,7 @@ metadata:
   {{ toYaml .Values.internalIngress.annotations | nindent 4 }}
 {{- end }}
   labels:
-    {{- include "base.labels" . | nindent 4 }}
+    {{- include "sentryfuse.labels" . | nindent 4 }}
 spec:
   ingressClassName: {{ .Values.internalIngress.class }}
   rules:

@@ -6,7 +6,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: {{ .Values.ingress.class }}
   labels:
-    {{- include "base.labels" . | nindent 4 }}
+    {{- include "sentryfuse.labels" . | nindent 4 }}
   name: {{ include "base.fullname" . }}-external-ing
   namespace: sentryfuse
 spec:
