@@ -7,7 +7,7 @@ kind: ConfigMap
 metadata:
   name: {{ $cm.name }}
   labels:
-    {{- include "base.labels" $ | nindent 4 }}
+    {{- include "sentryfuse.labels" $ | nindent 4 }}
   namespace: sentryfuse
 data:
   {{- range $filename, $content := $cm.data }}

@@ -1,3 +1,6 @@
+name: sentryfuse-consumer
+component: consumer
+
 base:
   image:
     pullPolicy: "Always"
