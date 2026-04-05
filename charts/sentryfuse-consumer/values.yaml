@@ -8,8 +8,7 @@ base:
     repository: registry.ldc.opstree.dev/coe/sentryfuse-consumer
     tag: latest
     pullSecrets: "reg-ldc-coe-regcred"
-  existingSecrets:
-    - sentryfuse-consumer
+  existingSecret: sentryfuse-consumer
 
 replicaCount: 1
 

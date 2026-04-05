@@ -39,20 +39,9 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
-          env:
-            - name: FORCE_ROLLOUT
-              value: {{ now | quote }}
-          {{- range $key, $value := .Values.base.config }}
-            - name: {{ $key }}
-              value: "{{ $value }}"
-          {{- end }}
-          {{- if .Values.base.existingSecrets }}
           envFrom:
-            {{- range .Values.base.existingSecrets }}
             - secretRef:
-                name: {{ . }}
-            {{- end }}
-          {{- end }}
+                name: {{ .Values.base.existingSecret }}
 
           {{- if .Values.healthcheck.enabled }}
           livenessProbe:
