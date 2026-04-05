@@ -36,9 +36,19 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
-          {{- if .Values.base.env }}
           env:
-            {{- toYaml .Values.base.env | nindent 12 }}
+            - name: FORCE_ROLLOUT
+              value: {{ now | quote }}
+          {{- range $key, $value := .Values.base.config }}
+            - name: {{ $key }}
+              value: "{{ $value }}"
+          {{- end }}
+          {{- if .Values.base.existingSecrets }}
+          envFrom:
+            {{- range .Values.base.existingSecrets }}
+            - secretRef:
+                name: {{ . }}
+            {{- end }}
           {{- end }}
 
           {{- if .Values.healthcheck.enabled }}
@@ -61,14 +71,6 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
             failureThreshold: 3
-          {{- end }}
-
-          {{- if .Values.base.existingSecrets }}
-          envFrom:
-            {{- range .Values.base.existingSecrets }}
-            - secretRef:
-                name: {{ . }}
-            {{- end }}
           {{- end }}
 
           {{- if .Values.volumes }}
