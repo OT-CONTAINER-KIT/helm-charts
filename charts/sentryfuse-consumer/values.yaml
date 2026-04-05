@@ -8,9 +8,6 @@ base:
     repository: registry.ldc.opstree.dev/coe/sentryfuse-consumer
     tag: latest
     pullSecrets: "reg-ldc-coe-regcred"
-  env:
-    - name: FORCE_ROLLOUT
-      value: "{{ .Release.Time }}"
   existingSecrets:
     - sentryfuse-consumer
 

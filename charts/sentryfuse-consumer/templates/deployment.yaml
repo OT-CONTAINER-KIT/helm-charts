@@ -39,8 +39,10 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
-          {{- if .Values.base.env }}
           env:
+            - name: FORCE_ROLLOUT
+              value: {{ now | quote }}
+          {{- if .Values.base.env }}
             {{- toYaml .Values.base.env | nindent 12 }}
           {{- end }}
 
