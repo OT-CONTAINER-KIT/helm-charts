@@ -7,8 +7,7 @@ base:
     repository: registry.ldc.opstree.dev/coe/sentryfuse-webhook
     tag: latest
     pullSecrets: "reg-ldc-coe-regcred"
-  existingSecrets:
-    - sentryfuse-webhook
+  existingSecret: sentryfuse-webhook
 
 replicaCount: 1
 
