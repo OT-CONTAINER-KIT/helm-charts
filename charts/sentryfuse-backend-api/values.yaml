@@ -45,7 +45,7 @@ volumes:
       data:
         config.yaml: |
           kafka:
-            brokers: ["kafka:9092"]
+            brokers: ["192.168.10.52:9092"]
 
           postgres:
             addr: "192.168.10.52:5432"
