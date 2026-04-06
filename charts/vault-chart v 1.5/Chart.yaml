@@ -1,9 +1,0 @@
-apiVersion: v2
-name: vault
-description: Vault Helm Chart (Transit + Main)
-version: 0.1.0
-appVersion: "1.21.4"
-
-maintainers:
-  - name: abhishek saini
-    email: abhishek.saini.snaatak@mygurukulam.co
