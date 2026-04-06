@@ -1,0 +1,18 @@
+***************************************************************
+  Harbor Deployment Successful!
+***************************************************************
+
+Release    : {{ .Release.Name }}
+Namespace  : {{ .Values.namespace }}
+URL        : {{ .Values.harbor.externalURL }}
+
+Access Harbor UI via Envoy:
+  https://harbor.mycompany.com
+
+Docker Login:
+  docker login harbor.mycompany.com
+
+Push Image:
+  docker tag nginx harbor.mycompany.com/library/nginx
+  docker push harbor.mycompany.com/library/nginx
+

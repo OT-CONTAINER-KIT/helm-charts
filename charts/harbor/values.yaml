@@ -1,0 +1,57 @@
+harbor:
+  externalURL: http://192.168.8.130:30002
+
+  harborAdminPassword: "Harbor@123"
+
+  expose:
+    type: nodePort
+    tls:
+      enabled: false
+
+  nginx:
+    enabled: true   # IMPORTANT (you disabled earlier → breaks routing)
+
+  core:
+    replicas: 1
+
+  portal:
+    replicas: 1
+
+  registry:
+    replicas: 1
+
+  jobservice:
+    replicas: 1
+
+  trivy:
+    enabled: true
+    replicas: 1
+
+  persistence:
+    enabled: true
+    imageChartStorage:
+      type: s3
+      s3:
+        region: us-east-1
+        bucket: harbor
+        accesskey: minioadmin
+        secretkey: opstreeadmin@2510
+        regionendpoint: https://minio.ldc.opstree.net:9000
+        secure: false
+        skipverify: true
+
+  database:
+    type: external
+    external:
+      host: 192.168.8.39
+      port: 5432
+      username: harbor_user
+      password: Harbor@123
+      coreDatabase: harbor_db
+
+  redis:
+    type: external
+    external:
+      host: 192.168.8.78
+      port: 6379
+      password: redis@123
