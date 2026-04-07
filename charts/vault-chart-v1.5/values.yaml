@@ -40,8 +40,7 @@ affinity:
 
 persistence:
   size: 5Gi
-  storageClass: "standard" # Recommended: gp3, pd-ssd, etc. in real clusters
-
+  storageClass: "vcluster-longhorn-restricted-x-coe-dev-x-coe-dev-vcluster" 
 service:
   type: ClusterIP
 
