@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "vault.fullname" . }}-main-config
+  namespace: {{ .Release.Namespace }}
 data:
   vault.hcl: |
     ui = {{ .Values.vault.ui | default true }}
