@@ -1,3 +1,5 @@
+namespace: vault
+
 transit:
   enabled: true
   replicaCount: 2
