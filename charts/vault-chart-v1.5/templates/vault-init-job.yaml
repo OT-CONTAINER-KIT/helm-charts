@@ -6,6 +6,7 @@ metadata:
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "20"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   template:
     metadata:
@@ -43,7 +44,6 @@ spec:
               echo "Waiting for main vault pod to be ready..."
               kubectl wait --for=condition=ready pod/{{ include "vault.fullname" . }}-main-0 -n {{ .Release.Namespace }} --timeout=180s
 
-              # Check if already initialized
               MAIN_INIT_STATUS=$(curl -s "$MAIN_ADDR/v1/sys/init" | jq -r '.initialized')
               if [ "$MAIN_INIT_STATUS" = "true" ]; then
                 echo "Main Vault is already initialized."
@@ -56,10 +56,7 @@ spec:
 
               echo "$INIT_OUTPUT"
 
-              # Extract root token
               ROOT_TOKEN=$(echo "$INIT_OUTPUT" | grep 'Initial Root Token:' | awk '{print $NF}')
-
-              # Extract keys (unseal/recovery)
               KEYS=$(echo "$INIT_OUTPUT" | grep -E 'Unseal Key|Recovery Key' | awk '{print $NF}' | paste -sd "," -)
 
               if [ -n "$ROOT_TOKEN" ]; then
