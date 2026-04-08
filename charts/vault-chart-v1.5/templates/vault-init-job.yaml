@@ -1,0 +1,53 @@
+{{- if .Values.main.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "vault.fullname" . }}-vault-init-job
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "20"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ include "vault.fullname" . }}-vault-sa
+      restartPolicy: OnFailure
+
+      containers:
+        - name: vault-init
+          image: alpine/k8s:1.29.2
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+
+              MAIN_ADDR="http://{{ include "vault.fullname" . }}-main:8200"
+
+              echo "Waiting for Main Vault to be reachable..."
+              # Wait until Vault API is responding
+              until curl -s "$MAIN_ADDR/v1/sys/init" | jq -r '.initialized' > /dev/null 2>&1; do
+                echo "  ...Waiting for main vault API, sleeping 5s"
+                sleep 5
+              done
+
+              # Check if already initialized
+              MAIN_INIT_STATUS=$(curl -s "$MAIN_ADDR/v1/sys/init" | jq -r '.initialized')
+              if [ "$MAIN_INIT_STATUS" = "true" ]; then
+                echo "Main Vault is already initialized."
+                exit 0
+              fi
+
+              echo "Initializing Main Vault via kubectl exec..."
+              # Running the specific command requested: kubectl exec into the pod and init
+              # We use -i instead of -it for non-interactive automation
+              INIT_OUTPUT=$(kubectl exec {{ include "vault.fullname" . }}-main-0 -n {{ .Release.Namespace }} -- \
+                sh -c "export VAULT_ADDR=http://127.0.0.1:8200 && vault operator init")
+
+              echo "$INIT_OUTPUT"
+
+              # Optional: Extract token and keys if you want to save them to a secret (as we did before)
+              
+              
+              echo "Main Vault initialization COMPLETE!"
+{{- end }}
