@@ -1,11 +1,12 @@
-{{- if .Values.main.enabled }}
+{{- if .Values.transit.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "vault.fullname" . }}-vault-init-job
+  name: {{ include "vault.fullname" . }}-init-job
+  
   annotations:
     "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-weight": "20"
+    "helm.sh/hook-weight": "10"
     "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   template:
@@ -14,7 +15,7 @@ spec:
       restartPolicy: OnFailure
 
       containers:
-        - name: vault-init
+        - name: init
           image: alpine/k8s:1.29.2
           command:
             - /bin/sh
@@ -22,44 +23,67 @@ spec:
             - |
               set -e
 
-              MAIN_ADDR="http://{{ include "vault.fullname" . }}-main:8200"
+              VAULT_ADDR="http://{{ include "vault.fullname" . }}-transit:8200"
 
-              echo "Waiting for Main Vault to be reachable..."
-              # Wait until Vault API is responding
-              until curl -s "$MAIN_ADDR/v1/sys/init" | jq -r '.initialized' > /dev/null 2>&1; do
-                echo "  ...Waiting for main vault API, sleeping 5s"
+              echo "Waiting for Vault transit to be ready..."
+              until curl -s "$VAULT_ADDR/v1/sys/init" | grep -q "initialized"; do
+                echo "  ...not ready yet, sleeping 5s"
                 sleep 5
               done
 
               # Check if already initialized
-              MAIN_INIT_STATUS=$(curl -s "$MAIN_ADDR/v1/sys/init" | jq -r '.initialized')
-              if [ "$MAIN_INIT_STATUS" = "true" ]; then
-                echo "Main Vault is already initialized."
+              INIT_STATUS=$(curl -s "$VAULT_ADDR/v1/sys/init" | jq -r '.initialized')
+              if [ "$INIT_STATUS" = "true" ]; then
+                echo "Vault is already initialized."
+                SEALED_STATUS=$(curl -s "$VAULT_ADDR/v1/sys/health" | jq -r '.sealed')
+                if [ "$SEALED_STATUS" = "true" ]; then
+                  echo "Vault is sealed. Attempting to fetch key from secret..."
+                  UNSEAL_KEY=$(kubectl get secret {{ include "vault.fullname" . }}-transit-token -n {{ .Release.Namespace }} -o jsonpath='{.data.key}' | base64 -d || echo "")
+                  if [ -n "$UNSEAL_KEY" ]; then
+                    echo "Unsealing Transit Vault..."
+                    curl -sf -X PUT "$VAULT_ADDR/v1/sys/unseal" \
+                      -H "Content-Type: application/json" \
+                      -d "{\"key\":\"$UNSEAL_KEY\"}"
+                  else
+                    echo "ERROR: Transit Vault is sealed but no unseal key found in K8s secret!"
+                    exit 1
+                  fi
+                else
+                  echo "Vault is already unsealed. Nothing to do."
+                fi
                 exit 0
               fi
 
-              echo "Initializing Main Vault via kubectl exec..."
-              # Running the specific command requested: kubectl exec into the pod and init
-              # We use -i instead of -it for non-interactive automation
-              INIT_OUTPUT=$(kubectl exec {{ include "vault.fullname" . }}-main-0 -n {{ .Release.Namespace }} -- \
-                sh -c "export VAULT_ADDR=http://127.0.0.1:8200 && vault operator init")
+              echo "Initializing Vault..."
+              INIT=$(curl -sf -X PUT "$VAULT_ADDR/v1/sys/init" \
+                -H "Content-Type: application/json" \
+                -d '{"secret_shares":1,"secret_threshold":1}')
 
-              echo "$INIT_OUTPUT"
+              KEY=$(echo "$INIT" | jq -r '.keys_base64[0]')
+              TOKEN=$(echo "$INIT" | jq -r '.root_token')
 
-              # Extracting keys from the standard text output
-              ROOT_TOKEN=$(echo "$INIT_OUTPUT" | grep 'Initial Root Token:' | awk '{print $NF}')
-              # It might say 'Unseal Key' or 'Recovery Key' depending on transit seal
-              KEYS=$(echo "$INIT_OUTPUT" | grep -E 'Unseal Key|Recovery Key' | awk '{print $NF}' | paste -sd "," -)
+              echo "Unsealing Vault..."
+              curl -sf -X PUT "$VAULT_ADDR/v1/sys/unseal" \
+                -H "Content-Type: application/json" \
+                -d "{\"key\":\"$KEY\"}"
 
-              if [ -n "$ROOT_TOKEN" ]; then
-                echo "Saving tokens to Kubernetes secret..."
-                kubectl create secret generic {{ include "vault.fullname" . }}-main-vault-keys \
-                  --from-literal=root-token="$ROOT_TOKEN" \
-                  --from-literal=keys="$KEYS" \
-                  -n {{ .Release.Namespace }} \
-                  --dry-run=client -o yaml | kubectl apply -f -
-                echo "Keys successfully saved to secret: {{ include "vault.fullname" . }}-main-vault-keys"
-              fi
-              
-              echo "Main Vault initialization COMPLETE!"
+              echo "Enabling transit secrets engine..."
+              curl -sf -X POST "$VAULT_ADDR/v1/sys/mounts/transit" \
+                -H "X-Vault-Token: $TOKEN" \
+                -H "Content-Type: application/json" \
+                -d '{"type":"transit"}'
+
+              echo "Creating transit unseal key..."
+              curl -sf -X POST "$VAULT_ADDR/v1/transit/keys/unseal-key" \
+                -H "X-Vault-Token: $TOKEN"
+
+              echo "Saving root token and unseal key as Kubernetes secret..."
+              kubectl create secret generic {{ include "vault.fullname" . }}-transit-token \
+                --from-literal=token="$TOKEN" \
+                --from-literal=key="$KEY" \
+                -n {{ .Release.Namespace }} \
+                --dry-run=client -o yaml | kubectl apply -f -
+
+
+              echo "Transit Vault setup complete!"
 {{- end }}
