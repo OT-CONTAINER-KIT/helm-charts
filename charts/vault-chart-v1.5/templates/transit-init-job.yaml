@@ -2,14 +2,15 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "vault.fullname" . }}-init-job
+  name: {{ include "vault.fullname" . }}-transit-init-job  
   namespace: {{ .Release.Namespace }}
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "10"
-    "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   template:
+    metadata:
+      name: transit-init
     spec:
       serviceAccountName: {{ include "vault.fullname" . }}-vault-sa
       restartPolicy: OnFailure
@@ -24,9 +25,10 @@ spec:
               set -e
 
               VAULT_ADDR="http://{{ include "vault.fullname" . }}-transit:8200"
+              echo "Transit VAULT_ADDR: $VAULT_ADDR"
 
               echo "Waiting for Vault transit to be ready..."
-              until curl -s "$VAULT_ADDR/v1/sys/init" | grep -q "initialized"; do
+              until curl -s "$VAULT_ADDR/v1/sys/health" > /dev/null; do
                 echo "  ...not ready yet, sleeping 5s"
                 sleep 5
               done
@@ -83,7 +85,6 @@ spec:
                 --from-literal=key="$KEY" \
                 -n {{ .Release.Namespace }} \
                 --dry-run=client -o yaml | kubectl apply -f -
-
 
               echo "Transit Vault setup complete!"
 {{- end }}
