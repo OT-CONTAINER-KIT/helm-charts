@@ -6,9 +6,10 @@ metadata:
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "20"
-    "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   template:
+    metadata:
+      name: main-init
     spec:
       serviceAccountName: {{ include "vault.fullname" . }}-vault-sa
       restartPolicy: OnFailure
@@ -22,14 +23,25 @@ spec:
             - |
               set -e
 
+              TRANSIT_ADDR="http://{{ include "vault.fullname" . }}-transit:8200"
               MAIN_ADDR="http://{{ include "vault.fullname" . }}-main:8200"
 
-              echo "Waiting for Main Vault to be reachable..."
-              # Wait until Vault API is responding
-              until curl -s "$MAIN_ADDR/v1/sys/init" | jq -r '.initialized' > /dev/null 2>&1; do
-                echo "  ...Waiting for main vault API, sleeping 5s"
+              echo "Waiting for Transit Vault..."
+              until curl -s "$TRANSIT_ADDR/v1/sys/health" > /dev/null; do
+                echo "  ...waiting for transit vault"
                 sleep 5
               done
+              echo "Transit Vault is ready!"
+
+              echo "Waiting for Main Vault API..."
+              until curl -s "$MAIN_ADDR/v1/sys/health" > /dev/null; do
+                echo "  ...waiting for main vault API"
+                sleep 5
+              done
+              echo "Main Vault API is reachable!"
+
+              echo "Waiting for main vault pod to be ready..."
+              kubectl wait --for=condition=ready pod/{{ include "vault.fullname" . }}-main-0 -n {{ .Release.Namespace }} --timeout=180s
 
               # Check if already initialized
               MAIN_INIT_STATUS=$(curl -s "$MAIN_ADDR/v1/sys/init" | jq -r '.initialized')
@@ -38,17 +50,16 @@ spec:
                 exit 0
               fi
 
-              echo "Initializing Main Vault via kubectl exec..."
-              # Running the specific command requested: kubectl exec into the pod and init
-              # We use -i instead of -it for non-interactive automation
+              echo "Initializing Main Vault..."
               INIT_OUTPUT=$(kubectl exec {{ include "vault.fullname" . }}-main-0 -n {{ .Release.Namespace }} -- \
                 sh -c "export VAULT_ADDR=http://127.0.0.1:8200 && vault operator init")
 
               echo "$INIT_OUTPUT"
 
-              # Extracting keys from the standard text output
+              # Extract root token
               ROOT_TOKEN=$(echo "$INIT_OUTPUT" | grep 'Initial Root Token:' | awk '{print $NF}')
-              # It might say 'Unseal Key' or 'Recovery Key' depending on transit seal
+
+              # Extract keys (unseal/recovery)
               KEYS=$(echo "$INIT_OUTPUT" | grep -E 'Unseal Key|Recovery Key' | awk '{print $NF}' | paste -sd "," -)
 
               if [ -n "$ROOT_TOKEN" ]; then
@@ -58,8 +69,12 @@ spec:
                   --from-literal=keys="$KEYS" \
                   -n {{ .Release.Namespace }} \
                   --dry-run=client -o yaml | kubectl apply -f -
-                echo "Keys successfully saved to secret: {{ include "vault.fullname" . }}-main-vault-keys"
+
+                echo "Keys successfully saved!"
+              else
+                echo "ERROR: Failed to extract root token!"
+                exit 1
               fi
-              
+
               echo "Main Vault initialization COMPLETE!"
 {{- end }}
