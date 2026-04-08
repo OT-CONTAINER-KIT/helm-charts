@@ -7,6 +7,7 @@ metadata:
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "10"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   template:
     metadata:
@@ -33,7 +34,6 @@ spec:
                 sleep 5
               done
 
-              # Check if already initialized
               INIT_STATUS=$(curl -s "$VAULT_ADDR/v1/sys/init" | jq -r '.initialized')
               if [ "$INIT_STATUS" = "true" ]; then
                 echo "Vault is already initialized."
