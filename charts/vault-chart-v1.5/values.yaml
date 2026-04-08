@@ -2,11 +2,11 @@ namespace: vault
 
 transit:
   enabled: true
-  replicaCount: 2
+  replicaCount: 1
 
 main:
   enabled: true
-  replicaCount: 6
+  replicaCount: 3
 
 image:
   repository: hashicorp/vault
