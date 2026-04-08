@@ -11,7 +11,7 @@ metadata:
   name: {{ include "vault.fullname" . }}-vault-role
 rules:
   - apiGroups: [""]
-    resources: ["secrets"]
+    resources: ["secrets", "pods", "pods/exec"]
     verbs: ["get", "create", "patch", "delete", "update", "list"]
 
 ---
