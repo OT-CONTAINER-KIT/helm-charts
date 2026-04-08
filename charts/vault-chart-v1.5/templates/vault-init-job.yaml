@@ -3,7 +3,6 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "vault.fullname" . }}-vault-init-job
-  namespace: {{ .Release.Namespace }}
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "20"
@@ -47,8 +46,20 @@ spec:
 
               echo "$INIT_OUTPUT"
 
-              # Optional: Extract token and keys if you want to save them to a secret (as we did before)
-              
+              # Extracting keys from the standard text output
+              ROOT_TOKEN=$(echo "$INIT_OUTPUT" | grep 'Initial Root Token:' | awk '{print $NF}')
+              # It might say 'Unseal Key' or 'Recovery Key' depending on transit seal
+              KEYS=$(echo "$INIT_OUTPUT" | grep -E 'Unseal Key|Recovery Key' | awk '{print $NF}' | paste -sd "," -)
+
+              if [ -n "$ROOT_TOKEN" ]; then
+                echo "Saving tokens to Kubernetes secret..."
+                kubectl create secret generic {{ include "vault.fullname" . }}-main-vault-keys \
+                  --from-literal=root-token="$ROOT_TOKEN" \
+                  --from-literal=keys="$KEYS" \
+                  -n {{ .Release.Namespace }} \
+                  --dry-run=client -o yaml | kubectl apply -f -
+                echo "Keys successfully saved to secret: {{ include "vault.fullname" . }}-main-vault-keys"
+              fi
               
               echo "Main Vault initialization COMPLETE!"
 {{- end }}
