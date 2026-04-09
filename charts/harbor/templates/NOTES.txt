@@ -1,4 +1,5 @@
 ***************************************************************
+<<<<<<< HEAD
   Harbor Deployment Successful!
 ***************************************************************
 
@@ -16,3 +17,25 @@ Push Image:
   docker tag nginx harbor.mycompany.com/library/nginx
   docker push harbor.mycompany.com/library/nginx
 
+=======
+  Harbor Deployed via Custom Umbrella Chart!
+***************************************************************
+
+Release    : {{ .Release.Name }}
+Namespace  : {{ .Values.namespace | default .Release.Namespace }}
+Version    : {{ .Chart.AppVersion }}
+
+URL        : {{ .Values.harbor.externalURL | default "http://harbor.local" }}
+
+Access Harbor UI:
+  {{ .Values.harbor.externalURL | default "http://harbor.local" }}
+
+Docker Login:
+  docker login {{ .Values.harbor.externalURL | default "harbor.local" | trimPrefix "https://" | trimPrefix "http://" }}
+
+Push Image:
+  docker tag nginx {{ .Values.harbor.externalURL | default "harbor.local" | trimPrefix "https://" | trimPrefix "http://" }}/library/nginx
+  docker push {{ .Values.harbor.externalURL | default "harbor.local" | trimPrefix "https://" | trimPrefix "http://" }}/library/nginx
+
+***************************************************************
+>>>>>>> ea66f6b (adding files)

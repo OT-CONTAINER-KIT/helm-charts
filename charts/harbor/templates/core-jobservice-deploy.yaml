@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-core
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: core
+  template:
+    metadata:
+      labels:
+        component: core
+    spec:
+      containers:
+      - name: core
+        image: {{ .Values.images.core }}
+        # Set working directory to where the app lives
+        workingDir: /harbor
+        ports:
+        - containerPort: 8080
+        env:
+        - name: CORE_SECRET
+          value: "HarborSecret123"
+        - name: JOBSERVICE_SECRET
+          value: "HarborSecret123"
+        - name: CACHE_TYPE
+          value: "redis"
+        - name: POSTGRESQL_HOST
+          value: {{ .Values.database.host | quote }}
+        - name: POSTGRESQL_PORT
+          value: {{ .Values.database.port | quote }}
+        - name: POSTGRESQL_USER
+          value: {{ .Values.database.user | quote }}
+        - name: POSTGRESQL_PASSWORD
+          value: {{ .Values.database.password | quote }}
+        - name: POSTGRESQL_DATABASE
+          value: {{ .Values.database.dbname | quote }}
+        - name: CORE_DATABASE_URL
+          value: "postgres://{{ .Values.database.user }}:{{ .Values.database.password | urlquery }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.dbname }}?sslmode=disable"
+        - name: DB_USR
+          value: {{ .Values.database.user | quote }}
+        - name: DB_PWD
+          value: {{ .Values.database.password | quote }}
+        - name: _REDIS_URL_CORE
+          valueFrom:
+            configMapKeyRef:
+              name: harbor-core-config
+              key: _REDIS_URL_CORE
+        volumeMounts:
+        - name: core-config
+          # Harbor looks for ./conf/app.conf relative to /harbor
+          mountPath: /harbor/conf/app.conf
+          subPath: app.conf
+        - name: core-tmp
+          mountPath: /var/run
+      volumes:
+      - name: core-config
+        configMap:
+          name: harbor-core-config
+      - name: core-tmp
+        emptyDir: {}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-jobservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: jobservice
+  template:
+    metadata:
+      labels:
+        component: jobservice
+    spec:
+      containers:
+      - name: jobservice
+        image: {{ .Values.images.jobservice }}
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - |
+            echo "Waiting for harbor-core to be ready..."
+            # Removed -q and --spider to ensure compatibility with BusyBox wget
+            until wget http://harbor-core:80/api/v2.0/ping -O /dev/null; do
+              echo "harbor-core not ready, retrying..."
+              sleep 5
+            done
+            echo "harbor-core is ready!"
+            /harbor/entrypoint.sh
+        env:
+        - name: CONFIG_PATH
+          value: /etc/jobservice/config.yml
+        - name: CORE_URL
+          value: "http://harbor-core:80"
+        - name: CORE_SECRET
+          value: "HarborSecret123"
+        - name: JOBSERVICE_SECRET
+          value: "HarborSecret123"
+        volumeMounts:
+        - name: config
+          mountPath: /etc/jobservice/config.yml
+          subPath: config.yml
+        - name: jobservice-token
+          mountPath: /etc/jobservice/auth_bundle.pem
+          subPath: auth_bundle.pem
+        - name: jobservice-tmp
+          mountPath: /var/run
+      volumes:
+      - name: config
+        configMap:
+          name: harbor-jobservice-config
+      - name: jobservice-token
+        configMap:
+          name: harbor-jobservice-token
+      - name: jobservice-tmp
+        emptyDir: {}

@@ -1,4 +1,5 @@
 harbor:
+<<<<<<< HEAD
   externalURL: http://192.168.8.130:30002
 
   harborAdminPassword: "Harbor@123"
@@ -55,3 +56,45 @@ harbor:
       host: 192.168.8.78
       port: 6379
       password: redis@123
+=======
+  externalURL: http://192.168.49.2:30002
+  adminPassword: "Harbor@123"
+  expose:
+  type: nodePort  # 1. Change from ingress to nodePort
+  tls:
+    enabled: false # 2. Set this to false since you don't have certs
+  nodePort:
+    name: harbor
+    ports:
+      http:
+        port: 80
+        nodePort: 30002
+
+# --- Move these to the far left (Root Level) ---
+database:
+  host: 192.168.8.39
+  port: 5432
+  user: harbor_user
+  password: "Harbor@123"
+  dbname: harbor_db
+
+redis:
+  host: 192.168.8.78
+  port: 6379
+  password: "redis@123"
+
+s3:
+  endpoint: "http://minio.ldc.opstree.net:9000"
+  bucket: harbor
+  accesskey: "minioadmin"
+  secretkey: "opstreeadmin@2510"
+  region: us-east-1
+
+images:
+  core: goharbor/harbor-core:v2.10.0
+  jobservice: goharbor/harbor-jobservice:v2.10.0
+  registry: goharbor/registry-photon:v2.10.0
+  nginx: goharbor/nginx-photon:v2.10.0
+  portal: goharbor/harbor-portal:v2.10.0
+  trivy: goharbor/trivy-adapter-photon:v2.10.0
+>>>>>>> ea66f6b (adding files)

@@ -1,0 +1,120 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: harbor-core-config
+data:
+  app.conf: |
+    appname = Harbor
+    runmode = dev
+    enablegzip = true
+    # Beego specific DB keys
+    db_host = {{ .Values.database.host }}
+    db_port = {{ .Values.database.port }}
+    db_user = {{ .Values.database.user }}
+    db_password = {{ .Values.database.password }}
+    db_name = {{ .Values.database.dbname }}
+    db_sslmode = disable
+  # Using simple concatenation to avoid the float64 formatting issue
+  _REDIS_URL_CORE: "redis://:{{ .Values.redis.password | urlquery }}@{{ .Values.redis.host }}:{{ .Values.redis.port | int }}/0"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: harbor-jobservice-config
+data:
+  config.yml: |
+    protocol: "http"
+    port: 8080
+
+    core_url: "http://harbor-core:80"
+    registry_url: "http://harbor-registry:5000"
+
+    worker_pool:
+      workers: 10
+      backend: "redis"
+      redis_pool:
+        redis_url: "redis://:{{ .Values.redis.password }}@{{ .Values.redis.host }}:{{ .Values.redis.port }}/1"
+
+    job_loggers:
+      - name: "STD_OUTPUT"
+        level: "INFO"
+
+    auth_token:
+      token_issuer: "harbor-token-issuer"
+      public_key_path: "/etc/jobservice/auth_bundle.pem"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: harbor-registry-config
+data:
+  config.yml: |
+    version: 0.1
+    log:
+      level: info
+    http:
+      addr: :5000
+    storage:
+      s3:
+        accesskey: {{ .Values.s3.accesskey }}
+        secretkey: {{ .Values.s3.secretkey }}
+        region: {{ .Values.s3.region }}
+        bucket: {{ .Values.s3.bucket }}
+        endpoint: {{ .Values.s3.endpoint }}
+      maintenance:
+        readonly:
+          enabled: false
+#    auth:
+ #     token:
+  #      issuer: harbor-token-issuer
+   #     realm: {{ .Values.harbor.externalURL }}/service/token
+    #    service: harbor-registry
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: harbor-nginx-config
+data:
+  nginx.conf: |
+    worker_processes auto;
+    events { worker_connections 1024; }
+
+    http {
+      server {
+        listen 8080;
+
+        client_max_body_size 0;
+
+        location / {
+          proxy_pass http://harbor-portal:80;
+        }
+
+        location /api/ {
+          proxy_pass http://harbor-core:80;
+        }
+
+        location /service/ {
+          proxy_pass http://harbor-core:80;
+        }
+
+        location /v2/ {
+          proxy_pass http://harbor-registry:5000;
+        }
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      }
+    }
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: harbor-jobservice-token
+data:
+  auth_bundle.pem: |
+    dummy-cert
