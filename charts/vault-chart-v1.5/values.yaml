@@ -6,7 +6,7 @@ transit:
 
 main:
   enabled: true
-  replicaCount: 3
+  replicaCount: 4
 
 image:
   repository: hashicorp/vault
@@ -39,7 +39,7 @@ affinity:
           topologyKey: kubernetes.io/hostname
 
 persistence:
-  size: 5Gi
+  size: 3Gi
   storageClass: "vcluster-longhorn-restricted-x-coe-dev-x-coe-dev-vcluster" 
 service:
   type: ClusterIP
