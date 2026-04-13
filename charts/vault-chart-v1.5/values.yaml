@@ -54,3 +54,22 @@ ingress:
         - path: /
           pathType: Prefix
   tls: []
+
+
+# ***************************  BACKUP CONFIG  *********************
+backup:
+  enabled: true
+  schedule: "0/5 * * * *"
+  vault:
+    address: "http://vault-main:8200"
+  minio:
+    endpoint: "https://192.168.8.18:9000"
+    accessKey: "minioadmin"
+    secretKey: "opstreeadmin@2510"
+    bucket: "vault-backup"
+    retentionCount: 3
+# ***************************** RESTORE CONFIG **********************
+
+restore:
+  enabled: false
+  snapshotName: ""
