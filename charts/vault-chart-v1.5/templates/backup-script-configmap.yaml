@@ -1,0 +1,43 @@
+{{- if .Values.backup.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "vault.fullname" . }}-backup-script
+  namespace: {{ .Release.Namespace }}
+data:
+  backup.sh: |
+    #!/bin/sh
+    set -e
+
+    apk add --no-cache curl kubectl
+
+    curl -s -o /usr/local/bin/mc https://dl.min.io/client/mc/release/linux-amd64/mc
+    chmod +x /usr/local/bin/mc
+
+    export VAULT_ADDR="{{ .Values.backup.vault.address }}"
+
+    echo "Finding active Vault node..."
+    for i in 0 1 2 3 4; do
+      NODE_ADDR="http://vault-main-${i}.vault-main-headless:8200"
+      if vault status -address="${NODE_ADDR}" 2>/dev/null | grep -q "HA Mode.*active"; then
+        echo "Found active node at ${NODE_ADDR}"
+        export VAULT_ADDR="${NODE_ADDR}"
+        break
+      fi
+    done
+
+    echo "Fetching Vault token..."
+    VAULT_TOKEN=$(kubectl get secret {{ include "vault.fullname" . }}-main-vault-keys -n {{ .Release.Namespace }} -o jsonpath='{.data.root-token}' | base64 -d)
+    export VAULT_TOKEN
+
+    echo "Taking snapshot..."
+    vault operator raft snapshot save /tmp/backup.snap
+
+    echo "Uploading to MinIO..."
+    mc alias set minio "{{ .Values.backup.minio.endpoint }}" "{{ .Values.backup.minio.accessKey }}" "{{ .Values.backup.minio.secretKey }}" --insecure
+    mc cp /tmp/backup.snap minio/{{ .Values.backup.minio.bucket }}/backup-$(date +%F-%H-%M).snap --insecure
+
+    rm -f /tmp/backup.snap
+
+    echo "Backup completed successfully"
+{{- end }}

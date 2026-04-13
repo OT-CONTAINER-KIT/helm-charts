@@ -1,0 +1,59 @@
+{{- if .Values.restore.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "vault.fullname" . }}-restore-script
+  namespace: {{ .Release.Namespace }}
+data:
+  restore.sh: |
+    #!/bin/sh
+    set -e
+
+    apk add --no-cache curl kubectl jq
+
+    curl -s -o /usr/local/bin/mc https://dl.min.io/client/mc/release/linux-amd64/mc
+    chmod +x /usr/local/bin/mc
+
+    # Function to find active node
+    find_active_node() {
+      for i in $(seq 0 5); do
+        NODE_ADDR="http://{{ include "vault.fullname" . }}-main-${i}.{{ include "vault.fullname" . }}-main-headless:8200"
+        if vault status -address="${NODE_ADDR}" 2>/dev/null | grep -q "HA Mode.*active"; then
+          echo "${NODE_ADDR}"
+          return 0
+        fi
+      done
+      return 1
+    }
+
+    echo "Finding active Vault node..."
+    ACTIVE_ADDR=$(find_active_node) || { echo "Active node not found!"; exit 1; }
+    echo "Found active node at ${ACTIVE_ADDR}"
+    export VAULT_ADDR="${ACTIVE_ADDR}"
+
+    echo "Setting up MinIO..."
+    mc alias set minio "{{ .Values.backup.minio.endpoint }}" "{{ .Values.backup.minio.accessKey }}" "{{ .Values.backup.minio.secretKey }}" --insecure
+
+    SNAPSHOT_NAME="{{ .Values.restore.snapshotName }}"
+    if [ -z "$SNAPSHOT_NAME" ]; then
+      echo "Searching for the latest snapshot in bucket {{ .Values.backup.minio.bucket }}..."
+      SNAPSHOT_NAME=$(mc ls minio/{{ .Values.backup.minio.bucket }} --json --insecure | jq -r '.key' | sort -r | head -n 1)
+      if [ -z "$SNAPSHOT_NAME" ] || [ "$SNAPSHOT_NAME" = "null" ]; then
+        echo "No snapshots found in bucket!"
+        exit 1
+      fi
+    fi
+
+    echo "Downloading snapshot: ${SNAPSHOT_NAME}..."
+    mc cp minio/{{ .Values.backup.minio.bucket }}/${SNAPSHOT_NAME} /tmp/restore.snap --insecure
+
+    echo "Fetching Vault token..."
+    VAULT_TOKEN=$(kubectl get secret {{ include "vault.fullname" . }}-main-vault-keys -n {{ .Release.Namespace }} -o jsonpath='{.data.root-token}' | base64 -d)
+    export VAULT_TOKEN
+
+    echo "Performing restore..."
+    vault operator raft snapshot restore -force /tmp/restore.snap
+
+    rm -f /tmp/restore.snap
+    echo "Restore completed successfully!"
+{{- end }}

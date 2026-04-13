@@ -1,0 +1,30 @@
+{{- if .Values.restore.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "vault.fullname" . }}-restore
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": "post-install,post-upgrade"
+    "helm.sh/hook-weight": "10"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ include "vault.fullname" . }}-vault-sa
+      restartPolicy: OnFailure
+      containers:
+      - name: vault-restore
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        command:
+        - /bin/sh
+        - /scripts/restore.sh
+        volumeMounts:
+        - name: script
+          mountPath: /scripts
+      volumes:
+      - name: script
+        configMap:
+          name: {{ include "vault.fullname" . }}-restore-script
+          defaultMode: 0755
+{{- end }}
