@@ -1,0 +1,73 @@
+{{- if .Values.restore.enabled -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "flagd-operator.fullname" . }}-restore-{{ now | unixEpoch }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "flagd-operator.labels" . | nindent 4 }}
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ include "flagd-operator.serviceAccountName" . }}
+      restartPolicy: OnFailure
+      initContainers:
+        - name: download
+          image: alpine/k8s:1.30.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "Installing mc..."
+              wget -q https://dl.min.io/client/mc/release/linux-amd64/mc -O /usr/local/bin/mc
+              chmod +x /usr/local/bin/mc
+              
+              /usr/local/bin/mc alias set backup {{ .Values.backup.minio.url }} $MINIO_ACCESS_KEY $MINIO_SECRET_KEY --api S3v4
+              
+              if [ -z "$FILE_NAME" ]; then
+                echo "Fetching latest backup from {{ .Values.backup.minio.bucket }}..."
+                FULL_PATH=$(/usr/local/bin/mc find backup/{{ .Values.backup.minio.bucket }} --name "*.yaml" | sort | tail -n 1)
+                FILE_NAME=$(basename $FULL_PATH)
+              fi
+              
+              if [ -z "$FILE_NAME" ]; then
+                echo "No backup found in bucket!"
+                exit 1
+              fi
+              
+              echo "Downloading $FILE_NAME..."
+              /usr/local/bin/mc cp backup/{{ .Values.backup.minio.bucket }}/$FILE_NAME /data/restore.yaml
+          env:
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "flagd-operator.fullname" . }}-backup-creds
+                  key: accessKey
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "flagd-operator.fullname" . }}-backup-creds
+                  key: secretKey
+            - name: FILE_NAME
+              value: {{ .Values.restore.fileName | quote }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      containers:
+        - name: restore
+          image: alpine/k8s:1.30.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Restoring OpenFeature resources from /data/restore.yaml..."
+              kubectl apply -f /data/restore.yaml
+              echo "Restore completed successfully."
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}
+{{- end }}

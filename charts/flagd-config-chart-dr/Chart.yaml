@@ -1,0 +1,17 @@
+apiVersion: v2
+name: flagd-operator
+description: A Helm chart for the OpenFeature flagd Operator (controller manager)
+type: application
+version: 0.1.0
+appVersion: "v0.8.9"
+
+keywords:
+  - openfeature
+  - flagd
+  - feature-flags
+  - operator
+
+maintainers:
+  - name: snatakSneha
+    email: sneha.joshi.snaatak@mygurukulam.co
+    url: https://github.com/snatakSneha

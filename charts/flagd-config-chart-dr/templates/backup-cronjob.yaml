@@ -1,0 +1,61 @@
+{{- if .Values.backup.enabled -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "flagd-operator.fullname" . }}-backup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "flagd-operator.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ include "flagd-operator.serviceAccountName" . }}
+          restartPolicy: OnFailure
+          initContainers:
+            - name: export
+              image: alpine/k8s:1.30.0
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  echo "Exporting OpenFeature resources..."
+                  kubectl get featureflags,featureflagsources,flagdconfigs -A -o yaml > /data/backup.yaml
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+          containers:
+            - name: backup
+              image: minio/mc:latest
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  echo "Configuring MinIO client..."
+                  mc alias set backup {{ .Values.backup.minio.url }} $MINIO_ACCESS_KEY $MINIO_SECRET_KEY --api S3v4
+                  
+                  echo "Uploading backup to {{ .Values.backup.minio.bucket }}..."
+                  mc cp /data/backup.yaml backup/{{ .Values.backup.minio.bucket }}/flagd-backup-$(date +%Y%m%d%H%M%S).yaml
+                  echo "Backup completed successfully."
+              env:
+                - name: MINIO_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "flagd-operator.fullname" . }}-backup-creds
+                      key: accessKey
+                - name: MINIO_SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "flagd-operator.fullname" . }}-backup-creds
+                      key: secretKey
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+          volumes:
+            - name: data
+              emptyDir: {}
+{{- end }}

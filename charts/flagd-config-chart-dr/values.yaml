@@ -1,0 +1,88 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/open-feature/open-feature-operator
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 128Mi
+  requests:
+    cpu: 10m
+    memory: 64Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+verbose: true
+
+metricsPort: 8080
+
+healthProbePort: 8081
+
+leaderElection:
+  enabled: true
+  resourceName: flagd-operator-leader-election
+
+flagd:
+  image:
+    repository: ghcr.io/open-feature/flagd
+    tag: "v0.15.2"
+
+crds:
+  enabled: true
+
+pdb:
+  enabled: true
+  minAvailable: 1
+  maxUnavailable: ""
+
+podAntiAffinity:
+  enabled: true
+  type: soft
+
+tls:
+  enabled: false
+
+backup:
+  enabled: true
+  schedule: "0 0 * * *"
+  image: "bitnami/kubectl:latest"
+  minio:
+    url: "https://minio.ldc.opstree.dev:9000/"
+    accessKey: "minioadmin"
+    secretKey: "opstreeadmin@2510"
+    bucket: "flagd-backup"
+
+restore:
+  enabled: false
+  fileName: ""
+  image: "minio/mc:latest"
