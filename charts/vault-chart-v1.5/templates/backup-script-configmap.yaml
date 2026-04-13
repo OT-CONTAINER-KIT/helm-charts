@@ -9,7 +9,7 @@ data:
     #!/bin/sh
     set -e
 
-    apk add --no-cache curl kubectl
+    apk add --no-cache curl kubectl jq
 
     curl -s -o /usr/local/bin/mc https://dl.min.io/client/mc/release/linux-amd64/mc
     chmod +x /usr/local/bin/mc
@@ -38,6 +38,18 @@ data:
     mc cp /tmp/backup.snap minio/{{ .Values.backup.minio.bucket }}/backup-$(date +%F-%H-%M).snap --insecure
 
     rm -f /tmp/backup.snap
+
+    # Retention Policy
+    RETENTION_COUNT={{ .Values.backup.minio.retentionCount | default 5 }}
+    echo "Applying retention policy (keeping latest ${RETENTION_COUNT} backups)..."
+    
+    # List backups, sort them (newest first), and skip the first N (retention count)
+    OLD_BACKUPS=$(mc ls minio/{{ .Values.backup.minio.bucket }} --json --insecure | jq -r '.key' | sort -r | tail -n +$((${RETENTION_COUNT} + 1)))
+    
+    for backup in ${OLD_BACKUPS}; do
+      echo "Deleting old backup: ${backup}"
+      mc rm minio/{{ .Values.backup.minio.bucket }}/${backup} --insecure
+    done
 
     echo "Backup completed successfully"
 {{- end }}
