@@ -1,18 +1,12 @@
+# Chart.yaml
 apiVersion: v2
 name: harbor-custom
-<<<<<<< HEAD
-description: Custom Helm chart for Harbor deployment with external DB, Redis, MinIO and Envoy
+description: My enterprise Harbor wrapper
 type: application
 version: 1.0.0
 appVersion: "2.10.0"
 
 dependencies:
   - name: harbor
-    version: 1.14.0
-    repository: https://helm.goharbor.io
-=======
-description: Full Custom Harbor Stack for COE
-type: application
-version: 1.0.0
-appVersion: "2.10.0"
->>>>>>> ea66f6b (adding files)
+    version: "1.15.0" # Current stable version of the chart
+    repository: "https://helm.goharbor.io"

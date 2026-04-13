@@ -1,41 +1,28 @@
-***************************************************************
-<<<<<<< HEAD
-  Harbor Deployment Successful!
-***************************************************************
+******************************************************************************
+  HARBOR CUSTOM WRAPPER DEPLOYED SUCCESSFULLY
+******************************************************************************
 
-Release    : {{ .Release.Name }}
-Namespace  : {{ .Values.namespace }}
-URL        : {{ .Values.harbor.externalURL }}
+Namespace:  {{ .Release.Namespace }}
+Status:     All components are being managed with {{ .Values.harbor.portal.replicas | default 1 }} replicas.
 
-Access Harbor UI via Envoy:
-  https://harbor.mycompany.com
+{{- if .Values.harbor.expose.ingress.hosts.core }}
+Portal URL: http://{{ .Values.harbor.expose.ingress.hosts.core }}
+{{- else }}
+Portal URL: {{ .Values.harbor.externalURL }}
+{{- end }}
 
-Docker Login:
-  docker login harbor.mycompany.com
+CONNECTED EXTERNAL SERVICES:
+---------------------------
+Database:   PostgreSQL (Host: {{ .Values.harbor.database.external.host }})
+Cache:      Redis (Addr: {{ .Values.harbor.redis.external.addr }})
+Storage:    S3 / MinIO (Bucket: {{ .Values.harbor.persistence.imageChartStorage.s3.bucket }})
 
-Push Image:
-  docker tag nginx harbor.mycompany.com/library/nginx
-  docker push harbor.mycompany.com/library/nginx
+VERIFICATION COMMANDS:
+---------------------
+1. Check Registry Storage Endpoint:
+   kubectl exec -it $(kubectl get pods -n {{ .Release.Namespace }} -l component=registry -o name | head -n 1) -n {{ .Release.Namespace }} -c registry -- env | grep REGISTRY_STORAGE
 
-=======
-  Harbor Deployed via Custom Umbrella Chart!
-***************************************************************
+2. Check Core Logs for DB connection:
+   kubectl logs -n {{ .Release.Namespace }} -l component=core | grep "Register database completed"
 
-Release    : {{ .Release.Name }}
-Namespace  : {{ .Values.namespace | default .Release.Namespace }}
-Version    : {{ .Chart.AppVersion }}
-
-URL        : {{ .Values.harbor.externalURL | default "http://harbor.local" }}
-
-Access Harbor UI:
-  {{ .Values.harbor.externalURL | default "http://harbor.local" }}
-
-Docker Login:
-  docker login {{ .Values.harbor.externalURL | default "harbor.local" | trimPrefix "https://" | trimPrefix "http://" }}
-
-Push Image:
-  docker tag nginx {{ .Values.harbor.externalURL | default "harbor.local" | trimPrefix "https://" | trimPrefix "http://" }}/library/nginx
-  docker push {{ .Values.harbor.externalURL | default "harbor.local" | trimPrefix "https://" | trimPrefix "http://" }}/library/nginx
-
-***************************************************************
->>>>>>> ea66f6b (adding files)
+******************************************************************************

@@ -1,32 +1,37 @@
+# values.yaml
 harbor:
-<<<<<<< HEAD
-  externalURL: http://192.168.8.130:30002
-
-  harborAdminPassword: "Harbor@123"
-
   expose:
-    type: nodePort
+    type: ingress
     tls:
       enabled: false
+    ingress:
+      ingressClassName: nginx
+      hosts:
+        # Variablized Ingress Host
+        core: ${HARBOR_EXTERNAL_URL_HOST}
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "900"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "900"
 
-  nginx:
-    enabled: true   # IMPORTANT (you disabled earlier → breaks routing)
+  # Variablized External URL
+  externalURL: ${HARBOR_EXTERNAL_URL}
 
-  core:
-    replicas: 1
+  database:
+    type: external
+    external:
+      host: "${DB_HOST}"
+      port: 5432
+      username: "${DB_USER}"
+      password: "${DB_PASSWORD}"
+      coreDatabase: "${DB_NAME}"
 
-  portal:
-    replicas: 1
-
-  registry:
-    replicas: 1
-
-  jobservice:
-    replicas: 1
-
-  trivy:
-    enabled: true
-    replicas: 1
+  redis:
+    type: external
+    external:
+      addr: "${REDIS_ADDR}"
+      password: "${REDIS_PASSWORD}"
 
   persistence:
     enabled: true
@@ -34,67 +39,22 @@ harbor:
       type: s3
       s3:
         region: us-east-1
-        bucket: harbor
-        accesskey: minioadmin
-        secretkey: opstreeadmin@2510
-        regionendpoint: https://minio.ldc.opstree.net:9000
-        secure: false
+        bucket: "${S3_BUCKET}"
+        accesskey: "${S3_ACCESS_KEY}"
+        secretkey: "${S3_SECRET_KEY}"
+        regionendpoint: "${S3_ENDPOINT}"
+        secure: true
+        v4auth: true
         skipverify: true
 
-  database:
-    type: external
-    external:
-      host: 192.168.8.39
-      port: 5432
-      username: harbor_user
-      password: Harbor@123
-      coreDatabase: harbor_db
-
-  redis:
-    type: external
-    external:
-      host: 192.168.8.78
-      port: 6379
-      password: redis@123
-=======
-  externalURL: http://192.168.49.2:30002
-  adminPassword: "Harbor@123"
-  expose:
-  type: nodePort  # 1. Change from ingress to nodePort
-  tls:
-    enabled: false # 2. Set this to false since you don't have certs
-  nodePort:
-    name: harbor
-    ports:
-      http:
-        port: 80
-        nodePort: 30002
-
-# --- Move these to the far left (Root Level) ---
-database:
-  host: 192.168.8.39
-  port: 5432
-  user: harbor_user
-  password: "Harbor@123"
-  dbname: harbor_db
-
-redis:
-  host: 192.168.8.78
-  port: 6379
-  password: "redis@123"
-
-s3:
-  endpoint: "http://minio.ldc.opstree.net:9000"
-  bucket: harbor
-  accesskey: "minioadmin"
-  secretkey: "opstreeadmin@2510"
-  region: us-east-1
-
-images:
-  core: goharbor/harbor-core:v2.10.0
-  jobservice: goharbor/harbor-jobservice:v2.10.0
-  registry: goharbor/registry-photon:v2.10.0
-  nginx: goharbor/nginx-photon:v2.10.0
-  portal: goharbor/harbor-portal:v2.10.0
-  trivy: goharbor/trivy-adapter-photon:v2.10.0
->>>>>>> ea66f6b (adding files)
+  # Replicas variablized for scaling control in BuildPiper
+  portal:
+    replicas: ${PORTAL_REPLICAS}
+  core:
+    replicas: ${CORE_REPLICAS}
+  jobservice:
+    replicas: ${JOBSERVICE_REPLICAS}
+  registry:
+    replicas: ${REGISTRY_REPLICAS}
+  nginx:
+    replicas: ${NGINX_REPLICAS}
