@@ -16,8 +16,9 @@ data:
 
     # Function to find active node
     find_active_node() {
-      for i in $(seq 0 5); do
-        NODE_ADDR="http://{{ include "vault.fullname" . }}-main-${i}.{{ include "vault.fullname" . }}-main-headless:8200"
+
+      for i in 0 1 2 3; do
+        NODE_ADDR="http://{{ include "vault.fullname" . }}-main-${i}.{{ include "vault.fullname" . }}-main-headless.{{ .Release.Namespace }}.svc.cluster.local:8200"
         if vault status -address="${NODE_ADDR}" 2>/dev/null | grep -q "HA Mode.*active"; then
           echo "${NODE_ADDR}"
           return 0
