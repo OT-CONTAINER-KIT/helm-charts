@@ -6,10 +6,14 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   schedule: "{{ .Values.backup.schedule }}"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
       template:
         spec:
+          ttlSecondsAfterFinished: 300
           serviceAccountName: {{ include "vault.fullname" . }}-vault-sa
           restartPolicy: OnFailure
           containers:
