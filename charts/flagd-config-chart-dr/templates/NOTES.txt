@@ -7,12 +7,12 @@ OPERATOR STATUS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Check the operator pod is running:
 
-  kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "flagd-operator.name" . }}
+  kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "flagd-config-chart-dr.name" . }}
 
 View operator logs:
 
   kubectl logs -n {{ .Release.Namespace }} \
-    -l app.kubernetes.io/name={{ include "flagd-operator.name" . }} \
+    -l app.kubernetes.io/name={{ include "flagd-config-chart-dr.name" . }} \
     --tail=100
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

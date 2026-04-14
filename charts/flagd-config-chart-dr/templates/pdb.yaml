@@ -2,10 +2,10 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ include "flagd-operator.fullname" . }}
+  name: {{ include "flagd-config-chart-dr.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "flagd-operator.labels" . | nindent 4 }}
+    {{- include "flagd-config-chart-dr.labels" . | nindent 4 }}
 spec:
   {{- if .Values.pdb.minAvailable }}
   minAvailable: {{ .Values.pdb.minAvailable }}
@@ -15,5 +15,5 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "flagd-operator.selectorLabels" . | nindent 6 }}
+      {{- include "flagd-config-chart-dr.selectorLabels" . | nindent 6 }}
 {{- end }}

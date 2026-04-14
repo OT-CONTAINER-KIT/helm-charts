@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "flagd-operator.fullname" . }}
+  name: {{ include "flagd-config-chart-dr.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "flagd-operator.labels" . | nindent 4 }}
+    {{- include "flagd-config-chart-dr.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "flagd-operator.selectorLabels" . | nindent 6 }}
+      {{- include "flagd-config-chart-dr.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -17,19 +17,19 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "flagd-operator.labels" . | nindent 8 }}
+        {{- include "flagd-config-chart-dr.labels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "flagd-operator.serviceAccountName" . }}
+      serviceAccountName: {{ include "flagd-config-chart-dr.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       terminationGracePeriodSeconds: 10
       containers:
         - name: manager
-          image: "{{ .Values.image.repository }}:{{ include "flagd-operator.imageTag" . }}"
+          image: "{{ .Values.image.repository }}:{{ include "flagd-config-chart-dr.imageTag" . }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - /manager
@@ -78,7 +78,7 @@ spec:
         - name: webhook-certs
           secret:
             defaultMode: 420
-            secretName: {{ include "flagd-operator.fullname" . }}-webhook-cert
+            secretName: {{ include "flagd-config-chart-dr.fullname" . }}-webhook-cert
         {{- end }}
       {{- with .Values.affinity }}
       affinity:
@@ -91,7 +91,7 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             - labelSelector:
                 matchLabels:
-                  {{- include "flagd-operator.selectorLabels" . | nindent 18 }}
+                  {{- include "flagd-config-chart-dr.selectorLabels" . | nindent 18 }}
               topologyKey: "kubernetes.io/hostname"
           {{- else }}
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -99,7 +99,7 @@ spec:
               podAffinityTerm:
                 labelSelector:
                   matchLabels:
-                    {{- include "flagd-operator.selectorLabels" . | nindent 20 }}
+                    {{- include "flagd-config-chart-dr.selectorLabels" . | nindent 20 }}
                 topologyKey: "kubernetes.io/hostname"
           {{- end }}
       {{- end }}

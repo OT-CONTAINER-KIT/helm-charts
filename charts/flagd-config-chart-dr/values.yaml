@@ -70,12 +70,16 @@ podAntiAffinity:
   type: soft
 
 tls:
-  enabled: false
+  enabled: true
 
 backup:
   enabled: true
-  schedule: "0 0 * * *"
-  image: "bitnami/kubectl:latest"
+  # Every 10 minutes
+  schedule: "*/10 * * * *"
+  image: "alpine/k8s:1.30.0"
+  retention:
+    # Keep only the 5 most recent backups; older ones are auto-deleted
+    count: 5
   minio:
     url: "https://minio.ldc.opstree.dev:9000/"
     accessKey: "minioadmin"
@@ -84,5 +88,33 @@ backup:
 
 restore:
   enabled: false
+  # Specific backup file to restore; leave empty to auto-pick the latest
   fileName: ""
-  image: "minio/mc:latest"
+  image: "alpine/k8s:1.30.0"
+  # Override minio connection for DR (defaults to backup.minio.* if not set)
+  minio:
+    url: ""
+    accessKey: ""
+    secretKey: ""
+    bucket: ""
+
+ui:
+  enabled: true
+  image:
+    # Python-based Flag Manager UI (manages FeatureFlag CRs)
+    repository: python
+    tag: "3.11-slim"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+  ingress:
+    enabled: true
+    annotations: {}
+    hosts:
+      - host: flagd-ui.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []

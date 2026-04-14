@@ -1,0 +1,326 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "flagd-config-chart-dr.fullname" . }}-ui-code
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "flagd-config-chart-dr.labels" . | nindent 4 }}
+data:
+  app.py: |
+    import os
+    from flask import Flask, render_template_string, request, jsonify
+    from kubernetes import client, config
+    import json
+
+    app = Flask(__name__)
+
+    # Load Kubernetes configuration
+    try:
+        config.load_incluster_config()
+    except:
+        config.load_kube_config()
+
+    custom_api = client.CustomObjectsApi()
+    NAMESPACE = os.getenv("NAMESPACE", "flagd-nonprod")
+    GROUP = "core.openfeature.dev"
+    VERSION = "v1beta1"
+    PLURAL = "featureflags"
+
+    HTML_TEMPLATE = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Flagd - Feature Flag Manager</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --bg-color: #0f172a;
+                --card-bg: #1e293b;
+                --accent-color: #38bdf8;
+                --text-primary: #f8fafc;
+                --text-secondary: #94a3b8;
+                --success: #22c55e;
+                --danger: #ef4444;
+            }
+
+            body {
+                font-family: 'Inter', sans-serif;
+                background-color: var(--bg-color);
+                color: var(--text-primary);
+                margin: 0;
+                padding: 20px;
+            }
+
+            .container {
+                max-width: 1000px;
+                margin: 0 auto;
+            }
+
+            header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 40px;
+                padding: 20px;
+                background: rgba(30, 41, 59, 0.7);
+                backdrop-filter: blur(10px);
+                border-radius: 16px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            h1 { margin: 0; font-size: 24px; color: var(--accent-color); }
+
+            .btn {
+                padding: 10px 20px;
+                border-radius: 8px;
+                border: none;
+                cursor: pointer;
+                font-weight: 600;
+                transition: 0.3s;
+            }
+
+            .btn-primary { background: var(--accent-color); color: #000; }
+            .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
+
+            .flag-card {
+                background: var(--card-bg);
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 20px;
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            }
+
+            .flag-info h3 { margin: 0 0 5px 0; font-size: 18px; }
+            .flag-info p { margin: 0; color: var(--text-secondary); font-size: 14px; }
+
+            .actions { display: flex; gap: 10px; }
+            .btn-edit { background: #334155; color: white; }
+            .btn-delete { background: #450a0a; color: var(--danger); }
+
+            #modal {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            }
+
+            .modal-content {
+                background: var(--card-bg);
+                width: 90%;
+                max-width: 700px;
+                padding: 30px;
+                border-radius: 16px;
+                position: relative;
+            }
+
+            textarea {
+                width: 100%;
+                height: 300px;
+                background: #000;
+                color: #22c55e;
+                font-family: 'Courier New', monospace;
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px solid #334155;
+                margin: 15px 0;
+                box-sizing: border-box;
+            }
+
+            input {
+                width: 100%;
+                padding: 12px;
+                background: #0f172a;
+                border: 1px solid #334155;
+                color: white;
+                border-radius: 8px;
+                margin-bottom: 15px;
+                box-sizing: border-box;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>Flagd Manager</h1>
+                <button class="btn btn-primary" onclick="openModal()">+ Add New Flag</button>
+            </header>
+
+            <div id="flag-list">
+                <p style="text-align: center; color: var(--text-secondary);">Loading flags...</p>
+            </div>
+        </div>
+
+        <div id="modal">
+            <div class="modal-content">
+                <h2 id="modal-title">Create Feature Flag</h2>
+                <input type="text" id="flag-name" placeholder="Flag Resource Name (e.g. my-flags)">
+                <p style="font-size: 12px; color: var(--text-secondary);">Flag Specification (JSON):</p>
+                <textarea id="flag-json">{
+      "flagSpec": {
+        "flags": {
+          "new-feature": {
+            "state": "ENABLED",
+            "variants": {
+              "on": true,
+              "off": false
+            },
+            "defaultVariant": "on"
+          }
+        }
+      }
+    }</textarea>
+                <div class="actions">
+                    <button class="btn btn-primary" style="width: 100%;" onclick="saveFlag()">Save Flag</button>
+                    <button class="btn btn-edit" onclick="closeModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            let currentNamespace = "{{ "{{" }} namespace {{ "}}" }}";
+
+            async function fetchFlags() {
+                const resp = await fetch('/api/flags');
+                const data = await resp.json();
+                const list = document.getElementById('flag-list');
+                list.innerHTML = '';
+
+                if (data.length === 0) {
+                    list.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No feature flags found in ' + currentNamespace + '</p>';
+                    return;
+                }
+
+                data.forEach(flag => {
+                    const card = document.createElement('div');
+                    card.className = 'flag-card';
+                    card.innerHTML = `
+                        <div class="flag-info">
+                            <h3>${flag.metadata.name}</h3>
+                            <p>Version: ${flag.metadata.resourceVersion} | Namespace: ${flag.metadata.namespace}</p>
+                        </div>
+                        <div class="actions">
+                            <button class="btn btn-edit" onclick="editFlag('${flag.metadata.name}')">Edit</button>
+                            <button class="btn btn-delete" onclick="deleteFlag('${flag.metadata.name}')">Delete</button>
+                        </div>
+                    `;
+                    list.appendChild(card);
+                });
+            }
+
+            function openModal(name = '', json = null) {
+                document.getElementById('modal').style.display = 'flex';
+                document.getElementById('flag-name').value = name;
+                document.getElementById('flag-name').disabled = !!name;
+                document.getElementById('modal-title').innerText = name ? 'Edit Flag' : 'Create Flag';
+                
+                if (json) {
+                    document.getElementById('flag-json').value = JSON.stringify(json, null, 2);
+                }
+            }
+
+            function closeModal() {
+                document.getElementById('modal').style.display = 'none';
+            }
+
+            async function saveFlag() {
+                const name = document.getElementById('flag-name').value;
+                const spec = JSON.parse(document.getElementById('flag-json').value);
+                
+                const resp = await fetch('/api/flags', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, spec })
+                });
+
+                if (resp.ok) {
+                    closeModal();
+                    fetchFlags();
+                } else {
+                    alert('Error saving flag');
+                }
+            }
+
+            async function editFlag(name) {
+                const resp = await fetch('/api/flags/' + name);
+                const flag = await resp.json();
+                openModal(name, flag.spec);
+            }
+
+            async function deleteFlag(name) {
+                if (!confirm('Are you sure you want to delete ' + name + '?')) return;
+                const resp = await fetch('/api/flags/' + name, { method: 'DELETE' });
+                if (resp.ok) fetchFlags();
+            }
+
+            fetchFlags();
+        </script>
+    </body>
+    </html>
+    """
+
+    @app.route('/')
+    def index():
+        return render_template_string(HTML_TEMPLATE, namespace=NAMESPACE)
+
+    @app.route('/api/flags', methods=['GET'])
+    def get_flags():
+        try:
+            flags = custom_api.list_namespaced_custom_object(GROUP, VERSION, NAMESPACE, PLURAL)
+            return jsonify(flags.get("items", []))
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    @app.route('/api/flags/<name>', methods=['GET'])
+    def get_flag(name):
+        try:
+            flag = custom_api.get_namespaced_custom_object(GROUP, VERSION, NAMESPACE, PLURAL, name)
+            return jsonify(flag)
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    @app.route('/api/flags', methods=['POST'])
+    def save_flag():
+        data = request.json
+        name = data.get("name")
+        spec = data.get("spec")
+        
+        body = {
+            "apiVersion": f"{GROUP}/{VERSION}",
+            "kind": "FeatureFlag",
+            "metadata": {"name": name},
+            "spec": spec
+        }
+        
+        try:
+            # Check if exists
+            try:
+                custom_api.get_namespaced_custom_object(GROUP, VERSION, NAMESPACE, PLURAL, name)
+                # Update
+                custom_api.patch_namespaced_custom_object(GROUP, VERSION, NAMESPACE, PLURAL, name, body)
+            except:
+                # Create
+                custom_api.create_namespaced_custom_object(GROUP, VERSION, NAMESPACE, PLURAL, body)
+            return jsonify({"status": "success"})
+        except Exception as e:
+            print(f"Error saving: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    @app.route('/api/flags/<name>', methods=['DELETE'])
+    def delete_flag(name):
+        try:
+            custom_api.delete_namespaced_custom_object(GROUP, VERSION, NAMESPACE, PLURAL, name)
+            return jsonify({"status": "success"})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    if __name__ == '__main__':
+        app.run(host='0.0.0.0', port=8080)
