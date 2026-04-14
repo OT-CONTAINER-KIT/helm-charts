@@ -46,7 +46,9 @@ harbor:
         secure: true
         v4auth: true
         skipverify: true
-
+  trivy:
+    enabled: true
+    replicas: 1
   # Replicas variablized for scaling control in BuildPiper
   portal:
     replicas: ${PORTAL_REPLICAS}
