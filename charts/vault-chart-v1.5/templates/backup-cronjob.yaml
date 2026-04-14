@@ -11,9 +11,9 @@ spec:
   failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
+      ttlSecondsAfterFinished: 300
       template:
         spec:
-          ttlSecondsAfterFinished: 300
           serviceAccountName: {{ include "vault.fullname" . }}-vault-sa
           restartPolicy: OnFailure
           containers:
