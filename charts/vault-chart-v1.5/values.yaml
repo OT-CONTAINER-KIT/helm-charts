@@ -61,7 +61,7 @@ backup:
   enabled: true
   schedule: "0/5 * * * *"
   vault:
-    address: "http://vault-main:8200"
+    address: "http://vault-1-main:8200"
   minio:
     endpoint: "https://192.168.8.18:9000"
     accessKey: "minioadmin"
