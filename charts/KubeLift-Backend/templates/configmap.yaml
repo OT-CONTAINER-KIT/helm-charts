@@ -1,0 +1,19 @@
+{{- if .Values.volumes }}
+{{- if .Values.volumes.configMaps }}
+{{ range $cm := .Values.volumes.configMaps}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $cm.name }}
+  labels:
+    {{- include "kubelift.labels" $ | nindent 4 }}
+  namespace: kubelift
+data:
+  {{- range $filename, $content := $cm.data }}
+  {{ $filename }}: |-
+{{ $content | toString | indent 4}}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
