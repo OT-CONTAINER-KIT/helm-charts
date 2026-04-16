@@ -21,10 +21,14 @@ data:
         config.load_kube_config()
 
     custom_api = client.CustomObjectsApi()
-    NAMESPACE = os.getenv("NAMESPACE", "flagd-nonprod")
+    core_api = client.CoreV1Api()
+    
+    # Configuration
     GROUP = "core.openfeature.dev"
     VERSION = "v1beta1"
-    PLURAL = "featureflags"
+    PLURAL_FLAGS = "featureflags"
+    PLURAL_SOURCES = "featureflagsources"
+    DEFAULT_NAMESPACE = os.getenv("NAMESPACE", "flagd-nonprod")
 
     HTML_TEMPLATE = """
     <!DOCTYPE html>
@@ -32,7 +36,7 @@ data:
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Flagd - Feature Flag Manager</title>
+        <title>Flagd Central Manager</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
         <style>
             :root {
@@ -43,225 +47,301 @@ data:
                 --text-secondary: #94a3b8;
                 --success: #22c55e;
                 --danger: #ef4444;
+                --border: rgba(255, 255, 255, 0.1);
             }
 
             body {
                 font-family: 'Inter', sans-serif;
                 background-color: var(--bg-color);
                 color: var(--text-primary);
-                margin: 0;
-                padding: 20px;
+                margin: 0; padding: 20px; line-height: 1.5;
             }
 
-            .container {
-                max-width: 1000px;
-                margin: 0 auto;
-            }
+            .container { max-width: 1200px; margin: 0 auto; }
 
             header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 40px;
-                padding: 20px;
-                background: rgba(30, 41, 59, 0.7);
-                backdrop-filter: blur(10px);
-                border-radius: 16px;
-                border: 1px solid rgba(255, 255, 255, 0.1);
+                display: flex; justify-content: space-between; align-items: center;
+                margin-bottom: 20px; padding: 25px;
+                background: rgba(30, 41, 59, 0.8);
+                backdrop-filter: blur(12px);
+                border-radius: 20px; border: 1px solid var(--border);
             }
 
-            h1 { margin: 0; font-size: 24px; color: var(--accent-color); }
+            .header-left { display: flex; align-items: center; gap: 30px; }
+            h1 { margin: 0; font-size: 24px; color: var(--accent-color); letter-spacing: -0.025em; }
+
+            .ns-selector {
+                background: #0f172a; border: 1px solid #334155; color: white;
+                padding: 10px 15px; border-radius: 10px; font-weight: 500;
+                cursor: pointer; outline: none;
+            }
+
+            .tabs { display: flex; gap: 4px; margin-bottom: 25px; background: rgba(30, 41, 59, 0.4); padding: 5px; border-radius: 12px; width: fit-content; }
+            .tab {
+                padding: 10px 24px; cursor: pointer; color: var(--text-secondary);
+                font-weight: 600; border-radius: 8px; transition: 0.2s;
+            }
+            .tab.active { background: var(--accent-color); color: #000; }
 
             .btn {
-                padding: 10px 20px;
-                border-radius: 8px;
-                border: none;
-                cursor: pointer;
-                font-weight: 600;
-                transition: 0.3s;
+                padding: 12px 24px; border-radius: 10px; border: none;
+                cursor: pointer; font-weight: 600; transition: 0.2s;
+                display: inline-flex; align-items: center; gap: 8px;
             }
-
             .btn-primary { background: var(--accent-color); color: #000; }
-            .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
+            .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3); }
 
-            .flag-card {
-                background: var(--card-bg);
-                border-radius: 12px;
-                padding: 20px;
-                margin-bottom: 20px;
-                border: 1px solid rgba(255, 255, 255, 0.05);
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+            .card {
+                background: var(--card-bg); border-radius: 16px; padding: 24px;
+                border: 1px solid var(--border); transition: 0.3s;
+                display: flex; flex-direction: column; gap: 15px;
             }
+            .card:hover { border-color: var(--accent-color); transform: translateY(-2px); }
 
-            .flag-info h3 { margin: 0 0 5px 0; font-size: 18px; }
-            .flag-info p { margin: 0; color: var(--text-secondary); font-size: 14px; }
+            .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+            .card-title h3 { margin: 0; font-size: 19px; }
+            .card-title p { margin: 4px 0 0 0; color: var(--text-secondary); font-size: 13px; font-family: monospace; }
+            
+            .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+            .badge-source { background: rgba(56, 189, 248, 0.1); color: var(--accent-color); }
 
-            .actions { display: flex; gap: 10px; }
+            .actions { display: flex; gap: 10px; margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border); }
+            .btn-sm { padding: 8px 16px; font-size: 13px; }
             .btn-edit { background: #334155; color: white; }
-            .btn-delete { background: #450a0a; color: var(--danger); }
+            .btn-delete { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
 
             #modal {
-                display: none;
-                position: fixed;
-                top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0, 0, 0, 0.8);
-                justify-content: center;
-                align-items: center;
-                z-index: 1000;
+                display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(4px);
+                justify-content: center; align-items: center; z-index: 2000;
             }
-
             .modal-content {
-                background: var(--card-bg);
-                width: 90%;
-                max-width: 700px;
-                padding: 30px;
-                border-radius: 16px;
-                position: relative;
+                background: var(--card-bg); width: 95%; max-width: 800px;
+                padding: 35px; border-radius: 24px; border: 1px solid var(--border);
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             }
-
             textarea {
-                width: 100%;
-                height: 300px;
-                background: #000;
-                color: #22c55e;
-                font-family: 'Courier New', monospace;
-                padding: 15px;
-                border-radius: 8px;
-                border: 1px solid #334155;
-                margin: 15px 0;
-                box-sizing: border-box;
+                width: 100%; height: 400px;
+                background: #020617; color: #10b981; font-family: 'JetBrains Mono', 'Fira Code', monospace;
+                padding: 20px; border-radius: 12px; border: 1px solid #334155;
+                margin: 20px 0; box-sizing: border-box; font-size: 13px; line-height: 1.6;
             }
-
+            .form-group { margin-bottom: 20px; }
+            label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; color: var(--text-secondary); }
             input {
-                width: 100%;
-                padding: 12px;
-                background: #0f172a;
-                border: 1px solid #334155;
-                color: white;
-                border-radius: 8px;
-                margin-bottom: 15px;
-                box-sizing: border-box;
+                width: 100%; padding: 14px; background: #0f172a;
+                border: 1px solid #334155; color: white; border-radius: 10px;
+                box-sizing: border-box; transition: 0.2s;
             }
+            input:focus { border-color: var(--accent-color); outline: none; }
         </style>
     </head>
     <body>
         <div class="container">
             <header>
-                <h1>Flagd Manager</h1>
-                <button class="btn btn-primary" onclick="openModal()">+ Add New Flag</button>
+                <div class="header-left">
+                    <h1>Flagd Central</h1>
+                    <select class="ns-selector" id="namespace-selector" onchange="updateNamespace(this.value)">
+                        <option value="all">All Namespaces</option>
+                    </select>
+                </div>
+                <div id="action-btn-container"></div>
             </header>
 
-            <div id="flag-list">
-                <p style="text-align: center; color: var(--text-secondary);">Loading flags...</p>
+            <div class="tabs">
+                <div class="tab active" id="tab-flags" onclick="switchTab('flags')">Feature Flags</div>
+                <div class="tab" id="tab-sources" onclick="switchTab('sources')">Flag Sources</div>
+            </div>
+
+            <div id="list-container" class="grid">
+                <p style="text-align: center; grid-column: 1/-1; color: var(--text-secondary);">Initializing management interface...</p>
             </div>
         </div>
 
         <div id="modal">
             <div class="modal-content">
-                <h2 id="modal-title">Create Feature Flag</h2>
-                <input type="text" id="flag-name" placeholder="Flag Resource Name (e.g. my-flags)">
-                <p style="font-size: 12px; color: var(--text-secondary);">Flag Specification (JSON):</p>
-                <textarea id="flag-json">{
-      "flagSpec": {
-        "flags": {
-          "new-feature": {
-            "state": "ENABLED",
-            "variants": {
-              "on": true,
-              "off": false
-            },
-            "defaultVariant": "on"
-          }
-        }
-      }
-    }</textarea>
-                <div class="actions">
-                    <button class="btn btn-primary" style="width: 100%;" onclick="saveFlag()">Save Flag</button>
-                    <button class="btn btn-edit" onclick="closeModal()">Cancel</button>
+                <h2 id="modal-title" style="margin: 0 0 25px 0;">Create Resource</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label>Target Namespace</label>
+                        <select class="ns-selector" style="width: 100%" id="modal-namespace"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Resource Name</label>
+                        <input type="text" id="item-name" placeholder="e.g. app-features-vault">
+                    </div>
+                </div>
+                <label>Configuration Specification (JSON)</label>
+                <textarea id="item-json" spellcheck="false"></textarea>
+                <div style="display: flex; gap: 15px;">
+                    <button class="btn btn-primary" style="flex: 2" onclick="saveItem()">Apply Configuration</button>
+                    <button class="btn btn-edit" style="flex: 1" onclick="closeModal()">Discard Changes</button>
                 </div>
             </div>
         </div>
 
         <script>
-            let currentNamespace = "{{ "{{" }} namespace {{ "}}" }}";
+            let currentTab = 'flags';
+            let activeNamespace = 'all';
+            let namespaces = [];
 
-            async function fetchFlags() {
-                const resp = await fetch('/api/flags');
+            const TEMPLATES = {
+                flags: {
+                    flagSpec: {
+                        flags: {
+                            "new-feature-toggle": {
+                                state: "ENABLED",
+                                variants: { on: true, off: false },
+                                defaultVariant: "on"
+                            }
+                        }
+                    }
+                },
+                sources: {
+                    sources: [
+                        {
+                            source: "https://vault.opstree.dev/v1/secret/data/feature-flags",
+                            provider: "http",
+                            interval: 30
+                        }
+                    ],
+                    envVars: [
+                      {
+                        name: "HTTP_SYNC_BEARER_TOKEN",
+                        valueFrom: {
+                          secretKeyRef: {
+                            name: "vault-token-secret", // Ensure this secret exists in the namespace
+                            key: "token"
+                          }
+                        }
+                      }
+                    ]
+                }
+            };
+
+            async function init() {
+                const nsResp = await fetch('/api/namespaces');
+                namespaces = await nsResp.json();
+                
+                const selectors = [document.getElementById('namespace-selector'), document.getElementById('modal-namespace')];
+                selectors.forEach(sel => {
+                    namespaces.forEach(ns => {
+                        const opt = document.createElement('option');
+                        opt.value = ns; opt.text = ns;
+                        if (ns === '{{ "{{" }} default_ns {{ "}}" }}') opt.selected = true;
+                        sel.appendChild(opt);
+                    });
+                });
+                
+                activeNamespace = document.getElementById('namespace-selector').value;
+                switchTab('flags');
+            }
+
+            function updateNamespace(val) {
+                activeNamespace = val;
+                fetchItems();
+            }
+
+            function switchTab(tab) {
+                currentTab = tab;
+                document.getElementById('tab-flags').className = tab === 'flags' ? 'tab active' : 'tab';
+                document.getElementById('tab-sources').className = tab === 'sources' ? 'tab active' : 'tab';
+                
+                const btnContainer = document.getElementById('action-btn-container');
+                btnContainer.innerHTML = `<button class="btn btn-primary" onclick="openModal()">+ Add New ${tab === 'flags' ? 'Flag' : 'Source'}</button>`;
+                
+                fetchItems();
+            }
+
+            async function fetchItems() {
+                const endpoint = (currentTab === 'flags' ? '/api/flags' : '/api/sources') + '?ns=' + activeNamespace;
+                const resp = await fetch(endpoint);
                 const data = await resp.json();
-                const list = document.getElementById('flag-list');
+                const list = document.getElementById('list-container');
                 list.innerHTML = '';
 
                 if (data.length === 0) {
-                    list.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No feature flags found in ' + currentNamespace + '</p>';
+                    list.innerHTML = `<div style="text-align: center; grid-column: 1/-1; padding: 60px; color: var(--text-secondary);">
+                        No ${currentTab} configurations found in filter "${activeNamespace}"
+                    </div>`;
                     return;
                 }
 
-                data.forEach(flag => {
+                data.forEach(item => {
                     const card = document.createElement('div');
-                    card.className = 'flag-card';
+                    card.className = 'card';
                     card.innerHTML = `
-                        <div class="flag-info">
-                            <h3>${flag.metadata.name}</h3>
-                            <p>Version: ${flag.metadata.resourceVersion} | Namespace: ${flag.metadata.namespace}</p>
+                        <div class="card-header">
+                            <div class="card-title">
+                                <h3>${item.metadata.name}</h3>
+                                <p>ns/${item.metadata.namespace}</p>
+                            </div>
+                            <span class="badge ${currentTab === 'flags' ? 'badge-success' : 'badge-source'}">
+                                ${currentTab === 'flags' ? 'FeatureFlag' : 'Source'}
+                            </span>
                         </div>
                         <div class="actions">
-                            <button class="btn btn-edit" onclick="editFlag('${flag.metadata.name}')">Edit</button>
-                            <button class="btn btn-delete" onclick="deleteFlag('${flag.metadata.name}')">Delete</button>
+                            <button class="btn btn-sm btn-edit" onclick="editItem('${item.metadata.namespace}', '${item.metadata.name}')">Configure</button>
+                            <button class="btn btn-sm btn-delete" onclick="deleteItem('${item.metadata.namespace}', '${item.metadata.name}')">Remove</button>
                         </div>
                     `;
                     list.appendChild(card);
                 });
             }
 
-            function openModal(name = '', json = null) {
+            function openModal(ns = '', name = '', json = null) {
                 document.getElementById('modal').style.display = 'flex';
-                document.getElementById('flag-name').value = name;
-                document.getElementById('flag-name').disabled = !!name;
-                document.getElementById('modal-title').innerText = name ? 'Edit Flag' : 'Create Flag';
+                document.getElementById('modal-namespace').value = ns || (activeNamespace === 'all' ? '{{ "{{" }} default_ns {{ "}}" }}' : activeNamespace);
+                document.getElementById('modal-namespace').disabled = !!name;
+                document.getElementById('item-name').value = name;
+                document.getElementById('item-name').disabled = !!name;
+                document.getElementById('modal-title').innerText = name ? `Update ${currentTab}` : `New Centralized ${currentTab}`;
                 
                 if (json) {
-                    document.getElementById('flag-json').value = JSON.stringify(json, null, 2);
-                }
-            }
-
-            function closeModal() {
-                document.getElementById('modal').style.display = 'none';
-            }
-
-            async function saveFlag() {
-                const name = document.getElementById('flag-name').value;
-                const spec = JSON.parse(document.getElementById('flag-json').value);
-                
-                const resp = await fetch('/api/flags', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, spec })
-                });
-
-                if (resp.ok) {
-                    closeModal();
-                    fetchFlags();
+                    document.getElementById('item-json').value = JSON.stringify(json, null, 2);
                 } else {
-                    alert('Error saving flag');
+                    document.getElementById('item-json').value = JSON.stringify(TEMPLATES[currentTab], null, 2);
                 }
             }
 
-            async function editFlag(name) {
-                const resp = await fetch('/api/flags/' + name);
-                const flag = await resp.json();
-                openModal(name, flag.spec);
+            function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+            async function saveItem() {
+                const ns = document.getElementById('modal-namespace').value;
+                const name = document.getElementById('item-name').value;
+                const specInput = document.getElementById('item-json').value;
+                
+                try {
+                    const spec = JSON.parse(specInput);
+                    const endpoint = currentTab === 'flags' ? '/api/flags' : '/api/sources';
+                    
+                    const resp = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ns, name, spec })
+                    });
+
+                    if (resp.ok) { closeModal(); fetchItems(); } 
+                    else { alert('Deployment Failed: Access Denied or Invalid Configuration'); }
+                } catch(e) { alert('Invalid JSON Syntax in Specification'); }
             }
 
-            async function deleteFlag(name) {
-                if (!confirm('Are you sure you want to delete ' + name + '?')) return;
-                const resp = await fetch('/api/flags/' + name, { method: 'DELETE' });
-                if (resp.ok) fetchFlags();
+            async function editItem(ns, name) {
+                const endpoint = (currentTab === 'flags' ? '/api/flags/' : '/api/sources/') + name + '?ns=' + ns;
+                const resp = await fetch(endpoint);
+                const item = await resp.json();
+                openModal(ns, name, item.spec);
             }
 
-            fetchFlags();
+            async function deleteItem(ns, name) {
+                if (!confirm(`Permanently remove ${name} from ${ns}?`)) return;
+                const endpoint = (currentTab === 'flags' ? '/api/flags/' : '/api/sources/') + name + '?ns=' + ns;
+                const resp = await fetch(endpoint, { method: 'DELETE' });
+                if (resp.ok) fetchItems();
+            }
+
+            init();
         </script>
     </body>
     </html>
@@ -269,58 +349,59 @@ data:
 
     @app.route('/')
     def index():
-        return render_template_string(HTML_TEMPLATE, namespace=NAMESPACE)
+        return render_template_string(HTML_TEMPLATE, default_ns=DEFAULT_NAMESPACE)
 
-    @app.route('/api/flags', methods=['GET'])
-    def get_flags():
+    @app.route('/api/namespaces')
+    def get_namespaces():
         try:
-            flags = custom_api.list_namespaced_custom_object(GROUP, VERSION, NAMESPACE, PLURAL)
-            return jsonify(flags.get("items", []))
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
+            nss = core_api.list_namespace()
+            return jsonify([ns.metadata.name for ns in nss.items])
+        except:
+            return jsonify([DEFAULT_NAMESPACE])
 
-    @app.route('/api/flags/<name>', methods=['GET'])
-    def get_flag(name):
-        try:
-            flag = custom_api.get_namespaced_custom_object(GROUP, VERSION, NAMESPACE, PLURAL, name)
-            return jsonify(flag)
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
-
-    @app.route('/api/flags', methods=['POST'])
-    def save_flag():
-        data = request.json
-        name = data.get("name")
-        spec = data.get("spec")
+    def handle_request(plural, name=None):
+        ns = request.args.get('ns', DEFAULT_NAMESPACE)
+        if request.method == 'GET':
+            if name:
+                return jsonify(custom_api.get_namespaced_custom_object(GROUP, VERSION, ns, plural, name))
+            if ns == 'all':
+                items = custom_api.list_cluster_custom_object(GROUP, VERSION, plural)
+            else:
+                items = custom_api.list_namespaced_custom_object(GROUP, VERSION, ns, plural)
+            return jsonify(items.get("items", []))
         
-        body = {
-            "apiVersion": f"{GROUP}/{VERSION}",
-            "kind": "FeatureFlag",
-            "metadata": {"name": name},
-            "spec": spec
-        }
-        
-        try:
-            # Check if exists
+        if request.method == 'POST':
+            data = request.json
+            target_ns = data.get("ns")
+            name = data.get("name")
+            spec = data.get("spec")
+            kind = "FeatureFlag" if plural == PLURAL_FLAGS else "FeatureFlagSource"
+            body = {
+                "apiVersion": f"{GROUP}/{VERSION}",
+                "kind": kind,
+                "metadata": {"name": name, "namespace": target_ns},
+                "spec": spec
+            }
             try:
-                custom_api.get_namespaced_custom_object(GROUP, VERSION, NAMESPACE, PLURAL, name)
-                # Update
-                custom_api.patch_namespaced_custom_object(GROUP, VERSION, NAMESPACE, PLURAL, name, body)
+                custom_api.get_namespaced_custom_object(GROUP, VERSION, target_ns, plural, name)
+                return jsonify(custom_api.patch_namespaced_custom_object(GROUP, VERSION, target_ns, plural, name, body))
             except:
-                # Create
-                custom_api.create_namespaced_custom_object(GROUP, VERSION, NAMESPACE, PLURAL, body)
-            return jsonify({"status": "success"})
-        except Exception as e:
-            print(f"Error saving: {e}")
-            return jsonify({"error": str(e)}), 500
+                return jsonify(custom_api.create_namespaced_custom_object(GROUP, VERSION, target_ns, plural, body))
 
-    @app.route('/api/flags/<name>', methods=['DELETE'])
-    def delete_flag(name):
-        try:
-            custom_api.delete_namespaced_custom_object(GROUP, VERSION, NAMESPACE, PLURAL, name)
-            return jsonify({"status": "success"})
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
+        if request.method == 'DELETE':
+            return jsonify(custom_api.delete_namespaced_custom_object(GROUP, VERSION, ns, plural, name))
+
+    @app.route('/api/flags', methods=['GET', 'POST'])
+    @app.route('/api/flags/<name>', methods=['GET', 'DELETE'])
+    def flags(name=None):
+        try: return handle_request(PLURAL_FLAGS, name)
+        except Exception as e: return jsonify({"error": str(e)}), 500
+
+    @app.route('/api/sources', methods=['GET', 'POST'])
+    @app.route('/api/sources/<name>', methods=['GET', 'DELETE'])
+    def sources(name=None):
+        try: return handle_request(PLURAL_SOURCES, name)
+        except Exception as e: return jsonify({"error": str(e)}), 500
 
     if __name__ == '__main__':
         app.run(host='0.0.0.0', port=8080)
