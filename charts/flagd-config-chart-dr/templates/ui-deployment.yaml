@@ -59,6 +59,14 @@ spec:
               value: /tmp/lib/python3.11/site-packages
             - name: HOME
               value: /tmp
+            {{- if .Values.ui.auth.enabled }}
+            - name: UI_USERNAME
+              value: {{ .Values.ui.auth.username | quote }}
+            - name: UI_PASSWORD
+              value: {{ .Values.ui.auth.password | quote }}
+            - name: FLASK_SECRET_KEY
+              value: {{ .Values.ui.auth.secretKey | quote }}
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.ui.service.targetPort }}

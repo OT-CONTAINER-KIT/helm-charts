@@ -118,3 +118,8 @@ ui:
           - path: /
             pathType: ImplementationSpecific
     tls: []
+  auth:
+    enabled: true
+    username: "admin"
+    password: "password123" # Use a Secret in production
+    secretKey: "flagd-manager-awesome-secret"

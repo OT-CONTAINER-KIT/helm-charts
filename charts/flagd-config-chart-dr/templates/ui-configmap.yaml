@@ -8,11 +8,13 @@ metadata:
 data:
   app.py: |
     import os
-    from flask import Flask, render_template_string, request, jsonify
-    from kubernetes import client, config
     import json
+    from flask import Flask, render_template_string, request, jsonify, session, redirect, url_for
+    from kubernetes import client, config
+    from functools import wraps
 
     app = Flask(__name__)
+    app.secret_key = os.getenv("FLASK_SECRET_KEY", "flagd-manager-awesome-secret")
 
     # Load Kubernetes configuration
     try:
@@ -29,6 +31,78 @@ data:
     PLURAL_FLAGS = "featureflags"
     PLURAL_SOURCES = "featureflagsources"
     DEFAULT_NAMESPACE = os.getenv("NAMESPACE", "flagd-nonprod")
+    
+    # Auth Configuration
+    UI_USER = os.getenv("UI_USERNAME", "admin")
+    UI_PASS = os.getenv("UI_PASSWORD", "admin")
+
+    # Auth Decorator
+    def login_required(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not session.get("logged_in"):
+                return redirect(url_for('login'))
+            return f(*args, **kwargs)
+        return decorated_function
+
+    LOGIN_HTML = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Login - Flagd Central</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --bg-color: #0f172a;
+                --card-bg: #1e293b;
+                --accent-color: #38bdf8;
+                --text-primary: #f8fafc;
+                --text-secondary: #94a3b8;
+                --border: rgba(255, 255, 255, 0.1);
+            }
+            body { 
+                font-family: 'Inter', sans-serif; background-color: var(--bg-color); 
+                color: var(--text-primary); display: flex; align-items: center; 
+                justify-content: center; height: 100vh; margin: 0;
+            }
+            .login-card {
+                background: var(--card-bg); padding: 40px; border-radius: 24px;
+                border: 1px solid var(--border); width: 100%; max-width: 400px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            }
+            h1 { font-size: 28px; margin-bottom: 30px; color: var(--accent-color); text-align: center; }
+            input {
+                width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155;
+                color: white; border-radius: 12px; box-sizing: border-box; margin-bottom: 20px;
+                font-family: inherit; font-size: 16px;
+            }
+            .btn-login {
+                width: 100%; padding: 14px; background: var(--accent-color); color: #000;
+                border: none; border-radius: 12px; font-weight: 700; cursor: pointer;
+                font-size: 16px; transition: 0.2s;
+            }
+            .btn-login:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4); }
+            .error { color: #ef4444; text-align: center; margin-bottom: 20px; font-size: 14px; }
+        </style>
+    </head>
+    <body>
+        <div class="login-card">
+            <h1>Flagd Central</h1>
+            {% if error %}<div class="error">{{ error }}</div>{% endif %}
+            <form method="POST">
+                <input type="text" name="username" placeholder="Username" required autofocus>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit" class="btn-login">Unlock Manager</button>
+            </form>
+            <p style="text-align: center; color: var(--text-secondary); font-size: 12px; margin-top: 20px;">
+                Secure access for coe-dev-cluster
+            </p>
+        </div>
+    </body>
+    </html>
+    """
 
     HTML_TEMPLATE = """
     <!DOCTYPE html>
@@ -110,6 +184,7 @@ data:
             .btn-sm { padding: 8px 16px; font-size: 13px; }
             .btn-edit { background: #334155; color: white; }
             .btn-delete { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+            .btn-logout { font-size: 13px; color: var(--text-secondary); background: transparent; border: 1px solid #334155; }
 
             #modal {
                 display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -146,7 +221,10 @@ data:
                         <option value="all">All Namespaces</option>
                     </select>
                 </div>
-                <div id="action-btn-container"></div>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <button class="btn btn-logout" onclick="location.href='/logout'">Logout</button>
+                    <div id="action-btn-container"></div>
+                </div>
             </header>
 
             <div class="tabs">
@@ -211,7 +289,7 @@ data:
                         name: "HTTP_SYNC_BEARER_TOKEN",
                         valueFrom: {
                           secretKeyRef: {
-                            name: "vault-token-secret", // Ensure this secret exists in the namespace
+                            name: "vault-token-secret",
                             key: "token"
                           }
                         }
@@ -222,6 +300,7 @@ data:
 
             async function init() {
                 const nsResp = await fetch('/api/namespaces');
+                if (nsResp.status === 401) return location.href = '/login';
                 namespaces = await nsResp.json();
                 
                 const selectors = [document.getElementById('namespace-selector'), document.getElementById('modal-namespace')];
@@ -257,6 +336,7 @@ data:
             async function fetchItems() {
                 const endpoint = (currentTab === 'flags' ? '/api/flags' : '/api/sources') + '?ns=' + activeNamespace;
                 const resp = await fetch(endpoint);
+                if (resp.status === 401) return location.href = '/login';
                 const data = await resp.json();
                 const list = document.getElementById('list-container');
                 list.innerHTML = '';
@@ -347,11 +427,27 @@ data:
     </html>
     """
 
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        if request.method == 'POST':
+            if request.form['username'] == UI_USER and request.form['password'] == UI_PASS:
+                session['logged_in'] = True
+                return redirect(url_for('index'))
+            return render_template_string(LOGIN_HTML, error="Invalid credentials")
+        return render_template_string(LOGIN_HTML)
+
+    @app.route('/logout')
+    def logout():
+        session.pop('logged_in', None)
+        return redirect(url_for('login'))
+
     @app.route('/')
+    @login_required
     def index():
         return render_template_string(HTML_TEMPLATE, default_ns=DEFAULT_NAMESPACE)
 
     @app.route('/api/namespaces')
+    @login_required
     def get_namespaces():
         try:
             nss = core_api.list_namespace()
@@ -393,12 +489,14 @@ data:
 
     @app.route('/api/flags', methods=['GET', 'POST'])
     @app.route('/api/flags/<name>', methods=['GET', 'DELETE'])
+    @login_required
     def flags(name=None):
         try: return handle_request(PLURAL_FLAGS, name)
         except Exception as e: return jsonify({"error": str(e)}), 500
 
     @app.route('/api/sources', methods=['GET', 'POST'])
     @app.route('/api/sources/<name>', methods=['GET', 'DELETE'])
+    @login_required
     def sources(name=None):
         try: return handle_request(PLURAL_SOURCES, name)
         except Exception as e: return jsonify({"error": str(e)}), 500
