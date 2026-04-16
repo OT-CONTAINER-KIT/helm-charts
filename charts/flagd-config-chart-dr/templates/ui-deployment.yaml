@@ -15,10 +15,11 @@ spec:
       app.kubernetes.io/component: ui
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/ui-configmap.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       labels:
         {{- include "flagd-config-chart-dr.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: ui
