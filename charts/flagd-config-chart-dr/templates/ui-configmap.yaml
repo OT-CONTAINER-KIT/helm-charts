@@ -90,7 +90,7 @@ data:
     <body>
         <div class="login-card">
             <h1>Flagd Central</h1>
-            {% if error %}<div class="error">{{ error }}</div>{% endif %}
+            {% if error %}<div class="error">{{ "{{" }} error {{ "}}" }}</div>{% endif %}
             <form method="POST">
                 <input type="text" name="username" placeholder="Username" required autofocus>
                 <input type="password" name="password" placeholder="Password" required>
