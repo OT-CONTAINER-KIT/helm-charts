@@ -1,0 +1,33 @@
+{{- if .Values.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "vault.fullname" . }}-backup
+  namespace: {{ .Release.Namespace }}
+spec:
+  schedule: "{{ .Values.backup.schedule }}"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 300
+      template:
+        spec:
+          serviceAccountName: {{ include "vault.fullname" . }}-vault-sa
+          restartPolicy: OnFailure
+          containers:
+          - name: vault-backup
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            command:
+            - /bin/sh
+            - /scripts/backup.sh
+            volumeMounts:
+            - name: script
+              mountPath: /scripts
+          volumes:
+          - name: script
+            configMap:
+              name: {{ include "vault.fullname" . }}-backup-script
+              defaultMode: 0755
+{{- end }}
