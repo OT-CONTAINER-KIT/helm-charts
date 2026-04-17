@@ -10,7 +10,7 @@ main:
 
 image:
   repository: hashicorp/vault
-  tag: "2.0.0"
+  tag: "1.21.4"
 
 vault:
   ui: true
