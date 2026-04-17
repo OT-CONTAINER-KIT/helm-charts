@@ -82,9 +82,10 @@ backup:
     count: 5
   minio:
     url: "https://minio.ldc.opstree.dev:9000/"
-    accessKey: "minioadmin"
-    secretKey: "opstreeadmin@2510"
+    accessKey: ""
+    secretKey: ""
     bucket: "flagd-backup"
+    existingSecret: "" # Path to secret containing accessKey, secretKey (optional)
 
 restore:
   enabled: false
@@ -120,14 +121,16 @@ ui:
     tls: []
   auth:
     enabled: true
-    username: "admin"
-    password: "password123" # Use a Secret in production
-    secretKey: "flagd-manager-awesome-secret"
+    username: ""
+    password: ""
+    secretKey: ""
+    existingSecret: "" # Path to secret containing username, password, secretKey (optional)
   sso:
     enabled: true
     discoveryUrl: "https://keycloak.opstree.dev/realms/master/.well-known/openid-configuration"
-    clientId: "flagd"
-    clientSecret: "12Ow0JyUoBfdc3jQFMAEuHlP3Gr6Fn4z"
+    clientId: ""
+    clientSecret: ""
+    existingSecret: "" # Path to secret containing clientId, clientSecret (optional)
   config:
     brandName: "Flagd Central"
     clusterDescription: "Secure access for coe-dev-cluster"

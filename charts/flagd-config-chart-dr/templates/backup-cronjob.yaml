@@ -85,12 +85,12 @@ spec:
                 - name: MINIO_ACCESS_KEY
                   valueFrom:
                     secretKeyRef:
-                      name: {{ include "flagd-config-chart-dr.fullname" . }}-backup-creds
+                      name: {{ .Values.backup.minio.existingSecret | default (printf "%s-backup-creds" (include "flagd-config-chart-dr.fullname" .)) }}
                       key: accessKey
                 - name: MINIO_SECRET_KEY
                   valueFrom:
                     secretKeyRef:
-                      name: {{ include "flagd-config-chart-dr.fullname" . }}-backup-creds
+                      name: {{ .Values.backup.minio.existingSecret | default (printf "%s-backup-creds" (include "flagd-config-chart-dr.fullname" .)) }}
                       key: secretKey
               volumeMounts:
                 - name: data

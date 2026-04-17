@@ -63,7 +63,7 @@ spec:
             - name: MINIO_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "flagd-config-chart-dr.fullname" . }}-backup-creds
+                  name: {{ .Values.backup.minio.existingSecret | default (printf "%s-backup-creds" (include "flagd-config-chart-dr.fullname" .)) }}
                   {{- if $useRestoreCreds }}
                   key: restoreAccessKey
                   {{- else }}
@@ -72,7 +72,7 @@ spec:
             - name: MINIO_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "flagd-config-chart-dr.fullname" . }}-backup-creds
+                  name: {{ .Values.backup.minio.existingSecret | default (printf "%s-backup-creds" (include "flagd-config-chart-dr.fullname" .)) }}
                   {{- if $useRestoreCreds }}
                   key: restoreSecretKey
                   {{- else }}

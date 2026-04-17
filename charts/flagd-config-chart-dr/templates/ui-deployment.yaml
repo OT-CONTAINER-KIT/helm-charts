@@ -61,20 +61,35 @@ spec:
               value: /tmp
             {{- if .Values.ui.auth.enabled }}
             - name: UI_USERNAME
-              value: {{ .Values.ui.auth.username | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ui.auth.existingSecret | default (printf "%s-ui-auth" (include "flagd-config-chart-dr.fullname" .)) }}
+                  key: username
             - name: UI_PASSWORD
-              value: {{ .Values.ui.auth.password | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ui.auth.existingSecret | default (printf "%s-ui-auth" (include "flagd-config-chart-dr.fullname" .)) }}
+                  key: password
             - name: FLASK_SECRET_KEY
-              value: {{ .Values.ui.auth.secretKey | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ui.auth.existingSecret | default (printf "%s-ui-auth" (include "flagd-config-chart-dr.fullname" .)) }}
+                  key: secretKey
             {{- end }}
             - name: SSO_ENABLED
               value: {{ .Values.ui.sso.enabled | quote }}
             - name: SSO_DISCOVERY_URL
               value: {{ .Values.ui.sso.discoveryUrl | quote }}
             - name: SSO_CLIENT_ID
-              value: {{ .Values.ui.sso.clientId | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ui.sso.existingSecret | default (printf "%s-ui-sso" (include "flagd-config-chart-dr.fullname" .)) }}
+                  key: clientId
             - name: SSO_CLIENT_SECRET
-              value: {{ .Values.ui.sso.clientSecret | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ui.sso.existingSecret | default (printf "%s-ui-sso" (include "flagd-config-chart-dr.fullname" .)) }}
+                  key: clientSecret
             - name: UI_BRAND_NAME
               value: {{ .Values.ui.config.brandName | quote }}
             - name: UI_CLUSTER_DESC
