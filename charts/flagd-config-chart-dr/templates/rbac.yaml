@@ -22,7 +22,7 @@ rules:
     resources: ["deployments"]
     verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
   - apiGroups: [""]
-    resources: ["configmaps", "services", "serviceaccounts", "pods"]
+    resources: ["configmaps", "services", "serviceaccounts", "pods", "namespaces"]
     verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
   - apiGroups: [""]
     resources: ["events"]
