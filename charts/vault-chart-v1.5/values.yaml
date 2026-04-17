@@ -6,7 +6,7 @@ transit:
 
 main:
   enabled: true
-  replicaCount: 4
+  replicaCount: 3
 
 image:
   repository: hashicorp/vault
@@ -59,7 +59,7 @@ ingress:
 # ***************************  BACKUP CONFIG  *********************
 backup:
   enabled: true
-  schedule: "0/5 * * * *"
+  schedule: "0 */12 * * *"
   vault:
     address: "http://vault-1-main:8200"
   minio:
@@ -67,7 +67,7 @@ backup:
     accessKey: "minioadmin"
     secretKey: "opstreeadmin@2510"
     bucket: "vault-backup"
-    retentionCount: 3
+    retentionCount: 6
 # ***************************** RESTORE CONFIG **********************
 
 restore:
