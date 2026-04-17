@@ -13,8 +13,10 @@ data:
     from kubernetes import client, config
     from functools import wraps
     from authlib.integrations.flask_client import OAuth
+    from werkzeug.middleware.proxy_fix import ProxyFix
 
     app = Flask(__name__)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
     app.secret_key = os.getenv("FLASK_SECRET_KEY", "flagd-manager-awesome-secret")
 
     # Load Kubernetes configuration
@@ -479,8 +481,12 @@ data:
 
     @app.route('/logout')
     def logout():
-        session.pop('logged_in', None)
-        session.pop('user', None)
+        session.clear()
+        if SSO_ENABLED:
+            # Basic OIDC logout redirect
+            logout_url = SSO_DISCOVERY_URL.replace('.well-known/openid-configuration', 'protocol/openid-connect/logout')
+            redirect_query = f"?client_id={SSO_CLIENT_ID}&post_logout_redirect_uri={url_for('login', _external=True)}"
+            return redirect(logout_url + redirect_query)
         return redirect(url_for('login'))
 
     @app.route('/')
@@ -499,40 +505,48 @@ data:
         try:
             nss = core_api.list_namespace()
             return jsonify([ns.metadata.name for ns in nss.items])
-        except:
+        except Exception as e:
+            print(f"Error listing namespaces: {e}")
             return jsonify([DEFAULT_NAMESPACE])
 
     def handle_request(plural, name=None):
         ns = request.args.get('ns', DEFAULT_NAMESPACE)
-        if request.method == 'GET':
-            if name:
-                return jsonify(custom_api.get_namespaced_custom_object(GROUP, VERSION, ns, plural, name))
-            if ns == 'all':
-                items = custom_api.list_cluster_custom_object(GROUP, VERSION, plural)
-            else:
-                items = custom_api.list_namespaced_custom_object(GROUP, VERSION, ns, plural)
-            return jsonify(items.get("items", []))
-        
-        if request.method == 'POST':
-            data = request.json
-            target_ns = data.get("ns")
-            name = data.get("name")
-            spec = data.get("spec")
-            kind = "FeatureFlag" if plural == PLURAL_FLAGS else "FeatureFlagSource"
-            body = {
-                "apiVersion": f"{GROUP}/{VERSION}",
-                "kind": kind,
-                "metadata": {"name": name, "namespace": target_ns},
-                "spec": spec
-            }
-            try:
-                custom_api.get_namespaced_custom_object(GROUP, VERSION, target_ns, plural, name)
-                return jsonify(custom_api.patch_namespaced_custom_object(GROUP, VERSION, target_ns, plural, name, body))
-            except:
-                return jsonify(custom_api.create_namespaced_custom_object(GROUP, VERSION, target_ns, plural, body))
+        try:
+            if request.method == 'GET':
+                if name:
+                    return jsonify(custom_api.get_namespaced_custom_object(GROUP, VERSION, ns, plural, name))
+                if ns == 'all':
+                    items = custom_api.list_cluster_custom_object(GROUP, VERSION, plural)
+                else:
+                    items = custom_api.list_namespaced_custom_object(GROUP, VERSION, ns, plural)
+                return jsonify(items.get("items", []))
+            
+            if request.method == 'POST':
+                data = request.json
+                if not data: return jsonify({"error": "No data provided"}), 400
+                target_ns = data.get("ns", ns)
+                name = data.get("name")
+                spec = data.get("spec")
+                if not name or not spec: return jsonify({"error": "Name and Spec are required"}), 400
+                
+                kind = "FeatureFlag" if plural == PLURAL_FLAGS else "FeatureFlagSource"
+                body = {
+                    "apiVersion": f"{GROUP}/{VERSION}",
+                    "kind": kind,
+                    "metadata": {"name": name, "namespace": target_ns},
+                    "spec": spec
+                }
+                try:
+                    custom_api.get_namespaced_custom_object(GROUP, VERSION, target_ns, plural, name)
+                    return jsonify(custom_api.patch_namespaced_custom_object(GROUP, VERSION, target_ns, plural, name, body))
+                except:
+                    return jsonify(custom_api.create_namespaced_custom_object(GROUP, VERSION, target_ns, plural, body))
 
-        if request.method == 'DELETE':
-            return jsonify(custom_api.delete_namespaced_custom_object(GROUP, VERSION, ns, plural, name))
+            if request.method == 'DELETE':
+                if not name: return jsonify({"error": "Name required for deletion"}), 400
+                return jsonify(custom_api.delete_namespaced_custom_object(GROUP, VERSION, ns, plural, name))
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
 
     @app.route('/api/flags', methods=['GET', 'POST'])
     @app.route('/api/flags/<name>', methods=['GET', 'DELETE'])
