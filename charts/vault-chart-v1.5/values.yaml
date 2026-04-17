@@ -71,5 +71,5 @@ backup:
 # ***************************** RESTORE CONFIG **********************
 
 restore:
-  enabled: false
+  enabled: true
   snapshotName: ""
