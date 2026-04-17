@@ -123,3 +123,16 @@ ui:
     username: "admin"
     password: "password123" # Use a Secret in production
     secretKey: "flagd-manager-awesome-secret"
+  sso:
+    enabled: true
+    discoveryUrl: "https://keycloak.opstree.dev/realms/master/.well-known/openid-configuration"
+    clientId: "flagd"
+    clientSecret: "12Ow0JyUoBfdc3jQFMAEuHlP3Gr6Fn4z"
+  config:
+    brandName: "Flagd Central"
+    clusterDescription: "Secure access for coe-dev-cluster"
+    defaultNamespace: "flagd-nonprod"
+    vault:
+      url: "https://vault.opstree.dev/v1/secret/data/feature-flags"
+      secretName: "vault-token-secret"
+      secretKey: "token"

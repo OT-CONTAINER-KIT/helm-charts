@@ -12,6 +12,7 @@ data:
     from flask import Flask, render_template_string, request, jsonify, session, redirect, url_for
     from kubernetes import client, config
     from functools import wraps
+    from authlib.integrations.flask_client import OAuth
 
     app = Flask(__name__)
     app.secret_key = os.getenv("FLASK_SECRET_KEY", "flagd-manager-awesome-secret")
@@ -32,15 +33,42 @@ data:
     PLURAL_SOURCES = "featureflagsources"
     DEFAULT_NAMESPACE = os.getenv("NAMESPACE", "flagd-nonprod")
     
+    # UI Brand Configuration
+    BRAND_NAME = os.getenv("UI_BRAND_NAME", "Flagd Central")
+    CLUSTER_DESC = os.getenv("UI_CLUSTER_DESC", "Secure Cluster Management")
+    
+    # Vault Template Configuration
+    VAULT_URL = os.getenv("UI_VAULT_URL", "https://vault.opstree.dev/v1/secret/data/feature-flags")
+    VAULT_SECRET = os.getenv("UI_VAULT_SECRET_NAME", "vault-token-secret")
+    VAULT_KEY = os.getenv("UI_VAULT_SECRET_KEY", "token")
+
     # Auth Configuration
     UI_USER = os.getenv("UI_USERNAME", "admin")
     UI_PASS = os.getenv("UI_PASSWORD", "admin")
+
+    # SSO Configuration
+    SSO_ENABLED = os.getenv("SSO_ENABLED", "false").lower() == "true"
+    SSO_DISCOVERY_URL = os.getenv("SSO_DISCOVERY_URL")
+    SSO_CLIENT_ID = os.getenv("SSO_CLIENT_ID")
+    SSO_CLIENT_SECRET = os.getenv("SSO_CLIENT_SECRET")
+
+    oauth = OAuth(app)
+    if SSO_ENABLED:
+        oauth.register(
+            name='keycloak',
+            client_id=SSO_CLIENT_ID,
+            client_secret=SSO_CLIENT_SECRET,
+            server_metadata_url=SSO_DISCOVERY_URL,
+            client_kwargs={
+                'scope': 'openid profile email',
+            }
+        )
 
     # Auth Decorator
     def login_required(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if not session.get("logged_in"):
+            if not session.get("logged_in") and not session.get("user"):
                 return redirect(url_for('login'))
             return f(*args, **kwargs)
         return decorated_function
@@ -51,7 +79,7 @@ data:
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Login - Flagd Central</title>
+        <title>Login - {{ "{{" }} brand_name {{ "}}" }}</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
         <style>
             :root {
@@ -89,7 +117,7 @@ data:
     </head>
     <body>
         <div class="login-card">
-            <h1>Flagd Central</h1>
+            <h1>{{ "{{" }} brand_name {{ "}}" }}</h1>
             {% if error %}<div class="error">{{ "{{" }} error {{ "}}" }}</div>{% endif %}
             <form method="POST">
                 <input type="text" name="username" placeholder="Username" required autofocus>
@@ -97,7 +125,7 @@ data:
                 <button type="submit" class="btn-login">Unlock Manager</button>
             </form>
             <p style="text-align: center; color: var(--text-secondary); font-size: 12px; margin-top: 20px;">
-                Secure access for coe-dev-cluster
+                {{ "{{" }} cluster_desc {{ "}}" }}
             </p>
         </div>
     </body>
@@ -110,7 +138,7 @@ data:
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Flagd Central Manager</title>
+        <title>{{ "{{" }} brand_name {{ "}}" }}</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
         <style>
             :root {
@@ -216,7 +244,7 @@ data:
         <div class="container">
             <header>
                 <div class="header-left">
-                    <h1>Flagd Central</h1>
+                    <h1>{{ "{{" }} brand_name {{ "}}" }}</h1>
                     <select class="ns-selector" id="namespace-selector" onchange="updateNamespace(this.value)">
                         <option value="all">All Namespaces</option>
                     </select>
@@ -279,7 +307,7 @@ data:
                 sources: {
                     sources: [
                         {
-                            source: "https://vault.opstree.dev/v1/secret/data/feature-flags",
+                            source: "{{ "{{" }} vault_url {{ "}}" }}",
                             provider: "http",
                             interval: 30
                         }
@@ -289,8 +317,8 @@ data:
                         name: "HTTP_SYNC_BEARER_TOKEN",
                         valueFrom: {
                           secretKeyRef: {
-                            name: "vault-token-secret",
-                            key: "token"
+                            name: "{{ "{{" }} vault_secret {{ "}}" }}",
+                            key: "{{ "{{" }} vault_key {{ "}}" }}"
                           }
                         }
                       }
@@ -429,22 +457,41 @@ data:
 
     @app.route('/login', methods=['GET', 'POST'])
     def login():
+        if SSO_ENABLED:
+            redirect_uri = url_for('auth_callback', _external=True)
+            return oauth.keycloak.authorize_redirect(redirect_uri)
+        
         if request.method == 'POST':
             if request.form['username'] == UI_USER and request.form['password'] == UI_PASS:
                 session['logged_in'] = True
                 return redirect(url_for('index'))
-            return render_template_string(LOGIN_HTML, error="Invalid credentials")
-        return render_template_string(LOGIN_HTML)
+            return render_template_string(LOGIN_HTML, error="Invalid credentials", brand_name=BRAND_NAME, cluster_desc=CLUSTER_DESC)
+        return render_template_string(LOGIN_HTML, brand_name=BRAND_NAME, cluster_desc=CLUSTER_DESC)
+
+    @app.route('/auth/callback')
+    def auth_callback():
+        token = oauth.keycloak.authorize_access_token()
+        user = token.get('userinfo')
+        if user:
+            session['user'] = user
+            return redirect(url_for('index'))
+        return redirect(url_for('login'))
 
     @app.route('/logout')
     def logout():
         session.pop('logged_in', None)
+        session.pop('user', None)
         return redirect(url_for('login'))
 
     @app.route('/')
     @login_required
     def index():
-        return render_template_string(HTML_TEMPLATE, default_ns=DEFAULT_NAMESPACE)
+        return render_template_string(HTML_TEMPLATE, 
+                                      default_ns=DEFAULT_NAMESPACE, 
+                                      brand_name=BRAND_NAME,
+                                      vault_url=VAULT_URL,
+                                      vault_secret=VAULT_SECRET,
+                                      vault_key=VAULT_KEY)
 
     @app.route('/api/namespaces')
     @login_required

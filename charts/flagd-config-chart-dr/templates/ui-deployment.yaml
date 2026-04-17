@@ -49,7 +49,7 @@ spec:
             - |
               echo "Installing dependencies..."
               export PYTHONPATH=$PYTHONPATH:/tmp/lib/python3.11/site-packages
-              pip install --no-cache-dir --target /tmp/lib/python3.11/site-packages flask kubernetes
+              pip install --no-cache-dir --target /tmp/lib/python3.11/site-packages flask kubernetes authlib requests
               echo "Starting Flagd Manager..."
               python /app/app.py
           env:
@@ -67,6 +67,24 @@ spec:
             - name: FLASK_SECRET_KEY
               value: {{ .Values.ui.auth.secretKey | quote }}
             {{- end }}
+            - name: SSO_ENABLED
+              value: {{ .Values.ui.sso.enabled | quote }}
+            - name: SSO_DISCOVERY_URL
+              value: {{ .Values.ui.sso.discoveryUrl | quote }}
+            - name: SSO_CLIENT_ID
+              value: {{ .Values.ui.sso.clientId | quote }}
+            - name: SSO_CLIENT_SECRET
+              value: {{ .Values.ui.sso.clientSecret | quote }}
+            - name: UI_BRAND_NAME
+              value: {{ .Values.ui.config.brandName | quote }}
+            - name: UI_CLUSTER_DESC
+              value: {{ .Values.ui.config.clusterDescription | quote }}
+            - name: UI_VAULT_URL
+              value: {{ .Values.ui.config.vault.url | quote }}
+            - name: UI_VAULT_SECRET_NAME
+              value: {{ .Values.ui.config.vault.secretName | quote }}
+            - name: UI_VAULT_SECRET_KEY
+              value: {{ .Values.ui.config.vault.secretKey | quote }}
           ports:
             - name: http
               containerPort: {{ .Values.ui.service.targetPort }}
