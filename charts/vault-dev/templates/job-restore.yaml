@@ -1,0 +1,101 @@
+{{- if .Values.restore.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "vault.fullname" . }}-restore
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vault.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "30"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: {{ include "vault.fullname" . }}-restore
+    spec:
+      serviceAccountName: {{ include "vault.fullname" . }}-vault-sa
+      restartPolicy: OnFailure
+      containers:
+        - name: restore
+          image: alpine/k8s:1.29.2
+          env:
+            - name: VAULT_ADDR
+              value: {{ .Values.backup.vault.address | quote }}
+            - name: MINIO_ENDPOINT
+              value: {{ .Values.backup.minio.endpoint | quote }}
+            - name: MINIO_ACCESS_KEY
+              value: {{ .Values.backup.minio.accessKey | quote }}
+            - name: MINIO_SECRET_KEY
+              value: {{ .Values.backup.minio.secretKey | quote }}
+            - name: MINIO_BUCKET
+              value: {{ .Values.backup.minio.bucket | quote }}
+            - name: SNAPSHOT_NAME
+              value: {{ .Values.restore.snapshotName | quote }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+
+              echo "=== Vault Raft Restore ==="
+
+              # Install dependencies
+              apk add --no-cache curl jq > /dev/null 2>&1
+
+              # Install mc (MinIO client)
+              curl -sSL https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc
+              chmod +x /usr/local/bin/mc
+
+              # Get Vault root token
+              ROOT_TOKEN=$(kubectl get secret {{ include "vault.fullname" . }}-main-vault-keys \
+                -n {{ .Release.Namespace }} \
+                -o jsonpath='{.data.root-token}' | base64 -d)
+
+              if [ -z "$ROOT_TOKEN" ]; then
+                echo "ERROR: Could not retrieve Vault root token!"
+                exit 1
+              fi
+
+              # Configure MinIO client
+              mc alias set minio "${MINIO_ENDPOINT}" "${MINIO_ACCESS_KEY}" "${MINIO_SECRET_KEY}" --insecure
+
+              # Determine which snapshot to restore
+              if [ -z "$SNAPSHOT_NAME" ]; then
+                echo "No snapshot name specified — using latest snapshot..."
+                SNAPSHOT_NAME=$(mc ls minio/${MINIO_BUCKET}/ --insecure | \
+                  grep '\.snap' | \
+                  awk '{print $NF}' | \
+                  sort -r | \
+                  head -n 1)
+
+                if [ -z "$SNAPSHOT_NAME" ]; then
+                  echo "ERROR: No snapshots found in bucket!"
+                  exit 1
+                fi
+              fi
+
+              echo "Downloading snapshot: ${SNAPSHOT_NAME}"
+              mc cp "minio/${MINIO_BUCKET}/${SNAPSHOT_NAME}" /tmp/restore.snap --insecure
+
+              SNAP_SIZE=$(stat -c%s "/tmp/restore.snap" 2>/dev/null || stat -f%z "/tmp/restore.snap" 2>/dev/null)
+              echo "Snapshot size: ${SNAP_SIZE} bytes"
+
+              if [ "$SNAP_SIZE" -lt 100 ]; then
+                echo "ERROR: Snapshot file is suspiciously small!"
+                exit 1
+              fi
+
+              echo "Restoring Raft snapshot..."
+              curl -sSf \
+                --header "X-Vault-Token: ${ROOT_TOKEN}" \
+                --request POST \
+                --data-binary @/tmp/restore.snap \
+                "${VAULT_ADDR}/v1/sys/storage/raft/snapshot"
+
+              echo "=== Restore Complete ==="
+              echo "WARNING: Vault may restart after restore. Verify cluster health."
+{{- end }}

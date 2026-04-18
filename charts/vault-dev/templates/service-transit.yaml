@@ -1,0 +1,18 @@
+{{- if .Values.transit.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "vault.fullname" . }}-transit
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ include "vault.fullname" . }}-transit
+  ports:
+    - port: 8200
+      targetPort: 8200
+      name: http
+    - port: 8201
+      targetPort: 8201
+      name: internal
+{{- end }}
