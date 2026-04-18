@@ -3,17 +3,16 @@ fullnameOverride: "stateless-app-harbor"
 harbor:
   # 1. Exposure Settings
   expose:
-    type: clusterIP  # Typically used when behind an Ingress or BuildPiper LB
+    type: nodePort  # Typically used when behind an Ingress or BuildPiper LB
     tls:
       enabled: false 
     # Use the block below if you explicitly need NodePort exposure
-    # type: nodePort
-    # nodePort:
-    #   name: harbor
-    #   ports:
-    #     http:
-    #       port: 80
-    #       nodePort: 30002
+      nodePort:
+        name: harbor
+        ports:
+          http:
+            port: 80
+            nodePort: 30003
 
   # 2. External Access URL
   externalURL: ${HARBOR_EXTERNAL_URL}
