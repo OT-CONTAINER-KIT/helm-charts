@@ -1,19 +1,18 @@
 # values.yaml
 harbor:
   expose:
-    type: ingress
+    type: clusterIP
     tls:
       enabled: false
-    ingress:
-      ingressClassName: nginx
-      hosts:
-        # Variablized Ingress Host
-        core: ${HARBOR_EXTERNAL_URL_HOST}
-      annotations:
-        kubernetes.io/ingress.class: nginx
-        nginx.ingress.kubernetes.io/proxy-body-size: "0"
-        nginx.ingress.kubernetes.io/proxy-read-timeout: "900"
-        nginx.ingress.kubernetes.io/proxy-send-timeout: "900"
+#    ingress:
+#      ingressClassName: nginx
+#      hosts:
+#        core: ${HARBOR_EXTERNAL_URL_HOST}
+#      annotations:
+#        kubernetes.io/ingress.class: nginx
+#        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+#        nginx.ingress.kubernetes.io/proxy-read-timeout: "900"
+#        nginx.ingress.kubernetes.io/proxy-send-timeout: "900"
 
   # Variablized External URL
   externalURL: ${HARBOR_EXTERNAL_URL}
