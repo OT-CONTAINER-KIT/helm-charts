@@ -1,20 +1,11 @@
-# values.yaml
+fullnameOverride: "stateless-app-harbor"
+
 harbor:
   expose:
     type: clusterIP
     tls:
       enabled: false
-#    ingress:
-#      ingressClassName: nginx
-#      hosts:
-#        core: ${HARBOR_EXTERNAL_URL_HOST}
-#      annotations:
-#        kubernetes.io/ingress.class: nginx
-#        nginx.ingress.kubernetes.io/proxy-body-size: "0"
-#        nginx.ingress.kubernetes.io/proxy-read-timeout: "900"
-#        nginx.ingress.kubernetes.io/proxy-send-timeout: "900"
 
-  # Variablized External URL
   externalURL: ${HARBOR_EXTERNAL_URL}
 
   database:
@@ -34,6 +25,9 @@ harbor:
 
   persistence:
     enabled: true
+    # Disabling Jobservice PVC because logs move to Postgres
+    jobservice:
+      jobLog: false 
     imageChartStorage:
       type: s3
       s3:
@@ -45,17 +39,25 @@ harbor:
         secure: true
         v4auth: true
         skipverify: true
-        
+
+  jobservice:
+    # This setting tells Harbor to store task logs in the External Postgres
+    jobLogger: database
+    replicas: ${JOBSERVICE_REPLICAS}
+
   trivy:
     enabled: true
     replicas: ${TRIVY_REPLICAS}
-  # Replicas variablized for scaling control in BuildPiper
+    persistence:
+      enabled: true
+      # Keeping default PVC behavior as per your request
+      size: 5Gi
+      storageClass: "longhorn" 
+
   portal:
     replicas: ${PORTAL_REPLICAS}
   core:
     replicas: ${CORE_REPLICAS}
-  jobservice:
-    replicas: ${JOBSERVICE_REPLICAS}
   registry:
     replicas: ${REGISTRY_REPLICAS}
   nginx:
