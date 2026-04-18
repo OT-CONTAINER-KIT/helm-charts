@@ -1,13 +1,24 @@
 fullnameOverride: "stateless-app-harbor"
 
 harbor:
+  # 1. Exposure Settings
   expose:
-    type: clusterIP
+    type: clusterIP  # Typically used when behind an Ingress or BuildPiper LB
     tls:
-      enabled: false
+      enabled: false 
+    # Use the block below if you explicitly need NodePort exposure
+    # type: nodePort
+    # nodePort:
+    #   name: harbor
+    #   ports:
+    #     http:
+    #       port: 80
+    #       nodePort: 30002
 
+  # 2. External Access URL
   externalURL: ${HARBOR_EXTERNAL_URL}
 
+  # 3. External Database Configuration (PostgreSQL)
   database:
     type: external
     external:
@@ -17,15 +28,17 @@ harbor:
       password: "${DB_PASSWORD}"
       coreDatabase: "${DB_NAME}"
 
+  # 4. External Cache Configuration (Redis)
   redis:
     type: external
     external:
       addr: "${REDIS_ADDR}"
       password: "${REDIS_PASSWORD}"
 
+  # 5. Storage Configuration (MinIO / S3)
   persistence:
     enabled: true
-    # Disabling Jobservice PVC because logs move to Postgres
+    # Disabling Jobservice PVC to utilize Database Logging (Stateless)
     jobservice:
       jobLog: false 
     imageChartStorage:
@@ -40,25 +53,43 @@ harbor:
         v4auth: true
         skipverify: true
 
+  # 6. Service Management & Replica Scaling
   jobservice:
-    # This setting tells Harbor to store task logs in the External Postgres
-    jobLogger: database
+    # Critical: Routes task logs to Postgres instead of Disk
+    jobLoggers:
+      - database
     replicas: ${JOBSERVICE_REPLICAS}
 
+  core:
+    replicas: ${CORE_REPLICAS}
+    # Optional: ensure internal secret consistency to avoid 404s
+    # secret: "${HARBOR_CORE_SECRET}"
+
+  portal:
+    replicas: ${PORTAL_REPLICAS}
+
+  registry:
+    replicas: ${REGISTRY_REPLICAS}
+    # secret: "${HARBOR_REGISTRY_SECRET}"
+
+  nginx:
+    replicas: ${NGINX_REPLICAS}
+
+  # 7. Security Scanner (Trivy)
   trivy:
     enabled: true
     replicas: ${TRIVY_REPLICAS}
     persistence:
       enabled: true
-      # Keeping default PVC behavior as per your request
       size: 5Gi
       storageClass: "longhorn" 
 
-  portal:
-    replicas: ${PORTAL_REPLICAS}
-  core:
-    replicas: ${CORE_REPLICAS}
-  registry:
-    replicas: ${REGISTRY_REPLICAS}
-  nginx:
-    replicas: ${NGINX_REPLICAS}
+# 8. Global Disables for Internal Sub-Charts (ROOT Level)
+database:
+  internal:
+    enabled: false
+redis:
+  internal:
+    enabled: false
+postgresql:
+  enabled: false
