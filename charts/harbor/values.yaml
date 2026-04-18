@@ -7,12 +7,12 @@ harbor:
     tls:
       enabled: false 
     # Use the block below if you explicitly need NodePort exposure
-      nodePort:
-        name: harbor
-        ports:
-          http:
-            port: 80
-            nodePort: 30003
+    nodePort:
+      name: harbor
+      ports:
+         http:
+           port: 80
+           nodePort: 30003
 
   # 2. External Access URL
   externalURL: ${HARBOR_EXTERNAL_URL}
