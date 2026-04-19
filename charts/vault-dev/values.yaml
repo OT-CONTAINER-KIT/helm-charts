@@ -10,7 +10,7 @@ main:
 
 image:
   repository: hashicorp/vault
-  tag: "1.18.4"
+  tag: "1.21.4"
 
 vault:
   ui: true
@@ -40,7 +40,7 @@ affinity:
 
 persistence:
   size: 5Gi
-  storageClass: ""
+  storageClass: "vcluster-longhorn-restricted-x-coe-dev-x-coe-dev-vcluster"
 
 service:
   type: ClusterIP
