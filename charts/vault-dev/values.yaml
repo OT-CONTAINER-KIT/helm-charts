@@ -1,0 +1,75 @@
+namespace: vault
+
+transit:
+  enabled: true
+  replicaCount: 1
+
+main:
+  enabled: true
+  replicaCount: 4
+
+image:
+  repository: hashicorp/vault
+  tag: "1.18.4"
+
+vault:
+  ui: true
+  disable_mlock: true
+  log_level: "info"
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "250m"
+  limits:
+    memory: "1Gi"
+    cpu: "1000m"
+
+nodeSelector: {}
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app: vault-main
+          topologyKey: kubernetes.io/hostname
+
+persistence:
+  size: 5Gi
+  storageClass: ""
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: vault.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# ***************************  BACKUP CONFIG  *********************
+backup:
+  enabled: true
+  schedule: "* * * * *"
+  vault:
+    address: "http://vault-main:8200"
+  minio:
+    endpoint: "https://192.168.8.18:9000"
+    accessKey: "minioadmin"
+    secretKey: "opstreeadmin@2510"
+    bucket: "vault-test"
+    retentionCount: 6
+
+# ***************************** RESTORE CONFIG **********************
+restore:
+  enabled: true
+  snapshotName: ""

@@ -1,0 +1,14 @@
+{{- if .Values.main.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "vault.fullname" . }}-main-pdb
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vault.labels" . | nindent 4 }}
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: {{ include "vault.fullname" . }}-main
+{{- end }}

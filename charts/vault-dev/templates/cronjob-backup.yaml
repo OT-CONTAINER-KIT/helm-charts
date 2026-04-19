@@ -1,0 +1,119 @@
+{{- if .Values.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "vault.fullname" . }}-backup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vault.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            app: {{ include "vault.fullname" . }}-backup
+        spec:
+          serviceAccountName: {{ include "vault.fullname" . }}-vault-sa
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: alpine/k8s:1.29.2
+              env:
+                - name: VAULT_ADDR
+                  value: {{ .Values.backup.vault.address | quote }}
+                - name: MINIO_ENDPOINT
+                  value: {{ .Values.backup.minio.endpoint | quote }}
+                - name: MINIO_ACCESS_KEY
+                  value: {{ .Values.backup.minio.accessKey | quote }}
+                - name: MINIO_SECRET_KEY
+                  value: {{ .Values.backup.minio.secretKey | quote }}
+                - name: MINIO_BUCKET
+                  value: {{ .Values.backup.minio.bucket | quote }}
+                - name: RETENTION_COUNT
+                  value: {{ .Values.backup.minio.retentionCount | default 6 | quote }}
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+
+                  echo "=== Vault Raft Backup ==="
+
+                  # Install dependencies
+                  apk add --no-cache curl jq > /dev/null 2>&1
+
+                  # Install mc (MinIO client)
+                  curl -sSL https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc
+                  chmod +x /usr/local/bin/mc
+
+                  # Get Vault root token from K8s secret
+                  ROOT_TOKEN=$(kubectl get secret {{ include "vault.fullname" . }}-main-vault-keys \
+                    -n {{ .Release.Namespace }} \
+                    -o jsonpath='{.data.root-token}' | base64 -d)
+
+                  if [ -z "$ROOT_TOKEN" ]; then
+                    echo "ERROR: Could not retrieve Vault root token!"
+                    exit 1
+                  fi
+
+                  # Find Active (Leader) Node
+                  echo "Finding active Vault leader node..."
+                  LEADER_ADDR=$(curl -sSf \
+                    --header "X-Vault-Token: ${ROOT_TOKEN}" \
+                    "${VAULT_ADDR}/v1/sys/leader" | jq -r '.leader_address')
+
+                  if [ -z "$LEADER_ADDR" ] || [ "$LEADER_ADDR" = "null" ]; then
+                    echo "ERROR: Could not determine Vault leader address!"
+                    exit 1
+                  fi
+
+                  echo "Active node found: ${LEADER_ADDR}"
+
+                  # Take Raft snapshot from Active Node only
+                  TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+                  SNAPSHOT_FILE="/tmp/vault-snapshot-${TIMESTAMP}.snap"
+
+                  echo "Taking Raft snapshot from leader..."
+                  curl -sSf \
+                    --header "X-Vault-Token: ${ROOT_TOKEN}" \
+                    --output "${SNAPSHOT_FILE}" \
+                    "${LEADER_ADDR}/v1/sys/storage/raft/snapshot"
+
+                  SNAP_SIZE=$(stat -c%s "${SNAPSHOT_FILE}" 2>/dev/null || stat -f%z "${SNAPSHOT_FILE}" 2>/dev/null)
+                  echo "Snapshot size: ${SNAP_SIZE} bytes"
+
+                  if [ "$SNAP_SIZE" -lt 100 ]; then
+                    echo "ERROR: Snapshot file is suspiciously small!"
+                    exit 1
+                  fi
+
+                  # Configure MinIO client
+                  mc alias set minio "${MINIO_ENDPOINT}" "${MINIO_ACCESS_KEY}" "${MINIO_SECRET_KEY}" --insecure
+
+                  # Ensure bucket exists
+                  mc mb minio/${MINIO_BUCKET} --ignore-existing --insecure
+
+                  # Upload snapshot
+                  echo "Uploading to MinIO: ${MINIO_BUCKET}/vault-snapshot-${TIMESTAMP}.snap"
+                  mc cp "${SNAPSHOT_FILE}" "minio/${MINIO_BUCKET}/vault-snapshot-${TIMESTAMP}.snap" --insecure
+
+                  # Retention: keep only latest N snapshots
+                  echo "Applying retention policy (keep last ${RETENTION_COUNT})..."
+                  mc ls minio/${MINIO_BUCKET}/ --insecure | \
+                    grep '\.snap' | \
+                    awk '{print $NF}' | \
+                    sort -r | \
+                    tail -n +$((RETENTION_COUNT + 1)) | \
+                    while read -r old_snap; do
+                      echo "  Deleting old snapshot: ${old_snap}"
+                      mc rm "minio/${MINIO_BUCKET}/${old_snap}" --insecure
+                    done
+
+                  echo "=== Backup Complete ==="
+{{- end }}

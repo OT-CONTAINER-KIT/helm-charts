@@ -1,0 +1,139 @@
+{{- if .Values.main.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "vault.fullname" . }}-main
+  namespace: {{ .Release.Namespace }}
+
+spec:
+  serviceName: {{ include "vault.fullname" . }}-main-headless
+
+  replicas: {{ .Values.main.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: {{ include "vault.fullname" . }}-main
+
+
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap-main.yaml") . | sha256sum }}
+      labels:
+        app: {{ include "vault.fullname" . }}-main
+
+
+    spec:
+      serviceAccountName: {{ include "vault.fullname" . }}-vault-sa
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      initContainers:
+        - name: wait-secret
+          image: alpine/k8s:1.29.2
+          command:
+            - /bin/sh
+            - -c
+            - |
+              until kubectl get secret {{ include "vault.fullname" . }}-transit-token -n {{ .Release.Namespace }}; do
+
+                echo "Waiting for transit token secret..."
+                sleep 5
+              done
+
+      containers:
+        - name: vault
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              cp /vault/config/vault.hcl /tmp/config.hcl
+              sed -i "s/__NODE_ID__/${HOSTNAME}/g" /tmp/config.hcl
+              TOKEN=$(cat /vault/token/token)
+              sed -i "s#__TRANSIT_TOKEN__#$TOKEN#g" /tmp/config.hcl
+              exec vault server -config=/tmp/config.hcl
+
+          env:
+            - name: VAULT_SKIP_VERIFY
+              value: "true"
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+
+          ports:
+            - name: http
+              containerPort: 8200
+            - name: internal
+              containerPort: 8201
+
+          {{- if .Values.resources }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- end }}
+
+          livenessProbe:
+            httpGet:
+              path: /v1/sys/health?standbyok=true&sealedcode=204&uninitcode=204
+              port: 8200
+              scheme: HTTP
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /v1/sys/health?standbyok=true
+              port: 8200
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 2
+
+          volumeMounts:
+            - name: config
+              mountPath: /vault/config
+            - name: token
+              mountPath: /vault/token
+              readOnly: true
+            - name: data
+              mountPath: /vault/data
+
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "vault.fullname" . }}-main-config
+
+        - name: token
+          secret:
+            secretName: {{ include "vault.fullname" . }}-transit-token
+
+
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        {{- if .Values.persistence.storageClass }}
+        {{- if (eq "-" .Values.persistence.storageClass) }}
+        storageClassName: ""
+        {{- else }}
+        storageClassName: "{{ .Values.persistence.storageClass }}"
+        {{- end }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}
+{{- end }}
