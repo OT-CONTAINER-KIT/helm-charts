@@ -1,0 +1,102 @@
+{{- $root := . -}}
+{{- $tags := .Values.tags | default dict -}}
+{{- range $svcKey := list "backend" "frontend" "consumer" }}
+{{- $svc := index $root.Values $svcKey -}}
+{{- if $svc }}
+{{- $tagEnabled := true -}}
+{{- if hasKey $tags $svcKey }}
+{{- $tagEnabled = index $tags $svcKey -}}
+{{- end }}
+{{- if and ($svc.enabled | default false) $tagEnabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $svc.name }}
+  namespace: kubelift
+  labels:
+    {{- include "kubelift.labels" (dict "name" $svc.name "component" $svc.component) | nindent 4 }}
+spec:
+{{- if not $svc.autoscaling.enabled }}
+  replicas: {{ $svc.replicaCount | default 1 }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "kubelift.labels" (dict "name" $svc.name "component" $svc.component) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "kubelift.labels" (dict "name" $svc.name "component" $svc.component) | nindent 8 }}
+    spec:
+      {{- if $svc.base.image.pullSecrets }}
+      imagePullSecrets:
+        - name: {{ $svc.base.image.pullSecrets }}
+      {{- end }}
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: {{ $svc.name }}
+          image: "{{ $svc.base.image.repository }}:{{ $svc.base.image.tag }}"
+          imagePullPolicy: {{ $svc.base.image.pullPolicy | default "IfNotPresent" }}
+
+          {{- if $svc.base.image.args }}
+          args:
+            {{- toYaml $svc.base.image.args | nindent 12 }}
+          {{- end }}
+
+          ports:
+            - name: http
+              containerPort: {{ $svc.service.port | default 8080 }}
+              protocol: TCP
+
+          resources:
+            {{- toYaml $svc.resources | nindent 12 }}
+
+          envFrom:
+            - secretRef:
+                name: {{ $svc.base.existingSecret }}
+
+          {{- if $svc.healthcheck.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ $svc.healthcheck.statusPath }}
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 1
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: {{ $svc.healthcheck.statusPath }}
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 1
+            failureThreshold: 3
+          {{- end }}
+
+          {{- if $svc.volumes }}
+          volumeMounts:
+            {{- if $svc.volumes.configMaps }}
+            {{- range $conf := $svc.volumes.configMaps }}
+            - mountPath: {{ $conf.mountPath }}
+              name: {{ $conf.name }}-volume
+            {{- end }}
+            {{- end }}
+          {{- end }}
+
+      {{- if $svc.volumes }}
+      volumes:
+        {{- if $svc.volumes.configMaps }}
+        {{- range $conf := $svc.volumes.configMaps }}
+        - name: {{ $conf.name }}-volume
+          configMap:
+            name: {{ $conf.name }}
+        {{- end }}
+        {{- end }}
+      {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

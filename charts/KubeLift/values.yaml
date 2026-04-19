@@ -1,0 +1,164 @@
+# Global tag toggles. Set to false to disable a service by tag.
+tags:
+  backend: true
+  frontend: true
+  consumer: true
+
+# Example toggle (true -> false):
+# backend:
+#   enabled: false
+# tags:
+#   backend: false
+
+backend:
+  enabled: true
+  name: kubelift-api
+  component: api
+
+  base:
+    image:
+      pullPolicy: "Always"
+      repository: ""
+      tag: latest
+      pullSecrets: ""
+    existingSecret: kubelift-api
+
+  replicaCount: 1
+
+  healthcheck:
+    enabled: false
+    statusPath: /health
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 500Mi
+    limits:
+      cpu: 1
+      memory: 500Mi
+
+  volumes:
+    configMaps:
+      - name: kubelift-api-config
+        mountPath: /etc/kubelift/
+        data:
+          config.yaml: |
+            {}
+
+  livenessProbe: {}
+  readinessProbe: {}
+
+  ingress:
+    enabled: false
+
+  internalIngress:
+    enabled: false
+
+  autoscaling:
+    enabled: false
+
+frontend:
+  enabled: true
+  name: kubelift-frontend
+  component: frontend
+
+  base:
+    image:
+      pullPolicy: "Always"
+      repository: ""
+      tag: latest
+      pullSecrets: ""
+    existingSecret: kubelift-frontend
+
+  replicaCount: 1
+
+  healthcheck:
+    enabled: false
+    statusPath: /health
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+
+  volumes:
+    configMaps:
+      - name: kubelift-frontend-config
+        mountPath: /etc/kubelift/
+        data:
+          config.yaml: |
+            {}
+
+  livenessProbe: {}
+  readinessProbe: {}
+
+  ingress:
+    enabled: false
+
+  internalIngress:
+    enabled: false
+
+  autoscaling:
+    enabled: false
+
+consumer:
+  enabled: true
+  name: kubelift-consumer
+  component: consumer
+
+  base:
+    image:
+      pullPolicy: "Always"
+      repository: ""
+      tag: latest
+      pullSecrets: ""
+    existingSecret: kubelift-consumer
+
+  replicaCount: 2
+
+  healthcheck:
+    enabled: false
+    statusPath: /health
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 500Mi
+    limits:
+      cpu: 1
+      memory: 500Mi
+
+  volumes:
+    configMaps:
+      - name: kubelift-consumer-config
+        mountPath: /etc/kubelift/
+        data:
+          config.yaml: |
+            {}
+
+  livenessProbe: {}
+  readinessProbe: {}
+
+  ingress:
+    enabled: false
+
+  internalIngress:
+    enabled: false
+
+  autoscaling:
+    enabled: false

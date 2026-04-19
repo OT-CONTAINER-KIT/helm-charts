@@ -1,0 +1,53 @@
+{{- $root := . -}}
+{{- $tags := .Values.tags | default dict -}}
+{{- range $svcKey := list "backend" "frontend" "consumer" }}
+{{- $svc := index $root.Values $svcKey -}}
+{{- if $svc }}
+{{- $tagEnabled := true -}}
+{{- if hasKey $tags $svcKey }}
+{{- $tagEnabled = index $tags $svcKey -}}
+{{- end }}
+{{- if and ($svc.enabled | default false) $tagEnabled }}
+{{- if $svc.ingress.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: {{ $svc.ingress.class }}
+  namespace: kubelift
+  labels:
+    {{- include "kubelift.labels" (dict "name" $svc.name "component" $svc.component) | nindent 4 }}
+  name: {{ $svc.name }}-external-ing
+spec:
+  ingressClassName: {{ $svc.ingress.class }}
+  rules:
+{{- range $rule := $svc.ingress.rules }}
+    - host: {{ $rule.hostname }}
+      http:
+        paths:
+        {{- if (kindIs "slice" $rule.path) }}
+        {{- range $path := $rule.path }}
+          - path: {{ $path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $svc.name }}
+                port:
+                  number: {{ $svc.service.port }}
+        {{- end }}
+        {{- end }}
+        {{- if (kindIs "string" $rule.path) }}
+          - path: {{ $rule.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $svc.name }}
+                port:
+                  number: {{ $svc.service.port }}
+        {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

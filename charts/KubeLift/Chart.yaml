@@ -1,7 +1,7 @@
----
 apiVersion: v2
-name: kubelift-api
-description: A deployment helm chart which will be used to deploy KubeLift API
+name: kubelift
+description: Helm chart for KubeLift services (backend, frontend, consumer)
+type: application
 version: 0.1.0
 appVersion: "0.1.0"
 maintainers:
@@ -10,17 +10,11 @@ maintainers:
     url: https://github.com/samyakjain1908
 sources:
   - https://github.com/ot-container-kit/helm-charts
-dependencies:
-  - name: base
-    version: 0.1.0
-    repository: https://ot-container-kit.github.io/helm-charts
 home: https://github.com/ot-container-kit/helm-charts
 keywords:
-  - deployment
-  - base
-  - opstree
-  - kubernetes
-  - openshift
+  - kubelift
+  - backend
+  - frontend
+  - consumer
   - microservice
-  - stateless
 icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/helm-charts/main/static/helm-chart-logo.svg

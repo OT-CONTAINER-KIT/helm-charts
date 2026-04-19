@@ -1,0 +1,46 @@
+{{- $root := . -}}
+{{- $tags := .Values.tags | default dict -}}
+{{- range $svcKey := list "backend" "frontend" "consumer" }}
+{{- $svc := index $root.Values $svcKey -}}
+{{- if $svc }}
+{{- $tagEnabled := true -}}
+{{- if hasKey $tags $svcKey }}
+{{- $tagEnabled = index $tags $svcKey -}}
+{{- end }}
+{{- if and ($svc.enabled | default false) $tagEnabled }}
+{{- if $svc.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ $svc.name }}
+  labels:
+    {{- include "kubelift.labels" (dict "name" $svc.name "component" $svc.component) | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ $svc.name }}
+  minReplicas: {{ $svc.autoscaling.minReplicas }}
+  maxReplicas: {{ $svc.autoscaling.maxReplicas }}
+  metrics:
+    {{- if $svc.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ $svc.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if $svc.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ $svc.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
