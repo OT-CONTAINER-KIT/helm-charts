@@ -1,0 +1,141 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/open-feature/open-feature-operator
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 128Mi
+  requests:
+    cpu: 10m
+    memory: 64Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+verbose: true
+
+metricsPort: 8080
+
+healthProbePort: 8081
+
+leaderElection:
+  enabled: true
+  resourceName: flagd-operator-leader-election
+
+flagd:
+  image:
+    repository: ghcr.io/open-feature/flagd
+    tag: "v0.15.2"
+
+crds:
+  enabled: true
+
+pdb:
+  enabled: true
+  minAvailable: 1
+  maxUnavailable: ""
+
+podAntiAffinity:
+  enabled: true
+  type: soft
+
+tls:
+  enabled: true
+
+backup:
+  enabled: true
+  # Every 10 minutes
+  schedule: "*/10 * * * *"
+  image: "alpine/k8s:1.30.0"
+  retention:
+    # Keep only the 5 most recent backups; older ones are auto-deleted
+    count: 5
+  minio:
+    url: "https://minio.ldc.opstree.dev:9000/"
+    accessKey: ""
+    secretKey: ""
+    bucket: "flagd-backup"
+    existingSecret: ""  # Path to secret containing accessKey, secretKey (optional)
+
+restore:
+  enabled: false
+  # Specific backup file to restore; leave empty to auto-pick the latest
+  fileName: ""
+  image: "alpine/k8s:1.30.0"
+  # Override minio connection for DR (defaults to backup.minio.* if not set)
+  minio:
+    url: ""
+    accessKey: ""
+    secretKey: ""
+    bucket: ""
+
+ui:
+  enabled: true
+  image:
+    # Python-based Flag Manager UI (manages FeatureFlag CRs)
+    repository: python
+    tag: "3.11-slim"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+  ingress:
+    enabled: true
+    annotations: {}
+    hosts:
+      - host: flagd-ui.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []
+  auth:
+    enabled: true
+    username: ""
+    password: ""
+    secretKey: ""
+    existingSecret: ""  # Path to secret containing username, password, secretKey (optional)
+  sso:
+    enabled: true
+    discoveryUrl: "https://keycloak.opstree.dev/realms/master/.well-known/openid-configuration"
+    clientId: ""
+    clientSecret: ""
+    existingSecret: ""  # Path to secret containing clientId, clientSecret (optional)
+  config:
+    brandName: "Flagd Central"
+    clusterDescription: "Secure access for coe-dev-cluster"
+    defaultNamespace: "flagd-nonprod"
+    vault:
+      url: "https://vault.opstree.dev/v1/secret/data/feature-flags"
+      secretName: "vault-token-secret"
+      secretKey: "token"
