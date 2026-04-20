@@ -12,6 +12,7 @@ harbor:
     secret: "${HARBOR_CORE_SECRET}"
 
   jobservice:
+    core_url: "http://stateless-app-harbor-core"
     jobLoggers:
       - database
     replicas: ${JOBSERVICE_REPLICAS}
