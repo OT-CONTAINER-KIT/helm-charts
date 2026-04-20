@@ -21,7 +21,7 @@ data:
     
     # Session Configuration for HTTPS
     app.config.update(
-        SESSION_COOKIE_SECURE=True,
+        SESSION_COOKIE_SECURE=False,
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE='Lax',
     )
@@ -536,6 +536,10 @@ data:
                 spec = data.get("spec")
                 if not name or not spec: return jsonify({"error": "Name and Spec are required"}), 400
                 
+                if isinstance(spec, list) and len(spec) > 0:
+                    print(f"Detected array-wrapped spec, extracting first element")
+                    spec = spec[0]
+
                 kind = "FeatureFlag" if plural == PLURAL_FLAGS else "FeatureFlagSource"
                 body = {
                     "apiVersion": f"{GROUP}/{VERSION}",
@@ -543,6 +547,7 @@ data:
                     "metadata": {"name": name, "namespace": target_ns},
                     "spec": spec
                 }
+                print(f"Applying {kind} {name} in namespace {target_ns}")
                 try:
                     custom_api.get_namespaced_custom_object(GROUP, VERSION, target_ns, plural, name)
                     return jsonify(custom_api.patch_namespaced_custom_object(GROUP, VERSION, target_ns, plural, name, body))

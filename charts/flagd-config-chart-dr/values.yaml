@@ -85,7 +85,7 @@ backup:
     accessKey: ""
     secretKey: ""
     bucket: "flagd-backup"
-    existingSecret: ""  # Path to secret containing accessKey, secretKey (optional)
+    existingSecret: "" # Path to secret containing accessKey, secretKey (optional)
 
 restore:
   enabled: false
@@ -121,16 +121,17 @@ ui:
     tls: []
   auth:
     enabled: true
-    username: ""
-    password: ""
-    secretKey: ""
-    existingSecret: ""  # Path to secret containing username, password, secretKey (optional)
+    username: "admin"
+    password: "admin"
+    secretKey: "flagd-manager-awesome-secret"
+    existingSecret: "" # Path to secret containing username, password, secretKey (optional)
   sso:
     enabled: true
-    discoveryUrl: "https://keycloak.opstree.dev/realms/master/.well-known/openid-configuration"
+    discoveryUrl: "https://keycloak.opstree.dev/realms/master/.well-known/openid-co\
+      nfiguration"
     clientId: ""
     clientSecret: ""
-    existingSecret: ""  # Path to secret containing clientId, clientSecret (optional)
+    existingSecret: "" # Path to secret containing clientId, clientSecret (optional)
   config:
     brandName: "Flagd Central"
     clusterDescription: "Secure access for coe-dev-cluster"
