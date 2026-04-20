@@ -66,7 +66,7 @@ backup:
     endpoint: "https://192.168.8.18:9000"
     accessKey: "minioadmin"
     secretKey: "opstreeadmin@2510"
-    bucket: "vault-test"
+    bucket: "vault-backup"
     retentionCount: 6
 
 # ***************************** RESTORE CONFIG **********************
