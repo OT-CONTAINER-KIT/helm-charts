@@ -59,7 +59,7 @@ ingress:
 # ***************************  BACKUP CONFIG  *********************
 backup:
   enabled: true
-  schedule: "* * * * *"
+  schedule: "0 */12 * * *"
   vault:
     address: "http://vault-main:8200"
   minio:
@@ -67,7 +67,7 @@ backup:
     accessKey: "minioadmin"
     secretKey: "opstreeadmin@2510"
     bucket: "vault-backup"
-    retentionCount: 6
+    retentionCount: 5
 
 # ***************************** RESTORE CONFIG **********************
 restore:
