@@ -1,23 +1,37 @@
 fullnameOverride: "stateless-app-harbor"
 
 harbor:
-  # 1. Exposure Settings
+  # --- NEW: SHARED SECRETS BLOCK ---
+  # secretKey is used for encryption of sensitive data in the DB.
+  # If you change this later, you won't be able to read existing passwords!
+  secretKey: "stateless-harbor-master-key-32ch" 
+
+  core:
+    replicas: ${CORE_REPLICAS}
+    # This fixed secret allows multiple core pods to sync and Jobservice to authenticate
+    secret: "${HARBOR_CORE_SECRET}"
+
+  jobservice:
+    jobLoggers:
+      - database
+    replicas: ${JOBSERVICE_REPLICAS}
+    # Secret used for internal communication
+    secret: "${HARBOR_JOBSERVICE_SECRET}"
+
+  registry:
+    replicas: ${REGISTRY_REPLICAS}
+    # Secret used for communication between core and registry
+    secret: "${HARBOR_REGISTRY_SECRET}"
+
+  # --- END OF NEW SECRET BLOCK ---
+
   expose:
-    type: clusterIP  # Typically used when behind an Ingress or BuildPiper LB
+    type: clusterIP
     tls:
       enabled: false 
-#    Use the block below if you explicitly need NodePort exposure
-#    nodePort:
-#      name: harbor
-#      ports:
-#         http:
-#           port: 80
-#           nodePort: 30003
 
-  # 2. External Access URL
   externalURL: ${HARBOR_EXTERNAL_URL}
 
-  # 3. External Database Configuration (PostgreSQL)
   database:
     type: external
     external:
@@ -27,17 +41,14 @@ harbor:
       password: "${DB_PASSWORD}"
       coreDatabase: "${DB_NAME}"
 
-  # 4. External Cache Configuration (Redis)
   redis:
     type: external
     external:
       addr: "${REDIS_ADDR}"
       password: "${REDIS_PASSWORD}"
 
-  # 5. Storage Configuration (MinIO / S3)
   persistence:
     enabled: true
-    # Disabling Jobservice PVC to utilize Database Logging (Stateless)
     jobservice:
       jobLog: false 
     imageChartStorage:
@@ -52,29 +63,12 @@ harbor:
         v4auth: true
         skipverify: true
 
-  # 6. Service Management & Replica Scaling
-  jobservice:
-    # Critical: Routes task logs to Postgres instead of Disk
-    jobLoggers:
-      - database
-    replicas: ${JOBSERVICE_REPLICAS}
-
-  core:
-    replicas: ${CORE_REPLICAS}
-    # Optional: ensure internal secret consistency to avoid 404s
-    # secret: "${HARBOR_CORE_SECRET}"
-
   portal:
     replicas: ${PORTAL_REPLICAS}
-
-  registry:
-    replicas: ${REGISTRY_REPLICAS}
-    # secret: "${HARBOR_REGISTRY_SECRET}"
 
   nginx:
     replicas: ${NGINX_REPLICAS}
 
-  # 7. Security Scanner (Trivy)
   trivy:
     enabled: true
     replicas: ${TRIVY_REPLICAS}
@@ -83,7 +77,7 @@ harbor:
       size: 5Gi
       storageClass: "longhorn" 
 
-# 8. Global Disables for Internal Sub-Charts (ROOT Level)
+# Global Disables
 database:
   internal:
     enabled: false
