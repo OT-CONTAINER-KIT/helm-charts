@@ -7,6 +7,27 @@ harbor:
   secretKey: "stateless-harbor-master-key-32ch" 
 
   core:
+    # Set Auth Mode to OIDC
+    authMode: "oidc"
+    
+  # OIDC Settings
+  oidc:
+    name: "Keycloak"
+    # Replace with your Keycloak Realm URL (e.g., https://keycloak.opstree.dev/auth/realms/master)
+    endpoint: "https://keycloak.opstree.dev/auth/realms/master"
+    # Matches 'Client ID' in your screenshot
+    clientId: "harbor"
+    # Copy the 'Client Secret' from your Credentials tab
+    clientSecret: "XR5IBgxZsF0GDqyVdGNSWXdjvRCc218D"
+    # Scopes required for OIDC
+    scope: "openid,profile,email,offline_access"
+    # Standard claim name for groups in Keycloak
+    groupsClaim: "groups"
+    # If using self-signed certs for Keycloak, set this to false
+    verifyCert: true
+    # This must match 'Valid redirect URIs' in Keycloak
+    redirectUrl: "https://harbor.opstree.dev/c/oidc/callback"
+    
     replicas: ${CORE_REPLICAS}
     # This fixed secret allows multiple core pods to sync and Jobservice to authenticate
     secret: "${HARBOR_CORE_SECRET}"
