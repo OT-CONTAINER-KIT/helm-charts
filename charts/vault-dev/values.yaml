@@ -6,7 +6,7 @@ transit:
 
 main:
   enabled: true
-  replicaCount: 4
+  replicaCount: 6
 
 image:
   repository: hashicorp/vault
