@@ -22,7 +22,7 @@ harbor:
     redirectUrl: "https://harbor.opstree.dev/c/oidc/callback"
     
   jobservice:
-    core_url: "http://10.233.61.120:80"
+    core_url: "http://stateless-app-harbor-core"
     jobLoggers:
       - database
     replicas: ${JOBSERVICE_REPLICAS}
