@@ -6,7 +6,7 @@ harbor:
     
   core:
     authMode: "oidc_auth" # Use oidc_auth to match the API requirement
-    replicas: ${CORE_REPLICAS}
+    replicas: 2
     # CHANGE: Use the SAME secret string for all three below
     secret: "opstree-shared-internal-secret" 
   
@@ -24,7 +24,7 @@ harbor:
     core_url: "http://stateless-app-harbor-core:80"
     jobLoggers:
       - database
-    replicas: ${JOBSERVICE_REPLICAS}
+    replicas: 2
     # CHANGE: Must be identical to core.secret
     secret: "opstree-shared-internal-secret" 
 
