@@ -6,7 +6,11 @@ harbor:
   # If you change this later, you won't be able to read existing passwords!
   secretKey: "stateless-harbor-master-key-32ch" 
     
-  # OIDC Settings
+  core:
+    authMode: "oidc"
+    replicas: ${CORE_REPLICAS}
+    secret: "${HARBOR_CORE_SECRET}" # This secret MUST match across all components
+  
   oidc:
     name: "Keycloak"
     endpoint: "https://keycloak.opstree.dev/auth/realms/master"
@@ -16,15 +20,6 @@ harbor:
     groupsClaim: "groups"
     verifyCert: true
     redirectUrl: "https://harbor.opstree.dev/c/oidc/callback"
-    
-    replicas: ${CORE_REPLICAS}
-    # This fixed secret allows multiple core pods to sync and Jobservice to authenticate
-    secret: "${HARBOR_CORE_SECRET}"
-
-  core:
-    authMode: "oidc"
-    replicas: ${CORE_REPLICAS}
-    secret: "${HARBOR_CORE_SECRET}"
     
   jobservice:
     core_url: "http://stateless-app-harbor-core"
