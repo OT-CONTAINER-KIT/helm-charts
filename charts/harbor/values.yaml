@@ -1,7 +1,7 @@
 fullnameOverride: "stateless-app-harbor"
 
 harbor:
-  # This key encrypts data in the DB. Never change it after the first install.
+  # --- This parent 'harbor' key is MANDATORY ---
   secretKey: "stateless-harbor-master-key-32ch" 
     
   core:
@@ -15,15 +15,6 @@ harbor:
         memory: "512Mi"
         cpu: "500m"
   
-  oidc:
-    name: "Keycloak"
-    endpoint: "https://keycloak.opstree.dev/auth/realms/master"
-    clientId: "harbor"
-    clientSecret: "XR5IBgxZsF0GDqyVdGNSWXdjvRCc218D"
-    scope: "openid,profile,email,offline_access"
-    verifyCert: true
-    redirectUrl: "https://harbor.opstree.dev/c/oidc/callback"
-    
   jobservice:
     replicas: ${JOBSERVICE_REPLICAS}
     secret: "opstree-harbor-shared-secret"
@@ -83,6 +74,15 @@ harbor:
       size: 5Gi
       storageClass: "longhorn" 
 
+  oidc:
+    name: "Keycloak"
+    endpoint: "https://keycloak.opstree.dev/auth/realms/master"
+    clientId: "harbor"
+    clientSecret: "XR5IBgxZsF0GDqyVdGNSWXdjvRCc218D"
+    scope: "openid,profile,email,offline_access"
+    verifyCert: true
+    redirectUrl: "https://harbor.opstree.dev/c/oidc/callback"
+
   expose:
     type: clusterIP
     tls:
@@ -121,7 +121,7 @@ harbor:
         v4auth: true
         skipverify: true
 
-# Global Disables
+# These are outside the harbor block because they are sub-charts
 database:
   internal:
     enabled: false
