@@ -5,10 +5,16 @@ harbor:
   secretKey: "stateless-harbor-master-key-32ch" 
     
   core:
-    authMode: "oidc_auth" # Use oidc_auth to match the API requirement
     replicas: 2
-    # CHANGE: Use the SAME secret string for all three below
-    secret: "opstree-shared-internal-secret" 
+    secret: "opstree-harbor-shared-secret"
+    # ADD THIS BLOCK
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
   
   oidc:
     name: "Keycloak"
@@ -20,19 +26,31 @@ harbor:
     redirectUrl: "https://harbor.opstree.dev/c/oidc/callback"
     
   jobservice:
-    # If DNS continues to fail, replace this hostname with the ClusterIP
-    core_url: "http://stateless-app-harbor-core:80"
+    replicas: 2
+    secret: "opstree-harbor-shared-secret"
     jobLoggers:
       - database
-    replicas: 2
-    # CHANGE: Must be identical to core.secret
-    secret: "opstree-shared-internal-secret" 
+    # ADD THIS BLOCK
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
 
   registry:
-    replicas: ${REGISTRY_REPLICAS}
-    # CHANGE: Must be identical to core.secret
-    secret: "opstree-shared-internal-secret"
-
+    replicas: 2
+    secret: "opstree-harbor-shared-secret"
+    # ADD THIS BLOCK
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+        
   # --- END OF NEW SECRET BLOCK ---
 
   expose:
@@ -74,7 +92,14 @@ harbor:
         skipverify: true
 
   portal:
-    replicas: ${PORTAL_REPLICAS}
+    replicas: 2
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "128Mi"
+        cpu: "200m"
 
   nginx:
     replicas: ${NGINX_REPLICAS}
