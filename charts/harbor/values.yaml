@@ -1,15 +1,14 @@
 fullnameOverride: "stateless-app-harbor"
 
 harbor:
-  # --- NEW: SHARED SECRETS BLOCK ---
-  # secretKey is used for encryption of sensitive data in the DB.
-  # If you change this later, you won't be able to read existing passwords!
+  # This key encrypts data in the DB. Never change it after the first install.
   secretKey: "stateless-harbor-master-key-32ch" 
     
   core:
-    authMode: "oidc"
+    authMode: "oidc_auth" # Use oidc_auth to match the API requirement
     replicas: ${CORE_REPLICAS}
-    secret: "${HARBOR_CORE_SECRET}" # This secret MUST match across all components
+    # CHANGE: Use the SAME secret string for all three below
+    secret: "opstree-shared-internal-secret" 
   
   oidc:
     name: "Keycloak"
@@ -17,22 +16,22 @@ harbor:
     clientId: "harbor"
     clientSecret: "XR5IBgxZsF0GDqyVdGNSWXdjvRCc218D"
     scope: "openid,profile,email,offline_access"
-    groupsClaim: "groups"
     verifyCert: true
     redirectUrl: "https://harbor.opstree.dev/c/oidc/callback"
     
   jobservice:
+    # If DNS continues to fail, replace this hostname with the ClusterIP
     core_url: "http://stateless-app-harbor-core:80"
     jobLoggers:
       - database
     replicas: ${JOBSERVICE_REPLICAS}
-    # Secret used for internal communication
-    secret: "${HARBOR_JOBSERVICE_SECRET}"
+    # CHANGE: Must be identical to core.secret
+    secret: "opstree-shared-internal-secret" 
 
   registry:
     replicas: ${REGISTRY_REPLICAS}
-    # Secret used for communication between core and registry
-    secret: "${HARBOR_REGISTRY_SECRET}"
+    # CHANGE: Must be identical to core.secret
+    secret: "opstree-shared-internal-secret"
 
   # --- END OF NEW SECRET BLOCK ---
 
