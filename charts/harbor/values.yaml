@@ -72,7 +72,7 @@ harbor:
         memory: "300Mi"
         cpu: "500m"
     persistence:
-      enabled: true
+      enabled: false
       size: 5Gi
       storageClass: "longhorn" 
 
