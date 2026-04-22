@@ -38,15 +38,6 @@ harbor:
       limits:
         memory: "150Mi"
         cpu: "100m"
-    # Mandatory for your quota: Defines the registryctl sidecar
-    registryctl:
-      resources:
-        requests:
-          memory: "64Mi"
-          cpu: "20m"
-        limits:
-          memory: "100Mi"
-          cpu: "50m"
         
   portal:
     replicas: ${PORTAL_REPLICAS}
