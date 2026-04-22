@@ -1,7 +1,7 @@
 fullnameOverride: "stateless-app-harbor"
 
 harbor:
-  # --- This parent 'harbor' key is MANDATORY ---
+  internalURL: http://stateless-app-harbor-core.harbor.svc.cluster.local
   secretKey: "stateless-harbor-master-key-32ch" 
     
   core:
@@ -75,20 +75,45 @@ harbor:
       storageClass: "longhorn" 
 
   oidc:
+    enabled: true
     name: "Keycloak"
     endpoint: "https://keycloak.opstree.dev/auth/realms/master"
     clientId: "harbor"
     clientSecret: "XR5IBgxZsF0GDqyVdGNSWXdjvRCc218D"
     scope: "openid,profile,email,offline_access"
     verifyCert: true
-    redirectUrl: "https://harbor.opstree.dev/c/oidc/callback"
+    redirectUrl: "${HARBOR_EXTERNAL_URL}/c/oidc/callback"
 
   expose:
-    type: clusterIP
+    type: clusterIP 
     tls:
       enabled: false 
 
   externalURL: ${HARBOR_EXTERNAL_URL}
+
+  # --- METRICS ENABLEMENT ---
+  metrics:
+    enabled: true
+    exporter:
+      port: 8001
+      path: /metrics
+
+  # --- EXPORTER POD CONFIGURATION ---
+  exporter:
+    replicas: 1
+    image:
+      repository: goharbor/harbor-exporter
+      tag: v2.10.0
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    livenessProbe:
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    readinessProbe:
+      initialDelaySeconds: 30
+      periodSeconds: 10
 
   database:
     type: external
@@ -98,6 +123,7 @@ harbor:
       username: "${DB_USER}"
       password: "${DB_PASSWORD}"
       coreDatabase: "${DB_NAME}"
+      sslmode: "disable"
 
   redis:
     type: external
@@ -121,7 +147,7 @@ harbor:
         v4auth: true
         skipverify: true
 
-# These are outside the harbor block because they are sub-charts
+# --- Global Disables (Outside the harbor block) ---
 database:
   internal:
     enabled: false
