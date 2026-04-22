@@ -1,0 +1,22 @@
+apiVersion: v2
+name: kubelift
+description: Helm chart for KubeLift services (backend, frontend, consumer, mcp-server, mcp-client)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+maintainers:
+  - name: Samyak Jain
+    email: "samyak.jain@opstree.com"
+    url: https://github.com/samyakjain1908
+sources:
+  - https://github.com/ot-container-kit/helm-charts
+home: https://github.com/ot-container-kit/helm-charts
+keywords:
+  - kubelift
+  - backend
+  - frontend
+  - consumer
+  - mcp
+  - ai
+  - microservice
+icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/helm-charts/main/static/helm-chart-logo.svg

@@ -1,0 +1,36 @@
+{{- $root := . -}}
+{{- $tags := .Values.tags | default dict -}}
+{{- range $svcKey := list "backend" "frontend" "consumer" "mcp-server" "mcp-client" }}
+{{- $svc := index $root.Values $svcKey -}}
+{{- if $svc }}
+{{- $tagEnabled := true -}}
+{{- if hasKey $tags $svcKey }}
+{{- $tagEnabled = index $tags $svcKey -}}
+{{- end }}
+{{- if and ($svc.enabled | default false) $tagEnabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $svc.name }}
+  namespace: kubelift
+  annotations:
+  {{- if $svc.service.metrics }}
+    prometheus.io/path: "{{ $svc.service.metrics.path }}"
+    prometheus.io/port: "{{ $svc.service.metrics.port }}"
+    prometheus.io/scrape: "true"
+  {{- end }}
+  labels:
+    {{- include "kubelift.labels" (dict "name" $svc.name "component" $svc.component) | nindent 4 }}
+spec:
+  type: {{ $svc.service.type }}
+  ports:
+    - port: {{ $svc.service.port }}
+      targetPort: {{ $svc.service.targetPort | default $svc.service.port }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "kubelift.labels" (dict "name" $svc.name "component" $svc.component) | nindent 4 }}
+{{- end }}
+{{- end }}
+{{- end }}
