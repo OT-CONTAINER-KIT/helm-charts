@@ -38,6 +38,15 @@ harbor:
       limits:
         memory: "150Mi"
         cpu: "100m"
+    # ADD THIS MISSING BLOCK BELOW
+    registryctl:
+      resources:
+        requests:
+          memory: "64Mi"
+          cpu: "20m"
+        limits:
+          memory: "100Mi"
+          cpu: "50m"
         
   portal:
     replicas: ${PORTAL_REPLICAS}
