@@ -98,7 +98,7 @@ harbor:
       path: /metrics
 
   exporter:
-    replicas: 1
+    replicas: ${EXPORTER_REPLICAS}
     image:
       repository: goharbor/harbor-exporter
       tag: v2.10.0
