@@ -29,24 +29,25 @@ harbor:
         cpu: "100m"
 
   registry:
-    replicas: ${REGISTRY_REPLICAS}
-    secret: "opstree-harbor-shared-secret"
+  replicas: 1
+  secret: "opstree-harbor-shared-secret"
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 150Mi
+
+  registryctl:
     resources:
       requests:
-        memory: "128Mi"
-        cpu: "50m"
+        cpu: 20m
+        memory: 64Mi
       limits:
-        memory: "150Mi"
-        cpu: "100m"
-    # ADD THIS MISSING BLOCK BELOW
-    registryctl:
-      resources:
-        requests:
-          memory: "64Mi"
-          cpu: "20m"
-        limits:
-          memory: "100Mi"
-          cpu: "50m"
+        cpu: 50m
+        memory: 100Mi
         
   portal:
     replicas: ${PORTAL_REPLICAS}
