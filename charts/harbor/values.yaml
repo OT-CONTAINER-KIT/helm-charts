@@ -2,73 +2,75 @@ fullnameOverride: "stateless-app-harbor"
 
 harbor:
   internalURL: http://stateless-app-harbor-core.harbor.svc.cluster.local
+  # Mandatory for encrypting DB secrets
   secretKey: "stateless-harbor-master-key-32ch" 
     
   core:
-    replicas: ${CORE_REPLICAS}
+    replicas: 1
     secret: "opstree-harbor-shared-secret"
     resources:
       requests:
-        memory: "256Mi"
-        cpu: "100m"
+        memory: "128Mi"
+        cpu: "50m"
       limits:
-        memory: "512Mi"
-        cpu: "500m"
+        memory: "200Mi"
+        cpu: "100m"
   
   jobservice:
-    replicas: ${JOBSERVICE_REPLICAS}
+    replicas: 1
     secret: "opstree-harbor-shared-secret"
     jobLoggers:
       - database
     resources:
       requests:
-        memory: "256Mi"
-        cpu: "100m"
+        memory: "128Mi"
+        cpu: "50m"
       limits:
-        memory: "512Mi"
-        cpu: "500m"
+        memory: "200Mi"
+        cpu: "100m"
 
   registry:
-    replicas: ${REGISTRY_REPLICAS}
+    replicas: 1
     secret: "opstree-harbor-shared-secret"
     resources:
       requests:
-        memory: "256Mi"
-        cpu: "100m"
+        memory: "128Mi"
+        cpu: "50m"
       limits:
-        memory: "512Mi"
-        cpu: "500m"
+        memory: "200Mi"
+        cpu: "100m"
         
   portal:
-    replicas: ${PORTAL_REPLICAS}
+    replicas: 1
     resources:
       requests:
+        memory: "32Mi"
+        cpu: "20m"
+      limits:
         memory: "64Mi"
         cpu: "50m"
-      limits:
-        memory: "128Mi"
-        cpu: "200m"
 
   nginx:
-    replicas: ${NGINX_REPLICAS}
+    replicas: 1
     resources:
       requests:
+        memory: "32Mi"
+        cpu: "20m"
+      limits:
         memory: "64Mi"
         cpu: "50m"
-      limits:
-        memory: "128Mi"
-        cpu: "200m"
 
+  # Trivy is heavy; we give it the remaining 'headroom' in the quota
   trivy:
     enabled: true
-    replicas: ${TRIVY_REPLICAS}
+    replicas: 1
     resources:
       requests:
-        memory: "512Mi"
-        cpu: "200m"
+        memory: "200Mi"
+        cpu: "100m"
       limits:
-        memory: "1Gi"
-        cpu: "1000m"
+        memory: "300Mi"
+        cpu: "500m"
     persistence:
       enabled: true
       size: 5Gi
@@ -91,14 +93,12 @@ harbor:
 
   externalURL: ${HARBOR_EXTERNAL_URL}
 
-  # --- METRICS ENABLEMENT ---
   metrics:
     enabled: true
     exporter:
       port: 8001
       path: /metrics
 
-  # --- EXPORTER POD CONFIGURATION ---
   exporter:
     replicas: 1
     image:
@@ -106,14 +106,11 @@ harbor:
       tag: v2.10.0
     resources:
       requests:
-        cpu: 100m
-        memory: 128Mi
-    livenessProbe:
-      initialDelaySeconds: 30
-      periodSeconds: 10
-    readinessProbe:
-      initialDelaySeconds: 30
-      periodSeconds: 10
+        cpu: "20m"
+        memory: "32Mi"
+      limits:
+        cpu: "50m"
+        memory: "64Mi"
 
   database:
     type: external
@@ -147,7 +144,6 @@ harbor:
         v4auth: true
         skipverify: true
 
-# --- Global Disables (Outside the harbor block) ---
 database:
   internal:
     enabled: false
