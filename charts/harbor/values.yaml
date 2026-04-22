@@ -83,15 +83,15 @@ harbor:
       # size: 5Gi
       # storageClass: "longhorn" 
 
-  oidc:
-    enabled: false
-    name: "Keycloak"
-    endpoint: "https://keycloak.opstree.dev/auth/realms/master"
-    clientId: "harbor"
-    clientSecret: "6s18ll0o3wtF8X07XLvkt8ykpmj8TTLU"
-    scope: "openid"
-    verifyCert: true
-    redirectUrl: "${HARBOR_EXTERNAL_URL}/c/oidc/callback"
+#  oidc:
+#    enabled: false
+#    name: "Keycloak"
+#    endpoint: "https://keycloak.opstree.dev/auth/realms/master"
+#    clientId: "harbor"
+#    clientSecret: "6s18ll0o3wtF8X07XLvkt8ykpmj8TTLU"
+#    scope: "openid"
+#    verifyCert: true
+#    redirectUrl: "${HARBOR_EXTERNAL_URL}/c/oidc/callback"
 
   expose:
     type: clusterIP 
