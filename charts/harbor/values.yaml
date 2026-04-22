@@ -69,7 +69,7 @@ harbor:
         cpu: "50m"
 
   trivy:
-    enabled: true
+    enabled: false
     replicas: ${TRIVY_REPLICAS}
     resources:
       requests:
