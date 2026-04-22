@@ -45,7 +45,7 @@ spec:
 
           ports:
             - name: http
-              containerPort: {{ $svc.service.port | default 8080 }}
+              containerPort: {{ $svc.service.targetPort | default $svc.service.port | default 8080 }}
               protocol: TCP
 
           resources:

@@ -31,14 +31,15 @@ backend:
 
   service:
     type: ClusterIP
-    port: 8080
+    port: 80
+    targetPort: 8080
 
   resources:
     requests:
       cpu: 500m
       memory: 500Mi
     limits:
-      cpu: 1
+      cpu: 1000m
       memory: 500Mi
 
   volumes:
@@ -83,6 +84,7 @@ frontend:
   service:
     type: ClusterIP
     port: 80
+    targetPort: 80
 
   resources:
     requests:
@@ -133,14 +135,15 @@ consumer:
 
   service:
     type: ClusterIP
-    port: 8080
+    port: 80
+    targetPort: 8080
 
   resources:
     requests:
       cpu: 500m
       memory: 500Mi
     limits:
-      cpu: 1
+      cpu: 1000m
       memory: 500Mi
 
   volumes:
