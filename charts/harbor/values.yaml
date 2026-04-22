@@ -77,7 +77,7 @@ harbor:
       storageClass: "longhorn" 
 
   oidc:
-    enabled: true
+    enabled: false
     name: "Keycloak"
     endpoint: "https://keycloak.opstree.dev/auth/realms/master"
     clientId: "harbor"
