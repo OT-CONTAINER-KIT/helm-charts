@@ -82,7 +82,7 @@ harbor:
     endpoint: "https://keycloak.opstree.dev/auth/realms/master"
     clientId: "harbor"
     clientSecret: "6s18ll0o3wtF8X07XLvkt8ykpmj8TTLU"
-    scope: "openid,profile,email,offline_access"
+    scope: "openid"
     verifyCert: true
     redirectUrl: "${HARBOR_EXTERNAL_URL}/c/oidc/callback"
 
