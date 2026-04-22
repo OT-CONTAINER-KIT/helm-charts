@@ -15,4 +15,3 @@ charts/**/charts/crds/_index.md
 .helm/
 .local/
 tmp/
-charts
