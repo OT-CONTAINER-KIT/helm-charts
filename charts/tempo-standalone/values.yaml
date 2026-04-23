@@ -1,18 +1,61 @@
 tempo:
   enabled: true
   fullnameOverride: tempo
+
+  image:
+    registry: ""
+    repository: quay.io/opstree/tempo
+    tag: "2"
+
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    runAsNonRoot: true
+    fsGroup: 1000
+
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+
+  rbac:
+    create: true
+
+  service:
+    type: ClusterIP
+
+  resources:
+    limits:
+      cpu: 300m
+      memory: 300Mi
+    requests:
+      cpu: 150m
+      memory: 150Mi
+
+  tolerations:
+    - effect: NoExecute
+      operator: Exists
+    - effect: NoSchedule
+      operator: Exists
+
   tempo:
-    retention: 168h
-    resources:
-      requests:
-        cpu:  1
-        memory: 2Gi
-      limits:
-        cpu: 1
-        memory: 2Gi
+    retention: 24h
+    memBallastSizeMbs: 1024
+
+    metricsGenerator:
+      enabled: false
 
   persistence:
     enabled: true
+    size: 10Gi
+    storageClassName: o11y-gp3-storage
 
-  serviceMonitor:
-    enabled: true
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: "0.0.0.0:4317"
+        http:
+          endpoint: "0.0.0.0:4318"
