@@ -72,7 +72,7 @@ harbor:
         cpu: "50m"
 
   trivy:
-    enabled: false
+    enabled: true
     replicas: ${TRIVY_REPLICAS}
     resources:
       requests:
@@ -82,9 +82,9 @@ harbor:
         memory: "200Mi" # Reduced significantly to fit
         cpu: "200m"
     persistence:
-      enabled: false
-      # size: 5Gi
-      # storageClass: "longhorn" 
+      enabled: true
+      size: 5Gi
+      storageClass: "storage" 
 
 #  oidc:
 #    enabled: false
