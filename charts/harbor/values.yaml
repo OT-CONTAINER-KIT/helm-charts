@@ -31,18 +31,18 @@ harbor:
   registry:
     replicas: 1
     secret: "opstree-harbor-shared-secret"
-    # Registry Container Resources
-    resources:
-      requests:
-        cpu: 50m
-        memory: 100Mi
-      limits:
-        cpu: 100m
-        memory: 128Mi
+    # This block configures the 'registry' container
+    registry:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 100Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
     
-    # Registryctl Container Resources
-    # Ensure this is exactly at the same level as 'resources'
-    registryctl:
+    # This block configures the 'registryctl' container
+    controller:
       resources:
         requests:
           cpu: 20m
