@@ -1,0 +1,30 @@
+{{- if .Values.topics }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "kafka.fullname" . }}-create-topics
+  labels:
+    {{- include "kafka.labels" . | nindent 4 }}
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: create-topics
+          image: bitnami/kafka:{{ .Values.image.tag }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              for topic in $(echo '{{ toJson .Values.topics }}' | jq -r '.[] | @base64'); do
+                _jq() { echo ${topic} | base64 --decode | jq -r ${1}; }
+                kafka-topics.sh --create --if-not-exists --bootstrap-server {{ include "kafka.fullname" . }}:9092 \
+                  --topic $(_jq '.name') \
+                  --partitions $(_jq '.partitions') \
+                  --replication-factor $(_jq '.replicationFactor');
+              done
+          env:
+            - name: KAFKA_CFG_ZOOKEEPER_CONNECT
+              value: {{ include "kafka.fullname" . }}-zookeeper:2181
+          volumeMounts: []
+{{- end }}

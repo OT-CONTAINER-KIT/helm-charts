@@ -1,0 +1,57 @@
+replicaCount: 1
+
+image:
+  repository: bitnami/kafka
+  tag: "3.7.0"
+  pullPolicy: IfNotPresent
+
+
+resources:
+  requests:
+    memory: "2Gi"
+    cpu: "1"
+  limits:
+    memory: "4Gi"
+    cpu: "2"
+
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+  storageClass: ""
+
+zookeeper:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: bitnami/zookeeper
+    tag: "3.9.2"
+    pullPolicy: IfNotPresent
+  persistence:
+    enabled: true
+    accessModes:
+      - ReadWriteOnce
+    size: 5Gi
+    storageClass: ""
+
+consumerGroups:
+  - name: standard-group
+
+topics:
+  - name: upgrade.events
+    partitions: 6
+    replicationFactor: 1
+    config: {}
+  - name: precheck.tasks
+    partitions: 6
+    replicationFactor: 1
+    config: {}
+  - name: execution.logs
+    partitions: 6
+    replicationFactor: 1
+    config: {}
+  - name: system.events
+    partitions: 6
+    replicationFactor: 1
+    config: {}
