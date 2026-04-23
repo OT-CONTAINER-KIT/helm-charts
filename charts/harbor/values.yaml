@@ -31,7 +31,6 @@ harbor:
   registry:
     replicas: 1
     secret: "opstree-harbor-shared-secret"
-
     resources:
       requests:
         cpu: 50m
@@ -39,15 +38,15 @@ harbor:
       limits:
         cpu: 100m
         memory: 150Mi
-
-  registryctl:
-    resources:
-      requests:
-        cpu: 20m
-        memory: 64Mi
-      limits:
-        cpu: 50m
-        memory: 100Mi
+    # registryctl must be at the same level as 'resources'
+    registryctl:
+      resources:
+        requests:
+          cpu: 20m
+          memory: 64Mi
+        limits:
+          cpu: 50m
+          memory: 100Mi
         
   portal:
     replicas: ${PORTAL_REPLICAS}
