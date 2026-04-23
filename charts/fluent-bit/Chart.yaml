@@ -1,0 +1,15 @@
+apiVersion: v2
+name: fluent-bit
+appVersion: 5.0.3
+description: A Helm chart for fluent-bit
+type: application
+version: 0.0.1
+maintainers:
+  - name: ashwani-opstree
+    email: ashwani.singh@opstree.com
+  - name: Varunarora2201
+    email: varun.kumar@opstree.com
+dependencies:
+- name: fluent-bit
+  repository: https://fluent.github.io/helm-charts
+  version: 0.57.3
