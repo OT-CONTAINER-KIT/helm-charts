@@ -82,9 +82,9 @@ harbor:
         memory: "180Mi" # Reduced significantly to fit
         cpu: "200m"
     persistence:
-      enabled: false
+      enabled: true
       size: 5Gi
-      storageClass: "storage" 
+      storageClass: "vcluster-longhorn-restricted-x-coe-dev-x-coe-dev-vcluster" 
 
 #  oidc:
 #    enabled: false
