@@ -1,0 +1,17 @@
+apiVersion: v2
+name: postgresql-helm-chart
+version: 0.1.0
+description: A modern Helm chart for PostgreSQL 16
+appVersion: "16.3"
+keywords:
+  - postgresql
+  - database
+  - statefulset
+home: https://www.postgresql.org/
+sources:
+  - https://github.com/postgres/postgres
+maintainers:
+  - name: Samyak Jain
+    email: samyak.jain@opstree.com
+    url: https://github.com/samyakjain1908
+
