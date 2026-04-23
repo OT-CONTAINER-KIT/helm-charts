@@ -1,233 +1,202 @@
 vm:
+  enabled: true
+
+  
+  ## VM Operator ##
+
   victoria-metrics-operator:
-    cleanupCRD: false
-  defaultDashboardsEnabled: false
-  experimentalDashboardsEnabled: false
-  prometheus-node-exporter:
     enabled: true
-  node:
-    enabled: true
-  kubeStateMetrics:
-    enabled: true
-  grafana:
-    enabled: true
-    testFramework:
-      enabled: false
-    sidecar:
-      datasources:
-        defaultDatasourceEnabled: false
+
+    image:
+      registry: quay.io
+      repository: opstree/victoriametrics/operator
+      tag: "107f97f"
+
     resources:
-      requests:
-        cpu: "0.5"
-        memory: 1Gi
       limits:
-        cpu: 1
-        memory: 2Gi
-    persistence:
+        cpu: 200m
+        memory: 500Mi
+      requests:
+        cpu: 100m
+        memory: 300Mi
+
+    tolerations:
+      - effect: NoExecute
+        operator: Exists
+      - effect: NoSchedule
+        operator: Exists
+
+    serviceMonitor:
       enabled: true
-      type: sts
-      storageClassName: buildpiper-storage
-      accessModes:
-        - ReadWriteOnce
-      size: 1Gi
-      finalizers:
-        - kubernetes.io/pvc-protection
-    # nodeSelector:
-    #   node_group: o11y
-    # tolerations:
-    #   - key: o11y
-    #     operator: Equal
-    #     value: "true"
-    #     effect: NoSchedule
+
+    operator:
+      disable_prometheus_converter: false
+
+    env:
+      # opstree hardened images — identified and pushed
+      - name: VM_VMSINGLEDEFAULT_IMAGE
+        value: "quay.io/opstree/victoriamertics-victoriametrics:v1.40.0"
+      - name: VM_VMAGENTDEFAULT_IMAGE
+        value: "quay.io/opstree/victoriametrics-vmagent:1"
+      - name: VM_VMALERTDEFAULT_IMAGE
+        value: "quay.io/opstree/victoriametrics-vmalert:1"
+      - name: VM_VMALERTMANAGER_ALERTMANAGERDEFAULTBASEIMAGE
+        value: "quay.io/opstree/alertmanager"
+      # upstream images — not yet hardened
+      - name: VM_VLOGSDEFAULT_IMAGE
+        value: "quay.io/victoriametrics/victoria-logs"
+      - name: VM_VMCLUSTERDEFAULT_VMSELECTDEFAULT_IMAGE
+        value: "quay.io/victoriametrics/vmselect"
+      - name: VM_VMCLUSTERDEFAULT_VMSTORAGEDEFAULT_IMAGE
+        value: "quay.io/victoriametrics/vmstorage"
+      - name: VM_VMCLUSTERDEFAULT_VMINSERTDEFAULT_IMAGE
+        value: "quay.io/victoriametrics/vminsert"
+      - name: VM_VMBACKUP_IMAGE
+        value: "quay.io/victoriametrics/vmbackupmanager"
+      - name: VM_VMAUTHDEFAULT_IMAGE
+        value: "quay.io/victoriametrics/vmauth"
+
+  ## Grafana — managed via standalone grafana chart
+
+  grafana:
+    enabled: false
+
+  ## Alertmanager ##
+
   alertmanager:
     enabled: true
-    config:
-      global:
-        resolve_timeout: 5m
-      templates:
-        - "/etc/vm/configs/**/*.tmpl"
-      route:
-        receiver: "blackhole"
-      receivers:
-      - name: blackhole
     spec:
-      configNamespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: monitoring
-      replicaCount: 2
-      retention: 240h
+      replicaCount: 1
       resources:
-        requests:
-          cpu: 250m
-          memory: 500Mi
         limits:
           cpu: 250m
           memory: 500Mi
-      # nodeSelector:
-      #   node_group: o11y
-      # tolerations:
-      #   - key: o11y
-      #     operator: Equal
-      #     value: "true"
-      #     effect: NoSchedule
-      storage:
-        volumeClaimTemplate:
-          spec:
-            storageClassName: buildpiper-storage
-            accessModes:
-              - "ReadWriteOnce"
-            resources:
-              requests:
-                storage: 1Gi
-  vmsingle:
-    enabled: false
-  defaultRules:
-    create: false
-  kubeApiServer:
-    enabled: false
-  kubeControllerManager:
-    enabled: false
-  kubeEtcd:
-    enabled: false
-  kubeScheduler:
-    enabled: false
-  crds:
-    enabled: false
-  dashboards:
-    node-exporter-full: false
+        requests:
+          cpu: 100m
+          memory: 500Mi
+      tolerations:
+        - effect: NoExecute
+          operator: Exists
+        - effect: NoSchedule
+          operator: Exists
 
-  vmcluster:
+  ## VMSingle ##
+  
+  vmsingle:
     enabled: true
     spec:
-      retentionPeriod: "14d"
-      replicationFactor: 1
-      vmstorage:
-        replicaCount: 1
-        extraArgs:
-          search.maxUniqueTimeseries: "10000000000000"
+      retentionPeriod: "7d"
+      resources:
+        limits:
+          cpu: "1"
+          memory: 1Gi
+        requests:
+          cpu: "1"
+          memory: 1Gi
+      storage:
+        storageClassName: standard
+        accessModes:
+          - ReadWriteOnce
         resources:
-          limits:
-            cpu: "0.5"
-            memory: 500Mi
           requests:
-            cpu: "0.5"
-            memory: 500Mi
-        storage:
-          volumeClaimTemplate:
-            spec:
-              storageClassName: buildpiper-storage
-              resources:
-                requests:
-                  storage: 20Gi
-        # nodeSelector: {}
-        # tolerations: {}
-      vmselect:
-        replicaCount: 1
-        extraArgs:
-          memory.allowedPercent: "75"
-          search.cacheTimestampOffset: 60m
-          search.maxLabelsAPISeries: "10000000000000"
-          search.maxMemoryPerQuery: 2GB
-          search.maxPointsPerTimeseries: "10000000000000"
-          search.maxQueryDuration: 10m
-          search.maxQueryLen: "10000000000000"
-          search.maxSeries: "10000000000000"
-          search.maxUniqueTimeseries: "10000000000000"
-        storage:
-          volumeClaimTemplate:
-            spec:
-              storageClassName: buildpiper-storage
-              resources:
-                requests:
-                  storage: 2Gi
-        resources:
-          limits:
-            cpu: "1"
-            memory: "1Gi"
-          requests:
-            cpu: "1"
-            memory: "1Gi"
-        # nodeSelector: {}
-        # tolerations: {}
-      vminsert:
-        replicaCount: 1
-        extraArgs:
-          maxLabelsPerTimeseries: "100"
-        image:
-          tag: v1.103.0-cluster
-        resources:
-          limits:
-            cpu: "0.5"
-            memory: 500Mi
-          requests:
-            cpu: "0.5"
-            memory: "500Mi"
-        # nodeSelector: {}
-        # tolerations: {}
+            storage: 10Gi
+      tolerations:
+        - effect: NoExecute
+          operator: Exists
+        - effect: NoSchedule
+          operator: Exists
+
+  ## VMAgent ##
 
   vmagent:
     enabled: true
     spec:
-      serviceScrapeNamespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: vm
-      extraArgs:
-        promscrape.maxScrapeSize: 200MB
-        promscrape.streamParse: "true"
-        promscrape.dropOriginalLabels: "true"
+      scrapeInterval: 30s
       resources:
         limits:
-          cpu: "0.5"
+          cpu: 500m
           memory: 500Mi
         requests:
-          cpu: "0.5"
+          cpu: 100m
           memory: 500Mi
-      scrapeInterval: 30s
-      # nodeSelector: {}
-      # tolerations: {}
-      
+      tolerations:
+        - effect: NoExecute
+          operator: Exists
+        - effect: NoSchedule
+          operator: Exists
+
+  ## VMAlert ##
+  
   vmalert:
     enabled: true
     spec:
       resources:
         limits:
-          cpu: "0.5"
+          cpu: 500m
           memory: 500Mi
         requests:
-          cpu: "0.5"
+          cpu: 100m
           memory: 500Mi
-      # nodeSelector: {}
-      # tolerations: {}
+      tolerations:
+        - effect: NoExecute
+          operator: Exists
+        - effect: NoSchedule
+          operator: Exists
 
-blackbox:
-  enabled: false
-  serviceMonitor:
+  ## Kube State Metrics ##
+
+  kube-state-metrics:
+    image:
+      registry: ""
+      repository: quay.io/opstree/kube-state-metrics
+      tag: "2"
+      digest: ""
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+    tolerations:
+      - effect: NoExecute
+        operator: Exists
+      - effect: NoSchedule
+        operator: Exists
+
+  ## Node Exporter ##
+
+  prometheus-node-exporter:
+    image:
+      registry: quay.io
+      repository: opstree/node-exporter
+      tag: "1-alpine3"
+    resources:
+      limits:
+        cpu: 100m
+        memory: 64Mi
+      requests:
+        cpu: 10m
+        memory: 32Mi
+    tolerations:
+      - effect: NoExecute
+        operator: Exists
+      - effect: NoSchedule
+        operator: Exists
+
+  
+  ## Disabled by default ##
+
+  defaultDashboards:
     enabled: false
-  config:
-    modules:
-      http_2xx:
-        prober: http
-        timeout: 5s
-        http:
-          valid_http_versions:
-            - "HTTP/1.0"
-            - "HTTP/1.1"
-            - "HTTP/2.0"
-          no_follow_redirects: false
-          preferred_ip_protocol: "ip4"
-          fail_if_ssl: false
-          fail_if_not_ssl: false
 
-msteams:
+  defaultRules:
+    create: false
+
+  vmcluster:
+    enabled: false
+
+## Prometheus Operator CRDs — disabled, VM operator handles CRDs ##
+
+prometheus-operator-crds:
   enabled: false
-  image:
-    repository: quay.io/prometheusmsteams/prometheus-msteams
-    tag: 1.5.2
-  resources:
-   limits:
-     cpu: 200m
-     memory: 500Mi
-   requests:
-     cpu: 100m
-     memory: 250Mi
-  connectors: []

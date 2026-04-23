@@ -1,0 +1,44 @@
+prometheus-blackbox-exporter:
+  enabled: true
+  fullnameOverride: blackbox
+
+  image:
+    registry: quay.io
+    repository: opstree/blackbox-exporter
+    tag: "0"
+
+  rbac:
+    create: true
+
+  resources:
+    limits:
+      cpu: 300m
+      memory: 300Mi
+    requests:
+      cpu: 150m
+      memory: 150Mi
+
+  tolerations:
+    - effect: NoExecute
+      operator: Exists
+    - effect: NoSchedule
+      operator: Exists
+
+  config:
+    modules:
+      http_2xx:
+        prober: http
+        timeout: 10s
+        http:
+          valid_http_versions:
+            - "HTTP/1.0"
+            - "HTTP/1.1"
+            - "HTTP/2.0"
+          no_follow_redirects: false
+          preferred_ip_protocol: "ip4"
+          fail_if_ssl: false
+          fail_if_not_ssl: false
+          tls_config:
+            insecure_skip_verify: true
+          headers:
+            User-Agent: "blackbox-exporter"
