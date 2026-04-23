@@ -145,6 +145,26 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/elasticsearch-0.3.0/elasticsearch-0.3.0.tgz
     version: 0.3.0
+  fluent-bit:
+  - apiVersion: v2
+    appVersion: 5.0.3
+    created: "2026-04-23T07:42:18.156147524Z"
+    dependencies:
+    - name: fluent-bit
+      repository: https://fluent.github.io/helm-charts
+      version: 0.57.3
+    description: A Helm chart for fluent-bit
+    digest: b18177359cd439cb2c9413eeed33a2a1defe82e5ac03f110f8ae2c9edc4509f2
+    maintainers:
+    - email: ashwani.singh@opstree.com
+      name: ashwani-opstree
+    - email: varun.kumar@opstree.com
+      name: Varunarora2201
+    name: fluent-bit
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/fluent-bit-0.0.1/fluent-bit-0.0.1.tgz
+    version: 0.0.1
   fluentd:
   - apiVersion: v1
     appVersion: 0.4.0
@@ -5508,4 +5528,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/worker-0.1.0/worker-0.1.0.tgz
     version: 0.1.0
-generated: "2026-03-21T15:29:06.954365817Z"
+generated: "2026-04-23T07:42:18.156384101Z"
