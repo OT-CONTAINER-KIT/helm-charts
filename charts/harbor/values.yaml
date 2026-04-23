@@ -9,10 +9,10 @@ harbor:
     secret: "opstree-harbor-shared-secret"
     resources:
       requests:
-        memory: "128Mi"
+        memory: "100Mi"
         cpu: "50m"
       limits:
-        memory: "200Mi" # Reduced to fit 1Gi quota
+        memory: "150Mi" # Reduced to fit 1Gi quota
         cpu: "100m"
   
   jobservice:
@@ -22,10 +22,10 @@ harbor:
       - database
     resources:
       requests:
-        memory: "128Mi"
+        memory: "100Mi"
         cpu: "50m"
       limits:
-        memory: "150Mi" # Reduced to fit 1Gi quota
+        memory: "128Mi" # Reduced to fit 1Gi quota
         cpu: "100m"
 
   registry:
@@ -35,21 +35,21 @@ harbor:
     registry:
       resources:
         requests:
-          cpu: 50m
-          memory: 100Mi
+          cpu: "50m"
+          memory: "64Mi"
         limits:
-          cpu: 100m
-          memory: 128Mi
+          cpu: "100m"
+          memory: "100Mi"
     
     # This block configures the 'registryctl' container
     controller:
       resources:
         requests:
-          cpu: 20m
-          memory: 32Mi
+          cpu: "20m"
+          memory: "32Mi"
         limits:
-          cpu: 50m
-          memory: 64Mi
+          cpu: "50m"
+          memory: "64Mi"
         
   portal:
     replicas: ${PORTAL_REPLICAS}
@@ -79,7 +79,7 @@ harbor:
         memory: "150Mi"
         cpu: "50m"
       limits:
-        memory: "200Mi" # Reduced significantly to fit
+        memory: "180Mi" # Reduced significantly to fit
         cpu: "200m"
     persistence:
       enabled: true
