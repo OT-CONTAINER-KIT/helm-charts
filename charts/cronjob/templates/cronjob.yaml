@@ -1,0 +1,48 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "base.fullname" . }}
+  labels:
+    {{- include "base.labels" . | nindent 4 }}
+spec:
+  schedule: "{{ .Values.cronjob.schedule }}"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "base.labels" . | nindent 12 }}
+        spec:
+          containers:
+            - name: {{ include "base.fullname" . }}
+              image: "{{ .Values.base.image.repository }}:{{ .Values.base.image.tag }}"
+              imagePullPolicy: {{ .Values.base.image.pullPolicy }}
+              {{- if .Values.base.image.command }}
+              command: {{ toJson .Values.base.image.command }}
+              {{- end }}
+              env:
+                {{- if .Values.base.secret }}
+                {{- range $key, $value := .Values.base.secret }}
+                - name: {{ $key }}
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "base.fullname" $ }}
+                      key: {{ $key }}
+                {{- end }}
+                {{- end }}
+              volumeMounts:
+                {{- if .Values.volumes.configMaps }}
+                {{- range .Values.volumes.configMaps }}
+                - name: {{ .name }}
+                  mountPath: {{ .mountPath }}
+                {{- end }}
+                {{- end }}
+          restartPolicy: OnFailure
+          volumes:
+            {{- if .Values.volumes.configMaps }}
+            {{- range .Values.volumes.configMaps }}
+            - name: {{ .name }}
+              configMap:
+                name: {{ .name }}
+            {{- end }}
+            {{- end }}
