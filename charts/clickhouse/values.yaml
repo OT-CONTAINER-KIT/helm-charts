@@ -1,9 +1,10 @@
 replicaCount: 1
 
 image:
-  repository: clickhouse/clickhouse-server
+  repository: 552171489163.dkr.ecr.ap-south-1.amazonaws.com/kubelift/clickhouse
   tag: "23.12"
   pullPolicy: IfNotPresent
+  pullSecrets: sr-stage-aws-ecr-regcred
 
 resources:
   requests:

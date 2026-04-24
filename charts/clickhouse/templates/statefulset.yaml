@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "clickhouse.fullname" . }}
+  namespace: kubelift
   labels:
     {{- include "clickhouse.labels" . | nindent 4 }}
 spec:
@@ -17,9 +18,13 @@ spec:
         app.kubernetes.io/name: {{ include "clickhouse.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecrets }}
+      {{- end }}
       containers:
         - name: clickhouse
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 8123
@@ -39,10 +44,6 @@ spec:
               value: {{ .Values.clickhouse.defaultPassword | quote }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          livenessProbe:
-            {{- toYaml .Values.livenessProbe | nindent 12 }}
-          readinessProbe:
-            {{- toYaml .Values.readinessProbe | nindent 12 }}
           volumeMounts:
             - name: data
               mountPath: /var/lib/clickhouse
