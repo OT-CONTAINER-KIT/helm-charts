@@ -1,0 +1,28 @@
+replicaCount: 1
+
+image:
+  repository: clickhouse/clickhouse-server
+  tag: "23.12"
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    memory: "4Gi"
+    cpu: "2"
+  limits:
+    memory: "8Gi"
+    cpu: "4"
+
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 20Gi
+  storageClass: ""
+
+clickhouse:
+  defaultUser: clickhouse
+  defaultPassword: clickhouse
+  appDb: kubelift
+  appUser: kubelift
+  appPassword: kubelift
