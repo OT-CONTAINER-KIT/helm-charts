@@ -17,9 +17,11 @@ This Helm chart deploys a generic ClickHouse instance on Kubernetes.
 kubectl create namespace my-namespace
 ```
 
-### 2. Install the Chart (default namespace)
+
+### 2. Install the Chart (kubelift namespace)
 ```
-helm install clickhouse ./clickhouse
+kubectl create namespace kubelift   # Only if it doesn't already exist
+helm install clickhouse ./clickhouse --namespace kubelift
 ```
 
 ### 3. Access ClickHouse
