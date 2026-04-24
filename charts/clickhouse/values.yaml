@@ -8,11 +8,14 @@ image:
 
 resources:
   requests:
-    memory: "4Gi"
-    cpu: "2"
+    memory: "1Gi"
+    cpu: "500m"
   limits:
     memory: "8Gi"
     cpu: "4"
+
+tolerations:
+  - operator: "Exists"
 
 persistence:
   enabled: true
