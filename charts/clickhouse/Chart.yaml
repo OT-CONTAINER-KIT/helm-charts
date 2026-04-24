@@ -3,6 +3,7 @@ name: clickhouse
 version: 0.1.0
 description: A generic Helm chart for ClickHouse
 appVersion: "23.12"
+icon: https://upload.wikimedia.org/wikipedia/commons/6/6a/ClickHouse_logo.png
 keywords:
   - clickhouse
   - database
