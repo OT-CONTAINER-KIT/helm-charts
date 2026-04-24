@@ -8,7 +8,7 @@ fluent-bit:
     runAsUser: 65532
     runAsGroup: 65532
     runAsNonRoot: true
-  podSecurityContext: 
+  podSecurityContext:
     fsGroup: 65532
   rbac:
     create: true
@@ -27,7 +27,7 @@ fluent-bit:
     operator: Exists
   - effect: NoSchedule
     operator: Exists
-  serviceMonitor: 
+  serviceMonitor:
     enabled: true
   extraVolumes:
     - name: fluentbit-state
