@@ -1,35 +1,51 @@
-image:
-  repository: quay.io/opstree/fluent-bit
-  tag: 5.0.3
-testFramework:
-  enabled: false
-# securityContext:
-#   runAsUser: 0
-securityContext:
-  runAsUser: 65532
-  runAsGroup: 65532
-  runAsNonRoot: true
-  fsGroup: 65532
-containerSecurityContext:
-  allowPrivilegeEscalation: false
-  readOnlyRootFilesystem: true
-  capabilities:
-    drop:
-      - ALL
-rbac:
-  create: true
-metricsPort: 2020
-service:
-  type: ClusterIP
-resources:
-  limits:
-    cpu: 300m
-    memory: 300Mi
-  requests:
-    cpu: 150m
-    memory: 150Mi
-tolerations:
-- effect: NoExecute
-  operator: Exists
-- effect: NoSchedule
-  operator: Exists
+fluent-bit:
+  image:
+    repository: quay.io/opstree/fluent-bit
+    tag: 5.0.3
+  testFramework:
+    enabled: false
+  securityContext:
+    runAsUser: 65532
+    runAsGroup: 65532
+    runAsNonRoot: true
+  podSecurityContext: 
+    fsGroup: 65532
+  rbac:
+    create: true
+  metricsPort: 2020
+  service:
+    type: ClusterIP
+  resources:
+    limits:
+      cpu: 300m
+      memory: 300Mi
+    requests:
+      cpu: 150m
+      memory: 150Mi
+  tolerations:
+  - effect: NoExecute
+    operator: Exists
+  - effect: NoSchedule
+    operator: Exists
+  serviceMonitor: 
+    enabled: true
+  extraVolumes:
+    - name: fluentbit-state
+      hostPath:
+        path: /fluent-bit/state
+        type: DirectoryOrCreate
+  extraVolumeMounts:
+    - name: fluentbit-state
+      mountPath: /fluent-bit/state
+
+  # Add this section to fix permissions
+  initContainers:
+    - name: set-permissions
+      image: quay.io/opstree/busybox:1-alpine3.23
+      command: ["sh", "-c", "chown -R 65532:65532 /fluent-bit/state"]
+      securityContext:
+        runAsUser: 0
+        runAsNonRoot: false
+      volumeMounts:
+        - name: fluentbit-state
+          mountPath: /fluent-bit/state
