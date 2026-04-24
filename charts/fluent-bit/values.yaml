@@ -8,7 +8,7 @@ fluent-bit:
     runAsUser: 65532
     runAsGroup: 65532
     runAsNonRoot: true
-  podSecurityContext: 
+  podSecurityContext:
     fsGroup: 65532
   rbac:
     create: true
@@ -27,7 +27,7 @@ fluent-bit:
     operator: Exists
   - effect: NoSchedule
     operator: Exists
-  serviceMonitor: 
+  serviceMonitor:
     enabled: true
   extraVolumes:
     - name: fluentbit-state
@@ -38,7 +38,7 @@ fluent-bit:
     - name: fluentbit-state
       mountPath: /fluent-bit/state
 
-  # Add this section to fix permissions
+  # to fix the permission issue of fluent-bit when running as non-root user, we need to set the permissions of the state directory to 65532:65532 (fluent-bit user and group) before the fluent-bit container starts. We can achieve this by adding an init container that runs as root and sets the permissions of the state directory.
   initContainers:
     - name: set-permissions
       image: quay.io/opstree/busybox:1-alpine3.23
