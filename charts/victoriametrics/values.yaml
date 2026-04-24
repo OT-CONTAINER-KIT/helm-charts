@@ -106,6 +106,19 @@ vm:
         - effect: NoSchedule
           operator: Exists
 
+  # Add this section to fix permissions  
+    initContainers:
+      - name: volume-permissions
+        image: quay.io/opstree/busybox:1-alpine3.23
+        command:
+          - sh
+          - -c
+          - |
+            chown -R 1000:1000 /storage
+        volumeMounts:
+          - name: data
+            mountPath: /storage
+
   ## VMAgent ##
 
   vmagent:

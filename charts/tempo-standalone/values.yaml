@@ -59,3 +59,16 @@ tempo:
           endpoint: "0.0.0.0:4317"
         http:
           endpoint: "0.0.0.0:4318"
+          
+  # Add this section to fix permissions
+  initContainers:
+    - name: volume-permissions
+      image: quay.io/opstree/busybox:1-alpine3.23
+      command:
+        - sh
+        - -c
+        - |
+          chown -R 1000:1000 /var/tempo
+      volumeMounts:
+        - name: storage
+          mountPath: /var/tempo
