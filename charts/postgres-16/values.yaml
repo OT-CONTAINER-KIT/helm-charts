@@ -1,9 +1,11 @@
 replicaCount: 1
 
 image:
-  repository: postgres
-  tag: "16.3"
+  registry: 552171489163.dkr.ecr.ap-south-1.amazonaws.com
+  repository: kubelift/postgres
+  tag: "latest"
   pullPolicy: IfNotPresent
+  pullSecrets: "sr-stage-aws-ecr-regcred"
 
 service:
   type: ClusterIP
@@ -14,7 +16,7 @@ persistence:
   accessModes:
     - ReadWriteOnce
   size: 20Gi
-  storageClass: ""
+  storageClass: "gp3"
 
 resources:
   requests:
@@ -46,4 +48,5 @@ readinessProbe:
 
 affinity: {}
 nodeSelector: {}
-tolerations: []
+tolerations:
+  - operator: "Exists"

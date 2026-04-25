@@ -2,6 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ include "postgres.pvcName" . }}
+  namespace: kubelift
   labels:
     {{- include "postgres.labels" . | nindent 4 }}
 spec:
