@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   registry: 552171489163.dkr.ecr.ap-south-1.amazonaws.com
   repository: kubelift/kafka
-  tag: "3.7.0"
+  tag: "latest"
   pullPolicy: IfNotPresent
   pullSecrets: "sr-stage-aws-ecr-regcred"
 
