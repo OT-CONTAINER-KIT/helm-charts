@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "kafka.fullname" . }}-zookeeper
+  namespace: kubelift
   labels:
     {{- include "kafka.labels" . | nindent 4 }}
 spec:
@@ -17,9 +18,15 @@ spec:
         app.kubernetes.io/name: {{ include "kafka.name" . }}-zookeeper
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecrets }}
+      {{- if .Values.tolerations }}
+      tolerations:
+        {{- toYaml .Values.tolerations | nindent 8 }}
+      {{- end }}
       containers:
         - name: zookeeper
-          image: "{{ .Values.zookeeper.image.repository }}:{{ .Values.zookeeper.image.tag }}"
+          image: "{{ .Values.zookeeper.image.registry }}/{{ .Values.zookeeper.image.repository }}:{{ .Values.zookeeper.image.tag }}"
           imagePullPolicy: {{ .Values.zookeeper.image.pullPolicy }}
           ports:
             - containerPort: 2181

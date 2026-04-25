@@ -1,15 +1,17 @@
 replicaCount: 1
 
 image:
-  repository: bitnami/kafka
+  registry: 552171489163.dkr.ecr.ap-south-1.amazonaws.com
+  repository: kubelift/kafka
   tag: "3.7.0"
   pullPolicy: IfNotPresent
+  pullSecrets: "sr-stage-aws-ecr-regcred"
 
 
 resources:
   requests:
-    memory: "2Gi"
-    cpu: "1"
+    memory: "1Gi"
+    cpu: "500m"
   limits:
     memory: "4Gi"
     cpu: "2"
@@ -19,13 +21,14 @@ persistence:
   accessModes:
     - ReadWriteOnce
   size: 5Gi
-  storageClass: ""
+  storageClass: "gp3"
 
 zookeeper:
   enabled: true
   replicaCount: 1
   image:
-    repository: bitnami/zookeeper
+    registry: 552171489163.dkr.ecr.ap-south-1.amazonaws.com
+    repository: kubelift/zookeeper
     tag: "3.9.2"
     pullPolicy: IfNotPresent
   persistence:
@@ -33,7 +36,10 @@ zookeeper:
     accessModes:
       - ReadWriteOnce
     size: 5Gi
-    storageClass: ""
+    storageClass: "gp3"
+
+tolerations:
+  - operator: "Exists"
 
 consumerGroups:
   - name: standard-group
