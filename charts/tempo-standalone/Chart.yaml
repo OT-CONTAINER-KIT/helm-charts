@@ -1,14 +1,17 @@
 apiVersion: v2
 name: tempo-standalone
-description: A Helm chart for tempo standalone
+appVersion: "2"
+description: A Helm chart for Tempo Standalone setup
 type: application
 version: 1.0.0
-appVersion: 1.0.0
+maintainers:
+  - name: ashwani-opstree
+    email: ashwani.singh@opstree.com
+  - name: Varunarora2201
+    email: varun.kumar@opstree.com
 dependencies:
-  - name: tempo
-    version: 1.10.1
-    repository: https://grafana.github.io/helm-charts
-    alias: tempo
-    tags:
-      - tempo
+  - alias: tempo
     condition: tempo.enabled
+    name: tempo
+    repository: https://grafana.github.io/helm-charts
+    version: 1.23.0
