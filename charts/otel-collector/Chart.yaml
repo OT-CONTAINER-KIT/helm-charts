@@ -1,0 +1,17 @@
+apiVersion: v2
+name: otel-collector
+appVersion: "0.129.0"
+description: A Helm chart for OpenTelemetry Collector
+type: application
+version: 1.0.0
+maintainers:
+  - name: ashwani-opstree
+    email: ashwani.singh@opstree.com
+  - name: Varunarora2201
+    email: varun.kumar@opstree.com
+dependencies:
+  - name: opentelemetry-collector
+    version: 0.123.0
+    repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+    alias: collector
+    condition: collector.enabled
