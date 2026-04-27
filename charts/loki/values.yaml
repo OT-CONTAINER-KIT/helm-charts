@@ -1,14 +1,43 @@
-distributed:
-  enabled: false
-
-standalone:
+loki:
   enabled: true
+
   loki:
+    image:
+      registry: ""
+      repository: quay.io/opstree/loki
+      tag: "3.6-debian13"
+      digest: ""
+
+    auth_enabled: false
+
+    limits_config:
+      reject_old_samples: true
+      reject_old_samples_max_age: 168h
+      max_cache_freshness_per_query: 10m
+      split_queries_by_interval: 15m
+      per_stream_rate_limit: 512M
+      per_stream_rate_limit_burst: 1024M
+      cardinality_limit: 200000
+      ingestion_burst_size_mb: 1000
+      ingestion_rate_mb: 10000
+      max_entries_limit_per_query: 1000000
+      max_label_value_length: 20480
+      max_label_name_length: 10240
+      max_label_names_per_series: 300
+
+    compactor:
+      working_directory: /var/loki/compactor
+      compaction_interval: 10m
+      retention_enabled: false
+      delete_request_store: filesystem
+      retention_delete_delay: 2h
+
     storage:
       type: filesystem
-    auth_enabled: false
+
     commonConfig:
       replication_factor: 1
+
     schemaConfig:
       configs:
         - from: 2024-04-01
@@ -18,52 +47,111 @@ standalone:
           index:
             prefix: loki_index_
             period: 24h
+
     ingester:
       chunk_encoding: snappy
+
     tracing:
-      enabled: true
+      enabled: false
+
     querier:
-      # Default is 4, if you have enough memory and CPU you can increase, reduce if OOMing
       max_concurrent: 2
 
+  serviceAccount:
+    create: true
+
   deploymentMode: SingleBinary
+
   lokiCanary:
     enabled: false
+
   test:
     enabled: false
+
   singleBinary:
+    affinity: ""
     replicas: 1
+
+    initContainers:
+      - name: volume-permissions
+        image: quay.io/opstree/busybox:1-alpine3.23
+        command:
+          - sh
+          - -c
+          - |
+            chown -R 10001:10001 /var/loki
+        volumeMounts:
+          - name: storage
+            mountPath: /var/loki
+
     resources:
       limits:
-        cpu: 3
-        memory: 4Gi
-      requests:
-        cpu: 2
+        cpu: "2"
         memory: 2Gi
-    extraEnv:
-      # Keep a little bit lower than memory limits
-      - name: GOMEMLIMIT
-        value: 3750MiB
+      requests:
+        cpu: 500m
+        memory: 1Gi
+
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: standard
+
+    tolerations:
+      - effect: NoExecute
+        operator: Exists
+      - effect: NoSchedule
+        operator: Exists
+
+  gateway:
+    affinity: ""
+    tolerations:
+      - effect: NoExecute
+        operator: Exists
+      - effect: NoSchedule
+        operator: Exists
 
   chunksCache:
-    # default is 500MB, with limited memory keep this smaller
     writebackSizeLimit: 10MB
-    allocatedMemory: 1024
+    allocatedMemory: 250Mi
+    image:
+      repository: quay.io/opstree/memcached
+      tag: "1"
+    tolerations:
+      - effect: NoExecute
+        operator: Exists
+      - effect: NoSchedule
+        operator: Exists
+    exporter:
+      image:
+        repository: quay.io/opstree/memcached-exporter
+        tag: "0"
 
-  # Enable minio for storage
+  resultsCache:
+    allocatedMemory: 128Mi
+    image:
+      repository: quay.io/opstree/memcached
+      tag: "1"
+    tolerations:
+      - effect: NoExecute
+        operator: Exists
+      - effect: NoSchedule
+        operator: Exists
+    exporter:
+      image:
+        repository: quay.io/opstree/memcached-exporter
+        tag: "0"
+
   minio:
     enabled: false
-    persistence:
-      size: 10Gi
 
-  # Zero out replica counts of other deployment modes
+  # Zero out all non-SingleBinary replicas
   backend:
     replicas: 0
   read:
     replicas: 0
   write:
     replicas: 0
-
   ingester:
     replicas: 0
   querier:
@@ -82,9 +170,3 @@ standalone:
     replicas: 0
   bloomGateway:
     replicas: 0
-
-promtail:
-  config:
-    logLevel: info
-    clients:
-      - url: http://logging-gateway/loki/api/v1/push
