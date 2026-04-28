@@ -1,31 +1,22 @@
 apiVersion: v2
-name: vm
-description: A Helm chart for victoriametrics
+name: vm-standalone
+appVersion: "0.58.0"
+description: A Helm chart for Victoria Metrics K8s stack standalone setup
 type: application
-version: 0.0.3
-appVersion: v0.0.3
+version: 1.0.0
 maintainers:
   - name: ashwani-opstree
-
+    email: ashwani.singh@opstree.com
+  - name: Varunarora2201
+    email: varun.kumar@opstree.com
 dependencies:
   - name: victoria-metrics-k8s-stack
-    version: 0.25.5
+    version: 0.58.0
     repository: https://victoriametrics.github.io/helm-charts/
     alias: vm
-    tags:
-      - monitoring
     condition: vm.enabled
-  - name: prometheus-blackbox-exporter
-    version: 8.17.0
-    repository: https://prometheus-community.github.io/helm-charts/
-    tags:
-      - blackbox
-    alias: blackbox
-    condition: blackbox.enabled
-  - name: prometheus-msteams
-    version: 1.3.4
-    repository: https://prometheus-msteams.github.io/prometheus-msteams/
-    tags:
-      - msteams
-    alias: msteams
-    condition: msteams.enabled
+  - name: prometheus-operator-crds
+    version: "20.0.1"
+    repository: https://prometheus-community.github.io/helm-charts
+    alias: prometheus-operator-crds
+    condition: prometheus-operator-crds.enabled
