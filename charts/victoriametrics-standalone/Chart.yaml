@@ -1,6 +1,6 @@
 apiVersion: v2
 name: vm-standalone
-appVersion: "0.58.0"
+appVersion: "0.69.0"
 description: A Helm chart for Victoria Metrics K8s stack standalone setup
 type: application
 version: 0.0.1
