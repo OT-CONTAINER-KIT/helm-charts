@@ -1,0 +1,22 @@
+apiVersion: v2
+name: vm-standalone
+appVersion: "0.69.0"
+description: A Helm chart for Victoria Metrics K8s stack standalone setup
+type: application
+version: 0.0.1
+maintainers:
+  - name: ashwani-opstree
+    email: ashwani.singh@opstree.com
+  - name: Varunarora2201
+    email: varun.kumar@opstree.com
+dependencies:
+  - name: victoria-metrics-k8s-stack
+    version: 0.75.0
+    repository: https://victoriametrics.github.io/helm-charts/
+    alias: vm
+    condition: vm.enabled
+  - name: prometheus-operator-crds
+    version: "20.0.1"
+    repository: https://prometheus-community.github.io/helm-charts
+    alias: prometheus-operator-crds
+    condition: prometheus-operator-crds.enabled

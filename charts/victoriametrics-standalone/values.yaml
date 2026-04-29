@@ -1,0 +1,174 @@
+vm:
+  enabled: true
+
+
+  ## VM Operator ##
+
+  victoria-metrics-operator:
+    enabled: true
+
+    image:
+      registry: quay.io
+      repository: opstree/victoriametrics/operator
+      tag: "v0.69.0@sha256:66fe5216c278604b89064d5972687f0df2c23ad41fe6fcedb4f8bfb5c041595d"
+
+    resources:
+      limits:
+        cpu: 200m
+        memory: 500Mi
+      requests:
+        cpu: 100m
+        memory: 300Mi
+
+    serviceMonitor:
+      enabled: true
+
+    operator:
+      disable_prometheus_converter: false
+
+    env:
+      # opstree hardened images — identified and pushed
+      - name: VM_VMSINGLEDEFAULT_IMAGE
+        value: "quay.io/opstree/victoriamertics-victoriametrics:v1.40.0"
+      - name: VM_VMAGENTDEFAULT_IMAGE
+        value: "quay.io/opstree/victoriametrics-vmagent:1.141.0-debian13"
+      - name: VM_VMALERTDEFAULT_IMAGE
+        value: "quay.io/opstree/victoriametrics-vmalert:1.141.0-debian13"
+      - name: VM_VMALERTMANAGER_ALERTMANAGERDEFAULTBASEIMAGE
+        value: "quay.io/opstree/alertmanager:0.32.0-debian13"
+
+      # upstream images — not yet hardened this can be hardenend
+      - name: VM_VLOGSDEFAULT_IMAGE
+        value: "quay.io/victoriametrics/victoria-logs"
+      - name: VM_VMCLUSTERDEFAULT_VMSELECTDEFAULT_IMAGE
+        value: "quay.io/victoriametrics/vmselect"
+      - name: VM_VMCLUSTERDEFAULT_VMSTORAGEDEFAULT_IMAGE
+        value: "quay.io/victoriametrics/vmstorage"
+      - name: VM_VMCLUSTERDEFAULT_VMINSERTDEFAULT_IMAGE
+        value: "quay.io/victoriametrics/vminsert"
+      - name: VM_VMBACKUP_IMAGE
+        value: "quay.io/victoriametrics/vmbackupmanager"
+      - name: VM_VMAUTHDEFAULT_IMAGE
+        value: "quay.io/victoriametrics/vmauth"
+
+  ## Grafana — managed via standalone grafana chart
+
+  grafana:
+    enabled: false
+
+  ## Alertmanager ##
+
+  alertmanager:
+    enabled: true
+    spec:
+      replicaCount: 1
+      resources:
+        limits:
+          cpu: 250m
+          memory: 500Mi
+        requests:
+          cpu: 100m
+          memory: 500Mi
+
+  ## VMSingle ##
+
+  vmsingle:
+    enabled: true
+    spec:
+      retentionPeriod: "7d"
+      resources:
+        limits:
+          cpu: "1"
+          memory: 1Gi
+        requests:
+          cpu: "1"
+          memory: 1Gi
+      storage:
+        storageClassName: standard
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+
+  # Add this section to fix permissions
+    initContainers:
+      - name: volume-permissions
+        image: quay.io/opstree/busybox:1-alpine3.23
+        command:
+          - sh
+          - -c
+          - |
+            chown -R 1000:1000 /storage
+        volumeMounts:
+          - name: data
+            mountPath: /storage
+
+  ## VMAgent ##
+  vmagent:
+    enabled: true
+    spec:
+      scrapeInterval: 30s
+      resources:
+        limits:
+          cpu: 500m
+          memory: 500Mi
+        requests:
+          cpu: 100m
+          memory: 500Mi
+
+  ## VMAlert ##
+  vmalert:
+    enabled: true
+    spec:
+      resources:
+        limits:
+          cpu: 500m
+          memory: 500Mi
+        requests:
+          cpu: 100m
+          memory: 500Mi
+
+  ## Kube State Metrics ##
+  kube-state-metrics:
+    image:
+      registry: ""
+      repository: quay.io/opstree/kube-state-metrics
+      tag: "2.18.0-debian13"
+      digest: "sha256:53525d253793ccb33f525781831df4d66f25634b90318f07b5c41ae1e5bb587b"
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+
+  ## Node Exporter ##
+
+  prometheus-node-exporter:
+    image:
+      registry: quay.io
+      repository: opstree/node-exporter
+      tag: "1.11.1-alpine3.23"
+    resources:
+      limits:
+        cpu: 100m
+        memory: 64Mi
+      requests:
+        cpu: 50m
+        memory: 32Mi
+
+  ## Disabled by default ##
+  defaultDashboards:
+    enabled: false
+
+  defaultRules:
+    create: false
+
+  vmcluster:
+    enabled: false
+
+## Prometheus Operator CRDs — enabled, VM operator handles CRDs ##
+prometheus-operator-crds:
+  enabled: true
