@@ -10,7 +10,7 @@ vm:
     image:
       registry: quay.io
       repository: opstree/victoriametrics/operator
-      tag: "107f97f" ## this image is pulled from Docker Hub as no DHI image has been released for this.
+      tag: "v0.69.0@sha256:66fe5216c278604b89064d5972687f0df2c23ad41fe6fcedb4f8bfb5c041595d" ## this image is pulled from Docker Hub as no DHI image has been released for this.
 
     resources:
       limits:
@@ -19,12 +19,6 @@ vm:
       requests:
         cpu: 100m
         memory: 300Mi
-
-    tolerations:
-      - effect: NoExecute
-        operator: Exists
-      - effect: NoSchedule
-        operator: Exists
 
     serviceMonitor:
       enabled: true
@@ -43,7 +37,7 @@ vm:
       - name: VM_VMALERTMANAGER_ALERTMANAGERDEFAULTBASEIMAGE
         value: "quay.io/opstree/alertmanager:0.32.0-debian13"
       
-      # upstream images — not yet hardened this can be hardenend after Newgen update
+      # upstream images — not yet hardened this can be hardenend
       - name: VM_VLOGSDEFAULT_IMAGE
         value: "quay.io/victoriametrics/victoria-logs"
       - name: VM_VMCLUSTERDEFAULT_VMSELECTDEFAULT_IMAGE
@@ -75,11 +69,6 @@ vm:
         requests:
           cpu: 100m
           memory: 500Mi
-      tolerations:
-        - effect: NoExecute
-          operator: Exists
-        - effect: NoSchedule
-          operator: Exists
 
   ## VMSingle ##
   
@@ -101,11 +90,6 @@ vm:
         resources:
           requests:
             storage: 10Gi
-      tolerations:
-        - effect: NoExecute
-          operator: Exists
-        - effect: NoSchedule
-          operator: Exists
 
   # Add this section to fix permissions  
     initContainers:
@@ -121,7 +105,6 @@ vm:
             mountPath: /storage
 
   ## VMAgent ##
-
   vmagent:
     enabled: true
     spec:
@@ -133,14 +116,8 @@ vm:
         requests:
           cpu: 100m
           memory: 500Mi
-      tolerations:
-        - effect: NoExecute
-          operator: Exists
-        - effect: NoSchedule
-          operator: Exists
 
   ## VMAlert ##
-  
   vmalert:
     enabled: true
     spec:
@@ -151,20 +128,14 @@ vm:
         requests:
           cpu: 100m
           memory: 500Mi
-      tolerations:
-        - effect: NoExecute
-          operator: Exists
-        - effect: NoSchedule
-          operator: Exists
 
   ## Kube State Metrics ##
-
   kube-state-metrics:
     image:
       registry: ""
       repository: quay.io/opstree/kube-state-metrics
-      tag: "2-debian13"
-      digest: ""
+      tag: "2.18.0-debian13"
+      digest: "sha256:53525d253793ccb33f525781831df4d66f25634b90318f07b5c41ae1e5bb587b"
     resources:
       limits:
         cpu: 500m
@@ -172,11 +143,6 @@ vm:
       requests:
         cpu: 100m
         memory: 256Mi
-    tolerations:
-      - effect: NoExecute
-        operator: Exists
-      - effect: NoSchedule
-        operator: Exists
 
   ## Node Exporter ##
 
@@ -190,17 +156,10 @@ vm:
         cpu: 100m
         memory: 64Mi
       requests:
-        cpu: 10m
+        cpu: 50m
         memory: 32Mi
-    tolerations:
-      - effect: NoExecute
-        operator: Exists
-      - effect: NoSchedule
-        operator: Exists
-
   
   ## Disabled by default ##
-
   defaultDashboards:
     enabled: false
 
@@ -210,7 +169,6 @@ vm:
   vmcluster:
     enabled: false
 
-## Prometheus Operator CRDs — disabled, VM operator handles CRDs ##
-
+## Prometheus Operator CRDs — enabled, VM operator handles CRDs ##
 prometheus-operator-crds:
-  enabled: false
+  enabled: yes
