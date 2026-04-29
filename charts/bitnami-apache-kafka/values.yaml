@@ -29,8 +29,8 @@ zookeeper:
   image:
     registry: 552171489163.dkr.ecr.ap-south-1.amazonaws.com
     repository: kubelift/zookeeper
-    tag: "3.9.2"
-    pullPolicy: IfNotPresent
+    tag: "latest"
+    pullPolicy: Always
   persistence:
     enabled: true
     accessModes:
