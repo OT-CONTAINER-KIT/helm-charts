@@ -1,9 +1,10 @@
 replicaCount: 1
 
 image:
-  repository: 552171489163.dkr.ecr.ap-south-1.amazonaws.com/kubelift/clickhouse
-  tag: "1-2026-04-25-012909"
-  pullPolicy: IfNotPresent
+  registry: 552171489163.dkr.ecr.ap-south-1.amazonaws.com
+  repository: kubelift/clickhouse
+  tag: "latest"
+  pullPolicy: Always
   pullSecrets: sr-stage-aws-ecr-regcred
 
 resources:
