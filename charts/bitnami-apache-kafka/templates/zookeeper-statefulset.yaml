@@ -19,7 +19,7 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       imagePullSecrets:
-        - name: {{ .Values.image.pullSecrets }}
+        - name: {{ .Values.zookeeper.image.pullSecrets }}
       {{- if .Values.tolerations }}
       tolerations:
         {{- toYaml .Values.tolerations | nindent 8 }}
@@ -32,8 +32,8 @@ spec:
             - containerPort: 2181
               name: client
           env:
-            - name: ALLOW_ANONYMOUS_LOGIN
-              value: "yes"
+            - name: ZOO_MY_ID
+              value: "1"
           livenessProbe:
             tcpSocket:
               port: 2181
@@ -50,7 +50,7 @@ spec:
             failureThreshold: 6
           volumeMounts:
             - name: data
-              mountPath: /bitnami/zookeeper
+              mountPath: /data
       volumes:
         - name: data
           persistentVolumeClaim:

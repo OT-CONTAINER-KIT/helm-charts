@@ -4,7 +4,7 @@ image:
   registry: 552171489163.dkr.ecr.ap-south-1.amazonaws.com
   repository: kubelift/kafka
   tag: "latest"
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   pullSecrets: "sr-stage-aws-ecr-regcred"
 
 
@@ -31,6 +31,7 @@ zookeeper:
     repository: kubelift/zookeeper
     tag: "latest"
     pullPolicy: Always
+    pullSecrets: "sr-stage-aws-ecr-regcred"
   persistence:
     enabled: true
     accessModes:

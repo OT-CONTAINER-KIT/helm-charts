@@ -38,8 +38,10 @@ spec:
               value: "{{ include "kafka.fullname" . }}-zookeeper:2181"
             - name: KAFKA_LISTENERS
               value: "PLAINTEXT://:9092"
+            - name: KAFKA_LOG_DIRS
+              value: "/var/lib/kafka/data"
             - name: KAFKA_ADVERTISED_LISTENERS
-              value: "PLAINTEXT://{{ include "kafka.fullname" . }}:9092"
+              value: "PLAINTEXT://{{ include "kafka.fullname" . }}-0.{{ include "kafka.fullname" . }}:9092"
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           livenessProbe:

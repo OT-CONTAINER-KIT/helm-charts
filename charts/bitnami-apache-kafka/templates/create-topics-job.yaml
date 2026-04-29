@@ -21,7 +21,7 @@ spec:
             - |
               for topic in $(echo '{{ toJson .Values.topics }}' | jq -r '.[] | @base64'); do
                 _jq() { echo ${topic} | base64 --decode | jq -r ${1}; }
-                kafka-topics.sh --create --if-not-exists --bootstrap-server {{ include "kafka.fullname" . }}:9092 \
+                kafka-topics.sh --create --if-not-exists --bootstrap-server {{ include "kafka.fullname" . }}-0.{{ include "kafka.fullname" . }}:9092 \
                   --topic $(_jq '.name') \
                   --partitions $(_jq '.partitions') \
                   --replication-factor $(_jq '.replicationFactor');
