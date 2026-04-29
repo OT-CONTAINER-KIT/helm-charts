@@ -1,7 +1,7 @@
 vm:
   enabled: true
 
-  
+
   ## VM Operator ##
 
   victoria-metrics-operator:
@@ -36,7 +36,7 @@ vm:
         value: "quay.io/opstree/victoriametrics-vmalert:1.141.0-debian13"
       - name: VM_VMALERTMANAGER_ALERTMANAGERDEFAULTBASEIMAGE
         value: "quay.io/opstree/alertmanager:0.32.0-debian13"
-      
+
       # upstream images — not yet hardened this can be hardenend
       - name: VM_VLOGSDEFAULT_IMAGE
         value: "quay.io/victoriametrics/victoria-logs"
@@ -71,7 +71,7 @@ vm:
           memory: 500Mi
 
   ## VMSingle ##
-  
+
   vmsingle:
     enabled: true
     spec:
@@ -91,7 +91,7 @@ vm:
           requests:
             storage: 10Gi
 
-  # Add this section to fix permissions  
+  # Add this section to fix permissions
     initContainers:
       - name: volume-permissions
         image: quay.io/opstree/busybox:1-alpine3.23
@@ -158,7 +158,7 @@ vm:
       requests:
         cpu: 50m
         memory: 32Mi
-  
+
   ## Disabled by default ##
   defaultDashboards:
     enabled: false
