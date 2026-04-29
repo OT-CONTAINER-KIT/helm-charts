@@ -44,8 +44,6 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
-            - name: initdb
-              mountPath: /docker-entrypoint-initdb.d/
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           livenessProbe:
@@ -76,6 +74,3 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: {{ include "postgres.pvcName" . }}
-        - name: initdb
-          configMap:
-            name: {{ include "postgres.fullname" . }}-initdb
