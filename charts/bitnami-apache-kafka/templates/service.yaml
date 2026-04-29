@@ -13,6 +13,10 @@ spec:
       targetPort: 9092
       protocol: TCP
       name: kafka
+    - port: 9093
+      targetPort: 9093
+      protocol: TCP
+      name: controller
   selector:
     app.kubernetes.io/name: {{ include "kafka.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

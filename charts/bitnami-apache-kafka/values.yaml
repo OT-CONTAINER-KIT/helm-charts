@@ -24,7 +24,7 @@ persistence:
   storageClass: "gp3"
 
 zookeeper:
-  enabled: true
+  enabled: false
   replicaCount: 1
   image:
     registry: 552171489163.dkr.ecr.ap-south-1.amazonaws.com
@@ -47,11 +47,11 @@ consumerGroups:
 
 topics:
   - name: upgrade.events
-    partitions: 6
+    partitions: 12
     replicationFactor: 1
     config: {}
   - name: precheck.tasks
-    partitions: 6
+    partitions: 12
     replicationFactor: 1
     config: {}
   - name: execution.logs
