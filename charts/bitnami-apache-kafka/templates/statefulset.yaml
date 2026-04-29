@@ -58,7 +58,7 @@ spec:
             failureThreshold: 6
           volumeMounts:
             - name: data
-              mountPath: /bitnami/kafka
+              mountPath: /var/lib/kafka/data
       volumes:
         - name: data
           persistentVolumeClaim:

@@ -3,15 +3,18 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "kafka.fullname" . }}-create-topics
+  namespace: kubelift
   labels:
     {{- include "kafka.labels" . | nindent 4 }}
 spec:
   template:
     spec:
       restartPolicy: OnFailure
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecrets }}
       containers:
         - name: create-topics
-          image: bitnami/kafka:{{ .Values.image.tag }}
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command:
             - /bin/bash
             - -c
