@@ -22,7 +22,7 @@ persistence:
   accessModes:
     - ReadWriteOnce
   size: 20Gi
-  storageClass: "efs-sc"
+  storageClass: "gp3"
 
 clickhouse:
   defaultUser: clickhouse
