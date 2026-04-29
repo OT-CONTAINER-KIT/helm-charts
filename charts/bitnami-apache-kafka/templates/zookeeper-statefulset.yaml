@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "kafka.fullname" . }}-zookeeper
+  namespace: kubelift
+  labels:
+    {{- include "kafka.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "kafka.fullname" . }}-zookeeper
+  replicas: {{ .Values.zookeeper.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "kafka.name" . }}-zookeeper
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "kafka.name" . }}-zookeeper
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.zookeeper.image.pullSecrets }}
+      {{- if .Values.tolerations }}
+      tolerations:
+        {{- toYaml .Values.tolerations | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: zookeeper
+          image: "{{ .Values.zookeeper.image.registry }}/{{ .Values.zookeeper.image.repository }}:{{ .Values.zookeeper.image.tag }}"
+          imagePullPolicy: {{ .Values.zookeeper.image.pullPolicy }}
+          ports:
+            - containerPort: 2181
+              name: client
+          env:
+            - name: ZOO_MY_ID
+              value: "1"
+          livenessProbe:
+            tcpSocket:
+              port: 2181
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          readinessProbe:
+            tcpSocket:
+              port: 2181
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "kafka.fullname" . }}-zookeeper-data
