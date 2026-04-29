@@ -10,7 +10,7 @@ vm:
     image:
       registry: quay.io
       repository: opstree/victoriametrics/operator
-      tag: "v0.69.0@sha256:66fe5216c278604b89064d5972687f0df2c23ad41fe6fcedb4f8bfb5c041595d" ## this image is pulled from Docker Hub as no DHI image has been released for this.
+      tag: "v0.69.0@sha256:66fe5216c278604b89064d5972687f0df2c23ad41fe6fcedb4f8bfb5c041595d"
 
     resources:
       limits:
