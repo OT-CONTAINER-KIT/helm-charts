@@ -171,4 +171,4 @@ vm:
 
 ## Prometheus Operator CRDs — enabled, VM operator handles CRDs ##
 prometheus-operator-crds:
-  enabled: yes
+  enabled: true
