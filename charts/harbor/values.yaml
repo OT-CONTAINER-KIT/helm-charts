@@ -82,7 +82,7 @@ harbor:
         memory: "180Mi" # Reduced significantly to fit
         cpu: "200m"
     persistence:
-      enabled: false
+      enabled: true
       size: 5Gi
       storageClass: "standard" 
 
