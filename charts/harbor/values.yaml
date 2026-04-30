@@ -76,11 +76,11 @@ harbor:
     replicas: ${TRIVY_REPLICAS}
     resources:
       requests:
-        memory: "150Mi"
-        cpu: "50m"
-      limits:
-        memory: "180Mi" # Reduced significantly to fit
+        memory: "512Mi"
         cpu: "200m"
+      limits:
+        memory: "1Gi" # Reduced significantly to fit
+        cpu: "1000m"
     persistence:
       enabled: true
       size: 5Gi
