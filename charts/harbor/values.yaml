@@ -84,7 +84,7 @@ harbor:
     persistence:
       enabled: false
       size: 5Gi
-      storageClass: "vcluster-longhorn-restricted-x-coe-dev-x-coe-dev-vcluster" 
+      storageClass: "standard" 
 
 #  oidc:
 #    enabled: false
