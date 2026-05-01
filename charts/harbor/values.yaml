@@ -136,7 +136,7 @@ harbor:
     type: external
     external:
       addr: "${REDIS_ADDR}"
-      password: "${REDIS_PASSWORD}"
+      password: ""
 
   persistence:
     enabled: true
