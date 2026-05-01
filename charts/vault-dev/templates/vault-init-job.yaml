@@ -1,0 +1,95 @@
+{{- if .Values.main.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "vault.fullname" . }}-vault-init-job-{{ .Release.Revision }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  ttlSecondsAfterFinished: {{ .Values.jobTtlSeconds | default 120 }}
+  template:
+    spec:
+      serviceAccountName: {{ include "vault.fullname" . }}-vault-sa
+      restartPolicy: OnFailure
+
+      containers:
+        - name: vault-init
+          image: alpine/k8s:1.29.2
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -ex
+
+              echo "Waiting for pod {{ include "vault.fullname" . }}-main-0 to be ready..."
+              kubectl wait --for=condition=Ready pod/{{ include "vault.fullname" . }}-main-0 -n {{ .Release.Namespace }} --timeout=300s
+
+              MAIN_ADDR="http://{{ include "vault.fullname" . }}-main:8200"
+
+              echo "Waiting for Main Vault API to be reachable..."
+              # Wait until Vault API is responding
+              until curl -s "$MAIN_ADDR/v1/sys/init" | jq -r '.initialized' > /dev/null 2>&1; do
+                echo "  ...Waiting for main vault API, sleeping 5s"
+                sleep 5
+              done
+
+              echo "Stabilizing for 10 seconds..."
+              sleep 10
+
+              # Check if already initialized
+              MAIN_INIT_STATUS=$(curl -s "$MAIN_ADDR/v1/sys/init" | jq -r '.initialized')
+              if [ "$MAIN_INIT_STATUS" = "true" ]; then
+                echo "Main Vault is already initialized."
+              else
+                echo "Initializing Main Vault via kubectl exec..."
+                # Running the specific command with JSON output for robust parsing
+                INIT_OUTPUT=$(kubectl exec {{ include "vault.fullname" . }}-main-0 -c vault -n {{ .Release.Namespace }} -- \
+                  sh -c "export VAULT_ADDR=http://127.0.0.1:8200 && vault operator init -format=json" || true)
+
+                echo "Vault Init Output: $INIT_OUTPUT"
+
+                # Extracting keys robustly using jq
+                ROOT_TOKEN=$(echo "$INIT_OUTPUT" | jq -r '.root_token // empty' 2>/dev/null || true)
+                
+                # Vault returns unseal_keys_b64 normally, but recovery_keys_b64 if auto-unseal is used
+                KEYS=$(echo "$INIT_OUTPUT" | jq -r '.unseal_keys_b64 | join(",")' 2>/dev/null || echo "$INIT_OUTPUT" | jq -r '.recovery_keys_b64 | join(",")' 2>/dev/null || true)
+
+                if [ -n "$ROOT_TOKEN" ]; then
+                  echo "Saving tokens to Kubernetes secret..."
+                  kubectl create secret generic {{ include "vault.fullname" . }}-main-vault-keys \
+                    --from-literal=root-token="$ROOT_TOKEN" \
+                    --from-literal=keys="$KEYS" \
+                    -n {{ .Release.Namespace }} \
+                    --dry-run=client -o yaml | kubectl apply -f -
+                  echo "Keys successfully saved to secret: {{ include "vault.fullname" . }}-main-vault-keys"
+                else
+                  echo "ERROR: Failed to extract root token. Initialization failed or output was malformed."
+                  exit 1
+                fi
+                
+                echo "Main Vault initialization COMPLETE!"
+              fi
+
+              {{- if .Values.autopilot.enabled }}
+              echo "Waiting 10 seconds for Raft Leader Election..."
+              sleep 10
+
+              echo "Configuring Raft Autopilot..."
+              # Fetch token if not already in variable (for cases where it was already initialized)
+              if [ -z "$ROOT_TOKEN" ]; then
+                ROOT_TOKEN=$(kubectl get secret {{ include "vault.fullname" . }}-main-vault-keys -n {{ .Release.Namespace }} -o jsonpath='{.data.root-token}' | base64 -d || echo "")
+              fi
+
+              if [ -n "$ROOT_TOKEN" ]; then
+                kubectl exec {{ include "vault.fullname" . }}-main-0 -c vault -n {{ .Release.Namespace }} -- \
+                  sh -c "export VAULT_ADDR=http://127.0.0.1:8200 && export VAULT_TOKEN=$ROOT_TOKEN && \
+                  vault operator raft autopilot set-config \
+                  -cleanup-dead-servers={{ .Values.autopilot.cleanup_dead_servers }} \
+                  -dead-server-last-contact-threshold={{ .Values.autopilot.last_contact_threshold }} \
+                  -min-quorum={{ .Values.autopilot.min_quorum }} \
+                  -max-trailing-logs={{ .Values.autopilot.max_trailing_logs }}"
+                echo "Raft Autopilot configured successfully."
+              else
+                echo "Warning: Could not configure Autopilot because Root Token secret is missing."
+              fi
+              {{- end }}
+{{- end }}

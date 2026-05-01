@@ -1,0 +1,141 @@
+{{- if .Values.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "vault.fullname" . }}-backup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vault.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: {{ .Values.backup.historyLimit | default 3 }}
+  failedJobsHistoryLimit: {{ .Values.backup.historyLimit | default 1 }}
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: {{ include "vault.fullname" . }}-backup
+        spec:
+          serviceAccountName: {{ include "vault.fullname" . }}-vault-sa
+          restartPolicy: OnFailure
+          volumes:
+            - name: backup-vol
+              emptyDir: {}
+          initContainers:
+            - name: snapshot
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              env:
+                - name: VAULT_ADDR
+                  value: {{ .Values.backup.vault.address | quote }}
+                - name: ROOT_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "vault.fullname" . }}-main-vault-keys
+                      key: root-token
+                      optional: true
+              volumeMounts:
+                - name: backup-vol
+                  mountPath: /tmp
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  echo "=== Vault Raft Snapshot Init ==="
+                  if [ -z "$ROOT_TOKEN" ]; then
+                    echo "ERROR: Root token not available"
+                    exit 1
+                  fi
+                  echo "[1/2] Finding active Vault leader..."
+                  LEADER_ADDR=""
+                  for i in $(seq 1 5); do
+                    RESP=$(wget -qO- --header="X-Vault-Token: ${ROOT_TOKEN}" "${VAULT_ADDR}/v1/sys/leader" || true)
+                    if [ -n "$RESP" ]; then
+                      TMP_1="${RESP#*\"leader_address\":\"}"
+                      TMP_2="${TMP_1%%\"*}"
+                      LEADER_ADDR="$TMP_2"
+                      if [ -n "$LEADER_ADDR" ]; then
+                         break
+                      fi
+                    fi
+                    sleep 5
+                  done
+                  if [ -z "$LEADER_ADDR" ]; then
+                    echo "ERROR: Could not find leader"
+                    exit 1
+                  fi
+                  # Strip trailing slash if present
+                  LEADER_ADDR="${LEADER_ADDR%/}"
+                  echo "  Active Leader: $LEADER_ADDR"
+                  echo "[2/2] Taking snapshot..."
+                  wget -qO /tmp/snapshot.snap --header="X-Vault-Token: ${ROOT_TOKEN}" "${LEADER_ADDR}/v1/sys/storage/raft/snapshot"
+                  SNAP_SIZE=$(stat -c%s /tmp/snapshot.snap 2>/dev/null || stat -f%z /tmp/snapshot.snap 2>/dev/null || echo 0)
+                  echo "  Snapshot size: ${SNAP_SIZE} bytes"
+                  if [ "${SNAP_SIZE:-0}" -lt 1024 ]; then
+                    echo "ERROR: Snapshot too small (${SNAP_SIZE} bytes) — likely corrupt!"
+                    exit 1
+                  fi
+                  echo "Snapshot completed successfully."
+
+          containers:
+            - name: backup
+              image: {{ .Values.backup.minio.image | default "minio/mc:latest" }}
+              env:
+                - name: MINIO_ENDPOINT
+                  value: {{ .Values.backup.minio.endpoint | quote }}
+                - name: MINIO_ACCESS_KEY
+                  value: {{ .Values.backup.minio.accessKey | quote }}
+                - name: MINIO_SECRET_KEY
+                  value: {{ .Values.backup.minio.secretKey | quote }}
+                - name: MINIO_BUCKET
+                  value: {{ .Values.backup.minio.bucket | quote }}
+                - name: RETENTION_COUNT
+                  value: {{ .Values.backup.minio.retentionCount | default 6 | quote }}
+              volumeMounts:
+                - name: backup-vol
+                  mountPath: /tmp
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  echo "=== Vault Raft MinIO Upload ==="
+                  TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+                  SNAPSHOT_FILE="/tmp/snapshot.snap"
+                  
+                  if [ ! -f "$SNAPSHOT_FILE" ]; then
+                    echo "ERROR: Snapshot file not found!"
+                    exit 1
+                  fi
+                  
+                  echo "[1/2] Uploading snapshot to MinIO..."
+                  mc alias set minio "${MINIO_ENDPOINT}" "${MINIO_ACCESS_KEY}" "${MINIO_SECRET_KEY}" --insecure >/dev/null 2>&1
+                  mc mb "minio/${MINIO_BUCKET}" --ignore-existing --insecure >/dev/null 2>&1
+                  
+                  UPLOAD_PATH="minio/${MINIO_BUCKET}/vault-snapshot-${TIMESTAMP}.snap"
+                  mc cp "${SNAPSHOT_FILE}" "${UPLOAD_PATH}" --insecure
+                  echo "  Successfully uploaded: ${UPLOAD_PATH}"
+                  
+                  echo "[2/2] Applying retention policy (keep last ${RETENTION_COUNT})..."
+                  mc ls "minio/${MINIO_BUCKET}/" --insecure 2>/dev/null > /tmp/ls.out
+                  tr -s ' ' < /tmp/ls.out | cut -d ' ' -f 6 > /tmp/snaps.txt
+                  sort -r /tmp/snaps.txt > /tmp/sorted.txt
+                  
+                  COUNT=0
+                  while read -r obj; do
+                    case "$obj" in
+                      *.snap)
+                        COUNT=$((COUNT + 1))
+                        if [ "$COUNT" -gt "$RETENTION_COUNT" ]; then
+                          echo "  Deleting old snapshot: $obj"
+                          mc rm "minio/${MINIO_BUCKET}/${obj}" --insecure
+                        fi
+                        ;;
+                    esac
+                  done < /tmp/sorted.txt
+                  
+                  echo "=== Backup Complete ==="
+{{- end }}

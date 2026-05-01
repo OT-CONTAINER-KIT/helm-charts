@@ -1,0 +1,111 @@
+namespace: vault
+jobTtlSeconds: 120
+
+transit:
+  enabled: true
+  replicaCount: 1
+
+main:
+  enabled: true
+  replicaCount: 4
+
+image:
+  repository: hashicorp/vault
+  tag: "1.18.4"
+
+vault:
+  ui: true
+  disable_mlock: true
+  log_level: "info"
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "250m"
+  limits:
+    memory: "1Gi"
+    cpu: "1000m"
+
+nodeSelector: {}
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app: vault-main
+          topologyKey: kubernetes.io/hostname
+
+persistence:
+  size: 5Gi
+  storageClass: ""
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: vault.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# ***************************  BACKUP CONFIG  *********************
+backup:
+  enabled: true
+  schedule: "*/2 * * * *"
+  historyLimit: 2
+  vault:
+    address: "http://vault-main:8200"
+  minio:
+    image: "minio/mc:latest"
+    endpoint: "https://192.168.8.18:9000"
+    accessKey: "minioadmin"
+    secretKey: "opstreeadmin@2510"
+    bucket: "vault-test"
+    retentionCount: 6
+
+# ***************************** RESTORE CONFIG **********************
+restore:
+  enabled: false
+  snapshotName: ""
+
+# ***************************** OIDC SSO CONFIG *********************
+oidc:
+  enabled: true
+  discovery_url: "https://keycloak.opstree.dev/realms/master"
+  client_id: "vault-test"
+  client_secret: "5u7PqOs99KZ4gQBuUvCxDQ4S60cqaNeg"
+  default_role: "oidc-user"
+  # Replace with your actual Vault external URL
+  vault_url: "http://localhost:8200"
+  
+  # Role detailed configuration
+  user_claim: "sub"
+  token_policies: ["default"]
+  token_ttl: "1h"
+  token_max_ttl: "2h"
+  
+  # Group to Policy Mapping Toggle
+  groups:
+    enabled: false
+    claim_name: "groups"
+    # Example mapping: Keycloak group "vault-admins" gets Vault "admin" policy
+    mappings:
+      - name: "Admin"
+        policies: ["admin", "default"]
+
+# ***************************** RAFT AUTOPILOT **********************
+autopilot:
+  enabled: true
+  cleanup_dead_servers: true
+  last_contact_threshold: "10m"
+  max_trailing_logs: 1000
+  min_quorum: 3

@@ -1,0 +1,135 @@
+{{- if .Values.oidc.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "vault.fullname" . }}-oidc-config-job-{{ .Release.Revision }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  ttlSecondsAfterFinished: {{ .Values.jobTtlSeconds | default 120 }}
+  template:
+    spec:
+      serviceAccountName: {{ include "vault.fullname" . }}-vault-sa
+      restartPolicy: OnFailure
+      containers:
+        - name: oidc-config
+          image: alpine/k8s:1.29.2
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              
+              VAULT_ADDR="http://{{ include "vault.fullname" . }}-main:8200"
+              SECRET_NAME="{{ include "vault.fullname" . }}-main-vault-keys"
+              
+              echo "============================================="
+              echo "=== Vault OIDC Configuration Job Starting ==="
+              echo "============================================="
+
+              # Step 1: Install Dependencies
+              echo "[1/4] Installing dependencies (curl, jq)..."
+              apk add --no-cache curl jq > /dev/null 2>&1
+              
+              echo "[2/4] Fetching Root Token..."
+              until kubectl get secret "$SECRET_NAME" -n {{ .Release.Namespace }} > /dev/null 2>&1; do
+                echo "  ...waiting for secret $SECRET_NAME, sleeping 5s"
+                sleep 5
+              done
+              
+              VAULT_TOKEN=$(kubectl get secret "$SECRET_NAME" -n {{ .Release.Namespace }} -o jsonpath='{.data.root-token}' | base64 -d)
+              
+              if [ -z "$VAULT_TOKEN" ]; then
+                echo "Error: Could not retrieve Vault Root Token!"
+                exit 1
+              fi
+
+              # Step 3: Enable OIDC Auth Method
+              echo "[3/4] Checking OIDC auth method..."
+              # Use -f to fail on HTTP errors and -s for silence
+              AUTH_LIST=$(curl -s -f -H "X-Vault-Token: $VAULT_TOKEN" "$VAULT_ADDR/v1/sys/auth")
+              
+              if echo "$AUTH_LIST" | jq -e '.["oidc/"]' > /dev/null 2>&1; then
+                echo "      OIDC auth method already enabled."
+              else
+                echo "      Enabling OIDC auth method..."
+                curl -s -f -H "X-Vault-Token: $VAULT_TOKEN" \
+                  --request POST \
+                  --data '{"type": "oidc"}' \
+                  "$VAULT_ADDR/v1/sys/auth/oidc"
+              fi
+
+              # Step 4: Configure OIDC with Keycloak
+              echo "[4/4] Configuring OIDC with Keycloak..."
+              curl -s -f -H "X-Vault-Token: $VAULT_TOKEN" \
+                --request POST \
+                --data '{
+                  "oidc_discovery_url": "{{ .Values.oidc.discovery_url }}",
+                  "oidc_client_id": "{{ .Values.oidc.client_id }}",
+                  "oidc_client_secret": "{{ .Values.oidc.client_secret }}",
+                  "default_role": "{{ .Values.oidc.default_role }}"
+                }' \
+                "$VAULT_ADDR/v1/auth/oidc/config"
+
+              echo "Creating OIDC role: {{ .Values.oidc.default_role }}..."
+              curl -s -f -H "X-Vault-Token: $VAULT_TOKEN" \
+                --request POST \
+                --data '{
+                  "allowed_redirect_uris": [
+                    "{{ .Values.oidc.vault_url }}/ui/vault/auth/oidc/oidc/callback",
+                    "http://localhost:8250/oidc/callback"
+                    {{- if .Values.ingress.hosts }}
+                    {{- range .Values.ingress.hosts }}
+                    ,"http://{{ .host }}/ui/vault/auth/oidc/oidc/callback"
+                    ,"https://{{ .host }}/ui/vault/auth/oidc/oidc/callback"
+                    {{- end }}
+                    {{- end }}
+                  ],
+                  "user_claim": "{{ .Values.oidc.user_claim | default "sub" }}",
+                  "token_policies": {{ toJson (default (list "default") .Values.oidc.token_policies) }},
+                  "token_ttl": "{{ .Values.oidc.token_ttl | default "1h" }}",
+                  "token_max_ttl": "{{ .Values.oidc.token_max_ttl | default "2h" }}",
+                  {{- if .Values.oidc.groups.enabled }}
+                  "groups_claim": "{{ .Values.oidc.groups.claim_name | default "groups" }}"
+                  {{- else }}
+                  "groups_claim": ""
+                  {{- end }}
+                }' \
+                "$VAULT_ADDR/v1/auth/oidc/role/{{ .Values.oidc.default_role }}"
+
+              {{- $files := .Files }}
+              {{- if $files.Glob "policies/*.hcl" }}
+              echo "Applying Vault ACL Policies from files..."
+              {{- range $path, $bytes := $files.Glob "policies/*.hcl" }}
+              {{- $name := base $path | trimSuffix ".hcl" }}
+              echo "  -> Writing Policy: {{ $name }}"
+              curl -s -f -H "X-Vault-Token: $VAULT_TOKEN" \
+                --request PUT \
+                --data '{"policy": {{ toJson ($files.Get $path) }}}' \
+                "$VAULT_ADDR/v1/sys/policies/acl/{{ $name }}" > /dev/null
+              {{- end }}
+              {{- end }}
+
+              {{- if and .Values.oidc.groups.enabled .Values.oidc.groups.mappings }}
+              echo "[5/5] Configuring Identity Groups for Keycloak Group mappings..."
+              ACCESSOR=$(curl -s -H "X-Vault-Token: $VAULT_TOKEN" "$VAULT_ADDR/v1/sys/auth" | jq -r '.["oidc/"].accessor')
+              
+              {{- range .Values.oidc.groups.mappings }}
+              echo "      Mapping Group: {{ .name }} to Policies: {{ .policies }}"
+              curl -s -f -H "X-Vault-Token: $VAULT_TOKEN" \
+                --request POST \
+                --data '{"type": "external", "policies": {{ toJson .policies }}}' \
+                "$VAULT_ADDR/v1/identity/group/name/{{ .name }}" > /dev/null
+              
+              # Get Group ID
+              GROUP_ID=$(curl -s -f -H "X-Vault-Token: $VAULT_TOKEN" "$VAULT_ADDR/v1/identity/group/name/{{ .name }}" | jq -r '.data.id')
+              
+              # Create Alias
+              curl -s -f -H "X-Vault-Token: $VAULT_TOKEN" \
+                --request POST \
+                --data "{\"name\": \"{{ .name }}\", \"canonical_id\": \"$GROUP_ID\", \"mount_accessor\": \"$ACCESSOR\"}" \
+                "$VAULT_ADDR/v1/identity/group-alias" > /dev/null
+              {{- end }}
+              {{- end }}
+
+              echo "OIDC Configuration Complete!"
+{{- end }}

@@ -1,0 +1,180 @@
+{{- if .Values.restore.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "vault.fullname" . }}-restore
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vault.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "30"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  ttlSecondsAfterFinished: {{ .Values.jobTtlSeconds | default 120 }}
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: {{ include "vault.fullname" . }}-restore
+    spec:
+      serviceAccountName: {{ include "vault.fullname" . }}-vault-sa
+      restartPolicy: OnFailure
+      containers:
+        - name: restore
+          image: alpine/k8s:1.29.2
+          env:
+            - name: VAULT_ADDR
+              value: {{ .Values.backup.vault.address | quote }}
+            - name: MINIO_ENDPOINT
+              value: {{ .Values.backup.minio.endpoint | quote }}
+            - name: MINIO_ACCESS_KEY
+              value: {{ .Values.backup.minio.accessKey | quote }}
+            - name: MINIO_SECRET_KEY
+              value: {{ .Values.backup.minio.secretKey | quote }}
+            - name: MINIO_BUCKET
+              value: {{ .Values.backup.minio.bucket | quote }}
+            - name: SNAPSHOT_NAME
+              value: {{ .Values.restore.snapshotName | quote }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+
+              echo "============================================="
+              echo "=== Vault Raft Restore Job Starting      ==="
+              echo "============================================="
+
+              # ─── Step 1: Install Dependencies ────────────────────────────────────
+              echo "[1/6] Installing dependencies..."
+              apk add --no-cache curl jq > /dev/null 2>&1
+              curl -sSL https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc
+              chmod +x /usr/local/bin/mc
+              echo "      Dependencies installed."
+
+              # ─── Step 2: Get Vault Root Token ─────────────────────────────────────
+              echo "[2/6] Retrieving Vault root token from Kubernetes secret..."
+              ROOT_TOKEN=$(kubectl get secret {{ include "vault.fullname" . }}-main-vault-keys \
+                -n {{ .Release.Namespace }} \
+                -o jsonpath='{.data.root-token}' | base64 -d)
+
+              if [ -z "$ROOT_TOKEN" ]; then
+                echo "ERROR: Could not retrieve Vault root token from secret!"
+                exit 1
+              fi
+              echo "      Root token retrieved successfully."
+
+              # ─── Step 3: Detect Active Leader Node (with retries) ────────────────
+              # We MUST restore directly to the leader node.
+              # If we hit a follower, the API returns 307 redirect which can silently fail.
+              echo "[3/6] Detecting active Vault Raft leader node..."
+              LEADER_ADDR=""
+              RETRIES=10
+              SLEEP_SEC=10
+
+              for i in $(seq 1 $RETRIES); do
+                LEADER_ADDR=$(curl -sf \
+                  --header "X-Vault-Token: ${ROOT_TOKEN}" \
+                  "${VAULT_ADDR}/v1/sys/leader" 2>/dev/null | jq -r '.leader_address // empty')
+
+                if [ -n "$LEADER_ADDR" ] && [ "$LEADER_ADDR" != "null" ]; then
+                  break
+                fi
+
+                echo "      Attempt ${i}/${RETRIES}: Leader not found yet, retrying in ${SLEEP_SEC}s..."
+                sleep $SLEEP_SEC
+              done
+
+              if [ -z "$LEADER_ADDR" ] || [ "$LEADER_ADDR" = "null" ]; then
+                echo "ERROR: Could not determine Vault leader address after ${RETRIES} attempts!"
+                echo "       Cluster may be unhealthy. Aborting restore."
+                exit 1
+              fi
+
+              # Strip trailing slash if present
+              LEADER_ADDR="${LEADER_ADDR%/}"
+              echo "      Active leader found: ${LEADER_ADDR}"
+
+              # ─── Step 4: Download Snapshot from MinIO ────────────────────────────
+              echo "[4/6] Downloading snapshot from MinIO..."
+              mc alias set minio "${MINIO_ENDPOINT}" "${MINIO_ACCESS_KEY}" "${MINIO_SECRET_KEY}" --insecure > /dev/null 2>&1
+
+              if [ -z "$SNAPSHOT_NAME" ]; then
+                echo "      No snapshot name specified — using latest available snapshot..."
+                SNAPSHOT_NAME=$(mc ls "minio/${MINIO_BUCKET}/" --insecure 2>/dev/null | \
+                  grep '\.snap' | \
+                  awk '{print $NF}' | \
+                  sort -r | \
+                  head -n 1)
+
+                if [ -z "$SNAPSHOT_NAME" ]; then
+                  echo "ERROR: No snapshots found in MinIO bucket: ${MINIO_BUCKET}"
+                  exit 1
+                fi
+              fi
+
+              echo "      Snapshot selected: ${SNAPSHOT_NAME}"
+              mc cp "minio/${MINIO_BUCKET}/${SNAPSHOT_NAME}" /tmp/restore.snap --insecure
+
+              # Validate snapshot — must not be empty or corrupt
+              SNAP_SIZE=$(stat -c%s "/tmp/restore.snap" 2>/dev/null || stat -f%z "/tmp/restore.snap" 2>/dev/null)
+              echo "      Snapshot size: ${SNAP_SIZE} bytes"
+
+              if [ -z "$SNAP_SIZE" ] || [ "$SNAP_SIZE" -lt 1024 ]; then
+                echo "ERROR: Snapshot file is too small (${SNAP_SIZE} bytes). It may be corrupt or incomplete!"
+                exit 1
+              fi
+              echo "      Snapshot validated successfully."
+
+              # ─── Step 5: Restore Snapshot directly to Leader Node ────────────────
+              echo "[5/6] Restoring Raft snapshot to leader: ${LEADER_ADDR} ..."
+              HTTP_STATUS=$(curl -s -o /tmp/restore_response.txt -w "%{http_code}" \
+                --header "X-Vault-Token: ${ROOT_TOKEN}" \
+                --request POST \
+                --data-binary @/tmp/restore.snap \
+                "${LEADER_ADDR}/v1/sys/storage/raft/snapshot")
+
+              echo "      Restore API HTTP Status: ${HTTP_STATUS}"
+
+              if [ "$HTTP_STATUS" != "204" ] && [ "$HTTP_STATUS" != "200" ]; then
+                echo "ERROR: Restore API returned unexpected status: ${HTTP_STATUS}"
+                echo "       Response body:"
+                cat /tmp/restore_response.txt
+                exit 1
+              fi
+              echo "      Snapshot restore API call succeeded."
+
+              # ─── Step 6: Post-Restore Health Verification ────────────────────────
+              # After restore, Vault may briefly restart — wait and verify it comes back healthy.
+              echo "[6/6] Verifying cluster health after restore..."
+              sleep 5
+
+              HEALTH_RETRIES=12
+              HEALTHY=false
+
+              for i in $(seq 1 $HEALTH_RETRIES); do
+                HEALTH=$(curl -sf \
+                  --header "X-Vault-Token: ${ROOT_TOKEN}" \
+                  "${VAULT_ADDR}/v1/sys/health" 2>/dev/null | jq -r '.initialized // empty')
+
+                if [ "$HEALTH" = "true" ]; then
+                  HEALTHY=true
+                  break
+                fi
+
+                echo "      Attempt ${i}/${HEALTH_RETRIES}: Vault not healthy yet, waiting 10s..."
+                sleep 10
+              done
+
+              if [ "$HEALTHY" != "true" ]; then
+                echo "WARNING: Vault cluster did not report healthy within expected time."
+                echo "         Please check pod status manually: kubectl get pods -n {{ .Release.Namespace }}"
+              else
+                echo "      Cluster is healthy and initialized!"
+              fi
+
+              echo "============================================="
+              echo "=== Restore Complete: ${SNAPSHOT_NAME}   ==="
+              echo "============================================="
+{{- end }}

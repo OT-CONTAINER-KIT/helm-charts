@@ -1,0 +1,18 @@
+{{- if .Values.main.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "vault.fullname" . }}-main
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app: {{ include "vault.fullname" . }}-main
+  ports:
+    - port: 8200
+      targetPort: 8200
+      name: http
+    - port: 8201
+      targetPort: 8201
+      name: internal
+{{- end }}
