@@ -1,11 +1,15 @@
 tempo:
   enabled: true
   fullnameOverride: tempo
+  metricsPort: 3200
 
-  image:
-    registry: ""
+  tempo:
     repository: quay.io/opstree/tempo
     tag: "2.10.4-debian13"
+    retention: 24h
+    memBallastSizeMbs: 1024
+    metricsGenerator:
+      enabled: false
 
   securityContext:
     runAsUser: 1000
@@ -40,17 +44,9 @@ tempo:
     - effect: NoSchedule
       operator: Exists
 
-  tempo:
-    retention: 24h
-    memBallastSizeMbs: 1024
-
-    metricsGenerator:
-      enabled: false
-
   persistence:
     enabled: true
     size: 10Gi
-    storageClassName: o11y-gp3-storage
 
   receivers:
     otlp:
@@ -59,8 +55,7 @@ tempo:
           endpoint: "0.0.0.0:4317"
         http:
           endpoint: "0.0.0.0:4318"
-          
-  # Add this section to fix permissions
+
   initContainers:
     - name: volume-permissions
       image: quay.io/opstree/busybox:1-alpine3.23
