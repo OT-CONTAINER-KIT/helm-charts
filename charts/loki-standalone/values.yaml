@@ -68,43 +68,24 @@ loki:
   test:
     enabled: false
 
-  singleBinary:
-    affinity: ""
-    replicas: 1
+  # Sidecar image — correct upstream key
+  sidecar:
+    image:
+      repository: quay.io/opstree/k8s-sidecar
+      tag: "2.7.1"
 
-    initContainers:
-      - name: volume-permissions
-        image: quay.io/opstree/busybox:1-alpine3.23
-        command:
-          - sh
-          - -c
-          - |
-            chown -R 10001:10001 /var/loki
-        volumeMounts:
-          - name: storage
-            mountPath: /var/loki
-
-    resources:
-      limits:
-        cpu: "2"
-        memory: 2Gi
-      requests:
-        cpu: 500m
-        memory: 1Gi
-
-    persistence:
-      enabled: true
-      size: 10Gi
-      storageClass: standard
-
-    tolerations:
-      - effect: NoExecute
-        operator: Exists
-      - effect: NoSchedule
-        operator: Exists
+  # Memcached image — applies to both chunksCache and resultsCache
+  memcached:
+    image:
+      repository: quay.io/opstree/memcached
+      tag: "1.6.38-alpine3.22"
+  memcachedExporter:
+    image:
+      repository: quay.io/opstree/memcached-exporter
+      tag: "0.15.5-debian13"
 
   gateway:
-    affinity: ""
+    affinity: {}
     tolerations:
       - effect: NoExecute
         operator: Exists
@@ -114,33 +95,19 @@ loki:
   chunksCache:
     writebackSizeLimit: 10MB
     allocatedMemory: 250Mi
-    image:
-      repository: quay.io/opstree/memcached
-      tag: "1.6.38-alpine3.22"
     tolerations:
       - effect: NoExecute
         operator: Exists
       - effect: NoSchedule
         operator: Exists
-    exporter:
-      image:
-        repository: quay.io/opstree/memcached-exporter
-        tag: "0.15.5-debian13"
 
   resultsCache:
     allocatedMemory: 128Mi
-    image:
-      repository: quay.io/opstree/memcached
-      tag: "1.6.38-alpine3.22"
     tolerations:
       - effect: NoExecute
         operator: Exists
       - effect: NoSchedule
         operator: Exists
-    exporter:
-      image:
-        repository: quay.io/opstree/memcached-exporter
-        tag: "0.15.5-debian13"
 
   minio:
     enabled: false
