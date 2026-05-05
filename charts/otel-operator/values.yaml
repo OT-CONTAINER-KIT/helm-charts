@@ -1,12 +1,65 @@
 operator:
   enabled: true
-  fullnameOverride: otel
+  fullnameOverride: otel-operator
+
+  replicaCount: 1
+
+  securityContext:
+    runAsUser: 65532
+    runAsGroup: 65532
+    runAsNonRoot: true
+    fsGroup: 65532
+
+  tolerations:
+    - effect: NoExecute
+      operator: Exists
+    - effect: NoSchedule
+      operator: Exists
+
   manager:
+    image:
+      repository: quay.io/opstree/opentelemetry-operator
+      tag: "0.149.0-debian13"
+
     collectorImage:
-      repository: otel/opentelemetry-collector-contrib
-      tag: latest
+      repository: quay.io/opstree/opentelemetry-collector
+      tag: "0.150.1-debian13-contrib"
+
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+
+    resources:
+      limits:
+        cpu: 300m
+        memory: 300Mi
+      requests:
+        cpu: 150m
+        memory: 150Mi
+
+    serviceMonitor:
+      enabled: true
+
+  kubeRBACProxy:
+    image:
+      repository: quay.io/opstree/kube-rbac-proxy
+      tag: "0.21.2-alpine3.23"
+
+    resources:
+      limits:
+        cpu: 200m
+        memory: 128Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
+
   admissionWebhooks:
     certManager:
       enabled: false
     autoGenerateCert:
       enabled: true
+      recreate: false
+      certPeriodDays: 3650
