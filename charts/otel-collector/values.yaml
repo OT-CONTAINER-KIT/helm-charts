@@ -5,7 +5,10 @@ collector:
     repository: quay.io/opstree/opentelemetry-collector
     tag: "0.150.1-debian13-contrib"
 
-  containerSecurityContext:
+  securityContext:
+    runAsUser: 65532
+    runAsGroup: 65532
+    runAsNonRoot: true
     allowPrivilegeEscalation: false
     readOnlyRootFilesystem: true
     capabilities:
@@ -98,6 +101,7 @@ collector:
 
     exporters:
       otlp:
+        # Override in client values: point to tempo service in your namespace
         endpoint: tempo:4317
         tls:
           insecure: true
@@ -110,6 +114,7 @@ collector:
         compression: snappy
         timeout: 120s
       prometheusremotewrite:
+        # Override in client values: point to vmsingle service in your namespace
         endpoint: "http://vmsingle-vm.monitoring.svc.cluster.local:8429/api/v1/write"
         max_batch_size_bytes: 3000000
         retry_on_failure:
