@@ -1,0 +1,17 @@
+apiVersion: v2
+name: loki-standalone
+appVersion: "3"
+description: A Helm chart for Loki standalone setup
+type: application
+version: 1.0.0
+maintainers:
+  - name: ashwani-opstree
+    email: ashwani.singh@opstree.com
+  - name: Varunarora2201
+    email: varun.kumar@opstree.com
+dependencies:
+  - name: loki
+    version: 6.38.0
+    repository: https://grafana.github.io/helm-charts
+    alias: loki
+    condition: loki.enabled
