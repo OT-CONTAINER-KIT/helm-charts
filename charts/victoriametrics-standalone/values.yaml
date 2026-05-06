@@ -74,14 +74,14 @@ vm:
         value: "victoriametrics/vmbackupmanager"
       - name: VM_VMAUTHDEFAULT_IMAGE
         value: "victoriametrics/vmauth"
-      
+
       # VictoriaMetrics Operator configuration
       - name: "VM_USECUSTOMCONFIGRELOADER"
         value: "true"
       - name: "VM_CONFIG_RELOADER_REQUEST_CPU"
         value: "unlimited"
       - name: "VM_CONFIG_RELOADER_REQUEST_MEMORY"
-        value: "unlimited"  
+        value: "unlimited"
       - name: "VM_CONFIG_RELOADER_LIMIT_CPU"
         value: "unlimited"
       - name: "VM_CONFIG_RELOADER_LIMIT_MEMORY"
@@ -120,18 +120,18 @@ vm:
     #   fsGroup: 472
     #   runAsNonRoot: false
     securityContext:
-        runAsNonRoot: true
-        runAsUser: 65532
-        runAsGroup: 65532
-        fsGroup: 65532
+      runAsNonRoot: true
+      runAsUser: 65532
+      runAsGroup: 65532
+      fsGroup: 65532
     containerSecurityContext:
-        allowPrivilegeEscalation: false
-        privileged: false
-        capabilities:
-            drop:
-                - ALL
-        seccompProfile:
-            type: RuntimeDefault
+      allowPrivilegeEscalation: false
+      privileged: false
+      capabilities:
+        drop:
+            - ALL
+      seccompProfile:
+        type: RuntimeDefault
     testFramework:
       enabled: false
     sidecar:
