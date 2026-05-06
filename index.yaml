@@ -5488,6 +5488,32 @@ entries:
   vm-standalone:
   - apiVersion: v2
     appVersion: 0.69.0
+    created: "2026-05-06T13:12:01.126251788Z"
+    dependencies:
+    - alias: vm
+      condition: vm.enabled
+      name: victoria-metrics-k8s-stack
+      repository: https://victoriametrics.github.io/helm-charts/
+      version: 0.75.0
+    - alias: prometheus-operator-crds
+      condition: prometheus-operator-crds.enabled
+      name: prometheus-operator-crds
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 20.0.1
+    description: A Helm chart for Victoria Metrics K8s stack standalone setup
+    digest: 2d69b2edc41ae28fab1bbe3f41b466f2b1a6095330ebc0bb7cf41081e345231e
+    maintainers:
+    - email: ashwani.singh@opstree.com
+      name: ashwani-opstree
+    - email: varun.kumar@opstree.com
+      name: Varunarora2201
+    name: vm-standalone
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/vm-standalone-0.0.2/vm-standalone-0.0.2.tgz
+    version: 0.0.2
+  - apiVersion: v2
+    appVersion: 0.69.0
     created: "2026-04-29T05:52:52.227689577Z"
     dependencies:
     - alias: vm
@@ -5574,4 +5600,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/worker-0.1.0/worker-0.1.0.tgz
     version: 0.1.0
-generated: "2026-04-29T05:52:52.228092943Z"
+generated: "2026-05-06T13:12:01.126584946Z"
