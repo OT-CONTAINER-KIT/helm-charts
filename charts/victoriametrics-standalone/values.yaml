@@ -1,24 +1,27 @@
 vm:
   enabled: true
 
-
-  ## VM Operator ##
-
   victoria-metrics-operator:
     enabled: true
 
     image:
       registry: quay.io
-      repository: opstree/victoriametrics/operator
-      tag: "v0.69.0@sha256:66fe5216c278604b89064d5972687f0df2c23ad41fe6fcedb4f8bfb5c041595d"
+      repository: opstree/victoriametrics-operator
+      tag: "v0.69.0"
 
     resources:
       limits:
         cpu: 200m
         memory: 500Mi
       requests:
-        cpu: 100m
+        cpu: 50m
         memory: 300Mi
+
+    tolerations:
+      - effect: NoExecute
+        operator: Exists
+      - effect: NoSchedule
+        operator: Exists
 
     serviceMonitor:
       enabled: true
@@ -27,17 +30,16 @@ vm:
       disable_prometheus_converter: false
 
     env:
-      # opstree hardened images — identified and pushed
+      # opstree hardened images — repository only, operator appends version tag
       - name: VM_VMSINGLEDEFAULT_IMAGE
-        value: "quay.io/opstree/victoriamertics-victoriametrics:v1.40.0"
+        value: "quay.io/opstree/victoriamertics-victoriametrics"
       - name: VM_VMAGENTDEFAULT_IMAGE
-        value: "quay.io/opstree/victoriametrics-vmagent:1.141.0-debian13"
+        value: "quay.io/opstree/victoriametrics-vmagent"
       - name: VM_VMALERTDEFAULT_IMAGE
-        value: "quay.io/opstree/victoriametrics-vmalert:1.141.0-debian13"
+        value: "quay.io/opstree/victoriametrics-vmalert"
       - name: VM_VMALERTMANAGER_ALERTMANAGERDEFAULTBASEIMAGE
-        value: "quay.io/opstree/alertmanager:0.32.0-debian13"
-
-      # upstream images — not yet hardened this can be hardenend
+        value: "quay.io/opstree/alertmanager"
+      # upstream images — not yet hardened
       - name: VM_VLOGSDEFAULT_IMAGE
         value: "quay.io/victoriametrics/victoria-logs"
       - name: VM_VMCLUSTERDEFAULT_VMSELECTDEFAULT_IMAGE
@@ -51,12 +53,8 @@ vm:
       - name: VM_VMAUTHDEFAULT_IMAGE
         value: "quay.io/victoriametrics/vmauth"
 
-  ## Grafana — managed via standalone grafana chart
-
   grafana:
     enabled: false
-
-  ## Alertmanager ##
 
   alertmanager:
     enabled: true
@@ -67,10 +65,13 @@ vm:
           cpu: 250m
           memory: 500Mi
         requests:
-          cpu: 100m
-          memory: 500Mi
-
-  ## VMSingle ##
+          cpu: 50m
+          memory: 200Mi
+      tolerations:
+        - effect: NoExecute
+          operator: Exists
+        - effect: NoSchedule
+          operator: Exists
 
   vmsingle:
     enabled: true
@@ -81,30 +82,16 @@ vm:
           cpu: "1"
           memory: 1Gi
         requests:
-          cpu: "1"
-          memory: 1Gi
+          cpu: 200m
+          memory: 512Mi
       storage:
-        storageClassName: standard
+        storageClassName: local-path
         accessModes:
           - ReadWriteOnce
         resources:
           requests:
             storage: 10Gi
-
-  # Add this section to fix permissions
-    initContainers:
-      - name: volume-permissions
-        image: quay.io/opstree/busybox:1-alpine3.23
-        command:
-          - sh
-          - -c
-          - |
-            chown -R 1000:1000 /storage
-        volumeMounts:
-          - name: data
-            mountPath: /storage
-
-  ## VMAgent ##
+    
   vmagent:
     enabled: true
     spec:
@@ -114,10 +101,14 @@ vm:
           cpu: 500m
           memory: 500Mi
         requests:
-          cpu: 100m
-          memory: 500Mi
+          cpu: 50m
+          memory: 200Mi
+      tolerations:
+        - effect: NoExecute
+          operator: Exists
+        - effect: NoSchedule
+          operator: Exists
 
-  ## VMAlert ##
   vmalert:
     enabled: true
     spec:
@@ -126,14 +117,18 @@ vm:
           cpu: 500m
           memory: 500Mi
         requests:
-          cpu: 100m
-          memory: 500Mi
+          cpu: 50m
+          memory: 200Mi
+      tolerations:
+        - effect: NoExecute
+          operator: Exists
+        - effect: NoSchedule
+          operator: Exists
 
-  ## Kube State Metrics ##
   kube-state-metrics:
     image:
-      registry: ""
-      repository: quay.io/opstree/kube-state-metrics
+      registry: quay.io
+      repository: opstree/kube-state-metrics
       tag: "2.18.0-debian13"
       digest: "sha256:53525d253793ccb33f525781831df4d66f25634b90318f07b5c41ae1e5bb587b"
     resources:
@@ -141,10 +136,13 @@ vm:
         cpu: 500m
         memory: 512Mi
       requests:
-        cpu: 100m
-        memory: 256Mi
-
-  ## Node Exporter ##
+        cpu: 50m
+        memory: 128Mi
+    tolerations:
+      - effect: NoExecute
+        operator: Exists
+      - effect: NoSchedule
+        operator: Exists
 
   prometheus-node-exporter:
     image:
@@ -156,10 +154,14 @@ vm:
         cpu: 100m
         memory: 64Mi
       requests:
-        cpu: 50m
+        cpu: 10m
         memory: 32Mi
+    tolerations:
+      - effect: NoExecute
+        operator: Exists
+      - effect: NoSchedule
+        operator: Exists
 
-  ## Disabled by default ##
   defaultDashboards:
     enabled: false
 
@@ -169,6 +171,5 @@ vm:
   vmcluster:
     enabled: false
 
-## Prometheus Operator CRDs — enabled, VM operator handles CRDs ##
 prometheus-operator-crds:
   enabled: true
