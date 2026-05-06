@@ -3,7 +3,7 @@ name: vm-standalone
 appVersion: "0.69.0"
 description: A Helm chart for Victoria Metrics K8s stack standalone setup
 type: application
-version: 0.0.1
+version: 0.0.2
 maintainers:
   - name: ashwani-opstree
     email: ashwani.singh@opstree.com

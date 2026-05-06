@@ -9,9 +9,8 @@ vm:
 
     image:
       registry: quay.io
-      repository: opstree/victoriametrics/operator
-      tag: "v0.69.0@sha256:66fe5216c278604b89064d5972687f0df2c23ad41fe6fcedb4f8bfb5c041595d"
-
+      repository: opstree/victoriametrics-operator
+      tag: "v0.69.0"
     resources:
       limits:
         cpu: 200m
@@ -19,6 +18,19 @@ vm:
       requests:
         cpu: 100m
         memory: 300Mi
+
+    crds:
+      # plain: true
+      cleanup:
+        enabled: false
+
+    tolerations:
+      - key: team
+        operator: Equal
+        value: "o11y"
+        effect: NoSchedule
+    nodeSelector:
+      team: o11y
 
     serviceMonitor:
       enabled: true
@@ -29,35 +41,126 @@ vm:
     env:
       # opstree hardened images — identified and pushed
       - name: VM_VMSINGLEDEFAULT_IMAGE
-        value: "quay.io/opstree/victoriamertics-victoriametrics:v1.40.0"
+        value: "opstree/victoriamertics-victoriametrics"
+      - name: VM_VMSINGLEDEFAULT_VERSION
+        value: "v1.41.0"
+      - name: VM_VMSINGLEDEFAULT_VERSION
+        value: "v1.41.0"
       - name: VM_VMAGENTDEFAULT_IMAGE
-        value: "quay.io/opstree/victoriametrics-vmagent:1.141.0-debian13"
+        value: "opstree/victoriametrics-vmagent"
+      - name: VM_VMAGENTDEFAULT_VERSION
+        value: "v1.141.0"
       - name: VM_VMALERTDEFAULT_IMAGE
-        value: "quay.io/opstree/victoriametrics-vmalert:1.141.0-debian13"
+        value: "opstree/victoriametrics-vmalert"
+      - name: VM_VMALERTDEFAULT_VERSION
+        value: "v1.141.0"
       - name: VM_VMALERTMANAGER_ALERTMANAGERDEFAULTBASEIMAGE
-        value: "quay.io/opstree/alertmanager:0.32.0-debian13"
+        value: "opstree/alertmanager"
+      - name: VM_VMALERTMANAGER_ALERTMANAGERVERSION
+        value: "v0.32.0"
+      - name: VM_CONFIG_RELOADER_IMAGE
+        value: "opstree/victoriametrics-operator:config-reloader-v0.69.0"
 
       # upstream images — not yet hardened this can be hardenend
       - name: VM_VLOGSDEFAULT_IMAGE
-        value: "quay.io/victoriametrics/victoria-logs"
+        value: "victoriametrics/victoria-logs"
       - name: VM_VMCLUSTERDEFAULT_VMSELECTDEFAULT_IMAGE
-        value: "quay.io/victoriametrics/vmselect"
+        value: "victoriametrics/vmselect"
       - name: VM_VMCLUSTERDEFAULT_VMSTORAGEDEFAULT_IMAGE
-        value: "quay.io/victoriametrics/vmstorage"
+        value: "victoriametrics/vmstorage"
       - name: VM_VMCLUSTERDEFAULT_VMINSERTDEFAULT_IMAGE
-        value: "quay.io/victoriametrics/vminsert"
+        value: "victoriametrics/vminsert"
       - name: VM_VMBACKUP_IMAGE
-        value: "quay.io/victoriametrics/vmbackupmanager"
+        value: "victoriametrics/vmbackupmanager"
       - name: VM_VMAUTHDEFAULT_IMAGE
-        value: "quay.io/victoriametrics/vmauth"
+        value: "victoriametrics/vmauth"
+
+      # VictoriaMetrics Operator configuration
+      - name: "VM_USECUSTOMCONFIGRELOADER"
+        value: "true"
+      - name: "VM_CONFIG_RELOADER_REQUEST_CPU"
+        value: "unlimited"
+      - name: "VM_CONFIG_RELOADER_REQUEST_MEMORY"
+        value: "unlimited"
+      - name: "VM_CONFIG_RELOADER_LIMIT_CPU"
+        value: "unlimited"
+      - name: "VM_CONFIG_RELOADER_LIMIT_MEMORY"
+        value: "unlimited"
+      - name: "VM_VMAGENTDEFAULT_USEDEFAULTRESOURCES"
+        value: "false"
+      - name: "VM_VMALERTMANAGER_USEDEFAULTRESOURCES"
+        value: "false"
+      - name: VM_CONTAINERREGISTRY
+        value: "quay.io"
 
   ## Grafana — managed via standalone grafana chart
 
   grafana:
-    enabled: false
-
-  ## Alertmanager ##
-
+    enabled: true
+    image:
+      registry: quay.io
+      repository: opstree/grafana
+      tag: "12.4.3"
+    grafana.ini:
+      users:
+        viewers_can_edit: true
+      feature_toggles:
+      provisioning: "true"
+      kubernetesDashboards: "true"
+    useStatefulSet: true
+    serviceAccount:
+      create: true
+    adminUser: admin
+    adminPassword: opstree@2014
+    initChownData:
+      enabled: true
+    # securityContext:
+    #   runAsUser: 472
+    #   runAsGroup: 0
+    #   fsGroup: 472
+    #   runAsNonRoot: false
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 65532
+      runAsGroup: 65532
+      fsGroup: 65532
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      privileged: false
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault
+    testFramework:
+      enabled: false
+    sidecar:
+      dashboards:
+        enabled: true
+      datasources:
+        enabled: true
+        defaultDatasourceEnabled: false
+        label: grafana_datasource
+        labelValue: "1"
+    tolerations:
+      - key: team
+        operator: Equal
+        value: "o11y"
+        effect: NoSchedule
+    nodeSelector:
+      team: o11y
+    serviceMonitor:
+      enabled: false
+    persistence:
+      enabled: true
+      type: sts
+      storageClassName: standard
+      accessModes:
+        - ReadWriteOnce
+      size: 1Gi
+      finalizers:
+        - kubernetes.io/pvc-protection
+  ## Alertmanager — managed via VMAlertManager CRD
   alertmanager:
     enabled: true
     spec:
@@ -69,6 +172,13 @@ vm:
         requests:
           cpu: 100m
           memory: 500Mi
+      tolerations:
+        - key: team
+          operator: Equal
+          value: "o11y"
+          effect: NoSchedule
+      nodeSelector:
+        team: o11y
 
   ## VMSingle ##
 
@@ -76,6 +186,18 @@ vm:
     enabled: true
     spec:
       retentionPeriod: "7d"
+      extraArgs:
+        dedup.minScrapeInterval: 60s
+        search.maxUniqueTimeseries: "10000000000000"
+        search.cacheTimestampOffset: 60m
+        search.maxLabelsAPISeries: "10000000000000"
+        search.maxMemoryPerQuery: 1GB
+        search.maxPointsPerTimeseries: "10000000000000"
+        search.maxQueryDuration: 10m
+        search.maxQueryLen: "10000000000000"
+        search.maxSeries: "10000000000000"
+        maxLabelsPerTimeseries: "200"
+        memory.allowedPercent: "75"
       resources:
         limits:
           cpu: "1"
@@ -90,6 +212,13 @@ vm:
         resources:
           requests:
             storage: 10Gi
+      tolerations:
+        - key: team
+          operator: Equal
+          value: "o11y"
+          effect: NoSchedule
+      nodeSelector:
+        team: o11y
 
   # Add this section to fix permissions
     initContainers:
@@ -109,6 +238,10 @@ vm:
     enabled: true
     spec:
       scrapeInterval: 30s
+      extraArgs:
+        promscrape.maxScrapeSize: 200MB
+        promscrape.streamParse: "true"
+        promscrape.dropOriginalLabels: "true"
       resources:
         limits:
           cpu: 500m
@@ -116,6 +249,13 @@ vm:
         requests:
           cpu: 100m
           memory: 500Mi
+      tolerations:
+        - key: team
+          operator: Equal
+          value: "o11y"
+          effect: NoSchedule
+      nodeSelector:
+        team: o11y
 
   ## VMAlert ##
   vmalert:
@@ -128,12 +268,19 @@ vm:
         requests:
           cpu: 100m
           memory: 500Mi
+      tolerations:
+        - key: team
+          operator: Equal
+          value: "o11y"
+          effect: NoSchedule
+      nodeSelector:
+        team: o11y
 
   ## Kube State Metrics ##
   kube-state-metrics:
     image:
-      registry: ""
-      repository: quay.io/opstree/kube-state-metrics
+      registry: "quay.io"
+      repository: opstree/kube-state-metrics
       tag: "2.18.0-debian13"
       digest: "sha256:53525d253793ccb33f525781831df4d66f25634b90318f07b5c41ae1e5bb587b"
     resources:
@@ -143,7 +290,13 @@ vm:
       requests:
         cpu: 100m
         memory: 256Mi
-
+    tolerations:
+      - key: team
+        operator: Equal
+        value: "o11y"
+        effect: NoSchedule
+    nodeSelector:
+      team: o11y
   ## Node Exporter ##
 
   prometheus-node-exporter:
