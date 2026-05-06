@@ -129,7 +129,7 @@ vm:
       privileged: false
       capabilities:
         drop:
-            - ALL
+          - ALL
       seccompProfile:
         type: RuntimeDefault
     testFramework:
