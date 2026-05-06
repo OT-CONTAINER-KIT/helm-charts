@@ -101,7 +101,6 @@ vm:
       registry: quay.io
       repository: opstree/grafana
       tag: "12.4.3"
-      sha: "b61c1ed2f0154674effa732d29a62319b6a2efc479b6e708578a82ea8dc1e972"
     grafana.ini:
       users:
         viewers_can_edit: true
