@@ -60,7 +60,7 @@ ingress:
 # ***************************  BACKUP CONFIG  *********************
 backup:
   enabled: true
-  schedule: "*/2 * * * *"
+  schedule: "0 0 * * *"
   historyLimit: 2
   vault:
     address: "http://vault-main:8200"
