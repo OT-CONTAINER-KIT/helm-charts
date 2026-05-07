@@ -41,7 +41,7 @@ affinity:
 
 persistence:
   size: 5Gi
-  storageClass: "vcluster-longhorn-restricted-x-coe-dev-x-coe-dev-vcluster "
+  storageClass: "vcluster-longhorn-restricted-x-coe-dev-x-coe-dev-vcluster"
 
 service:
   type: ClusterIP
