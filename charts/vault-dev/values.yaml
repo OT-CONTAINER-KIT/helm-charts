@@ -63,7 +63,7 @@ backup:
   schedule: "0 0 * * *"
   historyLimit: 2
   vault:
-    address: "http://vault-main:8200"
+    address: "http://vault-1-main:8200"
   minio:
     image: "minio/mc:latest"
     endpoint: "https://192.168.8.18:9000"
