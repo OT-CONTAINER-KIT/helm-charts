@@ -81,7 +81,7 @@ restore:
 oidc:
   enabled: true
   discovery_url: "https://keycloak.opstree.dev/realms/master"
-  client_id: "vault-test"
+  client_id: "vault-backup"
   client_secret: "5u7PqOs99KZ4gQBuUvCxDQ4S60cqaNeg"
   default_role: "oidc-user"
   # Replace with your actual Vault external URL
