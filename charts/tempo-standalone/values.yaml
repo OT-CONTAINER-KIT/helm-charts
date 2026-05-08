@@ -55,6 +55,8 @@ tempo:
           endpoint: "0.0.0.0:4317"
         http:
           endpoint: "0.0.0.0:4318"
+  serviceMonitor:
+    enabled: true   
 
   initContainers:
     - name: volume-permissions
