@@ -5379,6 +5379,27 @@ entries:
     version: 0.5.0
   tempo-standalone:
   - apiVersion: v2
+    appVersion: 2.10.4
+    created: "2026-05-08T10:03:39.033446123Z"
+    dependencies:
+    - alias: tempo
+      condition: tempo.enabled
+      name: tempo
+      repository: https://grafana.github.io/helm-charts
+      version: 1.23.0
+    description: A Helm chart for Tempo Standalone setup
+    digest: 721ece9e7e7b755911b651d01830aa58ac8a47047e955a1969ff920ff40593a7
+    maintainers:
+    - email: ashwani.singh@opstree.com
+      name: ashwani-opstree
+    - email: varun.kumar@opstree.com
+      name: Varunarora2201
+    name: tempo-standalone
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/tempo-standalone-1.0.1/tempo-standalone-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
     appVersion: 1.0.0
     created: "2024-09-02T16:58:46.960536865Z"
     dependencies:
@@ -5600,4 +5621,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/worker-0.1.0/worker-0.1.0.tgz
     version: 0.1.0
-generated: "2026-05-06T13:12:01.126584946Z"
+generated: "2026-05-08T10:03:39.033887307Z"
