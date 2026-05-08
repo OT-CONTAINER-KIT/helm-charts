@@ -49,4 +49,3 @@ fluent-bit:
       volumeMounts:
         - name: fluentbit-state
           mountPath: /fluent-bit/state
-
