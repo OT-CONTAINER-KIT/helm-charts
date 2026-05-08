@@ -1,12 +1,12 @@
 tempo:
   enabled: true
-  fullnameOverride: tempo
-  metricsPort: 3200
+  fullnameOverride: tempo-standalone
 
   tempo:
     repository: quay.io/opstree/tempo
     tag: "2.10.4-debian13"
-    retention: 24h
+    #-- 7days retention
+    retention: 168h
     memBallastSizeMbs: 1024
     metricsGenerator:
       enabled: false
@@ -39,22 +39,24 @@ tempo:
       memory: 150Mi
 
   tolerations:
-    - effect: NoExecute
-      operator: Exists
-    - effect: NoSchedule
-      operator: Exists
+    - key: team
+      operator: Equal
+      value: "o11y"
+      effect: NoSchedule
+  nodeSelector:
+    team: o11y
 
   persistence:
     enabled: true
+    #-- Enable StatefulSetAutoDeletePVC feature
+    enableStatefulSetAutoDeletePVC: false
+    storageClassName: o11y
+    accessModes:
+      - ReadWriteOnce
     size: 10Gi
 
-  receivers:
-    otlp:
-      protocols:
-        grpc:
-          endpoint: "0.0.0.0:4317"
-        http:
-          endpoint: "0.0.0.0:4318"
+  receivers: {}
+
   serviceMonitor:
     enabled: true   
 

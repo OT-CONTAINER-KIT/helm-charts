@@ -1,6 +1,6 @@
 apiVersion: v2
 name: tempo-standalone
-appVersion: "2"
+appVersion: "2.10.4"
 description: A Helm chart for Tempo Standalone setup
 type: application
 version: 1.0.0
