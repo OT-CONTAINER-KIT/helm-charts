@@ -59,7 +59,7 @@ loki:
 
   serviceAccount:
     create: true
-  
+
   serviceMonitor:
     enabled: true
 
