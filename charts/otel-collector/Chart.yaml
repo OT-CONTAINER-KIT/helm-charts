@@ -3,7 +3,7 @@ name: otel-collector
 appVersion: "0.150.1"
 description: A Helm chart for OpenTelemetry Collector
 type: application
-version: 1.0.0
+version: 0.0.1
 maintainers:
   - name: ashwani-opstree
     email: ashwani.singh@opstree.com
