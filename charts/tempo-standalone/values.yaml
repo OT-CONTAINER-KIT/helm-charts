@@ -1,18 +1,73 @@
 tempo:
   enabled: true
-  fullnameOverride: tempo
+  fullnameOverride: tempo-standalone
+
   tempo:
+    repository: quay.io/opstree/tempo
+    tag: "2.10.4-debian13"
+    # 7days retention
     retention: 168h
-    resources:
-      requests:
-        cpu:  1
-        memory: 2Gi
-      limits:
-        cpu: 1
-        memory: 2Gi
+    memBallastSizeMbs: 1024
+    metricsGenerator:
+      enabled: false
+
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    runAsNonRoot: true
+    fsGroup: 1000
+
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+
+  rbac:
+    create: true
+
+  service:
+    type: ClusterIP
+
+  resources:
+    limits:
+      cpu: 300m
+      memory: 300Mi
+    requests:
+      cpu: 150m
+      memory: 150Mi
+
+  tolerations:
+    - key: team
+      operator: Equal
+      value: "o11y"
+      effect: NoSchedule
+  nodeSelector:
+    team: o11y
 
   persistence:
     enabled: true
+    # Enable StatefulSetAutoDeletePVC feature
+    enableStatefulSetAutoDeletePVC: false
+    storageClassName: o11y
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+
+  receivers: {}
 
   serviceMonitor:
     enabled: true
+
+  initContainers:
+    - name: volume-permissions
+      image: quay.io/opstree/busybox:1-alpine3.23
+      command:
+        - sh
+        - -c
+        - |
+          chown -R 1000:1000 /var/tempo
+      volumeMounts:
+        - name: storage
+          mountPath: /var/tempo
