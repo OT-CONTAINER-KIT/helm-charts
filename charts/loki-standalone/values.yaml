@@ -1,16 +1,15 @@
 loki:
-  enabled: true
 
   loki:
     image:
-      registry: ""
-      repository: quay.io/opstree/loki
+      registry: quay.io
+      repository: opstree/loki
       tag: "3.6-debian13"
-      digest: ""
 
     auth_enabled: false
 
     limits_config:
+      retention_period: 7d
       reject_old_samples: true
       reject_old_samples_max_age: 168h
       max_cache_freshness_per_query: 10m
@@ -28,7 +27,7 @@ loki:
     compactor:
       working_directory: /var/loki/compactor
       compaction_interval: 10m
-      retention_enabled: false
+      retention_enabled: true
       delete_request_store: filesystem
       retention_delete_delay: 2h
 
@@ -65,11 +64,32 @@ loki:
 
   deploymentMode: SingleBinary
 
-  lokiCanary:
-    enabled: false
-
-  test:
-    enabled: false
+  singleBinary:
+    replicas: 1
+    resources:
+      requests:
+        cpu: "500m"
+        memory: 1Gi
+      limits:
+        cpu: "2"
+        memory: 4Gi
+    persistence:
+      enabled: true
+      enableStatefulSetAutoDeletePVC: false
+      size: 100Gi
+      storageClass: o11y
+    tolerations:
+      - key: team
+        operator: Equal
+        value: "o11y"
+        effect: NoSchedule 
+    nodeSelector:
+      team: o11y
+    extraEnv:
+      - name: GOMEMLIMIT
+        value: 2200MiB
+    extraArgs:
+      - "-config.expand-env=true"
 
   # Sidecar image — correct upstream key
   sidecar:
@@ -90,27 +110,33 @@ loki:
   gateway:
     affinity: {}
     tolerations:
-      - effect: NoExecute
-        operator: Exists
-      - effect: NoSchedule
-        operator: Exists
+      - key: team
+        operator: Equal
+        value: "o11y"
+        effect: NoSchedule
+    nodeSelector:
+      team: o11y
 
   chunksCache:
     writebackSizeLimit: 10MB
     allocatedMemory: 250Mi
     tolerations:
-      - effect: NoExecute
-        operator: Exists
-      - effect: NoSchedule
-        operator: Exists
+      - key: team
+        operator: Equal
+        value: "o11y"
+        effect: NoSchedule
+    nodeSelector:
+      team: o11y
 
   resultsCache:
     allocatedMemory: 128Mi
     tolerations:
-      - effect: NoExecute
-        operator: Exists
-      - effect: NoSchedule
-        operator: Exists
+      - key: team
+        operator: Equal
+        value: "o11y"
+        effect: NoSchedule
+    nodeSelector:
+      team: o11y
 
   minio:
     enabled: false
@@ -140,3 +166,7 @@ loki:
     replicas: 0
   bloomGateway:
     replicas: 0
+  lokiCanary:
+    enabled: false
+  test:
+    enabled: false
