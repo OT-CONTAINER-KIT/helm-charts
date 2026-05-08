@@ -24,7 +24,7 @@ prometheus-blackbox-exporter:
       value: "o11y"
       effect: NoSchedule
   nodeSelector:
-      team: o11y
+    team: o11y
 
   serviceMonitor:
     enabled: true
