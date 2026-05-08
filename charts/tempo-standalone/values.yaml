@@ -5,7 +5,7 @@ tempo:
   tempo:
     repository: quay.io/opstree/tempo
     tag: "2.10.4-debian13"
-    #-- 7days retention
+    # 7days retention
     retention: 168h
     memBallastSizeMbs: 1024
     metricsGenerator:
@@ -48,7 +48,7 @@ tempo:
 
   persistence:
     enabled: true
-    #-- Enable StatefulSetAutoDeletePVC feature
+    # Enable StatefulSetAutoDeletePVC feature
     enableStatefulSetAutoDeletePVC: false
     storageClassName: o11y
     accessModes:
@@ -58,7 +58,7 @@ tempo:
   receivers: {}
 
   serviceMonitor:
-    enabled: true   
+    enabled: true
 
   initContainers:
     - name: volume-permissions
