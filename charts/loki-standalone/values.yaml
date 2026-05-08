@@ -82,7 +82,7 @@ loki:
       - key: team
         operator: Equal
         value: "o11y"
-        effect: NoSchedule 
+        effect: NoSchedule
     nodeSelector:
       team: o11y
     extraEnv:
