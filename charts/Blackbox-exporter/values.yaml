@@ -19,10 +19,15 @@ prometheus-blackbox-exporter:
       memory: 150Mi
 
   tolerations:
-    - effect: NoExecute
-      operator: Exists
-    - effect: NoSchedule
-      operator: Exists
+    - key: team
+      operator: Equal
+      value: "o11y"
+      effect: NoSchedule
+  nodeSelector:
+      team: o11y
+
+  serviceMonitor:
+    enabled: true
 
   config:
     modules:
