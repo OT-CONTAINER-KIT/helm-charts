@@ -3,7 +3,7 @@ name: otel-operator
 appVersion: "0.124.0"
 description: A Helm chart for OpenTelemetry Operator
 type: application
-version: 1.0.0
+version: 1.0.1
 maintainers:
   - name: ashwani-opstree
     email: ashwani.singh@opstree.com
