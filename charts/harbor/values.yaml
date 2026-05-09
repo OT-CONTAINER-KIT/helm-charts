@@ -11,9 +11,11 @@ harbor:
       requests:
         memory: "100Mi"
         cpu: "50m"
+        ephemeral-storage: "512Mi"   # NEWLY ADDED
       limits:
-        memory: "150Mi" # Reduced to fit 1Gi quota
+        memory: "150Mi"
         cpu: "100m"
+        ephemeral-storage: "1Gi"     # NEWLY ADDED
   
   jobservice:
     replicas: ${JOBSERVICE_REPLICAS}
@@ -24,32 +26,37 @@ harbor:
       requests:
         memory: "100Mi"
         cpu: "50m"
+        ephemeral-storage: "512Mi"   # NEWLY ADDED
       limits:
-        memory: "128Mi" # Reduced to fit 1Gi quota
+        memory: "128Mi"
         cpu: "100m"
+        ephemeral-storage: "1Gi"     # NEWLY ADDED
 
   registry:
     replicas: 1
     secret: "opstree-harbor-shared-secret"
-    # This block configures the 'registry' container
+
     registry:
       resources:
         requests:
           cpu: "50m"
           memory: "64Mi"
+          ephemeral-storage: "1Gi"   # NEWLY ADDED
         limits:
           cpu: "100m"
           memory: "100Mi"
+          ephemeral-storage: "2Gi"   # NEWLY ADDED
     
-    # This block configures the 'registryctl' container
     controller:
       resources:
         requests:
           cpu: "20m"
           memory: "32Mi"
+          ephemeral-storage: "512Mi" # NEWLY ADDED
         limits:
           cpu: "50m"
           memory: "64Mi"
+          ephemeral-storage: "1Gi"   # NEWLY ADDED
         
   portal:
     replicas: ${PORTAL_REPLICAS}
@@ -57,9 +64,11 @@ harbor:
       requests:
         memory: "32Mi"
         cpu: "20m"
+        ephemeral-storage: "256Mi"   # NEWLY ADDED
       limits:
         memory: "64Mi"
         cpu: "50m"
+        ephemeral-storage: "512Mi"   # NEWLY ADDED
 
   nginx:
     replicas: ${NGINX_REPLICAS}
@@ -67,9 +76,11 @@ harbor:
       requests:
         memory: "32Mi"
         cpu: "20m"
+        ephemeral-storage: "256Mi"   # NEWLY ADDED
       limits:
         memory: "64Mi"
         cpu: "50m"
+        ephemeral-storage: "512Mi"   # NEWLY ADDED
 
   trivy:
     enabled: true
@@ -78,23 +89,16 @@ harbor:
       requests:
         memory: "512Mi"
         cpu: "200m"
+        ephemeral-storage: "1Gi"     # NEWLY ADDED
       limits:
-        memory: "1Gi" # Reduced significantly to fit
+        memory: "1Gi"
         cpu: "1000m"
+        ephemeral-storage: "2Gi"     # NEWLY ADDED
+
     persistence:
       enabled: true
       size: 5Gi
       storageClass: "standard" 
-
-#  oidc:
-#    enabled: false
-#    name: "Keycloak"
-#    endpoint: "https://keycloak.opstree.dev/auth/realms/master"
-#    clientId: "harbor"
-#    clientSecret: "6s18ll0o3wtF8X07XLvkt8ykpmj8TTLU"
-#    scope: "openid"
-#    verifyCert: true
-#    redirectUrl: "${HARBOR_EXTERNAL_URL}/c/oidc/callback"
 
   expose:
     type: clusterIP 
@@ -118,9 +122,11 @@ harbor:
       requests:
         cpu: 20m
         memory: "32Mi"
-      limits: # Mandatory for your quota
+        ephemeral-storage: "256Mi"   # NEWLY ADDED
+      limits:
         cpu: 50m
         memory: "64Mi"
+        ephemeral-storage: "512Mi"   # NEWLY ADDED
 
   database:
     type: external
@@ -141,6 +147,7 @@ harbor:
     enabled: true
     jobservice:
       jobLog: false 
+
     imageChartStorage:
       type: s3
       s3:
@@ -156,8 +163,10 @@ harbor:
 database:
   internal:
     enabled: false
+
 redis:
   internal:
     enabled: false
+
 postgresql:
   enabled: false
