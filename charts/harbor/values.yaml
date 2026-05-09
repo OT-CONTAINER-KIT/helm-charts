@@ -33,7 +33,7 @@ harbor:
         ephemeral-storage: "1Gi"     # NEWLY ADDED
 
   registry:
-    replicas: 1
+    replicas: 2
     secret: "opstree-harbor-shared-secret"
 
     registry:
