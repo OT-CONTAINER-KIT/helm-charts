@@ -28,7 +28,7 @@ harbor:
         cpu: "50m"
         ephemeral-storage: "512Mi"   # NEWLY ADDED
       limits:
-        memory: "128Mi"
+        memory: "256Mi"
         cpu: "100m"
         ephemeral-storage: "1Gi"     # NEWLY ADDED
 
@@ -40,11 +40,11 @@ harbor:
       resources:
         requests:
           cpu: "50m"
-          memory: "64Mi"
+          memory: "256Mi"
           ephemeral-storage: "1Gi"   # NEWLY ADDED
         limits:
           cpu: "100m"
-          memory: "100Mi"
+          memory: "512Mi"
           ephemeral-storage: "2Gi"   # NEWLY ADDED
     
     controller:
@@ -55,7 +55,7 @@ harbor:
           ephemeral-storage: "512Mi" # NEWLY ADDED
         limits:
           cpu: "50m"
-          memory: "64Mi"
+          memory: "128Mi"
           ephemeral-storage: "1Gi"   # NEWLY ADDED
         
   portal:
