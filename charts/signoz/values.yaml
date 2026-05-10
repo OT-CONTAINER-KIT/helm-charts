@@ -1,0 +1,138 @@
+
+# --------------------
+# GLOBAL
+# --------------------
+global:
+  storageClass: "managed-csi" # Change to your storage class if different
+  cloud: azure # Change to "aws" if using AWS
+
+# --------------------
+# CLICKHOUSE
+# --------------------
+clickhouse:
+  enabled: true
+  cluster: signozch
+  layout:
+    shardsCount: 1
+    replicasCount: 1
+  user: admin
+  password: <password>
+  persistence:
+    enabled: true
+    size: 8Gi
+  zookeeper:
+    enabled: true
+    metrics:
+      enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 200Mi
+
+# --------------------
+# ZOOKEEPER (for ClickHouse HA)
+# --------------------
+zookeeper:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 8Gi
+
+# --------------------
+# SIGNOZ APP
+# --------------------
+signoz:
+  replicaCount: 1
+  image:
+    tag: v0.86.2
+  service:
+    type: ClusterIP
+    port: 8080
+  configVars:
+    storage: clickhouse
+    telemetryEnabled: true
+    deploymentType: kubernetes-helm
+  persistence:
+    enabled: true
+    size: 1Gi
+  livenessProbe:
+    enabled: true
+    path: /api/v1/health
+  readinessProbe:
+    enabled: true
+    path: /api/v1/health?live=1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+
+# --------------------
+# SCHEMA MIGRATOR (default)
+# --------------------
+schemaMigrator:
+  enabled: true
+  image:
+    tag: v0.111.42
+  upgradeHelmHooks: true
+  initContainers:
+    wait:
+      enabled: true
+    chReady:
+      enabled: true
+
+# --------------------
+# OTEL COLLECTOR
+# --------------------
+otelCollector:
+  replicaCount: 1
+  image:
+    tag: v0.111.42
+  service:
+    type: ClusterIP
+  ports:
+    otlp:
+      enabled: true
+    otlp-http:
+      enabled: true
+    metrics:
+      enabled: true
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc: {}
+          http: {}
+    processors:
+      batch:
+        send_batch_size: 50000
+        timeout: 1s
+      signozspanmetrics/delta:
+        metrics_exporter: clickhousemetricswrite,signozclickhousemetrics
+        latency_histogram_buckets: [100us,1ms,10ms,100ms,1s,10s]
+        dimensions_cache_size: 100000
+        dimensions:
+          - name: service.namespace
+            default: default
+    exporters:
+      clickhousetraces:
+        datasource: tcp://${env:CLICKHOUSE_USER}:${env:CLICKHOUSE_PASSWORD}@${env:CLICKHOUSE_HOST}:${env:CLICKHOUSE_PORT}/${env:CLICKHOUSE_TRACE_DATABASE}
+        use_new_schema: true
+      clickhousemetricswrite:
+        endpoint: tcp://${env:CLICKHOUSE_USER}:${env:CLICKHOUSE_PASSWORD}@${env:CLICKHOUSE_HOST}:${env:CLICKHOUSE_PORT}/${env:CLICKHOUSE_DATABASE}
+        timeout: 15s
+        resource_to_telemetry_conversion:
+          enabled: true
+        disable_v2: true
+      signozclickhousemetrics:
+        dsn: tcp://${env:CLICKHOUSE_USER}:${env:CLICKHOUSE_PASSWORD}@${env:CLICKHOUSE_HOST}:${env:CLICKHOUSE_PORT}/${env:CLICKHOUSE_DATABASE}
+        timeout: 45s
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [signozspanmetrics/delta, batch]
+          exporters: [clickhousetraces]
+        metrics:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [clickhousemetricswrite, signozclickhousemetrics]
