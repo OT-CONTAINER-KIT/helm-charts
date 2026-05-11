@@ -1,14 +1,19 @@
 apiVersion: v2
-name: otel-operator
-description: A Helm chart for Opentelemetry Operator
-type: application
-version: 1.0.0
-appVersion: 1.0.0
+appVersion: 0.149.0
 dependencies:
-  - name: opentelemetry-operator
-    version: 0.64.2
-    repository: https://open-telemetry.github.io/opentelemetry-helm-charts/
-    alias: operator
-    tags:
-      - operator
-    condition: operator.enabled
+- alias: operator
+  condition: operator.enabled
+  name: opentelemetry-operator
+  repository: https://open-telemetry.github.io/opentelemetry-helm-charts/
+  tags:
+  - operator
+  version: 0.111.0
+description: A Helm chart for Opentelemetry Operator
+name: otel-operator
+type: application
+version: 1.0.1
+maintainers:
+  - name: ashwani-opstree
+    email: ashwani.singh@opstree.com
+  - name: Varunarora2201
+    email: varun.kumar@opstree.com
