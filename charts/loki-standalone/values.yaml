@@ -31,21 +31,32 @@ loki:
       delete_request_store: filesystem
       retention_delete_delay: 2h
 
+    # -----------------------------------------------------------------
+    # Storage Backend
+    # Set storage.type and provide credentials for chosen backend.
+    #
+    # Default: filesystem (no credentials needed)
+    # Options: filesystem | s3 | azure | gcs
+    # Example files are stored at examples/standalone directory
+    # -----------------------------------------------------------------
     storage:
-      type: filesystem
+      type: filesystem    # override in client values
 
-    commonConfig:
-      replication_factor: 1
+    storage_config:
+      use_thanos_objstore: false
 
     schemaConfig:
       configs:
-        - from: 2024-04-01
+        - from: "2024-04-01"
           store: tsdb
           object_store: filesystem
           schema: v13
           index:
             prefix: loki_index_
             period: 24h
+
+    commonConfig:
+      replication_factor: 1
 
     ingester:
       chunk_encoding: snappy

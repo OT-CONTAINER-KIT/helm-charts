@@ -1,0 +1,48 @@
+# Loki Standalone — AWS S3 Storage Example
+# Copy this file to your client repo and fill in the required values.
+
+loki:
+  loki:
+    storage:
+      type: s3
+      bucketNames:
+        chunks: ""      # S3 bucket name e.g. newgen-loki-logs
+        ruler: ""       # same bucket name
+        admin: ""       # same bucket name
+      s3:
+        region: ""      # AWS region e.g. ap-south-1
+        bucketnames: "" # same as bucketNames.chunks above
+        accessKeyId: "" # AWS access key ID
+        secretAccessKey: "" # AWS secret access key
+        s3ForcePathStyle: false
+        insecure: false
+
+    schemaConfig:
+      configs:
+        - from: "2024-04-01"
+          store: tsdb
+          object_store: s3
+          schema: v13
+          index:
+            prefix: loki_index_
+            period: 24h
+
+    compactor:
+      working_directory: /var/loki/compactor
+      compaction_interval: 10m
+      retention_enabled: true
+      delete_request_store: s3
+      retention_delete_delay: 2h
+
+  serviceAccount:
+    create: true
+    name: loki-sa
+    annotations:
+      eks.amazonaws.com/role-arn: "" # ARN of IAM role with S3 access
+                                     # e.g. arn:aws:iam::123456789:role/loki-s3-role
+                                     # leave empty if using accessKeyId/secretAccessKey
+
+  singleBinary:
+    persistence:
+      storageClass: ""  # your cluster storage class e.g. o11y-gp3-storage
+      size: 10Gi        # local WAL size, not the S3 bucket size
