@@ -1032,6 +1032,29 @@ entries:
     version: 0.1.0
   otel-operator:
   - apiVersion: v2
+    appVersion: 0.149.0
+    created: "2026-05-11T08:08:47.016484905Z"
+    dependencies:
+    - alias: operator
+      condition: operator.enabled
+      name: opentelemetry-operator
+      repository: https://open-telemetry.github.io/opentelemetry-helm-charts/
+      tags:
+      - operator
+      version: 0.111.0
+    description: A Helm chart for Opentelemetry Operator
+    digest: 6e240da98fef3465e5023dac9f36793dc8114befa14ded3a4a8f539f781892d9
+    maintainers:
+    - email: ashwani.singh@opstree.com
+      name: ashwani-opstree
+    - email: varun.kumar@opstree.com
+      name: Varunarora2201
+    name: otel-operator
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/otel-operator-1.0.1/otel-operator-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
     appVersion: 1.0.0
     created: "2024-09-02T10:43:00.175442951Z"
     dependencies:
@@ -5621,4 +5644,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/worker-0.1.0/worker-0.1.0.tgz
     version: 0.1.0
-generated: "2026-05-08T10:03:39.033887307Z"
+generated: "2026-05-11T08:08:47.016792558Z"
