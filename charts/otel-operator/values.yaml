@@ -22,7 +22,7 @@ operator:
       repository: quay.io/opstree/opentelemetry-operator
       tag: 0.149.0-debian13
     collectorImage:
-      repository:  quay.io/opstree/opentelemetry-collector 
+      repository: quay.io/opstree/opentelemetry-collector
       tag: 0.150.1-debian13-contrib
 
     securityContext:
@@ -34,27 +34,27 @@ operator:
 
     autoInstrumentationImage:
       java:
-        #-- https://github.com/open-telemetry/opentelemetry-operator/pkgs/container/opentelemetry-operator%2Fautoinstrumentation-java
+        # -- https://github.com/open-telemetry/opentelemetry-operator/pkgs/container/opentelemetry-operator%2Fautoinstrumentation-java
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java
         tag: 2.27.0
       nodejs:
-        #-- https://github.com/open-telemetry/opentelemetry-operator/pkgs/container/opentelemetry-operator%2Fautoinstrumentation-nodejs
+        # -- https://github.com/open-telemetry/opentelemetry-operator/pkgs/container/opentelemetry-operator%2Fautoinstrumentation-nodejs
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs
         tag: 0.74.0
-      go: 
-        #-- https://github.com/open-telemetry/opentelemetry-go-instrumentation/pkgs/container/opentelemetry-go-instrumentation%2Fautoinstrumentation-go
+      go:
+        # -- https://github.com/open-telemetry/opentelemetry-go-instrumentation/pkgs/container/opentelemetry-go-instrumentation%2Fautoinstrumentation-go
         repository: quay.io/opstree/opentelemetry-autoinstrumentation-go
         tag: 0.24.0
       python:
-        #-- https://github.com/open-telemetry/opentelemetry-operator/pkgs/container/opentelemetry-operator%2Fautoinstrumentation-python
+        # -- https://github.com/open-telemetry/opentelemetry-operator/pkgs/container/opentelemetry-operator%2Fautoinstrumentation-python
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python
         tag: 0.62b1
       dotnet:
-        #-- https://github.com/open-telemetry/opentelemetry-operator/pkgs/container/opentelemetry-operator%2Fautoinstrumentation-dotnet
+        # -- https://github.com/open-telemetry/opentelemetry-operator/pkgs/container/opentelemetry-operator%2Fautoinstrumentation-dotnet
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet
         tag: 1.15.0
       apacheHttpd:
-        #-- https://github.com/open-telemetry/opentelemetry-operator/pkgs/container/opentelemetry-operator%2Fautoinstrumentation-apache-httpd
+        # -- https://github.com/open-telemetry/opentelemetry-operator/pkgs/container/opentelemetry-operator%2Fautoinstrumentation-apache-httpd
         repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
         tag: 1.0.4
     resources:
