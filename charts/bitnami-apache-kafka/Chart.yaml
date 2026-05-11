@@ -1,0 +1,17 @@
+apiVersion: v2
+name: apache-kafka
+version: 0.1.0
+description: A standard Helm chart for Apache Kafka (latest)
+appVersion: "3.7.0"
+keywords:
+  - kafka
+  - apache
+  - streaming
+home: https://kafka.apache.org/
+sources:
+  - https://github.com/apache/kafka
+maintainers:
+  - name: Samyak Jain
+    email: samyak.jain@opstree.com
+    url: https://github.com/samyakjain1908
+
