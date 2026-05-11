@@ -1,0 +1,70 @@
+name: sentryfuse-api
+component: api
+
+base:
+  image:
+    pullPolicy: "Always"
+    command: []
+    repository: registry.ldc.opstree.dev/coe/sentryfuse-api
+    tag: latest
+    pullSecrets: "reg-ldc-coe-regcred"
+  config:
+    POSTGRES_ADDR: "192.168.10.52:5432"
+    POSTGRES_USER: "postgres"
+    POSTGRES_PASSWORD: "password"
+  existingSecrets:
+    - sentryfuse-api
+
+healthcheck:
+  enabled: true
+  statusPath: /api/v1/healthz
+
+autoscaling:
+  enabled: false
+  targetCPUUtilizationPercentage: 65
+  targetMemoryUtilizationPercentage: 65
+  minReplicas: 10
+  maxReplicas: 50
+
+service:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+
+resources: {}
+
+replicaCount: 1
+
+volumes:
+  configMaps:
+    - name: sentryfuse-api-config
+      mountPath: /etc/sentryfuse/
+      data:
+        config.yaml: |
+          kafka:
+            brokers: ["192.168.10.52:9092"]
+
+          postgres:
+            addr: "192.168.10.52:5432"
+            user: "postgres"
+            password: "password"
+            dbname: "git_guard"
+
+web:
+  enabled: false
+
+ingress:
+  enabled: false
+  class: nginx
+  annotations:
+    ingress.gcp.kubernetes.io/pre-shared-cert: global-sign-opstree-com-2024
+    kubernetes.io/ingress.allow-http: "false"
+
+internalIngress:
+  enabled: false
+  class: nginx-internal
+  annotations:
+    kubernetes.io/ingress.allow-http: "true"
