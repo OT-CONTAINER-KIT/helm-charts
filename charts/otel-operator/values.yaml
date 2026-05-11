@@ -1,29 +1,29 @@
 operator:
   enabled: true
   fullnameOverride: otel-operator
-
-  replicaCount: 1
-
+  additionalLabels:
+    app: otel-operator
+  replicaCount: 2
   securityContext:
     runAsUser: 65532
     runAsGroup: 65532
     runAsNonRoot: true
     fsGroup: 65532
-
   tolerations:
-    - effect: NoExecute
-      operator: Exists
-    - effect: NoSchedule
-      operator: Exists
+    - key: team
+      operator: Equal
+      value: "o11y"
+      effect: NoSchedule
+  nodeSelector:
+    team: o11y
 
   manager:
     image:
       repository: quay.io/opstree/opentelemetry-operator
-      tag: "0.149.0-debian13"
-
+      tag: 0.149.0-debian13
     collectorImage:
-      repository: quay.io/opstree/opentelemetry-collector
-      tag: "0.150.1-debian13-contrib"
+      repository:  quay.io/opstree/opentelemetry-collector 
+      tag: 0.150.1-debian13-contrib
 
     securityContext:
       allowPrivilegeEscalation: false
@@ -32,29 +32,41 @@ operator:
         drop:
           - ALL
 
+    autoInstrumentationImage:
+      java:
+        #-- https://github.com/open-telemetry/opentelemetry-operator/pkgs/container/opentelemetry-operator%2Fautoinstrumentation-java
+        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java
+        tag: 2.27.0
+      nodejs:
+        #-- https://github.com/open-telemetry/opentelemetry-operator/pkgs/container/opentelemetry-operator%2Fautoinstrumentation-nodejs
+        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs
+        tag: 0.74.0
+      go: 
+        #-- https://github.com/open-telemetry/opentelemetry-go-instrumentation/pkgs/container/opentelemetry-go-instrumentation%2Fautoinstrumentation-go
+        repository: quay.io/opstree/opentelemetry-autoinstrumentation-go
+        tag: 0.24.0
+      python:
+        #-- https://github.com/open-telemetry/opentelemetry-operator/pkgs/container/opentelemetry-operator%2Fautoinstrumentation-python
+        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python
+        tag: 0.62b1
+      dotnet:
+        #-- https://github.com/open-telemetry/opentelemetry-operator/pkgs/container/opentelemetry-operator%2Fautoinstrumentation-dotnet
+        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet
+        tag: 1.15.0
+      apacheHttpd:
+        #-- https://github.com/open-telemetry/opentelemetry-operator/pkgs/container/opentelemetry-operator%2Fautoinstrumentation-apache-httpd
+        repository: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd
+        tag: 1.0.4
     resources:
       limits:
-        cpu: 300m
-        memory: 300Mi
-      requests:
-        cpu: 150m
-        memory: 150Mi
-
-    serviceMonitor:
-      enabled: true
-
-  kubeRBACProxy:
-    image:
-      repository: quay.io/opstree/kube-rbac-proxy
-      tag: "0.21.2-alpine3.23"
-
-    resources:
-      limits:
-        cpu: 200m
+        cpu: 100m
         memory: 128Mi
       requests:
         cpu: 50m
         memory: 64Mi
+
+    serviceMonitor:
+      enabled: true
 
   admissionWebhooks:
     certManager:
@@ -63,3 +75,20 @@ operator:
       enabled: true
       recreate: false
       certPeriodDays: 3650
+  affinity:
+    # podAntiAffinity:
+    #   preferredDuringSchedulingIgnoredDuringExecution:
+    #     - weight: 50
+    #       podAffinityTerm:
+    #         labelSelector:
+    #           matchLabels:
+    #             app.kubernetes.io/name: operator
+    #             app: otel-operator
+    #         topologyKey: kubernetes.io/hostname
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: operator
+              app: otel-operator
+          topologyKey: kubernetes.io/hostname
