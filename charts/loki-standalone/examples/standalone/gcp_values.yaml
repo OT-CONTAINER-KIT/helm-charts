@@ -1,0 +1,44 @@
+# Loki Standalone — GCS (Google Cloud Storage) Example
+# Copy this file to your client repo and fill in the required values.
+
+loki:
+  loki:
+    storage:
+      type: gcs
+      bucketNames:
+        chunks: ""      # GCS bucket name e.g. newgen-loki-logs
+        ruler: ""       # same bucket name
+        admin: ""       # same bucket name
+      gcs:
+        bucketName: ""  # same as bucketNames.chunks above
+        chunkBufferSize: 0
+        requestTimeout: "0s"
+
+    schemaConfig:
+      configs:
+        - from: "2024-04-01"
+          store: tsdb
+          object_store: gcs
+          schema: v13
+          index:
+            prefix: loki_index_
+            period: 24h
+
+    compactor:
+      working_directory: /var/loki/compactor
+      compaction_interval: 10m
+      retention_enabled: true
+      delete_request_store: gcs
+      retention_delete_delay: 2h
+
+  serviceAccount:
+    create: true
+    name: loki-sa
+    annotations:
+      iam.gke.io/gcp-service-account: "" # GCP service account email with Storage access
+                                          # e.g. loki@project.iam.gserviceaccount.com
+
+  singleBinary:
+    persistence:
+      storageClass: ""  # your cluster storage class e.g. o11y-gp3-storage
+      size: 10Gi        # local WAL size, not the GCS bucket size

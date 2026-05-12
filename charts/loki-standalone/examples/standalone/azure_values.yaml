@@ -1,0 +1,37 @@
+# Loki Standalone — Azure Blob Storage Example
+# Copy this file to client repo and fill in the required values.
+
+loki:
+  loki:
+    storage:
+      type: azure
+      bucketNames:
+        chunks: ""      # Azure container name e.g. loki-logs
+        ruler: ""       # same container name
+        admin: ""       # same container name
+      azure:
+        accountName: "" # Azure storage account name
+        accountKey: ""  # Azure storage account key
+        useManagedIdentity: false
+
+    schemaConfig:
+      configs:
+        - from: "2024-04-01"
+          store: tsdb
+          object_store: azure
+          schema: v13
+          index:
+            prefix: loki_index_
+            period: 24h
+
+    compactor:
+      working_directory: /var/loki/compactor
+      compaction_interval: 10m
+      retention_enabled: true
+      delete_request_store: azure
+      retention_delete_delay: 2h
+
+  singleBinary:
+    persistence:
+      storageClass: ""  # your cluster storage class e.g. o11y-gp3-storage
+      size: 10Gi        # local WAL size, not the blob storage size

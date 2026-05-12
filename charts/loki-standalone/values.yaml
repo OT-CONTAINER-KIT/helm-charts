@@ -1,0 +1,198 @@
+loki:
+
+  loki:
+    image:
+      registry: quay.io
+      repository: opstree/loki
+      tag: "3.6-debian13"
+
+    auth_enabled: false
+
+    limits_config:
+      retention_period: 7d
+      reject_old_samples: true
+      reject_old_samples_max_age: 168h
+      max_cache_freshness_per_query: 10m
+      split_queries_by_interval: 15m
+      per_stream_rate_limit: 512M
+      per_stream_rate_limit_burst: 1024M
+      cardinality_limit: 200000
+      ingestion_burst_size_mb: 1000
+      ingestion_rate_mb: 10000
+      max_entries_limit_per_query: 1000000
+      max_label_value_length: 20480
+      max_label_name_length: 10240
+      max_label_names_per_series: 300
+
+    compactor:
+      working_directory: /var/loki/compactor
+      compaction_interval: 10m
+      retention_enabled: true
+      delete_request_store: filesystem
+      retention_delete_delay: 2h
+
+    # -----------------------------------------------------------------
+    # Storage Backend
+    # Set storage.type and provide credentials for chosen backend.
+    #
+    # Default: filesystem (no credentials needed)
+    # Options: filesystem | s3 | azure | gcs
+    # Example files are stored at examples/standalone directory
+    # -----------------------------------------------------------------
+    storage:
+      type: filesystem    # override in client values
+
+    storage_config:
+      use_thanos_objstore: false
+
+    schemaConfig:
+      configs:
+        - from: "2024-04-01"
+          store: tsdb
+          object_store: filesystem
+          schema: v13
+          index:
+            prefix: loki_index_
+            period: 24h
+
+    commonConfig:
+      replication_factor: 1
+
+    ingester:
+      chunk_encoding: snappy
+
+    tracing:
+      enabled: false
+
+    querier:
+      max_concurrent: 2
+
+  serviceAccount:
+    create: true
+
+  serviceMonitor:
+    enabled: true
+
+  deploymentMode: SingleBinary
+
+  singleBinary:
+    replicas: 1
+    resources:
+      requests:
+        cpu: "500m"
+        memory: 1Gi
+      limits:
+        cpu: "2"
+        memory: 4Gi
+    persistence:
+      enabled: true
+      enableStatefulSetAutoDeletePVC: false
+      size: 100Gi
+      storageClass: o11y
+    tolerations:
+      - key: team
+        operator: Equal
+        value: "o11y"
+        effect: NoSchedule
+    nodeSelector:
+      team: o11y
+    extraEnv:
+      - name: GOMEMLIMIT
+        value: 2200MiB
+    extraArgs:
+      - "-config.expand-env=true"
+
+  # Sidecar image — correct upstream key
+  sidecar:
+    image:
+      repository: quay.io/opstree/k8s-sidecar
+      tag: "2.7.1"
+
+  # Memcached image — applies to both chunksCache and resultsCache
+  memcached:
+    image:
+      repository: quay.io/opstree/memcached
+      tag: "1.6.38-alpine3.22"
+    tolerations:
+      - key: team
+        operator: Equal
+        value: "o11y"
+        effect: NoSchedule
+    nodeSelector:
+      team: o11y
+
+  memcachedExporter:
+    image:
+      repository: quay.io/opstree/memcached-exporter
+      tag: "0.15.5-debian13"
+    tolerations:
+      - key: team
+        operator: Equal
+        value: "o11y"
+        effect: NoSchedule
+    nodeSelector:
+      team: o11y
+
+  gateway:
+    affinity: {}
+    tolerations:
+      - key: team
+        operator: Equal
+        value: "o11y"
+        effect: NoSchedule
+    nodeSelector:
+      team: o11y
+
+  chunksCache:
+    writebackSizeLimit: 10MB
+    allocatedMemory: 250Mi
+    tolerations:
+      - key: team
+        operator: Equal
+        value: "o11y"
+        effect: NoSchedule
+    nodeSelector:
+      team: o11y
+
+  resultsCache:
+    allocatedMemory: 128Mi
+    tolerations:
+      - key: team
+        operator: Equal
+        value: "o11y"
+        effect: NoSchedule
+    nodeSelector:
+      team: o11y
+
+  minio:
+    enabled: false
+
+  # Zero out all non-SingleBinary replicas
+  backend:
+    replicas: 0
+  read:
+    replicas: 0
+  write:
+    replicas: 0
+  ingester:
+    replicas: 0
+  querier:
+    replicas: 0
+  queryFrontend:
+    replicas: 0
+  queryScheduler:
+    replicas: 0
+  distributor:
+    replicas: 0
+  compactor:
+    replicas: 0
+  indexGateway:
+    replicas: 0
+  bloomCompactor:
+    replicas: 0
+  bloomGateway:
+    replicas: 0
+  lokiCanary:
+    enabled: false
+  test:
+    enabled: false
