@@ -113,10 +113,25 @@ loki:
     image:
       repository: quay.io/opstree/memcached
       tag: "1.6.38-alpine3.22"
+    tolerations:
+      - key: team
+        operator: Equal
+        value: "o11y"
+        effect: NoSchedule
+    nodeSelector:
+      team: o11y
+
   memcachedExporter:
     image:
       repository: quay.io/opstree/memcached-exporter
       tag: "0.15.5-debian13"
+    tolerations:
+      - key: team
+        operator: Equal
+        value: "o11y"
+        effect: NoSchedule
+    nodeSelector:
+      team: o11y
 
   gateway:
     affinity: {}
