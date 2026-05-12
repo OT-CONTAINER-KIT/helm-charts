@@ -612,6 +612,27 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/loki-1.0.0/loki-1.0.0.tgz
     version: 1.0.0
+  loki-standalone:
+  - apiVersion: v2
+    appVersion: "3.6"
+    created: "2026-05-12T12:34:39.696521089Z"
+    dependencies:
+    - alias: loki
+      name: loki
+      repository: https://grafana.github.io/helm-charts
+      version: 6.38.0
+    description: A Helm chart for Loki standalone setup
+    digest: 818a925b0dd4acacf59a52e0b0efd97c0815cd1fb3d5dfbd672eb4c78fd5029c
+    maintainers:
+    - email: ashwani.singh@opstree.com
+      name: ashwani-opstree
+    - email: varun.kumar@opstree.com
+      name: Varunarora2201
+    name: loki-standalone
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/loki-standalone-1.0.0/loki-standalone-1.0.0.tgz
+    version: 1.0.0
   microservice:
   - apiVersion: v2
     appVersion: 0.1.2
@@ -5644,4 +5665,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/worker-0.1.0/worker-0.1.0.tgz
     version: 0.1.0
-generated: "2026-05-11T08:08:47.016792558Z"
+generated: "2026-05-12T12:34:39.696939696Z"
