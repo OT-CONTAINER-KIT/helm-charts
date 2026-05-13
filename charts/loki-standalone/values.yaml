@@ -1,4 +1,4 @@
-loki:
+standalone:
 
   loki:
     image:
