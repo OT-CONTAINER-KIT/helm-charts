@@ -92,6 +92,21 @@ vm:
         value: "false"
       - name: VM_CONTAINERREGISTRY
         value: "quay.io"
+     
+      # Prometheus Converters
+      - name: VM_ENABLEDPROMETHEUSCONVERTER_PODMONITOR
+        value: "false"
+      - name: VM_ENABLEDPROMETHEUSCONVERTER_SERVICESCRAPE
+        value: "true"
+      - name: VM_ENABLEDPROMETHEUSCONVERTER_PROMETHEUSRULE
+        value: "false"
+      - name: VM_ENABLEDPROMETHEUSCONVERTER_PROBE
+        value: "false"
+      - name: VM_ENABLEDPROMETHEUSCONVERTER_ALERTMANAGERCONFIG
+        value: "false"
+      - name: VM_ENABLEDPROMETHEUSCONVERTER_SCRAPECONFIG
+        value: "false"
+
 
   ## Grafana — managed via standalone grafana chart
 
