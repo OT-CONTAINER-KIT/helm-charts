@@ -164,9 +164,18 @@ standalone:
     nodeSelector:
       team: o11y
 
+  # disable 
   minio:
     enabled: false
-
+  rollout_operator:
+    enabled: false
+  monitoring:
+    selfMonitoring:
+      enabled: false
+      grafanaAgent:
+        enabled: false
+        installOperator: false
+          
   # Zero out all non-SingleBinary replicas
   backend:
     replicas: 0
