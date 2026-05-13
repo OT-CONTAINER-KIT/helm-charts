@@ -158,7 +158,7 @@ harbor:
         regionendpoint: "${S3_ENDPOINT}"
         secure: true
         v4auth: true
-        skipverify: true
+        verifycert: false
 
 database:
   internal:
