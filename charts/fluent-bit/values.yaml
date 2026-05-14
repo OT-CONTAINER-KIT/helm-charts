@@ -8,8 +8,12 @@ fluent-bit:
     runAsUser: 65532
     runAsGroup: 65532
     runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
   podSecurityContext:
     fsGroup: 65532
+    supplementalGroups:
+      - 0
   rbac:
     create: true
   metricsPort: 2020
