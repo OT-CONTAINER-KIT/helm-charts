@@ -18,5 +18,6 @@ spec:
       targetPort: {{ .Values.metrics.service.port }}
       protocol: TCP
   selector:
-    {{- include "flagd-config-chart-dr.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ include "flagd-config-chart-dr.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
