@@ -148,6 +148,25 @@ entries:
   fluent-bit:
   - apiVersion: v2
     appVersion: 5.0.3
+    created: "2026-05-14T07:15:23.041415994Z"
+    dependencies:
+    - name: fluent-bit
+      repository: https://fluent.github.io/helm-charts
+      version: 0.57.3
+    description: A Helm chart for fluent-bit
+    digest: 199a33ea1083c1a726713cb7af4f1acde33487d93c12e3914823a7db8e4c4ae5
+    maintainers:
+    - email: ashwani.singh@opstree.com
+      name: ashwani-opstree
+    - email: varun.kumar@opstree.com
+      name: Varunarora2201
+    name: fluent-bit
+    type: application
+    urls:
+    - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/fluent-bit-0.0.3/fluent-bit-0.0.3.tgz
+    version: 0.0.3
+  - apiVersion: v2
+    appVersion: 5.0.3
     created: "2026-04-24T06:53:08.682410931Z"
     dependencies:
     - name: fluent-bit
@@ -5731,4 +5750,4 @@ entries:
     urls:
     - https://github.com/OT-CONTAINER-KIT/helm-charts/releases/download/worker-0.1.0/worker-0.1.0.tgz
     version: 0.1.0
-generated: "2026-05-13T07:18:28.343404089Z"
+generated: "2026-05-14T07:15:23.041728525Z"
