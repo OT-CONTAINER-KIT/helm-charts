@@ -139,3 +139,14 @@ ui:
       url: "https://vault.opstree.dev/v1/secret/data/feature-flags"
       secretName: "vault-token-secret"
       secretKey: "token"
+
+# Metrics exposure for Observability Team
+metrics:
+  enabled: true
+  service:
+    port: 8080
+  ingress:
+    enabled: true
+    host: "flagd.opstree.dev"
+    path: "/metrics"
+    annotations: {}
