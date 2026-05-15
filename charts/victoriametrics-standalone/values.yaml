@@ -1,8 +1,7 @@
 vm:
   enabled: true
 
-
-  ## VM Operator ##
+  # -- VM Operator
 
   victoria-metrics-operator:
     enabled: true
@@ -39,7 +38,7 @@ vm:
       disable_prometheus_converter: false
 
     env:
-      # opstree hardened images — identified and pushed
+      # -- opstree hardened images — identified and pushed
       - name: VM_VMSINGLEDEFAULT_IMAGE
         value: "opstree/victoriamertics-victoriametrics"
       - name: VM_VMSINGLEDEFAULT_VERSION
@@ -61,7 +60,7 @@ vm:
       - name: VM_CONFIG_RELOADER_IMAGE
         value: "opstree/victoriametrics-operator:config-reloader-v0.69.0"
 
-      # upstream images — not yet hardened this can be hardenend
+      # -- upstream images — not yet hardened this can be hardenend
       - name: VM_VLOGSDEFAULT_IMAGE
         value: "victoriametrics/victoria-logs"
       - name: VM_VMCLUSTERDEFAULT_VMSELECTDEFAULT_IMAGE
@@ -75,7 +74,7 @@ vm:
       - name: VM_VMAUTHDEFAULT_IMAGE
         value: "victoriametrics/vmauth"
 
-      # VictoriaMetrics Operator configuration
+      # -- VictoriaMetrics Operator configuration
       - name: "VM_USECUSTOMCONFIGRELOADER"
         value: "true"
       - name: "VM_CONFIG_RELOADER_REQUEST_CPU"
@@ -93,7 +92,7 @@ vm:
       - name: VM_CONTAINERREGISTRY
         value: "quay.io"
      
-      # Prometheus Converters
+      # -- Prometheus Converters
       - name: VM_ENABLEDPROMETHEUSCONVERTER_PODMONITOR
         value: "false"
       - name: VM_ENABLEDPROMETHEUSCONVERTER_SERVICESCRAPE
@@ -108,7 +107,7 @@ vm:
         value: "false"
 
 
-  ## Grafana — managed via standalone grafana chart
+  # -- Grafana — managed via standalone grafana chart
 
   grafana:
     enabled: true
@@ -129,11 +128,6 @@ vm:
     adminPassword: opstree@2014
     initChownData:
       enabled: true
-    # securityContext:
-    #   runAsUser: 472
-    #   runAsGroup: 0
-    #   fsGroup: 472
-    #   runAsNonRoot: false
     securityContext:
       runAsNonRoot: true
       runAsUser: 65532
@@ -150,6 +144,11 @@ vm:
     testFramework:
       enabled: false
     sidecar:
+      image:
+        registry: quay.io
+        repository:  opstree/k8s-sidecar
+        tag: 2.7.3
+        sha: ""
       dashboards:
         enabled: true
       datasources:
@@ -175,7 +174,9 @@ vm:
       size: 1Gi
       finalizers:
         - kubernetes.io/pvc-protection
-  ## Alertmanager — managed via VMAlertManager CRD
+
+  # -- Alertmanager — managed via VMAlertManager CRD
+
   alertmanager:
     enabled: true
     spec:
@@ -195,7 +196,7 @@ vm:
       nodeSelector:
         team: o11y
 
-  ## VMSingle ##
+  # -- VMSingle — managed via VMSingle CRD
 
   vmsingle:
     enabled: true
@@ -235,7 +236,8 @@ vm:
       nodeSelector:
         team: o11y
 
-  # Add this section to fix permissions
+    # -- Add this section to fix permissions
+
     initContainers:
       - name: volume-permissions
         image: quay.io/opstree/busybox:1-alpine3.23
@@ -248,7 +250,8 @@ vm:
           - name: data
             mountPath: /storage
 
-  ## VMAgent ##
+  # -- VMAgent — managed via VMAgent CRD
+
   vmagent:
     enabled: true
     spec:
@@ -272,7 +275,7 @@ vm:
       nodeSelector:
         team: o11y
 
-  ## VMAlert ##
+  # -- VMAlert — managed via VMAlert CRD
   vmalert:
     enabled: true
     spec:
@@ -291,7 +294,7 @@ vm:
       nodeSelector:
         team: o11y
 
-  ## Kube State Metrics ##
+  # -- Kube State Metrics
   kube-state-metrics:
     image:
       registry: "quay.io"
@@ -312,7 +315,8 @@ vm:
         effect: NoSchedule
     nodeSelector:
       team: o11y
-  ## Node Exporter ##
+
+  # -- Node Exporter
 
   prometheus-node-exporter:
     image:
@@ -327,7 +331,7 @@ vm:
         cpu: 50m
         memory: 32Mi
 
-  ## Disabled by default ##
+  # -- Disabled by defaults
   defaultDashboards:
     enabled: false
 
@@ -337,6 +341,6 @@ vm:
   vmcluster:
     enabled: false
 
-## Prometheus Operator CRDs — enabled, VM operator handles CRDs ##
+# -- Prometheus Operator CRDs — enabled, VM operator handles CRDs
 prometheus-operator-crds:
   enabled: true
