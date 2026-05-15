@@ -1,0 +1,33 @@
+replicaCount: 1
+
+image:
+  registry: 552171489163.dkr.ecr.ap-south-1.amazonaws.com
+  repository: kubelift/clickhouse
+  tag: "latest"
+  pullPolicy: Always
+  pullSecrets: sr-stage-aws-ecr-regcred
+
+resources:
+  requests:
+    memory: "1Gi"
+    cpu: "500m"
+  limits:
+    memory: "8Gi"
+    cpu: "4"
+
+tolerations:
+  - operator: "Exists"
+
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 20Gi
+  storageClass: "gp3"
+
+clickhouse:
+  defaultUser: clickhouse
+  defaultPassword: clickhouse
+  appDb: kubelift
+  appUser: kubelift
+  appPassword: kubelift
