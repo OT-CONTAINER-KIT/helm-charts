@@ -134,3 +134,11 @@ operatorArgs:
   zapLogLevel: "info"
   zapEncoder: "json"
   zapStacktraceLevel: "error"
+
+
+# ✅ ServiceMonitor for Observability Team
+serviceMonitor:
+  enabled: true
+  interval: "30s"
+  scrapeTimeout: "10s"
+  additionalLabels: {}
