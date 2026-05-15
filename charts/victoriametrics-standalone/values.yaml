@@ -91,7 +91,7 @@ vm:
         value: "false"
       - name: VM_CONTAINERREGISTRY
         value: "quay.io"
-     
+
       # -- Prometheus Converters
       - name: VM_ENABLEDPROMETHEUSCONVERTER_PODMONITOR
         value: "false"
@@ -146,7 +146,7 @@ vm:
     sidecar:
       image:
         registry: quay.io
-        repository:  opstree/k8s-sidecar
+        repository: opstree/k8s-sidecar
         tag: 2.7.3
         sha: ""
       dashboards:
