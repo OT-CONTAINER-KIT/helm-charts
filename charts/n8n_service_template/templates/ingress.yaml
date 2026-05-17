@@ -1,0 +1,24 @@
+# templates/ingress.yaml
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.name }}-ingress
+  annotations:
+{{ toYaml .Values.ingress.annotations | indent 4 }}
+spec:
+  ingressClassName: {{ .Values.ingress.ingressclass }}
+  rules:
+    - host: {{ .Values.ingress.hostname }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.name }}-service
+                port:
+                {{- range .Values.service.ports }}
+                  number: {{ .port }}
+                {{- end }}
+{{- end }}

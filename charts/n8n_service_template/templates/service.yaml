@@ -1,0 +1,22 @@
+# templates/service.yaml
+{{- if .Values.service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.name }}-service
+spec:
+  selector:
+    {{- toYaml .Values.labels | nindent 4 }}
+  type: {{ .Values.service.type }}
+  ports:
+  {{- if kindIs "slice" .Values.service.ports }}
+    {{- range .Values.service.ports }}
+    - name: {{ .name }}
+      port: {{ .port }}
+      protocol: {{ .protocol }}
+      {{- if .targetPort }}
+      targetPort: {{ .targetPort }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}

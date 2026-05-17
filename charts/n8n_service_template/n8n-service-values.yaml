@@ -1,0 +1,122 @@
+name: n8n
+environment: prod
+image:
+  repository: 211125433623.dkr.ecr.ap-south-1.amazonaws.com/n8n-release
+  pullpolicy: IfNotPresent
+  tag: latest
+
+port: 5678
+podAnnotations:
+  instrumentation.opentelemetry.io/inject-nodejs: "observability/otel-instrumentation"
+
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /healthz
+    port: 5678
+  periodSeconds: 60
+  initialDelaySeconds: 30
+  successThreshold: 1
+  timeoutSeconds: 30
+  failureThreshold: 4
+
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /healthz
+    port: 5678
+  periodSeconds: 60
+  initialDelaySeconds: 30
+  successThreshold: 3
+  timeoutSeconds: 30
+  failureThreshold: 3
+
+
+resources:
+  limits:
+    cpu: 2
+    memory: 400Mi
+  requests:
+    cpu: 1
+    memory: 300Mi
+
+csiVolume:
+  enabled: true
+  name: 
+    - n8n-service-env
+    #- database-pem
+  driver: secrets-store.csi.k8s.io
+  readOnly: true
+  secretProviderClass: 
+    - n8n-service-env-secrets
+    # - database-pem-secrets
+  mountPath: 
+    - /app/secrets/conf
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 1
+  targetCPUUtilizationPercentage: 75
+  targetMemoryUtilizationPercentage: 90
+
+service:
+  enabled: true
+  annotations: {}
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 5678
+
+ingress:
+  enabled: true
+  annotations:
+    alb.ingress.kubernetes.io/load-balancer-name: kogta-prod-eks-internal-alb
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/ip-address-type: ipv4
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:762531439720:certificate/f03950d5-8b4e-41e8-bc05-6fac7638c528
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/inbound-cidrs: 0.0.0.0/0
+    alb.ingress.kubernetes.io/healthcheck-path: /healthz
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-port: '5678'
+    alb.ingress.kubernetes.io/tags: Environment=prod,Owner=devops
+    alb.ingress.kubernetes.io/group.name: app
+    alb.ingress.kubernetes.io/subnets: subnet-07dc26e67bc3d72d2, subnet-0a249621078461ef8, subnet-0b703a94428a362e0
+  ingressclass: alb
+  hostname: workflow.kogtafinance.com
+  path: /
+
+serviceAccount:
+  create: true
+  name: n8n-sa
+  annotations:
+     eks.amazonaws.com/role-arn: arn:aws:iam::762531439720:role/prod-n8n-eks-secret-manager-role
+
+container:
+  command: ["/bin/sh"]
+  args:
+    - "-c"
+    - |
+      set -a
+      . /app/secrets/conf/.env
+      set +a
+      exec n8n start
+
+env: []
+
+labels:
+  app: n8n
+  environment: prod
+  owner: devops
+
+secretObject:
+  arn: 
+    - arn:aws:secretsmanager:ap-south-1:762531439720:secret:prod/n8n/env-u9C6jH
+  alias: 
+    - .env
