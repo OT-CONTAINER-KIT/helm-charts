@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgresql-config
+data:
+  POSTGRES_DB: {{ default (randAlphaNum 8) .Values.configMap.databaseName }}
+  POSTGRES_USER: {{ default (randAlphaNum 8) .Values.configMap.user }}
+
