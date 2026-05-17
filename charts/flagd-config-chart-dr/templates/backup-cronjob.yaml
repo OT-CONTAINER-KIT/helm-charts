@@ -1,0 +1,101 @@
+{{- if .Values.backup.enabled -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "flagd-config-chart-dr.fullname" . }}-backup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "flagd-config-chart-dr.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ include "flagd-config-chart-dr.serviceAccountName" . }}
+          restartPolicy: OnFailure
+          initContainers:
+            - name: export
+              image: alpine/k8s:1.30.0
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  echo "Exporting OpenFeature resources..."
+                  kubectl get featureflags,featureflagsources,flagdconfigs -A -o yaml > /data/backup.yaml || true
+                  echo "Export complete."
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+          containers:
+            - name: backup
+              image: {{ .Values.backup.image | default "minio/mc:latest" }}
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  BUCKET="{{ .Values.backup.minio.url }}"
+                  BUCKET_NAME="{{ .Values.backup.minio.bucket }}"
+                  RETAIN={{ .Values.backup.retention.count }}
+
+                  echo "Installing MinIO client (mc)..."
+                  if ! command -v mc >/dev/null 2>&1; then
+                    wget -q https://dl.min.io/client/mc/release/linux-amd64/mc -O /usr/local/bin/mc
+                    chmod +x /usr/local/bin/mc
+                  fi
+
+                  echo "Configuring MinIO client..."
+                  mc alias set backup {{ .Values.backup.minio.url }} $MINIO_ACCESS_KEY $MINIO_SECRET_KEY --api S3v4 --insecure
+
+                  # Ensure bucket exists
+                  mc mb --ignore-existing backup/${BUCKET_NAME} --insecure || true
+
+                  TIMESTAMP=$(date +%Y%m%d%H%M%S)
+                  BACKUP_FILE="flagd-backup-${TIMESTAMP}.yaml"
+                  echo "Uploading ${BACKUP_FILE} to bucket ${BUCKET_NAME}..."
+                  mc cp /data/backup.yaml backup/${BUCKET_NAME}/${BACKUP_FILE} --insecure
+                  echo "Upload complete."
+
+                  echo "Enforcing retention: keeping ${RETAIN} most recent backups..."
+                  # List all backup files sorted oldest-first
+                  ALL_FILES=$(mc ls backup/${BUCKET_NAME} --no-color --insecure 2>/dev/null \
+                    | awk '{print $NF}' \
+                    | grep '\.yaml$' \
+                    | sort)
+
+                  TOTAL=$(echo "$ALL_FILES" | grep -c '.' || echo 0)
+                  DELETE_COUNT=$((TOTAL - RETAIN))
+
+                  if [ "$DELETE_COUNT" -gt 0 ]; then
+                    echo "Found ${TOTAL} backups. Deleting ${DELETE_COUNT} oldest..."
+                    echo "$ALL_FILES" | head -n "$DELETE_COUNT" | while IFS= read -r OLD_FILE; do
+                      echo "  Removing old backup: ${OLD_FILE}"
+                      mc rm "backup/${BUCKET_NAME}/${OLD_FILE}" --insecure
+                    done
+                  else
+                    echo "Retention OK: ${TOTAL} backups present, limit is ${RETAIN}."
+                  fi
+
+                  echo "Backup job finished successfully."
+              env:
+                - name: MINIO_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.backup.minio.existingSecret | default (printf "%s-backup-creds" (include "flagd-config-chart-dr.fullname" .)) }}
+                      key: accessKey
+                - name: MINIO_SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.backup.minio.existingSecret | default (printf "%s-backup-creds" (include "flagd-config-chart-dr.fullname" .)) }}
+                      key: secretKey
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+          volumes:
+            - name: data
+              emptyDir: {}
+{{- end }}

@@ -1,0 +1,11 @@
+apiVersion: v2
+name: flagd-config-chart
+description: A Helm chart for Flagd deployment via OpenFeature Operator
+type: application
+version: 1.0.0
+appVersion: "0.12.4"
+
+maintainers:
+  - name: snatakSneha
+    email: sneha.joshi.snaatak@mygurukulam.co
+    url: https://github.com/snatakSneha

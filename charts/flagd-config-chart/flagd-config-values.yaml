@@ -1,0 +1,39 @@
+name: coe-solutions
+environment: dev
+namespace: flagd-nonprod
+
+image:
+  tag: v0.12.4
+
+serviceAccount:
+  create: true
+  name: flagd-sa
+  annotations: {}
+
+labels:
+  app: flagd
+  environment: dev
+  owner: devops
+
+flags:
+  my-feature:
+    state: "ENABLED"
+    variants:
+      "on": true
+      "off": false
+    defaultVariant: "on"
+  new-ui:
+    state: "ENABLED"
+    variants:
+      "on": true
+      "off": false
+    defaultVariant: "off"
+  dark-mode:
+    state: "ENABLED"
+    variants:
+      "on": true
+      "off": false
+    defaultVariant: "off"
+
+crds:
+  enabled: true

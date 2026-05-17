@@ -1,0 +1,66 @@
+Thank you for installing {{ .Chart.Name }} v{{ .Chart.AppVersion }}!
+
+The flagd Operator (OpenFeature) has been deployed to namespace: {{ .Release.Namespace }}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OPERATOR STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Check the operator pod is running:
+
+  kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "flagd-config-chart-dr.name" . }}
+
+View operator logs:
+
+  kubectl logs -n {{ .Release.Namespace }} \
+    -l app.kubernetes.io/name={{ include "flagd-config-chart-dr.name" . }} \
+    --tail=100
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+QUICK START
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Create a FeatureFlag resource to define your flags:
+
+  kubectl apply -f - <<EOF
+  apiVersion: core.openfeature.dev/v1beta1
+  kind: FeatureFlag
+  metadata:
+    name: my-flags
+    namespace: {{ .Release.Namespace }}
+  spec:
+    flagSpec:
+      flags:
+        my-flag:
+          state: ENABLED
+          variants:
+            "on": true
+            "off": false
+          defaultVariant: "on"
+  EOF
+
+2. Create a FeatureFlagSource pointing to your FeatureFlag:
+
+  kubectl apply -f - <<EOF
+  apiVersion: core.openfeature.dev/v1beta1
+  kind: FeatureFlagSource
+  metadata:
+    name: my-flag-source
+    namespace: {{ .Release.Namespace }}
+  spec:
+    sources:
+      - source: {{ .Release.Namespace }}/my-flags
+        provider: flagd
+  EOF
+
+3. Annotate your application pod to inject the flagd sidecar:
+
+  metadata:
+    annotations:
+      openfeature.dev/enabled: "true"
+      openfeature.dev/featureflagsource: "{{ .Release.Namespace }}/my-flag-source"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+UNINSTALL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  helm uninstall {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+For full documentation see: https://openfeature.dev/docs/reference/technologies/server/go/flagd
