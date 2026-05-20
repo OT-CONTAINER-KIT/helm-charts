@@ -1,5 +1,8 @@
 fullnameOverride: "stateless-app-harbor"
 
+commonLabels:
+  owner: "Tharik"
+
 harbor:
   internalURL: http://stateless-app-harbor-core.harbor.svc.cluster.local:80
   secretKey: "stateless-harbor-master-key-32ch" 
