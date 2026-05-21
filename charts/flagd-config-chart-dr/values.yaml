@@ -37,13 +37,9 @@ affinity: {}
 verbose: true
 metricsPort: 8080
 healthProbePort: 8081
-# ✅ UPDATED: Leader election timeouts increased to handle API server latency
 leaderElection:
   enabled: true
   resourceName: flagd-operator-leader-election
-  leaseDuration: "60s"
-  renewDeadline: "50s"
-  retryPeriod: "10s"
 flagd:
   image:
     repository: ghcr.io/open-feature/flagd
@@ -129,11 +125,6 @@ metrics:
     host: "flagd.opstree.dev"
     path: "/metrics"
     annotations: {}
-# ✅ Extra operator args for enhanced metrics
-operatorArgs:
-  zapLogLevel: "info"
-  zapEncoder: "json"
-  zapStacktraceLevel: "error"
 # ✅ ServiceMonitor for Observability Team
 serviceMonitor:
   enabled: true
