@@ -5,15 +5,14 @@ metadata:
   name: {{ include "flagd-config-chart-dr.fullname" . }}-metrics
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "flagd-config-chart-dr.labels" . | nindent 4 }}
+    {{- include "flagd-config-chart-dr.operatorLabels" . | nindent 4 }}
     {{- with .Values.serviceMonitor.additionalLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "flagd-config-chart-dr.name" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "flagd-config-chart-dr.operatorSelectorLabels" . | nindent 6 }}
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}

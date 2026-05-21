@@ -1,10 +1,11 @@
+{{- if and .Values.ui.enabled (eq .Values.ui.image.repository "python") -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "flagd-config-chart-dr.fullname" . }}-ui-code
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "flagd-config-chart-dr.labels" . | nindent 4 }}
+    {{- include "flagd-config-chart-dr.uiLabels" . | nindent 4 }}
 data:
   app.py: |
     import os
@@ -380,7 +381,7 @@ data:
 
                 if (data.length === 0) {
                     list.innerHTML = `<div style="text-align: center; grid-column: 1/-1; padding: 60px; color: var(--text-secondary);">
-                        No ${currentTab} configurations found in filter "${activeNamespace}"
+                         No ${currentTab} configurations found in filter "${activeNamespace}"
                     </div>`;
                     return;
                 }
@@ -576,3 +577,5 @@ data:
 
     if __name__ == '__main__':
         app.run(host='0.0.0.0', port=8080)
+{{- end }}
+

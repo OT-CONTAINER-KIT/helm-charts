@@ -33,6 +33,37 @@ app.kubernetes.io/name: {{ include "flagd-config-chart-dr.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
+{{- define "flagd-config-chart-dr.operatorSelectorLabels" -}}
+app.kubernetes.io/name: {{ include "flagd-config-chart-dr.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: operator
+{{- end }}
+
+{{- define "flagd-config-chart-dr.operatorLabels" -}}
+helm.sh/chart: {{ include "flagd-config-chart-dr.chart" . }}
+{{ include "flagd-config-chart-dr.operatorSelectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{- define "flagd-config-chart-dr.uiSelectorLabels" -}}
+app.kubernetes.io/name: {{ include "flagd-config-chart-dr.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: ui
+{{- end }}
+
+{{- define "flagd-config-chart-dr.uiLabels" -}}
+helm.sh/chart: {{ include "flagd-config-chart-dr.chart" . }}
+{{ include "flagd-config-chart-dr.uiSelectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+
 {{- define "flagd-config-chart-dr.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
 {{- default (include "flagd-config-chart-dr.fullname" .) .Values.serviceAccount.name }}
@@ -40,6 +71,15 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{- define "flagd-config-chart-dr.uiServiceAccountName" -}}
+{{- if .Values.ui.serviceAccount.create }}
+{{- default (printf "%s-ui" (include "flagd-config-chart-dr.fullname" .)) .Values.ui.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.ui.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
 
 {{- define "flagd-config-chart-dr.imageTag" -}}
 {{- .Values.image.tag | default .Chart.AppVersion }}

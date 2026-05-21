@@ -1,0 +1,32 @@
+{{- if .Values.ui.enabled -}}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "flagd-config-chart-dr.fullname" . }}-ui-role
+  labels:
+    {{- include "flagd-config-chart-dr.uiLabels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list"]
+  - apiGroups: ["core.openfeature.dev"]
+    resources: ["featureflags", "featureflagsources"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "flagd-config-chart-dr.fullname" . }}-ui-rolebinding
+  labels:
+    {{- include "flagd-config-chart-dr.uiLabels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "flagd-config-chart-dr.fullname" . }}-ui-role
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "flagd-config-chart-dr.uiServiceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}
