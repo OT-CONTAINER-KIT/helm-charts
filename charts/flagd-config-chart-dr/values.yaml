@@ -1,25 +1,22 @@
 replicaCount: 2
-
 image:
   repository: ghcr.io/open-feature/open-feature-operator
   pullPolicy: IfNotPresent
   tag: ""
-
 imagePullSecrets: []
-
 nameOverride: ""
 fullnameOverride: ""
-
 serviceAccount:
   create: true
   annotations: {}
   name: ""
-
-podAnnotations: {}
-
+# ✅ Prometheus pod annotations for metrics scraping
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/metrics"
 podSecurityContext:
   runAsNonRoot: true
-
 securityContext:
   allowPrivilegeEscalation: false
   capabilities:
@@ -27,7 +24,6 @@ securityContext:
       - ALL
   readOnlyRootFilesystem: true
   runAsNonRoot: true
-
 resources:
   limits:
     cpu: 500m
@@ -35,77 +31,78 @@ resources:
   requests:
     cpu: 10m
     memory: 64Mi
-
 nodeSelector: {}
-
 tolerations: []
-
 affinity: {}
-
 verbose: true
-
 metricsPort: 8080
-
 healthProbePort: 8081
-
 leaderElection:
   enabled: true
   resourceName: flagd-operator-leader-election
-
 flagd:
   image:
     repository: ghcr.io/open-feature/flagd
     tag: "v0.15.2"
-
 crds:
   enabled: true
-
 pdb:
   enabled: true
   minAvailable: 1
   maxUnavailable: ""
-
 podAntiAffinity:
   enabled: true
   type: soft
-
 tls:
   enabled: true
-
 backup:
   enabled: true
-  # Every 10 minutes
-  schedule: "*/10 * * * *"
-  image: "alpine/k8s:1.30.0"
+  schedule: "0 0 * * *"
+  image: "minio/mc:latest"
+  kubectlImage: "alpine/k8s:1.30.0"
   retention:
-    # Keep only the 5 most recent backups; older ones are auto-deleted
     count: 5
   minio:
     url: "https://minio.ldc.opstree.dev:9000/"
     accessKey: ""
     secretKey: ""
     bucket: "flagd-backup"
-    existingSecret: ""  # Path to secret containing accessKey, secretKey (optional)
-
+    existingSecret: ""
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
 restore:
   enabled: false
-  # Specific backup file to restore; leave empty to auto-pick the latest
   fileName: ""
-  image: "alpine/k8s:1.30.0"
-  # Override minio connection for DR (defaults to backup.minio.* if not set)
+  image: "minio/mc:latest"
+  kubectlImage: "alpine/k8s:1.30.0"
   minio:
     url: ""
     accessKey: ""
     secretKey: ""
     bucket: ""
-
+    existingSecret: ""
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
 ui:
   enabled: true
   image:
-    # Python-based Flag Manager UI (manages FeatureFlag CRs)
     repository: python
     tag: "3.11-slim"
     pullPolicy: IfNotPresent
+  serviceAccount:
+    create: true
+    name: ""
+    annotations: {}
   service:
     type: ClusterIP
     port: 8080
@@ -124,13 +121,13 @@ ui:
     username: ""
     password: ""
     secretKey: ""
-    existingSecret: ""  # Path to secret containing username, password, secretKey (optional)
+    existingSecret: ""
   sso:
     enabled: true
     discoveryUrl: "https://keycloak.opstree.dev/realms/master/.well-known/openid-configuration"
     clientId: ""
     clientSecret: ""
-    existingSecret: ""  # Path to secret containing clientId, clientSecret (optional)
+    existingSecret: ""
   config:
     brandName: "Flagd Central"
     clusterDescription: "Secure access for coe-dev-cluster"
@@ -139,3 +136,19 @@ ui:
       url: "https://vault.opstree.dev/v1/secret/data/feature-flags"
       secretName: "vault-token-secret"
       secretKey: "token"
+# ✅ Metrics exposure for Observability Team
+metrics:
+  enabled: true
+  service:
+    port: 8080
+  ingress:
+    enabled: true
+    host: "flagd.opstree.dev"
+    path: "/metrics"
+    annotations: {}
+# ✅ ServiceMonitor for Observability Team
+serviceMonitor:
+  enabled: true
+  interval: "30s"
+  scrapeTimeout: "10s"
+  additionalLabels: {}

@@ -1,0 +1,26 @@
+{{- if and .Values.metrics.enabled .Values.metrics.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "flagd-config-chart-dr.fullname" . }}-metrics
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "flagd-config-chart-dr.labels" . | nindent 4 }}
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /metrics
+    {{- with .Values.metrics.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  rules:
+    - host: {{ .Values.metrics.ingress.host }}
+      http:
+        paths:
+          - path: {{ .Values.metrics.ingress.path }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ include "flagd-config-chart-dr.fullname" . }}-metrics
+                port:
+                  number: {{ .Values.metrics.service.port }}
+{{- end }}

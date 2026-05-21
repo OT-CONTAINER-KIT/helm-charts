@@ -13,6 +13,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "flagd-config-chart-dr.labels" . | nindent 4 }}
+    app.kubernetes.io/component: restore
 spec:
   template:
     spec:
@@ -27,12 +28,6 @@ spec:
             - |
               set -e
               BUCKET="{{ $minioBucket }}"
-
-              echo "Installing MinIO client (mc)..."
-              if ! command -v mc >/dev/null 2>&1; then
-                wget -q https://dl.min.io/client/mc/release/linux-amd64/mc -O /usr/local/bin/mc
-                chmod +x /usr/local/bin/mc
-              fi
 
               echo "Configuring MinIO client for restore..."
               mc alias set restore {{ $minioUrl }} $MINIO_ACCESS_KEY $MINIO_SECRET_KEY --api S3v4 --insecure
@@ -57,6 +52,8 @@ spec:
               echo "Downloading restore/${BUCKET}/${REMOTE_FILE} to /data/restore.yaml..."
               mc cp "restore/${BUCKET}/${REMOTE_FILE}" /data/restore.yaml --insecure
               echo "Download complete."
+          resources:
+            {{- toYaml .Values.restore.resources | nindent 12 }}
           env:
             - name: FILE_NAME
               value: {{ .Values.restore.fileName | quote }}
@@ -83,14 +80,21 @@ spec:
               mountPath: /data
       containers:
         - name: restore
-          image: alpine/k8s:1.30.0
+          image: {{ .Values.restore.kubectlImage | default "alpine/k8s:1.30.0" }}
           command:
             - /bin/sh
             - -c
             - |
+              set -e
               echo "Restoring OpenFeature resources from /data/restore.yaml..."
+              if [ ! -s /data/restore.yaml ]; then
+                echo "ERROR: Restore file is empty or missing!" >&2
+                exit 1
+              fi
               kubectl apply -f /data/restore.yaml
               echo "Restore completed successfully."
+          resources:
+            {{- toYaml .Values.restore.resources | nindent 12 }}
           volumeMounts:
             - name: data
               mountPath: /data

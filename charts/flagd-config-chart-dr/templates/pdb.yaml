@@ -5,7 +5,7 @@ metadata:
   name: {{ include "flagd-config-chart-dr.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "flagd-config-chart-dr.labels" . | nindent 4 }}
+    {{- include "flagd-config-chart-dr.operatorLabels" . | nindent 4 }}
 spec:
   {{- if .Values.pdb.minAvailable }}
   minAvailable: {{ .Values.pdb.minAvailable }}
@@ -15,5 +15,5 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "flagd-config-chart-dr.selectorLabels" . | nindent 6 }}
+      {{- include "flagd-config-chart-dr.operatorSelectorLabels" . | nindent 6 }}
 {{- end }}

@@ -4,12 +4,12 @@ metadata:
   name: {{ include "flagd-config-chart-dr.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "flagd-config-chart-dr.labels" . | nindent 4 }}
+    {{- include "flagd-config-chart-dr.operatorLabels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "flagd-config-chart-dr.selectorLabels" . | nindent 6 }}
+      {{- include "flagd-config-chart-dr.operatorSelectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -17,7 +17,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "flagd-config-chart-dr.labels" . | nindent 8 }}
+        {{- include "flagd-config-chart-dr.operatorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -91,7 +91,7 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             - labelSelector:
                 matchLabels:
-                  {{- include "flagd-config-chart-dr.selectorLabels" . | nindent 18 }}
+                  {{- include "flagd-config-chart-dr.operatorSelectorLabels" . | nindent 18 }}
               topologyKey: "kubernetes.io/hostname"
           {{- else }}
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -99,7 +99,7 @@ spec:
               podAffinityTerm:
                 labelSelector:
                   matchLabels:
-                    {{- include "flagd-config-chart-dr.selectorLabels" . | nindent 20 }}
+                    {{- include "flagd-config-chart-dr.operatorSelectorLabels" . | nindent 20 }}
                 topologyKey: "kubernetes.io/hostname"
           {{- end }}
       {{- end }}
