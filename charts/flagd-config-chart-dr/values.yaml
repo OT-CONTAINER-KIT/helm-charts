@@ -57,7 +57,7 @@ tls:
   enabled: true
 backup:
   enabled: true
-  schedule: "*/10 * * * *"
+  schedule: "0 0 * * *"
   image: "alpine/k8s:1.30.0"
   retention:
     count: 5
