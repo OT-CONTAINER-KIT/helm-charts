@@ -10,13 +10,11 @@ serviceAccount:
   create: true
   annotations: {}
   name: ""
-
 # ✅ Prometheus pod annotations for metrics scraping
 podAnnotations:
   prometheus.io/scrape: "true"
   prometheus.io/port: "8080"
   prometheus.io/path: "/metrics"
-
 podSecurityContext:
   runAsNonRoot: true
 securityContext:
@@ -39,9 +37,13 @@ affinity: {}
 verbose: true
 metricsPort: 8080
 healthProbePort: 8081
+# ✅ UPDATED: Leader election timeouts increased to handle API server latency
 leaderElection:
   enabled: true
   resourceName: flagd-operator-leader-election
+  leaseDuration: "60s"
+  renewDeadline: "50s"
+  retryPeriod: "10s"
 flagd:
   image:
     repository: ghcr.io/open-feature/flagd
@@ -117,7 +119,6 @@ ui:
       url: "https://vault.opstree.dev/v1/secret/data/feature-flags"
       secretName: "vault-token-secret"
       secretKey: "token"
-
 # ✅ Metrics exposure for Observability Team
 metrics:
   enabled: true
@@ -128,14 +129,11 @@ metrics:
     host: "flagd.opstree.dev"
     path: "/metrics"
     annotations: {}
-
 # ✅ Extra operator args for enhanced metrics
 operatorArgs:
   zapLogLevel: "info"
   zapEncoder: "json"
   zapStacktraceLevel: "error"
-
-
 # ✅ ServiceMonitor for Observability Team
 serviceMonitor:
   enabled: true
