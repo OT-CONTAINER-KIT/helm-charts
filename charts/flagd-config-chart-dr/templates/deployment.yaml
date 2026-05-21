@@ -44,25 +44,6 @@ spec:
             {{- if .Values.verbose }}
             - --verbose
             {{- end }}
-            {{- if .Values.operatorArgs.zapLogLevel }}
-            - --zap-log-level={{ .Values.operatorArgs.zapLogLevel }}
-            {{- end }}
-            {{- if .Values.operatorArgs.zapEncoder }}
-            - --zap-encoder={{ .Values.operatorArgs.zapEncoder }}
-            {{- end }}
-            {{- if .Values.operatorArgs.zapStacktraceLevel }}
-            - --zap-stacktrace-level={{ .Values.operatorArgs.zapStacktraceLevel }}
-            {{- end }}
-            # ✅ Leader election timeouts - to handle API server latency (26s observed)
-            {{- if .Values.leaderElection.leaseDuration }}
-            - --leader-elect-lease-duration={{ .Values.leaderElection.leaseDuration }}
-            {{- end }}
-            {{- if .Values.leaderElection.renewDeadline }}
-            - --leader-elect-renew-deadline={{ .Values.leaderElection.renewDeadline }}
-            {{- end }}
-            {{- if .Values.leaderElection.retryPeriod }}
-            - --leader-elect-retry-period={{ .Values.leaderElection.retryPeriod }}
-            {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           ports:
