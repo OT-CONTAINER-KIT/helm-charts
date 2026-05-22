@@ -31,14 +31,22 @@ data:
     try:
         config.load_incluster_config()
         print("Successfully loaded incluster config")
-        # Ensure capitalization of Bearer token for strict EKS API servers
+        # Ensure authorization token is populated correctly for the Swagger client scheme
         default_conf = client.Configuration.get_default_copy()
         if default_conf.api_key and 'authorization' in default_conf.api_key:
             auth_val = default_conf.api_key['authorization']
             if auth_val.startswith('bearer '):
-                default_conf.api_key['authorization'] = 'Bearer ' + auth_val[7:]
-                client.Configuration.set_default(default_conf)
-                print("Patched bearer token prefix to capital 'Bearer'")
+                token_val = auth_val[7:]
+            elif auth_val.startswith('Bearer '):
+                token_val = auth_val[7:]
+            else:
+                token_val = auth_val
+            
+            # Set both 'authorization' and 'BearerToken' keys to satisfy the client library
+            default_conf.api_key['authorization'] = 'Bearer ' + token_val
+            default_conf.api_key['BearerToken'] = 'Bearer ' + token_val
+            client.Configuration.set_default(default_conf)
+            print("Successfully patched token config keys: 'authorization' and 'BearerToken'")
     except Exception as e:
         print(f"Failed to load incluster config: {e}")
         try:
