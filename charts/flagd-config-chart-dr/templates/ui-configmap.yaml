@@ -30,8 +30,14 @@ data:
     # Load Kubernetes configuration
     try:
         config.load_incluster_config()
-    except:
-        config.load_kube_config()
+        print("Successfully loaded incluster config")
+    except Exception as e:
+        print(f"Failed to load incluster config: {e}")
+        try:
+            config.load_kube_config()
+            print("Successfully loaded kube config")
+        except Exception as e2:
+            print(f"Failed to load kube config: {e2}")
 
     custom_api = client.CustomObjectsApi()
     core_api = client.CoreV1Api()
