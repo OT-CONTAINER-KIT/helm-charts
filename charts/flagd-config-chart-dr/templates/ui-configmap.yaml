@@ -31,6 +31,14 @@ data:
     try:
         config.load_incluster_config()
         print("Successfully loaded incluster config")
+        # Ensure capitalization of Bearer token for strict EKS API servers
+        default_conf = client.Configuration.get_default_copy()
+        if default_conf.api_key and 'authorization' in default_conf.api_key:
+            auth_val = default_conf.api_key['authorization']
+            if auth_val.startswith('bearer '):
+                default_conf.api_key['authorization'] = 'Bearer ' + auth_val[7:]
+                client.Configuration.set_default(default_conf)
+                print("Patched bearer token prefix to capital 'Bearer'")
     except Exception as e:
         print(f"Failed to load incluster config: {e}")
         try:
