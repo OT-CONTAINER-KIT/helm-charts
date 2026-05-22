@@ -6,6 +6,8 @@ image:
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
+rbac:
+  subjectsNamespace: "flagd-nonprod"
 serviceAccount:
   create: true
   annotations: {}

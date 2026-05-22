@@ -28,5 +28,5 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: {{ include "flagd-config-chart-dr.uiServiceAccountName" . }}
-    namespace: {{ .Release.Namespace }}
+    namespace: {{ .Values.rbac.subjectsNamespace | default .Release.Namespace }}
 {{- end }}
