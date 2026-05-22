@@ -55,58 +55,6 @@ podAntiAffinity:
   type: soft
 tls:
   enabled: true
-backup:
-  enabled: true
-  schedule: "0 0 * * *"
-  image: "minio/mc:RELEASE.2024-03-30T15-29-30Z"
-  kubectlImage: "alpine/k8s:1.30.0"
-  serviceAccount:
-    create: true
-    name: ""
-  podSecurityContext:
-    runAsNonRoot: true
-    fsGroup: 1000
-  securityContext:
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
-    runAsUser: 1000
-  retention:
-    count: 5
-  minio:
-    url: "https://minio.ldc.opstree.dev:9000/"
-    accessKey: ""
-    secretKey: ""
-    bucket: "flagd-backup"
-    existingSecret: ""
-  resources:
-    limits:
-      cpu: 100m
-      memory: 128Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
-restore:
-  enabled: false
-  fileName: ""
-  image: "minio/mc:RELEASE.2024-03-30T15-29-30Z"
-  kubectlImage: "alpine/k8s:1.30.0"
-  minio:
-    url: ""
-    accessKey: ""
-    secretKey: ""
-    bucket: ""
-    existingSecret: ""
-  resources:
-    limits:
-      cpu: 100m
-      memory: 128Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
 ui:
   enabled: true
   image:
