@@ -31,12 +31,6 @@ data:
     try:
         config.load_incluster_config()
         print("Successfully loaded incluster config")
-        default_conf = client.Configuration.get_default_copy()
-        print(f"Loaded config host: {default_conf.host}")
-        print(f"Loaded config api_key keys: {list(default_conf.api_key.keys()) if default_conf.api_key else 'None'}")
-        if default_conf.api_key and 'authorization' in default_conf.api_key:
-            auth_val = default_conf.api_key['authorization']
-            print(f"Loaded config authorization prefix: {auth_val[:20] if auth_val else 'None'}... (len: {len(auth_val) if auth_val else 0})")
     except Exception as e:
         print(f"Failed to load incluster config: {e}")
         try:
@@ -45,8 +39,10 @@ data:
         except Exception as e2:
             print(f"Failed to load kube config: {e2}")
 
-    custom_api = client.CustomObjectsApi()
-    core_api = client.CoreV1Api()
+    # Use explicit ApiClient associated with the loaded configuration
+    api_client = client.ApiClient()
+    custom_api = client.CustomObjectsApi(api_client)
+    core_api = client.CoreV1Api(api_client)
     
     # Configuration
     GROUP = "core.openfeature.dev"
