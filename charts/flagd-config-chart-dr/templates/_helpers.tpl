@@ -80,6 +80,14 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 {{- end }}
 
+{{- define "flagd-config-chart-dr.backupServiceAccountName" -}}
+{{- if .Values.backup.serviceAccount.create }}
+{{- default (printf "%s-backup" (include "flagd-config-chart-dr.fullname" .)) .Values.backup.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.backup.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
 
 {{- define "flagd-config-chart-dr.imageTag" -}}
 {{- .Values.image.tag | default .Chart.AppVersion }}

@@ -58,8 +58,22 @@ tls:
 backup:
   enabled: true
   schedule: "0 0 * * *"
-  image: "minio/mc:latest"
+  image: "minio/mc:RELEASE.2024-03-30T15-29-30Z"
   kubectlImage: "alpine/k8s:1.30.0"
+  serviceAccount:
+    create: true
+    name: ""
+  podSecurityContext:
+    runAsNonRoot: true
+    fsGroup: 1000
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
   retention:
     count: 5
   minio:
@@ -78,7 +92,7 @@ backup:
 restore:
   enabled: false
   fileName: ""
-  image: "minio/mc:latest"
+  image: "minio/mc:RELEASE.2024-03-30T15-29-30Z"
   kubectlImage: "alpine/k8s:1.30.0"
   minio:
     url: ""
@@ -103,6 +117,7 @@ ui:
     create: true
     name: ""
     annotations: {}
+  podAnnotations: {}
   service:
     type: ClusterIP
     port: 8080

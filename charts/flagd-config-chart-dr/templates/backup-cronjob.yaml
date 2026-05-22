@@ -16,11 +16,19 @@ spec:
     spec:
       template:
         spec:
-          serviceAccountName: {{ include "flagd-config-chart-dr.serviceAccountName" . }}
+          {{- with .Values.backup.podSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          serviceAccountName: {{ include "flagd-config-chart-dr.backupServiceAccountName" . }}
           restartPolicy: OnFailure
           initContainers:
             - name: export
               image: {{ .Values.backup.kubectlImage | default "alpine/k8s:1.30.0" }}
+              {{- with .Values.backup.securityContext }}
+              securityContext:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
               command:
                 - /bin/sh
                 - -c
@@ -33,6 +41,9 @@ spec:
                     exit 1
                   fi
                   echo "Export complete."
+              env:
+                - name: HOME
+                  value: /data
               resources:
                 {{- toYaml .Values.backup.resources | nindent 16 }}
               volumeMounts:
@@ -41,6 +52,10 @@ spec:
           containers:
             - name: backup
               image: {{ .Values.backup.image | default "minio/mc:latest" }}
+              {{- with .Values.backup.securityContext }}
+              securityContext:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
               command:
                 - /bin/sh
                 - -c
@@ -86,6 +101,8 @@ spec:
               resources:
                 {{- toYaml .Values.backup.resources | nindent 16 }}
               env:
+                - name: HOME
+                  value: /data
                 - name: MINIO_ACCESS_KEY
                   valueFrom:
                     secretKeyRef:

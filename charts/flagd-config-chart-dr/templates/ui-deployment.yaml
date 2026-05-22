@@ -15,7 +15,7 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/ui-configmap.yaml") . | sha256sum }}
-        {{- with .Values.podAnnotations }}
+        {{- with .Values.ui.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       labels:
