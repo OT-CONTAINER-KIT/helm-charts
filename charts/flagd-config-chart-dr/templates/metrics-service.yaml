@@ -1,0 +1,22 @@
+{{- if .Values.metrics.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "flagd-config-chart-dr.fullname" . }}-metrics
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "flagd-config-chart-dr.operatorLabels" . | nindent 4 }}
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "{{ .Values.metrics.service.port }}"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  ports:
+    - name: metrics
+      port: {{ .Values.metrics.service.port }}
+      targetPort: {{ .Values.metrics.service.port }}
+      protocol: TCP
+  selector:
+    {{- include "flagd-config-chart-dr.operatorSelectorLabels" . | nindent 4 }}
+{{- end }}

@@ -1,10 +1,11 @@
+{{- if and .Values.ui.enabled (eq .Values.ui.image.repository "python") -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "flagd-config-chart-dr.fullname" . }}-ui-code
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "flagd-config-chart-dr.labels" . | nindent 4 }}
+    {{- include "flagd-config-chart-dr.uiLabels" . | nindent 4 }}
 data:
   app.py: |
     import os
@@ -17,7 +18,7 @@ data:
 
     app = Flask(__name__)
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
-    app.secret_key = os.getenv("FLASK_SECRET_KEY", "flagd-manager-awesome-secret")
+    app.secret_key = os.getenv("FLASK_SECRET_KEY") or "flagd-manager-awesome-secret"
     
     # Session Configuration for HTTPS
     app.config.update(
@@ -29,11 +30,35 @@ data:
     # Load Kubernetes configuration
     try:
         config.load_incluster_config()
-    except:
-        config.load_kube_config()
+        print("Successfully loaded incluster config")
+        # Ensure authorization token is populated correctly for the Swagger client scheme
+        default_conf = client.Configuration.get_default_copy()
+        if default_conf.api_key and 'authorization' in default_conf.api_key:
+            auth_val = default_conf.api_key['authorization']
+            if auth_val.startswith('bearer '):
+                token_val = auth_val[7:]
+            elif auth_val.startswith('Bearer '):
+                token_val = auth_val[7:]
+            else:
+                token_val = auth_val
+            
+            # Set both 'authorization' and 'BearerToken' keys to satisfy the client library
+            default_conf.api_key['authorization'] = 'Bearer ' + token_val
+            default_conf.api_key['BearerToken'] = 'Bearer ' + token_val
+            client.Configuration.set_default(default_conf)
+            print("Successfully patched token config keys: 'authorization' and 'BearerToken'")
+    except Exception as e:
+        print(f"Failed to load incluster config: {e}")
+        try:
+            config.load_kube_config()
+            print("Successfully loaded kube config")
+        except Exception as e2:
+            print(f"Failed to load kube config: {e2}")
 
-    custom_api = client.CustomObjectsApi()
-    core_api = client.CoreV1Api()
+    # Use explicit ApiClient associated with the loaded configuration
+    api_client = client.ApiClient()
+    custom_api = client.CustomObjectsApi(api_client)
+    core_api = client.CoreV1Api(api_client)
     
     # Configuration
     GROUP = "core.openfeature.dev"
@@ -51,9 +76,8 @@ data:
     VAULT_SECRET = os.getenv("UI_VAULT_SECRET_NAME", "vault-token-secret")
     VAULT_KEY = os.getenv("UI_VAULT_SECRET_KEY", "token")
 
-    # Auth Configuration
-    UI_USER = os.getenv("UI_USERNAME", "admin")
-    UI_PASS = os.getenv("UI_PASSWORD", "admin")
+    UI_USER = os.getenv("UI_USERNAME") or "admin"
+    UI_PASS = os.getenv("UI_PASSWORD") or "admin"
 
     # SSO Configuration
     SSO_ENABLED = os.getenv("SSO_ENABLED", "false").lower() == "true"
@@ -380,7 +404,7 @@ data:
 
                 if (data.length === 0) {
                     list.innerHTML = `<div style="text-align: center; grid-column: 1/-1; padding: 60px; color: var(--text-secondary);">
-                        No ${currentTab} configurations found in filter "${activeNamespace}"
+                         No ${currentTab} configurations found in filter "${activeNamespace}"
                     </div>`;
                     return;
                 }
@@ -513,7 +537,8 @@ data:
             nss = core_api.list_namespace()
             return jsonify([ns.metadata.name for ns in nss.items])
         except Exception as e:
-            print(f"Error listing namespaces: {e}")
+            import traceback
+            traceback.print_exc()
             return jsonify([DEFAULT_NAMESPACE])
 
     def handle_request(plural, name=None):
@@ -558,6 +583,8 @@ data:
                 if not name: return jsonify({"error": "Name required for deletion"}), 400
                 return jsonify(custom_api.delete_namespaced_custom_object(GROUP, VERSION, ns, plural, name))
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return jsonify({"error": str(e)}), 500
 
     @app.route('/api/flags', methods=['GET', 'POST'])
@@ -565,14 +592,22 @@ data:
     @login_required
     def flags(name=None):
         try: return handle_request(PLURAL_FLAGS, name)
-        except Exception as e: return jsonify({"error": str(e)}), 500
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
 
     @app.route('/api/sources', methods=['GET', 'POST'])
     @app.route('/api/sources/<name>', methods=['GET', 'DELETE'])
     @login_required
     def sources(name=None):
         try: return handle_request(PLURAL_SOURCES, name)
-        except Exception as e: return jsonify({"error": str(e)}), 500
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
 
     if __name__ == '__main__':
         app.run(host='0.0.0.0', port=8080)
+{{- end }}
+

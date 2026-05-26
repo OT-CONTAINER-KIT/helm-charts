@@ -5,8 +5,7 @@ metadata:
   name: {{ include "flagd-config-chart-dr.fullname" . }}-ui
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "flagd-config-chart-dr.labels" . | nindent 4 }}
-    app.kubernetes.io/component: ui
+    {{- include "flagd-config-chart-dr.uiLabels" . | nindent 4 }}
 spec:
   type: {{ .Values.ui.service.type }}
   ports:
@@ -15,6 +14,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "flagd-config-chart-dr.selectorLabels" . | nindent 4 }}
-    app.kubernetes.io/component: ui
+    {{- include "flagd-config-chart-dr.uiSelectorLabels" . | nindent 4 }}
 {{- end }}
