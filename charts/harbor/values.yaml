@@ -156,6 +156,7 @@ harbor:
       s3:
         region: us-east-1
         bucket: "${S3_BUCKET}"
+        rootdirectory: "devops-tooling/harbor/coe-prod/backups"
         accesskey: "${S3_ACCESS_KEY}"
         secretkey: "${S3_SECRET_KEY}"
         regionendpoint: "${S3_ENDPOINT}"
