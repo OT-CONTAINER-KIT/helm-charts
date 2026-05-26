@@ -117,3 +117,10 @@ serviceMonitor:
   interval: "30s"
   scrapeTimeout: "10s"
   additionalLabels: {}
+
+# ✅ Custom Feature Flag Source settings
+flagdSource:
+  enabled: true
+  name: "flag-source"
+  otelCollectorUri: "otel-collector-collector.observability.svc.cluster.local:4317"
+ 
