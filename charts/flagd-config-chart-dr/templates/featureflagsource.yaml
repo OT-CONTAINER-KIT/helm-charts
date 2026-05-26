@@ -1,0 +1,19 @@
+{{- if .Values.flagdSource.enabled }}
+apiVersion: core.openfeature.dev/v1beta1
+kind: FeatureFlagSource
+metadata:
+  name: {{ .Values.flagdSource.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  envVarPrefix: FLAGD
+  evaluator: json
+  logFormat: json
+  managementPort: 8014
+  port: 8013
+  {{- if .Values.flagdSource.otelCollectorUri }}
+  otelCollectorUri: {{ .Values.flagdSource.otelCollectorUri | quote }}
+  {{- end }}
+  sources:
+    - provider: kubernetes
+      source: {{ .Release.Namespace }}/coe-solutions-flags
+{{- end }}
