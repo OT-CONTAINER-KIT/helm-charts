@@ -12,14 +12,19 @@ harbor:
     secret: "opstree-harbor-shared-secret"
     resources:
       requests:
-        memory: "100Mi"
-        cpu: "50m"
-        ephemeral-storage: "512Mi"   # NEWLY ADDED
+        memory: "256Mi"
+        cpu: "200m"
+        ephemeral-storage: "512Mi"
       limits:
-        memory: "150Mi"
-        cpu: "100m"
-        ephemeral-storage: "1Gi"     # NEWLY ADDED
+        memory: "512Mi"
+        cpu: "500m"
+        ephemeral-storage: "1Gi"
   
+    livenessProbe:
+      timeoutSeconds: 5
+    readinessProbe:
+      timeoutSeconds: 5
+      
   jobservice:
     replicas: ${JOBSERVICE_REPLICAS}
     secret: "opstree-harbor-shared-secret"
@@ -27,12 +32,12 @@ harbor:
       - database
     resources:
       requests:
-        memory: "100Mi"
-        cpu: "50m"
+        memory: "256Mi"
+        cpu: "200m"
         ephemeral-storage: "512Mi"   # NEWLY ADDED
       limits:
-        memory: "256Mi"
-        cpu: "100m"
+        memory: "512Mi"
+        cpu: "500m"
         ephemeral-storage: "1Gi"     # NEWLY ADDED
 
   registry:
@@ -42,22 +47,22 @@ harbor:
     registry:
       resources:
         requests:
-          cpu: "50m"
+          cpu: "200m"
           memory: "256Mi"
           ephemeral-storage: "1Gi"   # NEWLY ADDED
         limits:
-          cpu: "100m"
+          cpu: "500m"
           memory: "512Mi"
           ephemeral-storage: "2Gi"   # NEWLY ADDED
     
     controller:
       resources:
         requests:
-          cpu: "20m"
-          memory: "32Mi"
+          cpu: "50m"
+          memory: "64Mi"
           ephemeral-storage: "512Mi" # NEWLY ADDED
         limits:
-          cpu: "50m"
+          cpu: "100m"
           memory: "128Mi"
           ephemeral-storage: "1Gi"   # NEWLY ADDED
         
