@@ -31,10 +31,11 @@ kind: Service
 metadata:
   name: {{ .Release.Name }}-kong-manager
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: kong
   ports:
     - name: manager
       port: 8002
       targetPort: 8002
+      nodePort: 30082
