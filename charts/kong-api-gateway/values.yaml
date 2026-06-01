@@ -1,16 +1,12 @@
+apiVersion: v2
+name: kong-api-gateway
+description: Enterprise Kong API Gateway Helm Chart (OT-style custom wrapper)
+type: application
+version: 1.0.0
+appVersion: "3.9.0"
+
 kong:
   image: kong/kong-gateway:3.9.0
-
-  proxy:
-    type: ClusterIP
-
-  admin:
-    enabled: true
-    type: ClusterIP
-
-  manager:
-    enabled: true
-    type: ClusterIP
 
 postgres:
   host: postgres-postgresql
@@ -20,17 +16,7 @@ postgres:
 
 ingress:
   enabled: true
-
   className: nginx
 
-  manager:
-    host: kong-manager.local
-
-  admin:
-    host: kong-admin.local
-
-  proxy:
-    host: kong.local
-
 tls:
-  enabled: true
+  enabled: false
