@@ -3,26 +3,28 @@ kind: Service
 metadata:
   name: {{ .Release.Name }}-kong-proxy
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: kong
   ports:
     - name: proxy
       port: 8000
       targetPort: 8000
+      nodePort: 30080
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Release.Name }}-kong-admin
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: kong
   ports:
     - name: admin
       port: 8001
       targetPort: 8001
+      nodePort: 30081
 ---
 apiVersion: v1
 kind: Service
