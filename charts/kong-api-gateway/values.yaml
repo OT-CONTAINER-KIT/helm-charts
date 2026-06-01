@@ -1,12 +1,12 @@
 apiVersion: v2
 name: kong-api-gateway
-description: Enterprise Kong API Gateway Helm Chart (OT-style custom wrapper)
+description: Enterprise Kong API Gateway Helm Chart
 type: application
 version: 1.0.0
 appVersion: "3.9.0"
 
 kong:
-  image: kong/kong-gateway:3.9.0
+  image: kong/kong-gateway:latest
 
 postgres:
   host: postgres-postgresql
