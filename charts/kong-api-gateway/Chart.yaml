@@ -2,6 +2,7 @@ apiVersion: v2
 name: kong-api-gateway
 description: Enterprise Kong API Gateway Helm Chart
 type: application
+
 version: 1.0.0
 appVersion: "3.9.0"
 
@@ -16,3 +17,9 @@ maintainers:
   - name: platform-team
 
 home: https://konghq.com
+
+dependencies:
+  - name: postgresql
+    version: "16.7.27"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: postgresql.enabled
