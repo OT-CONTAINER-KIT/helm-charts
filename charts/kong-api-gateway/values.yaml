@@ -4,20 +4,24 @@ description: Enterprise Kong API Gateway Helm Chart
 type: application
 version: 1.0.0
 appVersion: "3.9.0"
+
 kong:
-image: kong/kong-gateway:latest
+  image: kong/kong-gateway:latest
+
 postgresql:
-enabled: true
-auth:
-username: kong
-password: kongpass
-database: kong
-primary:
-persistence:
-enabled: true
-size: 10Gi
+  enabled: true
+  auth:
+    username: kong
+    password: kongpass
+    database: kong
+  primary:
+    persistence:
+      enabled: true
+      size: 10Gi
+
 ingress:
-enabled: true
-className: nginx
+  enabled: true
+  className: nginx
+
 tls:
-enabled: false
+  enabled: false
