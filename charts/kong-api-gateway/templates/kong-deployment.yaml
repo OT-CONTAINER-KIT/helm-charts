@@ -15,21 +15,22 @@ spec:
       containers:
         - name: kong
           image: {{ .Values.kong.image }}
+
           env:
             - name: KONG_DATABASE
-              value: postgres
+              value: "postgres"
 
             - name: KONG_PG_HOST
-              value: {{ .Values.postgres.host }}
+              value: {{ .Release.Name }}-postgresql
 
             - name: KONG_PG_USER
-              value: {{ .Values.postgres.user }}
+              value: {{ .Values.postgresql.auth.username }}
 
             - name: KONG_PG_PASSWORD
-              value: {{ .Values.postgres.password }}
+              value: {{ .Values.postgresql.auth.password }}
 
             - name: KONG_PG_DATABASE
-              value: {{ .Values.postgres.database }}
+              value: {{ .Values.postgresql.auth.database }}
 
             - name: KONG_ADMIN_LISTEN
               value: "0.0.0.0:8001"
