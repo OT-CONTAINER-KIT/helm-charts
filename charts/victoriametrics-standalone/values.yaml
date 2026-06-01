@@ -40,11 +40,9 @@ vm:
     env:
       # -- opstree hardened images — identified and pushed
       - name: VM_VMSINGLEDEFAULT_IMAGE
-        value: "opstree/victoriamertics-victoriametrics"
+        value: "opstree/victoriametrics-victoriametrics"
       - name: VM_VMSINGLEDEFAULT_VERSION
-        value: "v1.41.0"
-      - name: VM_VMSINGLEDEFAULT_VERSION
-        value: "v1.41.0"
+        value: "v1.141.0"
       - name: VM_VMAGENTDEFAULT_IMAGE
         value: "opstree/victoriametrics-vmagent"
       - name: VM_VMAGENTDEFAULT_VERSION
@@ -168,7 +166,7 @@ vm:
     persistence:
       enabled: true
       type: sts
-      storageClassName: standard
+      storageClassName: o11y-gp3-storage
       accessModes:
         - ReadWriteOnce
       size: 1Gi
@@ -222,7 +220,7 @@ vm:
           cpu: "1"
           memory: 1Gi
       storage:
-        storageClassName: standard
+        storageClassName: o11y-gp3-storage
         accessModes:
           - ReadWriteOnce
         resources:
