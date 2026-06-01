@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kong-api-gateway
-description: Enterprise Kong API Gateway Helm Chart (OT-style custom wrapper)
+description: Enterprise Kong API Gateway Helm Chart
 type: application
 version: 1.0.0
 appVersion: "3.9.0"
