@@ -1,0 +1,36 @@
+kong:
+  image: kong/kong-gateway:3.9.0
+
+  proxy:
+    type: ClusterIP
+
+  admin:
+    enabled: true
+    type: ClusterIP
+
+  manager:
+    enabled: true
+    type: ClusterIP
+
+postgres:
+  host: postgres-postgresql
+  user: kong
+  password: kongpass
+  database: kong
+
+ingress:
+  enabled: true
+
+  className: nginx
+
+  manager:
+    host: kong-manager.local
+
+  admin:
+    host: kong-admin.local
+
+  proxy:
+    host: kong.local
+
+tls:
+  enabled: true

@@ -1,0 +1,18 @@
+apiVersion: v2
+name: kong-api-gateway
+description: Enterprise Kong API Gateway Helm Chart (OT-style custom wrapper)
+type: application
+version: 1.0.0
+appVersion: "3.9.0"
+
+keywords:
+  - kong
+  - api-gateway
+  - microservices
+  - ingress
+  - kubernetes
+
+maintainers:
+  - name: platform-team
+
+home: https://konghq.com

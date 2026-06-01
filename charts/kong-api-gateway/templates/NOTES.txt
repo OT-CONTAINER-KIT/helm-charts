@@ -1,0 +1,13 @@
+KONG API GATEWAY DEPLOYED
+
+Proxy URL:
+  http://<NODE_IP>:30080
+
+Admin API:
+  http://<NODE_IP>:30081
+
+Database:
+  PostgreSQL enabled via values.yaml
+
+Check pods:
+  kubectl get pods -l app=kong

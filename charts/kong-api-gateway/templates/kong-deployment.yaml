@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-kong
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kong
+  template:
+    metadata:
+      labels:
+        app: kong
+    spec:
+      containers:
+        - name: kong
+          image: {{ .Values.kong.image }}
+          env:
+            - name: KONG_DATABASE
+              value: postgres
+
+            - name: KONG_PG_HOST
+              value: {{ .Values.postgres.host }}
+
+            - name: KONG_PG_USER
+              value: {{ .Values.postgres.user }}
+
+            - name: KONG_PG_PASSWORD
+              value: {{ .Values.postgres.password }}
+
+            - name: KONG_PG_DATABASE
+              value: {{ .Values.postgres.database }}
+
+            - name: KONG_ADMIN_LISTEN
+              value: "0.0.0.0:8001"
+
+            - name: KONG_ADMIN_GUI_LISTEN
+              value: "0.0.0.0:8002"
+
+          ports:
+            - containerPort: 8000
+            - containerPort: 8001
+            - containerPort: 8002
