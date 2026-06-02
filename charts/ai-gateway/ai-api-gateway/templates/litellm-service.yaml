@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-litellm-proxy
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app: litellm
+  ports:
+    - name: proxy
+      port: {{ .Values.litellm.port }}
+      targetPort: {{ .Values.litellm.port }}
+      {{- if eq .Values.service.type "NodePort" }}
+      nodePort: {{ .Values.service.proxyNodePort }}
+      {{- end }}

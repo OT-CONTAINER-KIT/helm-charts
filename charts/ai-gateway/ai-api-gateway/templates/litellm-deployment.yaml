@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-litellm
+spec:
+  replicas: {{ .Values.litellm.replicas }}
+  selector:
+    matchLabels:
+      app: litellm
+  template:
+    metadata:
+      labels:
+        app: litellm
+    spec:
+      containers:
+        - name: litellm
+          image: {{ .Values.litellm.image }}
+
+          args:
+            - "--config"
+            - "/app/config.yaml"
+            - "--port"
+            - "{{ .Values.litellm.port }}"
+            - "--num_workers"
+            - "{{ .Values.litellm.workers }}"
+
+          env:
+            - name: LITELLM_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-litellm-secret
+                  key: masterKey
+
+            - name: LITELLM_SALT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-litellm-secret
+                  key: saltKey
+
+            - name: STORE_MODEL_IN_DB
+              value: "True"
+
+            - name: DATABASE_URL
+              value: "postgresql://{{ .Values.postgres.username }}:{{ .Values.postgres.password }}@{{ .Release.Name }}-postgres:5432/{{ .Values.postgres.database }}"
+
+            # Provider API keys (only set if non-empty)
+            {{- if .Values.litellm.providers.geminiApiKey }}
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-litellm-secret
+                  key: geminiApiKey
+            {{- end }}
+            {{- if .Values.litellm.providers.openaiApiKey }}
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-litellm-secret
+                  key: openaiApiKey
+            {{- end }}
+            {{- if .Values.litellm.providers.anthropicApiKey }}
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-litellm-secret
+                  key: anthropicApiKey
+            {{- end }}
+
+          ports:
+            - containerPort: {{ .Values.litellm.port }}
+
+          volumeMounts:
+            - name: config
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+              readOnly: true
+
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Release.Name }}-litellm-config

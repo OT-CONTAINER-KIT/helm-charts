@@ -1,0 +1,19 @@
+apiVersion: v2
+name: ai-api-gateway
+description: LiteLLM-based AI API Gateway Helm Chart
+type: application
+
+version: 1.0.0
+appVersion: "1.87.0"
+
+keywords:
+  - litellm
+  - ai-gateway
+  - llm
+  - openai
+  - kubernetes
+
+maintainers:
+  - name: platform-team
+
+home: https://docs.litellm.ai
