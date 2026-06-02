@@ -1,0 +1,83 @@
+# ai-api-gateway — values.yaml
+# LiteLLM proxy + in-chart Postgres + in-chart Redis (no external sub-charts)
+
+litellm:
+  image: ghcr.io/berriai/litellm:main-stable
+  replicas: 1
+  workers: 2
+  port: 4000
+
+  # Master admin key — generate a strong value before install:
+  #   helm install ... --set litellm.masterKey=sk-$(openssl rand -hex 24)
+  masterKey: "sk-master-CHANGE-ME"
+  saltKey: "sk-salt-CHANGE-ME"
+
+  # Provider API keys (set what you actually use; leave others blank)
+  providers:
+    geminiApiKey: ""
+    openaiApiKey: ""
+    anthropicApiKey: ""
+
+  # The litellm-config.yaml mounted into the container
+  # Edit the model_list as you onboard models
+  config:
+    model_list: []
+      # Example:
+      # - model_name: gemini-flash
+      #   litellm_params:
+      #     model: gemini/gemini-1.5-flash
+      #     api_key: os.environ/GEMINI_API_KEY
+      #     rpm: 60
+      #     tpm: 100000
+
+    router_settings:
+      routing_strategy: simple-shuffle
+      num_retries: 2
+      timeout: 600
+      allowed_fails: 3
+      cooldown_time: 30
+
+    litellm_settings:
+      cache: true
+      cache_params:
+        type: redis
+        host: redis
+        port: 6379
+        ttl: 600
+      drop_params: true
+      set_verbose: false
+
+    general_settings:
+      master_key: os.environ/LITELLM_MASTER_KEY
+      store_model_in_db: true
+
+postgres:
+  enabled: true
+  image: postgres:16-alpine
+  username: litellm
+  password: litellmpass
+  database: litellm
+  storage:
+    size: 10Gi
+    # storageClass: ""   # uncomment and set for non-default storage class
+
+redis:
+  enabled: true
+  image: redis:7.2-alpine
+  maxmemory: 256mb
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    proxy: litellm.local
+    ui: litellm-ui.local
+
+tls:
+  enabled: false
+  crt: ""
+  key: ""
+
+service:
+  type: NodePort
+  proxyNodePort: 30400

@@ -1,0 +1,32 @@
+AI API GATEWAY (LiteLLM) DEPLOYED
+
+Proxy URL (NodePort):
+  http://<NODE_IP>:{{ .Values.service.proxyNodePort }}
+
+Proxy Ingress:
+  http://{{ .Values.ingress.hosts.proxy }}
+
+Admin UI Ingress:
+  http://{{ .Values.ingress.hosts.ui }}/ui
+
+Health check:
+  curl http://<NODE_IP>:{{ .Values.service.proxyNodePort }}/health/liveliness
+
+Database:
+  PostgreSQL enabled via values.yaml (postgres.enabled = {{ .Values.postgres.enabled }})
+
+Cache + rate-limit counters:
+  Redis enabled via values.yaml (redis.enabled = {{ .Values.redis.enabled }})
+
+Master key (admin):
+  Stored in Secret: {{ .Release.Name }}-litellm-secret  (key: masterKey)
+  Retrieve with:
+    kubectl get secret {{ .Release.Name }}-litellm-secret -o jsonpath='{.data.masterKey}' | base64 -d ; echo
+
+Check pods:
+  kubectl get pods -l app=litellm
+  kubectl get pods -l app=postgres
+  kubectl get pods -l app=redis
+
+Logs:
+  kubectl logs -f -l app=litellm
