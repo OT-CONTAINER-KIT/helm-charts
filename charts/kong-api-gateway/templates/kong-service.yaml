@@ -2,6 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Release.Name }}-kong-proxy
+  annotations:
+    konghq.com/plugins: key-auth,rate-limit,jwt,prometheus,opentelemetry
 spec:
   type: ClusterIP
   selector:
@@ -10,29 +12,3 @@ spec:
     - name: proxy
       port: 8000
       targetPort: 8000
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .Release.Name }}-kong-admin
-spec:
-  type: ClusterIP
-  selector:
-    app: kong
-  ports:
-    - name: admin
-      port: 8001
-      targetPort: 8001
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .Release.Name }}-kong-manager
-spec:
-  type: ClusterIP
-  selector:
-    app: kong
-  ports:
-    - name: manager
-      port: 8002
-      targetPort: 8002

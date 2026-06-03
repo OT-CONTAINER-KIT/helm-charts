@@ -1,0 +1,15 @@
+{{- if and .Values.monitoring (and .Values.monitoring.serviceMonitor (and .Values.monitoring.serviceMonitor.enabled)) }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}-kong
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: kong
+  endpoints:
+    - port: metrics
+      interval: 15s
+{{- end }}

@@ -1,0 +1,7 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: opentelemetry
+plugin: opentelemetry
+config:
+  endpoint: {{ .Values.observability.otel.endpoint }}

@@ -1,22 +1,48 @@
-apiVersion: v2
-name: kong-api-gateway
-description: Enterprise Kong API Gateway Helm Chart (OT-style custom wrapper)
-type: application
-version: 1.0.0
-appVersion: "3.9.0"
-
 kong:
   image: kong/kong-gateway:3.9.0
+  replicaCount: 2
 
-postgres:
-  host: postgres-postgresql
-  user: kong
-  password: kongpass
-  database: kong
+  database:
+    enabled: false
 
-ingress:
+postgresql:
   enabled: true
-  className: nginx
+  auth:
+    username: kong
+    password: kongpass
+    database: kong
 
-tls:
-  enabled: false
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  cpu: 70
+
+observability:
+  prometheus:
+    enabled: true
+    external: true   # USE EXISTING PROMETHEUS
+  grafana:
+    enabled: true
+    external: true   # USE EXISTING GRAFANA
+
+  otel:
+    enabled: true
+    endpoint: http://otel-collector:4318
+
+plugins:
+  keyAuth: true
+  jwt: true
+  rateLimit: true
+  prometheus: true
+  opentelemetry: true
+
+kong:
+  plugins:
+    enabled: true
+    list:
+      - key-auth
+      - jwt
+      - rate-limiting
+      - prometheus
+      - opentelemetry

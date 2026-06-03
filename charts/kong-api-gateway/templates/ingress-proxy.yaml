@@ -1,7 +1,9 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: kong-proxy-ingress
+  name: {{ .Release.Name }}-kong-proxy-ingress
+  annotations:
+    konghq.com/plugins: key-auth,rate-limit,jwt
 spec:
   ingressClassName: nginx
   rules:

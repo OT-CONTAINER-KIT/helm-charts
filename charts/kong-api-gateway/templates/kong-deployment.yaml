@@ -2,42 +2,76 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-kong
+
 spec:
-  replicas: 2
+  replicas: {{ .Values.kong.replicaCount }}
+
   selector:
     matchLabels:
       app: kong
+
   template:
     metadata:
       labels:
         app: kong
+
     spec:
       containers:
-        - name: kong
-          image: {{ .Values.kong.image }}
-          env:
-            - name: KONG_DATABASE
-              value: postgres
+      - name: kong
+        image: {{ .Values.kong.image }}
 
-            - name: KONG_PG_HOST
-              value: {{ .Values.postgres.host }}
+        env:
 
-            - name: KONG_PG_USER
-              value: {{ .Values.postgres.user }}
+        - name: KONG_ADMIN_LISTEN
+          value: 0.0.0.0:8001
 
-            - name: KONG_PG_PASSWORD
-              value: {{ .Values.postgres.password }}
+        - name: KONG_ADMIN_GUI_LISTEN
+          value: 0.0.0.0:8002
 
-            - name: KONG_PG_DATABASE
-              value: {{ .Values.postgres.database }}
+        {{- if and .Values.kong .Values.kong.database .Values.kong.database.enabled }}
+        - name: KONG_DATABASE
+          value: postgres
 
-            - name: KONG_ADMIN_LISTEN
-              value: "0.0.0.0:8001"
+        - name: KONG_PG_HOST
+          value: {{ .Release.Name }}-postgresql
 
-            - name: KONG_ADMIN_GUI_LISTEN
-              value: "0.0.0.0:8002"
+        - name: KONG_PG_USER
+          value: {{ .Values.postgresql.auth.username }}
 
-          ports:
-            - containerPort: 8000
-            - containerPort: 8001
-            - containerPort: 8002
+        - name: KONG_PG_PASSWORD
+          value: {{ .Values.postgresql.auth.password }}
+
+        - name: KONG_PG_DATABASE
+          value: {{ .Values.postgresql.auth.database }}
+
+        {{- else }}
+        - name: KONG_DATABASE
+          value: off
+        - name: KONG_DECLARATIVE_CONFIG
+          value: /kong/config/kong.yml
+        {{- end }}
+
+        {{- if .Values.kong.plugins.enabled }}
+        - name: KONG_PLUGINS
+          value: {{ join "," .Values.kong.plugins.list }}
+        {{- end }}
+
+        - name: KONG_STATUS_LISTEN
+          value: 0.0.0.0:8100
+
+        - name: KONG_TRACING_INSTRUMENTATIONS
+          value: all
+
+        - name: KONG_TRACING_SAMPLING_RATE
+          value: "1.0"
+
+        {{- if .Values.observability.otel.endpoint }}
+        - name: KONG_OPENTELEMETRY_ENDPOINT
+          value: {{ .Values.observability.otel.endpoint }}
+        {{- end }}
+
+        ports:
+        - containerPort: 8000
+        - containerPort: 8001
+        - containerPort: 8002
+        - containerPort: 8100

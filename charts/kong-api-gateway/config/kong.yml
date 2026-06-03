@@ -1,0 +1,10 @@
+_format_version: "3.0"
+
+services:
+- name: httpbin
+  url: https://httpbin.org
+
+  routes:
+  - name: httpbin-route
+    paths:
+    - /httpbin

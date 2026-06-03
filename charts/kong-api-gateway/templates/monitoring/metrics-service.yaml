@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: kong-metrics
+
+spec:
+  selector:
+    app: kong
+
+  ports:
+  - name: metrics
+    port: 8100
+    targetPort: 8100
