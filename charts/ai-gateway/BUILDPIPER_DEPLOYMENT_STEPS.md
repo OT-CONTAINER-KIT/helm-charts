@@ -26,15 +26,31 @@ password: stored in Kubernetes Secret
 
 ---
 
-## 1. Create Namespace
+## 1. Confirm Deployment Namespace
 
-Use the namespace where BuildPiper will deploy the chart. Example:
+Use the exact namespace where BuildPiper deploys this chart.
 
-```bash
-kubectl create namespace ai-gateway
+From the pod describe output, the vCluster namespace is:
+
+```text
+rems
 ```
 
-Skip this if the namespace already exists.
+The host cluster shows the pod under:
+
+```text
+coe-dev
+```
+
+But secrets must exist in the **same BuildPiper/vCluster namespace as the Helm release**. For this deployment, that appears to be `rems`, not `ai-gateway`.
+
+If `rems` already exists, do not create it again. Otherwise:
+
+```bash
+kubectl create namespace rems
+```
+
+If BuildPiper is using a different app namespace, replace `rems` in all commands below with that namespace.
 
 ---
 
@@ -44,7 +60,7 @@ Create this secret before Helm deployment:
 
 ```bash
 kubectl create secret generic ai-gateway-db-secret \
-  -n ai-gateway \
+  -n rems \
   --from-literal=DATABASE_URL='postgresql://ai-db-user:<postgres-password>@192.168.8.39:5432/ai-gateway-db'
 ```
 
@@ -58,7 +74,7 @@ If the password contains special characters like `@`, `#`, `/`, `:`, or `%`, URL
 
 ```bash
 kubectl create secret generic ai-gateway-redis-secret \
-  -n ai-gateway \
+  -n rems \
   --from-literal=REDIS_PASSWORD='<redis-password>'
 ```
 
@@ -72,7 +88,7 @@ The chart can create the LiteLLM master/salt secret from `values.yaml`, but for 
 
 ```bash
 kubectl create secret generic ai-gateway-litellm-secret \
-  -n ai-gateway \
+  -n rems \
   --from-literal=masterKey='sk-master-<generate-a-strong-value>' \
   --from-literal=saltKey='sk-salt-<generate-a-strong-value>'
 ```
@@ -125,11 +141,11 @@ password: os.environ/REDIS_PASSWORD
 Example:
 
 ```bash
-helm upgrade --install ai-api-gateway ./buildpiper-helm \
-  -n ai-gateway
+helm upgrade --install ai-gateway ./ai-gateway \
+  -n rems
 ```
 
-In BuildPiper, select/use the `buildpiper-helm` chart folder and deploy with the same namespace.
+In BuildPiper, select/use the `ai-gateway` chart folder and deploy with the same namespace where the secrets exist.
 
 If BuildPiper cannot use pre-created Kubernetes Secrets, set `postgres.external.existingSecret` and `redis.external.existingSecret` to empty and inject these values securely through BuildPiper secret variables:
 
@@ -152,15 +168,15 @@ Pre-created Kubernetes Secrets are still the preferred path.
 ## 7. Validate
 
 ```bash
-kubectl get pods -n ai-gateway
+kubectl get pods -n rems
 ```
 
 ```bash
-kubectl logs deploy/ai-api-gateway-litellm -n ai-gateway
+kubectl logs deploy/ai-gateway-litellm -n rems
 ```
 
 ```bash
-kubectl port-forward svc/ai-api-gateway-litellm-proxy -n ai-gateway 4000:4000
+kubectl port-forward svc/ai-gateway-litellm-proxy -n rems 4000:4000
 ```
 
 ```bash
@@ -181,6 +197,7 @@ I'm alive!
 |---|---|
 | `secret "ai-gateway-db-secret" not found` | Create the Postgres secret in the same namespace |
 | `secret "ai-gateway-redis-secret" not found` | Create the Redis secret in the same namespace |
+| `secret "ai-gateway-litellm-secret-...vcluster" not found` | Create `ai-gateway-litellm-secret` in the BuildPiper/vCluster namespace, not the host namespace |
 | `password authentication failed` | Check DB username/password and URL encoding |
 | `permission denied for schema public` | Grant `ai-db-user` create/usage privileges on `ai-gateway-db` |
 | Redis auth error | Check Redis password secret and Redis password requirement |
