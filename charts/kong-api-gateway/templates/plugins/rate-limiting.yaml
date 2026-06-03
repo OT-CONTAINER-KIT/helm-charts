@@ -1,3 +1,7 @@
+{{- $p := .Values.plugins | default dict }}
+
+{{- if $p.rateLimit }}
+
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
 
@@ -9,3 +13,5 @@ plugin: rate-limiting
 config:
   minute: 100
   policy: local
+
+{{- end }}

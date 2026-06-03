@@ -1,7 +1,16 @@
+{{- $p := .Values.plugins | default dict }}
+
+{{- if $p.opentelemetry }}
+
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
+
 metadata:
   name: opentelemetry
+
 plugin: opentelemetry
+
 config:
-  endpoint: {{ .Values.observability.otel.endpoint }}
+  endpoint: {{ .Values.observability.otel.endpoint | quote }}
+
+{{- end }}

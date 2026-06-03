@@ -1,7 +1,13 @@
-{{- if .Values.plugins.keyAuth }}
+{{- $p := .Values.plugins | default dict }}
+
+{{- if $p.keyAuth }}
+
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
+
 metadata:
   name: key-auth
+
 plugin: key-auth
+
 {{- end }}

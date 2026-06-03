@@ -1,5 +1,13 @@
+{{- $p := .Values.plugins | default dict }}
+
+{{- if $p.prometheus }}
+
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
+
 metadata:
   name: prometheus
+
 plugin: prometheus
+
+{{- end }}
