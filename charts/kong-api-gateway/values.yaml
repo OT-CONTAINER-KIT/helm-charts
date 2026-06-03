@@ -1,5 +1,5 @@
 kong:
-  image: kong/kong-gateway:3.9.0
+  image: kong/kong-gateway:latest
   replicaCount: 2
 
   database:
