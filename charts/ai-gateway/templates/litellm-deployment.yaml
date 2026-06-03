@@ -28,43 +28,59 @@ spec:
             - name: LITELLM_MASTER_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-litellm-secret
+                  name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
                   key: masterKey
 
             - name: LITELLM_SALT_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-litellm-secret
+                  name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
                   key: saltKey
 
             - name: STORE_MODEL_IN_DB
               value: "True"
 
+            {{ if .Values.postgres.enabled }}
             - name: DATABASE_URL
               value: "postgresql://{{ .Values.postgres.username }}:{{ .Values.postgres.password }}@{{ .Release.Name }}-postgres:5432/{{ .Values.postgres.database }}"
+            {{ else }}
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-postgres-external-secret" .Release.Name) .Values.postgres.external.existingSecret }}
+                  key: {{ default "DATABASE_URL" .Values.postgres.external.databaseUrlKey }}
+            {{ end }}
+
+            {{ if and (not .Values.redis.enabled) (or .Values.redis.external.existingSecret .Values.redis.external.password) }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-redis-external-secret" .Release.Name) .Values.redis.external.existingSecret }}
+                  key: {{ default "REDIS_PASSWORD" .Values.redis.external.passwordKey }}
+            {{ end }}
 
             # Provider API keys (only set if non-empty)
-            {{- if .Values.litellm.providers.geminiApiKey }}
+            {{ if .Values.litellm.providers.geminiApiKey }}
             - name: GEMINI_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-litellm-secret
+                  name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
                   key: geminiApiKey
-            {{- end }}
-            {{- if .Values.litellm.providers.openaiApiKey }}
+            {{ end }}
+            {{ if .Values.litellm.providers.openaiApiKey }}
             - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-litellm-secret
+                  name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
                   key: openaiApiKey
-            {{- end }}
-            {{- if .Values.litellm.providers.anthropicApiKey }}
+            {{ end }}
+            {{ if .Values.litellm.providers.anthropicApiKey }}
             - name: ANTHROPIC_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-litellm-secret
+                  name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
                   key: anthropicApiKey
-            {{- end }}
+            {{ end }}
 
           ports:
             - containerPort: {{ .Values.litellm.port }}

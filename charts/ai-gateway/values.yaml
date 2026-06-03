@@ -1,5 +1,6 @@
-# ai-api-gateway — values.yaml
-# LiteLLM proxy + in-chart Postgres + in-chart Redis (no external sub-charts)
+# buildpiper-helm — values.yaml
+# LiteLLM proxy using organization-managed external Postgres and Redis.
+# Do not store real passwords in this file. Store passwords in Kubernetes Secrets.
 
 litellm:
   image: ghcr.io/berriai/litellm:main-stable
@@ -9,8 +10,9 @@ litellm:
 
   # Master admin key — generate a strong value before install:
   #   helm install ... --set litellm.masterKey=sk-$(openssl rand -hex 24)
-  masterKey: "sk-master-CHANGE-ME"
-  saltKey: "sk-salt-CHANGE-ME"
+  existingSecret: ai-gateway-litellm-secret
+  masterKey: ""
+  saltKey: ""
 
   # Provider API keys (set what you actually use; leave others blank)
   providers:
@@ -41,8 +43,9 @@ litellm:
       cache: true
       cache_params:
         type: redis
-        host: redis
+        host: "192.168.8.78"
         port: 6379
+        password: os.environ/REDIS_PASSWORD
         ttl: 600
       drop_params: true
       set_verbose: false
@@ -52,26 +55,27 @@ litellm:
       store_model_in_db: true
 
 postgres:
-  enabled: true
-  image: postgres:16-alpine
-  username: litellm
-  password: litellmpass
-  database: litellm
-  storage:
-    size: 10Gi
-    # storageClass: ""   # uncomment and set for non-default storage class
+  enabled: false
+  external:
+    host: "192.168.8.39"
+    port: 5432
+    existingSecret: ai-gateway-db-secret
+    databaseUrlKey: DATABASE_URL
 
 redis:
-  enabled: true
-  image: redis:7.2-alpine
-  maxmemory: 256mb
+  enabled: false
+  external:
+    host: "192.168.8.78"
+    port: 6379
+    existingSecret: ai-gateway-redis-secret
+    passwordKey: REDIS_PASSWORD
 
 ingress:
   enabled: true
   className: nginx
   hosts:
-    proxy: litellm.local
-    ui: litellm-ui.local
+    proxy: ai-gateway.example.internal
+    ui: ai-gateway-ui.example.internal
 
 tls:
   enabled: false
@@ -79,5 +83,5 @@ tls:
   key: ""
 
 service:
-  type: NodePort
+  type: ClusterIP
   proxyNodePort: 30400
