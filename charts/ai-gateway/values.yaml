@@ -1,36 +1,21 @@
 # buildpiper-helm — values.yaml
-# LiteLLM proxy using organization-managed external Postgres and Redis.
-# Do not store real passwords in this file. Store passwords in Kubernetes Secrets.
-
 litellm:
   image: ghcr.io/berriai/litellm:main-stable
   replicas: 1
   workers: 2
   port: 4000
 
-  # Master admin key — generate a strong value before install:
-  #   helm install ... --set litellm.masterKey=sk-$(openssl rand -hex 24)
   existingSecret: ""
   masterKey: ""
   saltKey: ""
 
-  # Provider API keys (set what you actually use; leave others blank)
   providers:
     geminiApiKey: ""
     openaiApiKey: ""
     anthropicApiKey: ""
 
-  # The litellm-config.yaml mounted into the container
-  # Edit the model_list as you onboard models
   config:
     model_list: []
-      # Example:
-      # - model_name: gemini-flash
-      #   litellm_params:
-      #     model: gemini/gemini-1.5-flash
-      #     api_key: os.environ/GEMINI_API_KEY
-      #     rpm: 60
-      #     tpm: 100000
 
     router_settings:
       routing_strategy: simple-shuffle
@@ -45,8 +30,7 @@ litellm:
         type: redis
         host: "192.168.8.78"
         port: 6379
-        password: os.environ/REDIS_PASSWORD
-        ttl: 600
+        ttl: 600        
       drop_params: true
       set_verbose: false
 
@@ -61,7 +45,7 @@ postgres:
     port: 5432
     existingSecret: ""
     databaseUrlKey: DATABASE_URL
-    databaseUrl: ""
+    databaseUrl: ""           # set via Buildpiper KV
 
 redis:
   enabled: false
