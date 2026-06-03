@@ -1,16 +1,21 @@
-{{- if .Values.autoscaling.enabled }}
+{{- $auto := .Values.autoscaling | default dict }}
+
+{{- if $auto.enabled }}
+
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
+
 metadata:
   name: {{ .Release.Name }}-kong
+
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ .Release.Name }}-kong
 
-  minReplicas: {{ .Values.autoscaling.minReplicas }}
-  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  minReplicas: {{ default 2 $auto.minReplicas }}
+  maxReplicas: {{ default 10 $auto.maxReplicas }}
 
   metrics:
   - type: Resource
@@ -18,5 +23,6 @@ spec:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: {{ .Values.autoscaling.cpu }}
+        averageUtilization: {{ default 70 $auto.cpu }}
+
 {{- end }}
