@@ -23,52 +23,51 @@ spec:
         env:
 
         - name: KONG_ADMIN_LISTEN
-          value: 0.0.0.0:8001
+          value: "0.0.0.0:8001"
 
         - name: KONG_ADMIN_GUI_LISTEN
-          value: 0.0.0.0:8002
+          value: "0.0.0.0:8002"
 
-        {{- if and .Values.kong .Values.kong.database .Values.kong.database.enabled }}
+        {{- if and .Values.kong (default false (index .Values.kong "database" "enabled")) }}
         - name: KONG_DATABASE
-          value: postgres
+          value: "postgres"
 
         - name: KONG_PG_HOST
-          value: {{ .Release.Name }}-postgresql
+          value: "{{ .Release.Name }}-postgresql"
 
         - name: KONG_PG_USER
-          value: {{ .Values.postgresql.auth.username }}
+          value: {{ default "kong" .Values.postgresql.auth.username | quote }}
 
         - name: KONG_PG_PASSWORD
-          value: {{ .Values.postgresql.auth.password }}
+          value: {{ default "kongpass" .Values.postgresql.auth.password | quote }}
 
         - name: KONG_PG_DATABASE
-          value: {{ .Values.postgresql.auth.database }}
+          value: {{ default "kong" .Values.postgresql.auth.database | quote }}
 
         {{- else }}
         - name: KONG_DATABASE
-          value: off
+          value: "off"
+
         - name: KONG_DECLARATIVE_CONFIG
-          value: /kong/config/kong.yml
+          value: "/kong/config/kong.yml"
         {{- end }}
 
-        {{- if .Values.kong.plugins.enabled }}
+        {{- if and .Values.kong (default false (index .Values.kong "plugins" "enabled")) }}
         - name: KONG_PLUGINS
-          value: {{ join "," .Values.kong.plugins.list }}
+          value: {{ join "," (default (list "bundled") .Values.kong.plugins.list) | quote }}
         {{- end }}
 
         - name: KONG_STATUS_LISTEN
-          value: 0.0.0.0:8100
+          value: "0.0.0.0:8100"
 
         - name: KONG_TRACING_INSTRUMENTATIONS
-          value: all
+          value: "all"
 
         - name: KONG_TRACING_SAMPLING_RATE
           value: "1.0"
 
-        {{- if .Values.observability.otel.endpoint }}
         - name: KONG_OPENTELEMETRY_ENDPOINT
-          value: {{ .Values.observability.otel.endpoint }}
-        {{- end }}
+          value: {{ default "http://otel-collector:4318" .Values.observability.otel.endpoint | quote }}
 
         ports:
         - containerPort: 8000
