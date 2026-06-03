@@ -39,3 +39,10 @@ observability:
   otel:
     enabled: true
     endpoint: http://otel-collector:4318
+
+monitoring:
+  serviceMonitor:
+    enabled: true
+
+tls:
+  enabled: false
