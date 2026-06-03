@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: kong
-          image: {{ .Values.kong.image | default "kong/kong-gateway:3.9.0" }}
+          image: {{ .Values.kong.image | default "kong/kong-gateway:latest" }}
 
           env:
             - name: KONG_ADMIN_LISTEN
