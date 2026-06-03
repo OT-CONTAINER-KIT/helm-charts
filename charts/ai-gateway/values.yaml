@@ -10,7 +10,7 @@ litellm:
 
   # Master admin key — generate a strong value before install:
   #   helm install ... --set litellm.masterKey=sk-$(openssl rand -hex 24)
-  existingSecret: ai-gateway-litellm-secret
+  existingSecret: ""
   masterKey: ""
   saltKey: ""
 
@@ -59,16 +59,18 @@ postgres:
   external:
     host: "192.168.8.39"
     port: 5432
-    existingSecret: ai-gateway-db-secret
+    existingSecret: ""
     databaseUrlKey: DATABASE_URL
+    databaseUrl: ""
 
 redis:
   enabled: false
   external:
     host: "192.168.8.78"
     port: 6379
-    existingSecret: ai-gateway-redis-secret
+    existingSecret: ""
     passwordKey: REDIS_PASSWORD
+    password: ""
 
 ingress:
   enabled: true
