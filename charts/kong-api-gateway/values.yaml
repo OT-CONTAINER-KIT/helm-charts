@@ -30,11 +30,11 @@ autoscaling:
 observability:
   prometheus:
     enabled: true
-    external: true
+    external: true   # uses existing Prometheus
 
   grafana:
     enabled: true
-    external: true
+    external: true   # uses existing Grafana
 
   otel:
     enabled: true
@@ -46,3 +46,6 @@ monitoring:
 
 tls:
   enabled: false
+
+# optional safety root (prevents future nil issues)
+global: {}
