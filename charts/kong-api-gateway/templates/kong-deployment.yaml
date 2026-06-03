@@ -4,7 +4,7 @@ metadata:
   name: {{ .Release.Name }}-kong
 
 spec:
-  replicas: {{ .Values.kong.replicaCount }}
+  replicas: {{ .Values.kong.replicaCount | default 1 }}
 
   selector:
     matchLabels:
@@ -17,65 +17,61 @@ spec:
 
     spec:
       containers:
-      - name: kong
-        image: {{ .Values.kong.image }}
+        - name: kong
+          image: {{ .Values.kong.image | default "kong/kong-gateway:3.9.0" }}
 
-        {{- $kong := .Values.kong | default dict }}
-        {{- $plugins := $kong.plugins | default dict }}
-        {{- $pluginList := $plugins.list | default list }}
-        {{- $db := $kong.database | default dict }}
+          env:
+            - name: KONG_ADMIN_LISTEN
+              value: "0.0.0.0:8001"
 
-        env:
+            - name: KONG_ADMIN_GUI_LISTEN
+              value: "0.0.0.0:8002"
 
-        - name: KONG_ADMIN_LISTEN
-          value: "0.0.0.0:8001"
+            {{- if and .Values.kong .Values.kong.database .Values.kong.database.enabled }}
+            - name: KONG_DATABASE
+              value: "postgres"
 
-        - name: KONG_ADMIN_GUI_LISTEN
-          value: "0.0.0.0:8002"
+            - name: KONG_PG_HOST
+              value: "{{ .Release.Name }}-postgresql"
 
-        {{- if $db.enabled }}
-        - name: KONG_DATABASE
-          value: "postgres"
-        - name: KONG_PG_HOST
-          value: "{{ .Release.Name }}-postgresql"
-        - name: KONG_PG_USER
-          value: "{{ .Values.postgresql.auth.username }}"
-        - name: KONG_PG_PASSWORD
-          value: "{{ .Values.postgresql.auth.password }}"
-        - name: KONG_PG_DATABASE
-          value: "{{ .Values.postgresql.auth.database }}"
-        {{- else }}
-        - name: KONG_DATABASE
-          value: "off"
-        - name: KONG_DECLARATIVE_CONFIG
-          value: "/kong/config/kong.yml"
-        {{- end }}
+            - name: KONG_PG_USER
+              value: "{{ .Values.postgresql.auth.username | default "kong" }}"
 
-        {{- if $plugins.enabled }}
-        - name: KONG_PLUGINS
-          value: "{{ join "," $pluginList }}"
-        {{- else }}
-        - name: KONG_PLUGINS
-          value: "bundled"
-        {{- end }}
+            - name: KONG_PG_PASSWORD
+              value: "{{ .Values.postgresql.auth.password | default "kongpass" }}"
 
-        - name: KONG_STATUS_LISTEN
-          value: "0.0.0.0:8100"
+            - name: KONG_PG_DATABASE
+              value: "{{ .Values.postgresql.auth.database | default "kong" }}"
 
-        - name: KONG_TRACING_INSTRUMENTATIONS
-          value: "all"
+            {{- else }}
+            - name: KONG_DATABASE
+              value: "off"
 
-        - name: KONG_TRACING_SAMPLING_RATE
-          value: "1.0"
+            - name: KONG_DECLARATIVE_CONFIG
+              value: "/kong/config/kong.yml"
+            {{- end }}
 
-        {{- if and .Values.observability .Values.observability.otel .Values.observability.otel.enabled }}
-        - name: KONG_OPENTELEMETRY_ENDPOINT
-          value: "{{ .Values.observability.otel.endpoint }}"
-        {{- end }}
+            {{- if and .Values.kong .Values.kong.plugins .Values.kong.plugins.enabled }}
+            - name: KONG_PLUGINS
+              value: "{{ join "," .Values.kong.plugins.list }}"
+            {{- end }}
 
-        ports:
-        - containerPort: 8000
-        - containerPort: 8001
-        - containerPort: 8002
-        - containerPort: 8100
-EOF
+            - name: KONG_STATUS_LISTEN
+              value: "0.0.0.0:8100"
+
+            - name: KONG_TRACING_INSTRUMENTATIONS
+              value: "all"
+
+            - name: KONG_TRACING_SAMPLING_RATE
+              value: "1.0"
+
+            {{- if and .Values.observability .Values.observability.otel .Values.observability.otel.endpoint }}
+            - name: KONG_OPENTELEMETRY_ENDPOINT
+              value: "{{ .Values.observability.otel.endpoint }}"
+            {{- end }}
+
+          ports:
+            - containerPort: 8000
+            - containerPort: 8001
+            - containerPort: 8002
+            - containerPort: 8100
