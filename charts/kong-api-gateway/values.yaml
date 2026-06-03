@@ -30,11 +30,11 @@ autoscaling:
 observability:
   prometheus:
     enabled: true
-    external: true   # uses existing Prometheus
+    external: true
 
   grafana:
     enabled: true
-    external: true   # uses existing Grafana
+    external: true
 
   otel:
     enabled: true
@@ -44,8 +44,12 @@ monitoring:
   serviceMonitor:
     enabled: true
 
+plugins:
+  keyAuth: true
+  jwt: true
+  rateLimit: true
+  prometheus: true
+  opentelemetry: true
+
 tls:
   enabled: false
-
-# optional safety root (prevents future nil issues)
-global: {}
