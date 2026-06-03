@@ -5,6 +5,15 @@ kong:
   database:
     enabled: false
 
+  plugins:
+    enabled: true
+    list:
+      - key-auth
+      - jwt
+      - rate-limiting
+      - prometheus
+      - opentelemetry
+
 postgresql:
   enabled: true
   auth:
@@ -21,28 +30,12 @@ autoscaling:
 observability:
   prometheus:
     enabled: true
-    external: true   # USE EXISTING PROMETHEUS
+    external: true
+
   grafana:
     enabled: true
-    external: true   # USE EXISTING GRAFANA
+    external: true
 
   otel:
     enabled: true
     endpoint: http://otel-collector:4318
-
-plugins:
-  keyAuth: true
-  jwt: true
-  rateLimit: true
-  prometheus: true
-  opentelemetry: true
-
-kong:
-  plugins:
-    enabled: true
-    list:
-      - key-auth
-      - jwt
-      - rate-limiting
-      - prometheus
-      - opentelemetry
