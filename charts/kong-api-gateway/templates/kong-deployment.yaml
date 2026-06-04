@@ -65,7 +65,7 @@ spec:
             {{- else }}
 
             - name: KONG_DATABASE
-              value: "off"
+              value: "postgres"
 
             {{- end }}
 
