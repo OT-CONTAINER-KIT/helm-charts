@@ -1,125 +1,36 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ .Release.Name }}-kong
+kong:
+  image: kong/kong-gateway:latest
+  replicaCount: 2
 
-spec:
-  replicas: {{ .Values.kong.replicaCount | default 1 }}
+  plugins:
+    enabled: true
+    list:
+      - key-auth
+      - jwt
+      - rate-limiting
+      - prometheus
+      - opentelemetry
 
-  selector:
-    matchLabels:
-      app: kong
+externalPostgres:
+  enabled: true
+  host: 192.168.8.39
+  port: 5432
+  user: kong-db-user
+  password: KongGateway_2026_safe
+  database: kong-db
 
-  template:
-    metadata:
-      labels:
-        app: kong
+postgresql:
+  enabled: false
 
-    spec:
-      containers:
-        - name: kong
-          image: {{ .Values.kong.image | default "kong/kong-gateway:latest" }}
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  cpu: 70
 
-          env:
-            - name: KONG_ADMIN_LISTEN
-              value: "0.0.0.0:8001"
+observability:
+  otel:
+    endpoint: http://otel-collector:4318
 
-            - name: KONG_ADMIN_GUI_LISTEN
-              value: "0.0.0.0:8002"
-
-            # -----------------------------
-            # DATABASE (FIXED - STRICT EXTERNAL FIRST)
-            # -----------------------------
-
-            {{- $ext := .Values.externalPostgres | default dict }}
-
-            {{- if $ext.enabled }}
-
-            - name: KONG_DATABASE
-              value: "postgres"
-
-            - name: KONG_PG_HOST
-              value: "{{ $ext.host }}"
-
-            - name: KONG_PG_PORT
-              value: "{{ $ext.port | default 5432 }}"
-
-            - name: KONG_PG_USER
-              value: "{{ $ext.user }}"
-
-            - name: KONG_PG_PASSWORD
-              value: "{{ $ext.password }}"
-
-            - name: KONG_PG_DATABASE
-              value: "{{ $ext.database }}"
-
-            {{- else if .Values.postgresql.enabled }}
-
-            - name: KONG_DATABASE
-              value: "postgres"
-
-            - name: KONG_PG_HOST
-              value: "{{ .Release.Name }}-postgresql"
-
-            - name: KONG_PG_PORT
-              value: "5432"
-
-            - name: KONG_PG_USER
-              valueFrom:
-                secretKeyRef:
-                  name: kong-db-secret
-                  key: username
-
-            - name: KONG_PG_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: kong-db-secret
-                  key: password
-
-            - name: KONG_PG_DATABASE
-              valueFrom:
-                secretKeyRef:
-                  name: kong-db-secret
-                  key: database
-
-            {{- else }}
-
-            {{- fail "No DB configured. Set externalPostgres.enabled=true or postgresql.enabled=true" }}
-
-            {{- end }}
-
-            # -----------------------------
-            # PLUGINS
-            # -----------------------------
-            {{- $plugins := "" }}
-            {{- if .Values.kong.plugins.list }}
-              {{- $plugins = join "," .Values.kong.plugins.list }}
-            {{- else }}
-              {{- $plugins = "key-auth,jwt,rate-limiting,prometheus,opentelemetry" }}
-            {{- end }}
-
-            - name: KONG_PLUGINS
-              value: "{{ $plugins }}"
-
-            # -----------------------------
-            # OBSERVABILITY
-            # -----------------------------
-            - name: KONG_STATUS_LISTEN
-              value: "0.0.0.0:8100"
-
-            - name: KONG_TRACING_INSTRUMENTATIONS
-              value: "all"
-
-            - name: KONG_TRACING_SAMPLING_RATE
-              value: "1.0"
-
-            {{- if .Values.observability.otel.endpoint }}
-            - name: KONG_OPENTELEMETRY_ENDPOINT
-              value: "{{ .Values.observability.otel.endpoint }}"
-            {{- end }}
-
-          ports:
-            - containerPort: 8000
-            - containerPort: 8001
-            - containerPort: 8002
-            - containerPort: 8100
+tls:
+  enabled: false
