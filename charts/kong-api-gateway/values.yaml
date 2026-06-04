@@ -13,7 +13,6 @@ kong:
 
   env:
     KONG_DATABASE: postgres
-
     KONG_PG_HOST: 192.168.8.39
     KONG_PG_PORT: "5432"
     KONG_PG_USER: kong-db-user
@@ -21,7 +20,7 @@ kong:
     KONG_PG_DATABASE: kong-db
 
 postgresql:
-  enabled: true
+  enabled: false
 
 autoscaling:
   enabled: true
