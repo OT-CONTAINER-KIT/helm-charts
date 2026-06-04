@@ -42,7 +42,7 @@ spec:
                       {{ end }}
 
             - name: KONG_PG_PORT
-              value: "{{ ternary .Values.externalPostgres.port 5432 (and .Values.externalPostgres .Values.externalPostgres.enabled) }}"
+              value: "{{ if and .Values.externalPostgres .Values.externalPostgres.enabled }}{{ .Values.externalPostgres.port }}{{ else }}5432{{ end }}"
 
             - name: KONG_PG_USER
               valueFrom:
