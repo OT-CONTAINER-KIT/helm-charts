@@ -27,34 +27,53 @@ spec:
             - name: KONG_ADMIN_GUI_LISTEN
               value: "0.0.0.0:8002"
 
-            {{- if and .Values.kong .Values.kong.database .Values.kong.database.enabled }}
+            # -----------------------------
+            # DATABASE MODE (FIXED LOGIC)
+            # -----------------------------
+            {{- if or .Values.externalPostgres.enabled .Values.postgresql.enabled }}
             - name: KONG_DATABASE
               value: "postgres"
 
             - name: KONG_PG_HOST
-              value: "{{ .Release.Name }}-postgresql"
+              value: {{ if .Values.externalPostgres.enabled }}
+                      "{{ .Values.externalPostgres.host }}"
+                      {{ else }}
+                      "{{ .Release.Name }}-postgresql"
+                      {{ end }}
+
+            - name: KONG_PG_PORT
+              value: "{{ .Values.externalPostgres.port | default 5432 }}"
 
             - name: KONG_PG_USER
-              value: "{{ .Values.postgresql.auth.username | default "kong" }}"
+              valueFrom:
+                secretKeyRef:
+                  name: kong-db-secret
+                  key: username
 
             - name: KONG_PG_PASSWORD
-              value: "{{ .Values.postgresql.auth.password | default "kongpass" }}"
+              valueFrom:
+                secretKeyRef:
+                  name: kong-db-secret
+                  key: password
 
             - name: KONG_PG_DATABASE
-              value: "{{ .Values.postgresql.auth.database | default "kong" }}"
+              valueFrom:
+                secretKeyRef:
+                  name: kong-db-secret
+                  key: database
 
             {{- else }}
+            # SAFE FALLBACK (NO CRASH)
             - name: KONG_DATABASE
               value: "off"
 
-            - name: KONG_DECLARATIVE_CONFIG
-              value: "/kong/config/kong.yml"
             {{- end }}
 
-            {{- if and .Values.kong .Values.kong.plugins .Values.kong.plugins.enabled }}
+            # -----------------------------
+            # PLUGINS
+            # -----------------------------
             - name: KONG_PLUGINS
               value: "{{ join "," .Values.kong.plugins.list }}"
-            {{- end }}
 
             - name: KONG_STATUS_LISTEN
               value: "0.0.0.0:8100"
@@ -65,7 +84,7 @@ spec:
             - name: KONG_TRACING_SAMPLING_RATE
               value: "1.0"
 
-            {{- if and .Values.observability .Values.observability.otel .Values.observability.otel.endpoint }}
+            {{- if .Values.observability.otel.endpoint }}
             - name: KONG_OPENTELEMETRY_ENDPOINT
               value: "{{ .Values.observability.otel.endpoint }}"
             {{- end }}
