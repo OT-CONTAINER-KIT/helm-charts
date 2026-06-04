@@ -1,0 +1,19 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: kongingresses.configuration.konghq.com
+spec:
+  group: configuration.konghq.com
+  scope: Namespaced
+  names:
+    plural: kongingresses
+    singular: kongingress
+    kind: KongIngress
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          x-kubernetes-preserve-unknown-fields: true
