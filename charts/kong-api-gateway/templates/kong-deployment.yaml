@@ -28,18 +28,15 @@ spec:
               value: "0.0.0.0:8002"
 
             # -----------------------------
-            # DATABASE MODE (FIXED LOGIC)
+            # DATABASE MODE
             # -----------------------------
             {{- if or (.Values.externalPostgres.enabled | default false) (.Values.postgresql.enabled | default false) }}
+
             - name: KONG_DATABASE
               value: "postgres"
 
             - name: KONG_PG_HOST
-              value: {{ if and .Values.externalPostgres .Values.externalPostgres.enabled }}
-                      "{{ .Values.externalPostgres.host }}"
-                      {{ else }}
-                      "{{ .Release.Name }}-postgresql"
-                      {{ end }}
+              value: "{{ if and .Values.externalPostgres .Values.externalPostgres.enabled }}{{ .Values.externalPostgres.host }}{{ else }}{{ .Release.Name }}-postgresql{{ end }}"
 
             - name: KONG_PG_PORT
               value: "{{ if and .Values.externalPostgres .Values.externalPostgres.enabled }}{{ .Values.externalPostgres.port }}{{ else }}5432{{ end }}"
@@ -63,7 +60,7 @@ spec:
                   key: database
 
             {{- else }}
-            # SAFE FALLBACK (NO CRASH)
+
             - name: KONG_DATABASE
               value: "off"
 
