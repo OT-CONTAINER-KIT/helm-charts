@@ -70,10 +70,17 @@ spec:
             {{- end }}
 
             # -----------------------------
-            # PLUGINS
+            # PLUGINS (FIXED)
             # -----------------------------
+            {{- $plugins := "" }}
+            {{- if .Values.kong.plugins.list }}
+              {{- $plugins = join "," .Values.kong.plugins.list }}
+            {{- else }}
+              {{- $plugins = "key-auth,jwt,rate-limiting,prometheus,opentelemetry" }}
+            {{- end }}
+
             - name: KONG_PLUGINS
-              value: "{{ join \",\" .Values.kong.plugins.list }}"
+              value: "{{ $plugins }}"
 
             - name: KONG_STATUS_LISTEN
               value: "0.0.0.0:8100"
