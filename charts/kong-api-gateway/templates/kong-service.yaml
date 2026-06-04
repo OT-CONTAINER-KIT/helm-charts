@@ -5,7 +5,7 @@ metadata:
   annotations:
     konghq.com/plugins: key-auth,rate-limit,jwt,prometheus,opentelemetry
 spec:
-  type: Nodeport
+  type: NodePort
   selector:
     app: kong
   ports:
