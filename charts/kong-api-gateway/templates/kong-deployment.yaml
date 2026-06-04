@@ -32,7 +32,7 @@ spec:
             # -----------------------------
             {{- if or .Values.externalPostgres.enabled .Values.postgresql.enabled }}
             - name: KONG_DATABASE
-              value: "postgres"
+              value: "kong-db"
 
             - name: KONG_PG_HOST
               value: {{ if .Values.externalPostgres.enabled }}
