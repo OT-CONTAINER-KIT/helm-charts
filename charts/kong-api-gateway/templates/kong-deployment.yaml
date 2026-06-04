@@ -28,18 +28,21 @@ spec:
               value: "0.0.0.0:8002"
 
             # -----------------------------
-            # DATABASE MODE
+            # DATABASE MODE (SAFE)
             # -----------------------------
-            {{- if or (.Values.externalPostgres.enabled | default false) (.Values.postgresql.enabled | default false) }}
+            {{- $ext := .Values.externalPostgres | default dict }}
+            {{- $pg := .Values.postgresql | default dict }}
+
+            {{- if or ($ext.enabled) ($pg.enabled) }}
 
             - name: KONG_DATABASE
               value: "postgres"
 
             - name: KONG_PG_HOST
-              value: "{{ if and .Values.externalPostgres .Values.externalPostgres.enabled }}{{ .Values.externalPostgres.host }}{{ else }}{{ .Release.Name }}-postgresql{{ end }}"
+              value: "{{ if $ext.enabled }}{{ $ext.host }}{{ else }}{{ .Release.Name }}-postgresql{{ end }}"
 
             - name: KONG_PG_PORT
-              value: "{{ if and .Values.externalPostgres .Values.externalPostgres.enabled }}{{ .Values.externalPostgres.port }}{{ else }}5432{{ end }}"
+              value: "{{ if $ext.enabled }}{{ $ext.port | default 5432 }}{{ else }}5432{{ end }}"
 
             - name: KONG_PG_USER
               valueFrom:
@@ -70,7 +73,7 @@ spec:
             # PLUGINS
             # -----------------------------
             - name: KONG_PLUGINS
-              value: "{{ default \"key-auth,jwt,rate-limiting,prometheus,opentelemetry\" (join \",\" .Values.kong.plugins.list) }}"
+              value: "{{ join \",\" .Values.kong.plugins.list }}"
 
             - name: KONG_STATUS_LISTEN
               value: "0.0.0.0:8100"
