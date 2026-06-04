@@ -2,7 +2,7 @@
 # namespace: ai-gateway
 litellm:
   image: ghcr.io/berriai/litellm:main-stable
-  replicas: 1
+  replicas: 2
   workers: 2
   port: 4000
 
@@ -66,7 +66,7 @@ ingress:
 
 gatewayApi:
   enabled: false
-  hostname: ai-gateway.opstree
+  hostname: ai-gateway.opstree.dev
   parentRef:
     # Ask the Envoy Gateway/platform team for these two values.
     name: ""
@@ -79,6 +79,5 @@ tls:
   key: ""
 
 service:
-  type: LoadBalancer
+  type: ClusterIP
   port: 80
-  proxyNodePort: 30400
