@@ -23,6 +23,7 @@ kong:
     KONG_PG_USER: kong-db-user
     KONG_PG_PASSWORD: KongGateway_2026_safe
     KONG_PG_DATABASE: kong-db
+    KONG_DATABASE: postgres
 
 externalPostgres:
   enabled: true
