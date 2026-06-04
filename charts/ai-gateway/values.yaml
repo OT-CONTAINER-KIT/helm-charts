@@ -2,7 +2,7 @@
 # namespace: ai-gateway
 litellm:
   image: ghcr.io/berriai/litellm:main-stable
-  replicas: 1
+  replicas: 2
   workers: 2
   port: 4000
 
