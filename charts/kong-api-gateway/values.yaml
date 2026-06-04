@@ -2,9 +2,6 @@ kong:
   image: kong/kong-gateway:latest
   replicaCount: 2
 
-  database:
-    enabled: false
-
   plugins:
     enabled: true
     list:
@@ -14,8 +11,17 @@ kong:
       - prometheus
       - opentelemetry
 
-postgresql:
+# -------------------------
+# USE EXTERNAL POSTGRESQL
+# -------------------------
+externalPostgres:
   enabled: true
+  host: 192.168.8.39
+  port: 5432
+
+postgresql:
+  enabled: false   # IMPORTANT (disable internal DB)
+
   auth:
     username: kong
     password: kongpass
@@ -28,28 +34,8 @@ autoscaling:
   cpu: 70
 
 observability:
-  prometheus:
-    enabled: true
-    external: true
-
-  grafana:
-    enabled: true
-    external: true
-
   otel:
-    enabled: true
     endpoint: http://otel-collector:4318
-
-monitoring:
-  serviceMonitor:
-    enabled: true
-
-plugins:
-  keyAuth: true
-  jwt: true
-  rateLimit: true
-  prometheus: true
-  opentelemetry: true
 
 tls:
   enabled: false
