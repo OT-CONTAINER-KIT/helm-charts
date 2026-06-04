@@ -3,7 +3,7 @@ kong:
   replicaCount: 2
 
   database:
-    enabled: true
+    enabled: false
 
   plugins:
     enabled: true
@@ -25,7 +25,7 @@ kong:
     KONG_PG_DATABASE: kong-db
 
 externalPostgres:
-  enabled: true
+  enabled: false
   host: 192.168.8.39
   port: 5432
 
