@@ -30,19 +30,19 @@ spec:
             # -----------------------------
             # DATABASE MODE (FIXED LOGIC)
             # -----------------------------
-            {{- if or .Values.externalPostgres.enabled .Values.postgresql.enabled }}
+            {{- if or (.Values.externalPostgres.enabled | default false) (.Values.postgresql.enabled | default false) }}
             - name: KONG_DATABASE
-              value: "kong-db"
+              value: "postgres"
 
             - name: KONG_PG_HOST
-              value: {{ if .Values.externalPostgres.enabled }}
+              value: {{ if and .Values.externalPostgres .Values.externalPostgres.enabled }}
                       "{{ .Values.externalPostgres.host }}"
                       {{ else }}
                       "{{ .Release.Name }}-postgresql"
                       {{ end }}
 
             - name: KONG_PG_PORT
-              value: "{{ .Values.externalPostgres.port | default 5432 }}"
+              value: "{{ ternary .Values.externalPostgres.port 5432 (and .Values.externalPostgres .Values.externalPostgres.enabled) }}"
 
             - name: KONG_PG_USER
               valueFrom:
@@ -73,7 +73,7 @@ spec:
             # PLUGINS
             # -----------------------------
             - name: KONG_PLUGINS
-              value: "{{ join "," .Values.kong.plugins.list }}"
+              value: "{{ default \"key-auth,jwt,rate-limiting,prometheus,opentelemetry\" (join \",\" .Values.kong.plugins.list) }}"
 
             - name: KONG_STATUS_LISTEN
               value: "0.0.0.0:8100"
