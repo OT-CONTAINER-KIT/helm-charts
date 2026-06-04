@@ -1,0 +1,15 @@
+# Enable this only after the platform team confirms Gateway API/Envoy Gateway
+# is available in the cluster and gives you the parent Gateway name/namespace.
+gatewayApi:
+  enabled: true
+  hostname: ai-gateway.opstree
+  parentRef:
+    name: "<envoy-gateway-name>"
+    namespace: "<envoy-gateway-namespace>"
+  pathPrefix: /
+
+ingress:
+  enabled: false
+
+service:
+  type: LoadBalancer

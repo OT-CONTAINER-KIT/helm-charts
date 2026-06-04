@@ -9,7 +9,7 @@ spec:
     app: litellm
   ports:
     - name:  proxy
-      port: {{ .Values.litellm.port }}
+      port: {{ .Values.service.port | default .Values.litellm.port }}
       targetPort: {{ .Values.litellm.port }}
       {{- if eq .Values.service.type "NodePort" }}
       nodePort: {{ .Values.service.proxyNodePort }}
