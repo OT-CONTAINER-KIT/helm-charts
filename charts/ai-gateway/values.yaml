@@ -58,11 +58,20 @@ redis:
     password: ""
 
 ingress:
-  enabled: true
+  enabled: false
   className: nginx
   hosts:
     proxy: ai-gateway.example.internal
     ui: ai-gateway-ui.example.internal
+
+gatewayApi:
+  enabled: false
+  hostname: ai-gateway.opstree
+  parentRef:
+    # Ask the Envoy Gateway/platform team for these two values.
+    name: ""
+    namespace: ""
+  pathPrefix: /
 
 tls:
   enabled: false
@@ -70,5 +79,6 @@ tls:
   key: ""
 
 service:
-  type: ClusterIP
+  type: LoadBalancer
+  port: 80
   proxyNodePort: 30400
