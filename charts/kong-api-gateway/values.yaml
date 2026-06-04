@@ -21,7 +21,7 @@ kong:
     KONG_PG_DATABASE: kong-db
 
 postgresql:
-  enabled: false
+  enabled: true
 
 autoscaling:
   enabled: true
