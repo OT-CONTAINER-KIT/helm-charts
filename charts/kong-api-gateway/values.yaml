@@ -2,6 +2,9 @@ kong:
   image: kong/kong-gateway:latest
   replicaCount: 2
 
+  database:
+    enabled: true
+
   plugins:
     enabled: true
     list:
@@ -11,21 +14,28 @@ kong:
       - prometheus
       - opentelemetry
 
-# -------------------------
-# USE EXTERNAL POSTGRESQL
-# -------------------------
+  env:
+    KONG_DATABASE: postgres
+
+    # External PostgreSQL connection
+    KONG_PG_HOST: 192.168.8.39
+    KONG_PG_PORT: "5432"
+    KONG_PG_USER: kong-db-user
+    KONG_PG_PASSWORD: KongGateway_2026_safe
+    KONG_PG_DATABASE: kong-db
+
 externalPostgres:
   enabled: true
   host: 192.168.8.39
   port: 5432
 
 postgresql:
-  enabled: false   # IMPORTANT (disable internal DB)
+  enabled: false
 
   auth:
-    username: kong
-    password: kongpass
-    database: kong
+    username: kong-db-user
+    password: KongGateway_2026_safe
+    database: kong-db
 
 autoscaling:
   enabled: true
