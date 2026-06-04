@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-litellm-config
-  # namespace: {{ .Values.namespace }}
+  namespace: {{ .Values.namespace }}
 data:
   config.yaml: |
 {{ toYaml .Values.litellm.config | indent 4 }}

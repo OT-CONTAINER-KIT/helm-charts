@@ -1,5 +1,5 @@
 # buildpiper-helm — values.yaml
-# namespace: ai-gateway
+namespace: ai-gateway
 litellm:
   image: ghcr.io/berriai/litellm:main-stable
   replicas: 1

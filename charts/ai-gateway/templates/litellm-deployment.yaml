@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-litellm
-  # namespace: {{ .Values.namespace }}
+  namespace: {{ .Values.namespace }}
 spec:
   replicas: {{ .Values.litellm.replicas }}
   selector:
