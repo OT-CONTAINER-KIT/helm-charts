@@ -1,0 +1,25 @@
+{
+  "title": "Kong API Gateway",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Request Rate",
+      "targets": [
+        {
+          "expr": "rate(kong_http_requests_total[1m])"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Latency",
+      "targets": [
+        {
+          "expr": "kong_latency_ms"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 16,
+  "version": 1
+}
