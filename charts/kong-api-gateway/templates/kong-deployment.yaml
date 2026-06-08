@@ -49,7 +49,7 @@ spec:
 
             {{- else }}
             - name: KONG_DATABASE
-              value: "off"
+              value: "postgres"
 
             - name: KONG_DECLARATIVE_CONFIG
               value: "/kong/config/kong.yml"
@@ -90,7 +90,7 @@ spec:
             {{- else }}
             # SAFE FALLBACK (NO CRASH)
             - name: KONG_DATABASE
-              value: "off"
+              value: "postgres"
 
             {{- end }}
 
