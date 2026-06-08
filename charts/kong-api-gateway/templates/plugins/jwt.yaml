@@ -1,0 +1,13 @@
+{{- $p := .Values.plugins | default dict }}
+
+{{- if $p.jwt }}
+
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+
+metadata:
+  name: jwt-auth
+
+plugin: jwt
+
+{{- end }}

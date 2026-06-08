@@ -1,0 +1,9 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongACL
+
+metadata:
+  name: dev-acl
+  consumer: developer-user
+
+groups:
+  - developer

@@ -1,0 +1,21 @@
+{{- $mon := .Values.monitoring | default dict }}
+{{- $sm := $mon.serviceMonitor | default dict }}
+
+{{- if $sm.enabled }}
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+
+metadata:
+  name: {{ .Release.Name }}-kong
+
+spec:
+  selector:
+    matchLabels:
+      app: kong
+
+  endpoints:
+  - port: metrics
+    interval: 15s
+
+{{- end }}

@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: kong
+
+spec:
+  podSelector:
+    matchLabels:
+      app: kong
+
+  policyTypes:
+  - Ingress
+  - Egress

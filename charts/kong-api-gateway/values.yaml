@@ -1,27 +1,54 @@
-apiVersion: v2
-name: kong-api-gateway
-description: Enterprise Kong API Gateway Helm Chart
-type: application
-version: 1.0.0
-appVersion: "3.9.0"
-
 kong:
   image: kong/kong-gateway:latest
+  replicaCount: 2
+
+  plugins:
+    enabled: true
+    list:
+      - key-auth
+      - jwt
+      - rate-limiting
+      - prometheus
+      - opentelemetry
+      - requestTransformer
+      - acl
+
+# -------------------------
+# USE EXTERNAL POSTGRESQL
+# -------------------------
+externalPostgres:
+  enabled: true
+  host: 192.168.8.39
+  port: 5432
 
 postgresql:
-  enabled: true
+  enabled: false   # IMPORTANT (disable internal DB)
+
   auth:
     username: kong
     password: kongpass
     database: kong
-  primary:
-    persistence:
-      enabled: true
-      size: 10Gi
 
-ingress:
+autoscaling:
   enabled: true
-  className: nginx
+  minReplicas: 2
+  maxReplicas: 10
+  cpu: 70
+
+observability:
+  otel:
+    endpoint: http://otel-collector:4318
+
+monitoring:
+  serviceMonitor:
+    enabled: true
+
+plugins:
+  keyAuth: true
+  jwt: true
+  rateLimit: true
+  prometheus: true
+  opentelemetry: true
 
 tls:
   enabled: false

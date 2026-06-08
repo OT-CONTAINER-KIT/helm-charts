@@ -1,0 +1,15 @@
+{{- if .Values.plugins.uriRewrite }}
+
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+
+metadata:
+  name: uri-rewrite
+
+plugin: request-transformer
+
+config:
+  replace:
+    uri: "/v1"
+
+{{- end }}

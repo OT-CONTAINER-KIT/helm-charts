@@ -1,0 +1,8 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongACL
+
+metadata:
+  name: admin-acl
+  consumer: admin-user
+
+group: admin

@@ -1,7 +1,9 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: kong-proxy-ingress
+  name: kong-kong-proxy-ingress
+  annotations:
+    konghq.com/plugins: key-auth,jwt,rate-limit,acl-plugin,request-transformer
 spec:
   ingressClassName: nginx
   rules:
@@ -12,6 +14,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ .Release.Name }}-kong-proxy
+                name: kong-kong-proxy
                 port:
                   number: 8000

@@ -1,0 +1,16 @@
+{{- if .Values.plugins.acl }}
+
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+
+metadata:
+  name: acl-plugin
+
+plugin: acl
+
+config:
+  allow:
+    - admin
+    - developer
+
+{{- end }}

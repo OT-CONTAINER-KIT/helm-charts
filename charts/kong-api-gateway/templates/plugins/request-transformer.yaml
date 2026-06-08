@@ -1,0 +1,15 @@
+{{- if .Values.plugins.requestTransformer }}
+
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+
+metadata:
+  name: request-transformer
+
+plugin: request-transformer
+
+config:
+  replace:
+    uri: "/api/v1"
+
+{{- end }}

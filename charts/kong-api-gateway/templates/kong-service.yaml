@@ -2,40 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Release.Name }}-kong-proxy
+  annotations:
+    konghq.com/plugins: key-auth,rate-limit,jwt,prometheus,opentelemetry
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: kong
   ports:
     - name: proxy
       port: 8000
       targetPort: 8000
-      nodePort: 30080
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .Release.Name }}-kong-admin
-spec:
-  type: NodePort
-  selector:
-    app: kong
-  ports:
-    - name: admin
-      port: 8001
-      targetPort: 8001
-      nodePort: 30081
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .Release.Name }}-kong-manager
-spec:
-  type: NodePort
-  selector:
-    app: kong
-  ports:
-    - name: manager
-      port: 8002
-      targetPort: 8002
-      nodePort: 30082
