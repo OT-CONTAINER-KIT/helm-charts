@@ -2,9 +2,38 @@
 # namespace: ai-gateway
 litellm:
   image: ghcr.io/berriai/litellm:main-stable
-  replicas: 2
-  workers: 2
+  replicas: 3
+  workers: 1
   port: 4000
+
+  resources:
+    requests:
+      cpu: "1"
+      memory: "4Gi"
+    limits:
+      cpu: "1"
+      memory: "4Gi"
+
+  readinessProbe:
+    httpGet:
+      path: /health/readiness
+      port: 4000
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+    successThreshold: 1
+
+  terminationGracePeriodSeconds: 620
+  maxRequestsBeforeRestart: 10000
+
+  extraEnv:
+    - name: LITELLM_LOG
+      value: "ERROR"
+    - name: LITELLM_MODE
+      value: "PRODUCTION"
+    - name: DISABLE_SCHEMA_UPDATE
+      value: "true"
 
   existingSecret: ""
   masterKey: ""
@@ -81,3 +110,10 @@ tls:
 service:
   type: ClusterIP
   port: 80
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  cpu: 60
+  memory: 80

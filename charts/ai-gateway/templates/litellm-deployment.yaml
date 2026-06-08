@@ -13,6 +13,7 @@ spec:
       labels:
         app: litellm
     spec:
+      terminationGracePeriodSeconds: {{ .Values.litellm.terminationGracePeriodSeconds }}
       containers:
         - name: litellm
           image: {{ .Values.litellm.image }}
@@ -24,6 +25,10 @@ spec:
             - "{{ .Values.litellm.port }}"
             - "--num_workers"
             - "{{ .Values.litellm.workers }}"
+            {{- if .Values.litellm.maxRequestsBeforeRestart }}
+            - "--max_requests_before_restart"
+            - "{{ .Values.litellm.maxRequestsBeforeRestart }}"
+            {{- end }}
 
           env:
             - name: LITELLM_MASTER_KEY
@@ -68,23 +73,37 @@ spec:
                   name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
                   key: geminiApiKey
             {{ end }}
-            {{ if .Values.litellm.providers.openaiApiKey }}
-            - name: OPENAI_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
-                  key: openaiApiKey
-            {{ end }}
-            {{ if .Values.litellm.providers.anthropicApiKey }}
-            - name: ANTHROPIC_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
-                  key: anthropicApiKey
-            {{ end }}
+            # {{ if .Values.litellm.providers.openaiApiKey }}
+            # - name: OPENAI_API_KEY
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
+            #       key: openaiApiKey
+            # {{ end }}
+            # {{ if .Values.litellm.providers.anthropicApiKey }}
+            # - name: ANTHROPIC_API_KEY
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
+            #       key: anthropicApiKey
+            # {{ end }}
+
+            {{- if .Values.litellm.extraEnv }}
+            {{- toYaml .Values.litellm.extraEnv | nindent 12 }}
+            {{- end }}
 
           ports:
             - containerPort: {{ .Values.litellm.port }}
+
+          resources:
+            {{- toYaml .Values.litellm.resources | nindent 12 }}
+
+          readinessProbe:
+            {{- toYaml .Values.litellm.readinessProbe | nindent 12 }}
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 5"]
 
           volumeMounts:
             - name: config
