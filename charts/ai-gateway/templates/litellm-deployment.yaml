@@ -17,6 +17,7 @@ spec:
       containers:
         - name: litellm
           image: {{ .Values.litellm.image }}
+          imagePullPolicy: {{ .Values.litellm.imagePullPolicy | default "IfNotPresent" }}
 
           args:
             - "--config"
