@@ -10,11 +10,11 @@ kong:
       - rate-limiting
       - prometheus
       - opentelemetry
-      - requestTransformer
+      - request-transformer   
       - acl
 
 # -------------------------
-# USE EXTERNAL POSTGRESQL
+# POSTGRES CONFIG
 # -------------------------
 externalPostgres:
   enabled: true
@@ -22,19 +22,25 @@ externalPostgres:
   port: 5432
 
 postgresql:
-  enabled: false   # IMPORTANT (disable internal DB)
+  enabled: false
 
   auth:
     username: kong
     password: kongpass
     database: kong
 
+# -------------------------
+# SCALING
+# -------------------------
 autoscaling:
   enabled: true
   minReplicas: 2
   maxReplicas: 10
   cpu: 70
 
+# -------------------------
+# OBSERVABILITY
+# -------------------------
 observability:
   otel:
     endpoint: http://otel-collector:4318
@@ -43,6 +49,9 @@ monitoring:
   serviceMonitor:
     enabled: true
 
+# -------------------------
+# PLUGINS (ENABLE FLAGS)
+# -------------------------
 plugins:
   keyAuth: true
   jwt: true
@@ -52,3 +61,5 @@ plugins:
 
 tls:
   enabled: false
+
+installCRDs: true
