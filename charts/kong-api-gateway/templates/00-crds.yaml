@@ -1,0 +1,4 @@
+{{- range .Files.Glob "crds/*.yaml" }}
+---
+{{ .AsYaml }}
+{{- end }}
