@@ -1,8 +1,7 @@
 apiVersion: configuration.konghq.com/v1
 kind: KongConsumer
-
 metadata:
   name: admin-user
-
+  annotations:
+    kubernetes.io/ingress.class: kong
 username: admin-user
-custom_id: admin-user
