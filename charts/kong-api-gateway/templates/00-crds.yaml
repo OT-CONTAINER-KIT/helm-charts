@@ -1,0 +1,99 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: kongconsumers.configuration.konghq.com
+spec:
+  group: configuration.konghq.com
+  scope: Namespaced
+  names:
+    plural: kongconsumers
+    singular: kongconsumer
+    kind: KongConsumer
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: kongplugins.configuration.konghq.com
+spec:
+  group: configuration.konghq.com
+  scope: Namespaced
+  names:
+    plural: kongplugins
+    singular: kongplugin
+    kind: KongPlugin
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: kongclusterplugins.configuration.konghq.com
+spec:
+  group: configuration.konghq.com
+  scope: Cluster
+  names:
+    plural: kongclusterplugins
+    singular: kongclusterplugin
+    kind: KongClusterPlugin
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: kongacls.configuration.konghq.com
+spec:
+  group: configuration.konghq.com
+  scope: Namespaced
+  names:
+    plural: kongacls
+    singular: kongacl
+    kind: KongACL
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: kongconsumercredentials.configuration.konghq.com
+spec:
+  group: configuration.konghq.com
+  scope: Namespaced
+  names:
+    plural: kongconsumercredentials
+    singular: kongconsumercredential
+    kind: KongConsumerCredential
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          x-kubernetes-preserve-unknown-fields: true
