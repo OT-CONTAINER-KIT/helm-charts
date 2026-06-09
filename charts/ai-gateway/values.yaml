@@ -1,7 +1,8 @@
 # buildpiper-helm — values.yaml
 # namespace: ai-gateway
 litellm:
-  image: ghcr.io/berriai/litellm:main-stable
+  image: ghcr.io/berriai/litellm@sha256:75543fa1d73989b7aefba49c910989f7886f63210520e30b39dbbc580a41826f
+  imagePullPolicy: Always
   replicas: 2
   workers: 1
   port: 4000
