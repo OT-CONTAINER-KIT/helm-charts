@@ -2,9 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-kong
+  namespace: kong
 
 spec:
-  replicas: {{ .Values.kong.replicaCount | default 1 }}
+  replicas: {{ .Values.kong.replicaCount | default 2 }}
 
   selector:
     matchLabels:
@@ -21,50 +22,26 @@ spec:
           image: {{ .Values.kong.image | default "kong/kong-gateway:latest" }}
 
           env:
+            # -------------------------
+            # CORE KONG CONFIG
+            # -------------------------
+            - name: KONG_DATABASE
+              value: "postgres"
+
             - name: KONG_ADMIN_LISTEN
               value: "0.0.0.0:8001"
 
             - name: KONG_ADMIN_GUI_LISTEN
               value: "0.0.0.0:8002"
 
-            {{- if and .Values.kong .Values.kong.database .Values.kong.database.enabled }}
-            # -----------------------------
-            # DATABASE MODE (FIXED LOGIC)
-            # -----------------------------
-            {{- if or .Values.externalPostgres.enabled .Values.postgresql.enabled }}
-            - name: KONG_DATABASE
-              value: "postgres"
+            - name: KONG_STATUS_LISTEN
+              value: "0.0.0.0:8100"
 
+            # -------------------------
+            # POSTGRES CONFIG (EXTERNAL ONLY)
+            # -------------------------
             - name: KONG_PG_HOST
-              value: "{{ .Release.Name }}-postgresql"
-
-            - name: KONG_PG_USER
-              value: "{{ .Values.postgresql.auth.username | default "kong" }}"
-
-            - name: KONG_PG_PASSWORD
-              value: "{{ .Values.postgresql.auth.password | default "kongpass" }}"
-
-            - name: KONG_PG_DATABASE
-              value: "{{ .Values.postgresql.auth.database | default "kong" }}"
-
-            {{- else }}
-            - name: KONG_DATABASE
-              value: "postgres"
-
-            - name: KONG_DECLARATIVE_CONFIG
-              value: "/kong/config/kong.yml"
-            {{- end }}
-
-            {{- if and .Values.kong .Values.kong.plugins .Values.kong.plugins.enabled }}
-            - name: KONG_PLUGINS
-              value: "{{ join "," .Values.kong.plugins.list }}"
-            {{- end }}
-
-              value: {{ if .Values.externalPostgres.enabled }}
-                      "{{ .Values.externalPostgres.host }}"
-                      {{ else }}
-                      "{{ .Release.Name }}-postgresql"
-                      {{ end }}
+              value: "{{ .Values.externalPostgres.host }}"
 
             - name: KONG_PG_PORT
               value: "{{ .Values.externalPostgres.port | default 5432 }}"
@@ -87,32 +64,23 @@ spec:
                   name: kong-db-secret
                   key: database
 
-            {{- else }}
-            # SAFE FALLBACK (NO CRASH)
-            - name: KONG_DATABASE
-              value: "postgres"
-
-            {{- end }}
-
-            # -----------------------------
+            # -------------------------
             # PLUGINS
-            # -----------------------------
+            # -------------------------
             - name: KONG_PLUGINS
-              value: "{{ join "," .Values.kong.plugins.list }}"
+              value: "key-auth,jwt,rate-limiting,prometheus,opentelemetry,request-transformer,acl"
 
-            - name: KONG_STATUS_LISTEN
-              value: "0.0.0.0:8100"
-
+            # -------------------------
+            # OBSERVABILITY / TRACING
+            # -------------------------
             - name: KONG_TRACING_INSTRUMENTATIONS
               value: "all"
 
             - name: KONG_TRACING_SAMPLING_RATE
               value: "1.0"
 
-            {{- if .Values.observability.otel.endpoint }}
             - name: KONG_OPENTELEMETRY_ENDPOINT
               value: "{{ .Values.observability.otel.endpoint }}"
-            {{- end }}
 
           ports:
             - containerPort: 8000
