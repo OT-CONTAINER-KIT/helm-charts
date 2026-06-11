@@ -51,7 +51,7 @@ outline:
   utilsSecret: ""
 
 azure:
-  enabled: false
+  enabled: true
   clientId: ""
   clientSecret: ""
   resourceAppId: ""
@@ -76,6 +76,7 @@ persistence:
   enabled: true
   size: 5Gi
   storageClass: "vcluster-longhorn-restricted-x-coe-dev-x-coe-dev-vcluster"
+  accessMode: ReadWriteMany
   mountPath: "/var/lib/outline/data"
 
 service:

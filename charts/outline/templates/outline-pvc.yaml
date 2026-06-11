@@ -5,7 +5,7 @@ metadata:
   name: {{ .Release.Name }}-outline-pvc
 spec:
   accessModes:
-    - ReadWriteOnce
+    - {{ .Values.persistence.accessMode | default "ReadWriteOnce" }}
   {{- if .Values.persistence.storageClass }}
   storageClassName: {{ .Values.persistence.storageClass }}
   {{- end }}
