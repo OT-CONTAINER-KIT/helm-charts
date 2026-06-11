@@ -39,7 +39,7 @@ outline:
   url: "https://docx.opstree.dev"
   collaborationUrl: "wss://docx.opstree.dev"
   nodeEnv: "production"
-  forceHttps: "true"
+  forceHttps: "false"
   trustProxy: "true"
   pgsslmode: "disable"
   fileStorage: "local"
