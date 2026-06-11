@@ -1,0 +1,41 @@
+OUTLINE WIKI DEPLOYED
+
+Service (ClusterIP — no Ingress managed here):
+  kubectl port-forward svc/{{ .Release.Name }}-outline {{ .Values.service.port }}:{{ .Values.service.port }} &
+  then open: http://localhost:{{ .Values.service.port }}
+
+Health check:
+  curl http://localhost:{{ .Values.service.port }}/api/health
+
+Database:
+  PostgreSQL in-chart enabled: {{ .Values.postgres.enabled }}
+  External Postgres host: {{ .Values.postgres.external.host }}:{{ .Values.postgres.external.port }}
+  External secret: {{ .Values.postgres.external.existingSecret }}
+
+Cache / sessions:
+  Redis in-chart enabled: {{ .Values.redis.enabled }}
+  External Redis host: {{ .Values.redis.external.host }}:{{ .Values.redis.external.port }}
+  Redis secret: {{ .Values.redis.external.existingSecret }}
+
+File storage:
+  Persistence enabled: {{ .Values.persistence.enabled }}
+  PVC size: {{ .Values.persistence.size }}
+  Mount path: {{ .Values.outline.fileStorageLocalRootDir }}
+
+Azure AD SSO:
+  Enabled: {{ .Values.azure.enabled }}
+
+Sensitive values stored in Secret: {{ default (printf "%s-outline-secret" .Release.Name) .Values.outline.existingSecret }}
+  Retrieve with:
+    kubectl get secret {{ default (printf "%s-outline-secret" .Release.Name) .Values.outline.existingSecret }} -o jsonpath='{.data.secretKey}' | base64 -d ; echo
+
+Check pods:
+  kubectl get pods -l app=outline
+
+Logs:
+  kubectl logs -f -l app=outline
+
+HPA:
+  Enabled: {{ .Values.autoscaling.enabled }}
+  Min replicas: {{ .Values.autoscaling.minReplicas }}
+  Max replicas: {{ .Values.autoscaling.maxReplicas }}
