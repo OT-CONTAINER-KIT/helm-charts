@@ -15,7 +15,6 @@ Database:
 Cache / sessions:
   Redis in-chart enabled: {{ .Values.redis.enabled }}
   External Redis host: {{ .Values.redis.external.host }}:{{ .Values.redis.external.port }}
-  Redis secret: {{ .Values.redis.external.existingSecret }}
 
 File storage:
   Persistence enabled: {{ .Values.persistence.enabled }}
