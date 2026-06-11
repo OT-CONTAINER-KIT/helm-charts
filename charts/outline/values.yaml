@@ -16,7 +16,7 @@ outline:
 
   readinessProbe:
     httpGet:
-      path: /api/health
+      path: /_health
       port: 3000
     initialDelaySeconds: 15
     periodSeconds: 10
