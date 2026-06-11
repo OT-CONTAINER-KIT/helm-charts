@@ -71,14 +71,11 @@ redis:
   external:
     host: "192.168.8.78"
     port: 6379
-    existingSecret: ""
-    passwordKey: REDIS_PASSWORD
-    password: ""
 
 persistence:
   enabled: true
-  size: 10Gi
-  storageClass: ""
+  size: 5Gi
+  storageClass: "vcluster-longhorn-restricted-x-coe-dev-x-coe-dev-vcluster"
   mountPath: "/var/lib/outline/data"
 
 service:
