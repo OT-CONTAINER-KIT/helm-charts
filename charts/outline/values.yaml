@@ -1,0 +1,94 @@
+# outline — values.yaml
+
+outline:
+  image: outlinewiki/outline:0.82.0
+  imagePullPolicy: IfNotPresent
+  replicas: 2
+  port: 3000
+
+  resources:
+    requests:
+      cpu: "1"
+      memory: "2Gi"
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+
+  readinessProbe:
+    httpGet:
+      path: /api/health
+      port: 3000
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+
+  livenessProbe:
+    httpGet:
+      path: /api/health
+      port: 3000
+    initialDelaySeconds: 30
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  terminationGracePeriodSeconds: 30
+
+  # Non-sensitive env vars — set via ConfigMap / inline
+  url: "https://docx.opstree.dev"
+  collaborationUrl: "wss://docx.opstree.dev"
+  nodeEnv: "production"
+  forceHttps: "true"
+  trustProxy: "true"
+  pgsslmode: "disable"
+  fileStorage: "local"
+  fileStorageLocalRootDir: "/var/lib/outline/data"
+
+  # Sensitive values — stored in the outline secret
+  existingSecret: ""
+  secretKey: ""
+  utilsSecret: ""
+
+azure:
+  enabled: false
+  clientId: ""
+  clientSecret: ""
+  resourceAppId: ""
+  tenantId: ""
+
+postgres:
+  enabled: false
+  external:
+    host: "192.168.8.39"
+    port: 5432
+    existingSecret: ""
+    databaseUrlKey: DATABASE_URL
+    databaseUrl: ""
+
+redis:
+  enabled: false
+  external:
+    host: "192.168.8.78"
+    port: 6379
+    existingSecret: ""
+    passwordKey: REDIS_PASSWORD
+    password: ""
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: ""
+  mountPath: "/var/lib/outline/data"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  cpu: 60
+  memory: 80

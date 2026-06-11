@@ -1,0 +1,27 @@
+{{- $auto := .Values.autoscaling | default dict }}
+{{- if $auto.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Release.Name }}-outline
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Release.Name }}-outline
+  minReplicas: {{ default 2 $auto.minReplicas }}
+  maxReplicas: {{ default 10 $auto.maxReplicas }}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ default 60 $auto.cpu }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ default 80 $auto.memory }}
+{{- end }}

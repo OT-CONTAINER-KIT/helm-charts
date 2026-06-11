@@ -1,0 +1,104 @@
+  sudo su - postgres                                                                                                                                                                                              
+   psql                                                                                                                                                                                                            
+ ```                                                                                                                                                                                                               
+                                                                                                                                                                                                                   
+ ```sql                                                                                                                                                                                                            
+   -- 1. create the user                                                                                                                                                                                           
+   CREATE USER "outline-db-user" WITH PASSWORD 'Outline_2026_safe';                                                                                                                                                
+                                                                                                                                                                                                                   
+   -- 2. create the database                                                                                                                                                                                       
+   CREATE DATABASE "outline" OWNER "outline-db-user";                                                                                                                                                              
+                                                                                                                                                                                                                   
+   -- 3. grant database-level privileges                                                                                                                                                                           
+   GRANT CONNECT ON DATABASE "outline" TO "outline-db-user";                                                                                                                                                       
+   GRANT ALL PRIVILEGES ON DATABASE "outline" TO "outline-db-user";                                                                                                                                                
+                                                                                                                                                                                                                   
+   -- 4. switch to the outline database                                                                                                                                                                            
+   \c outline                                                                                                                                                                                                      
+                                                                                                                                                                                                                   
+   -- 5. grant schema privileges                                                                                                                                                                                   
+   GRANT USAGE, CREATE ON SCHEMA public TO "outline-db-user";                                                                                                                                                      
+   GRANT ALL ON SCHEMA public TO "outline-db-user";                                                                                                                                                                
+                                                                                                                                                                                                                   
+   -- 6. grant on existing objects                                                                                                                                                                                 
+   GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "outline-db-user";                                                                                                                                       
+   GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "outline-db-user";                                                                                                                                    
+   GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO "outline-db-user";                                                                                                                                    
+                                                                                                                                                                                                                   
+   -- 7. future objects                                                                                                                                                                                            
+   ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "outline-db-user";                                                                                                                             
+   ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO "outline-db-user";                                                                                                                          
+   ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO "outline-db-user";                                                                                                                          
+                                                                                                                                                                                                                   
+   -- 8. verify                                                                                                                                                                                                    
+   \du outline-db-user                                                                                                                                                                                    
+   \l outline                                                                                                                                                                                                      
+   \q              
+
+
+ ```bash                                                                                                                                                                                                           
+   sudo nano /etc/postgresql/*/main/pg_hba.conf                                                                                                                                                                    
+ ```                                                                                                                                                                                                               
+                                                                                                                                                                                                                   
+ Add these lines:                                                                                                                                                                                                  
+                                                                                                                                                                                                                   
+ ```conf                                                                                                                                                                                                           
+   host    outline     outline-db-user    192.168.8.0/22      md5                                                                                                                                                  
+   host    outline     outline-db-user    10.233.0.0/16       md5                                                                                                                                                  
+ ```                                                                                                                                                                                                               
+
+sudo systemctl reload postgresql
+
+
+
+ ```bash                                                                                                                                                                                                           
+   sudo su - postgres                                                                                                                                                                                              
+   pg_restore \                                                                                                                                                                                                    
+     -d outline \                                                                                                                                                                                                  
+     --no-owner \                                                                                                                                                                                                  
+     --no-privileges \                                                                                                                                                                                             
+     --verbose \                                                                                                                                                                                                   
+     /tmp/outline_migration.dump                                                                                                                                                                                   
+ ```                                                                                                                                                                                                               
+
+
+ After restore finishes, re-apply grants (since --no-privileges stripped them):                                                                                                                                    
+                                                                                                                                                                                                                   
+ ```bash                                                                                                                                                                                                           
+   psql -d outline                                                                                                                                                                                                 
+ ```                                                                                                                                                                                                               
+                                                                                                                                                                                                                   
+ ```sql                                                                                                                                                                                                            
+   GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "outline-db-user";                                                                                                                                       
+   GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "outline-db-user";                                                                                                                                    
+   ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "outline-db-user";                                                                                                                             
+   ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO "outline-db-user";                                                                                                                          
+   \q                                                                                                                                                                                                              
+ ```                                       
+
+
+
+
+
+
+
+ Step 6 — Verify                                                                                                                                                                                                   
+                                                                                                                                                                                                                   
+ Test locally first:                                                                                                                                                                                               
+                                                                                                                                                                                                                   
+ ```bash                                                                                                                                                                                                           
+   psql "postgresql://outline-db-user:Outline_2026_safe@localhost:5432/outline"                                                                                                                                    
+ ```                                                                                                                                                                                                               
+                                                                                                                                                                                                                   
+ Then test over TCP (simulating what K8s will do):                                                                                                                                                                 
+                                                                                                                                                                                                                   
+ ```bash                                                                                                                                                                                                           
+   psql "postgresql://outline-db-user:Outline_2026_safe@192.168.8.39:5432/outline"                                                                                                                                 
+ ```                                                                                                                                                                                                               
+                                                                                                                                                                                                                   
+ Check tables:                                                                                                                                                                                                     
+                                                                                                                                                                                                                   
+ ```sql                                                                                                                                                                                                            
+   \dt                                                                                                                                                                                                             
+   SELECT COUNT(*) FROM documents;                                                                                                                                                                                 
+ ```                   

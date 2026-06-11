@@ -1,0 +1,128 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-outline
+spec:
+  replicas: {{ .Values.outline.replicas }}
+  selector:
+    matchLabels:
+      app: outline
+  template:
+    metadata:
+      labels:
+        app: outline
+    spec:
+      terminationGracePeriodSeconds: {{ .Values.outline.terminationGracePeriodSeconds }}
+      containers:
+        - name: outline
+          image: {{ .Values.outline.image }}
+          imagePullPolicy: {{ .Values.outline.imagePullPolicy | default "IfNotPresent" }}
+
+          ports:
+            - containerPort: {{ .Values.outline.port }}
+
+          env:
+            # Non-sensitive inline / ConfigMap env vars
+            - name: PORT
+              value: {{ .Values.outline.port | quote }}
+
+            - name: NODE_ENV
+              value: {{ .Values.outline.nodeEnv | quote }}
+
+            - name: URL
+              value: {{ .Values.outline.url | quote }}
+
+            - name: FORCE_HTTPS
+              value: {{ .Values.outline.forceHttps | quote }}
+
+            - name: TRUST_PROXY
+              value: {{ .Values.outline.trustProxy | quote }}
+
+            - name: COLLABORATION_URL
+              value: {{ .Values.outline.collaborationUrl | quote }}
+
+            - name: PGSSLMODE
+              value: {{ .Values.outline.pgsslmode | quote }}
+
+            - name: FILE_STORAGE
+              value: {{ .Values.outline.fileStorage | quote }}
+
+            - name: FILE_STORAGE_LOCAL_ROOT_DIR
+              value: {{ .Values.outline.fileStorageLocalRootDir | quote }}
+
+            # Sensitive env vars from Secrets
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-outline-secret" .Release.Name) .Values.outline.existingSecret }}
+                  key: secretKey
+
+            - name: UTILS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-outline-secret" .Release.Name) .Values.outline.existingSecret }}
+                  key: utilsSecret
+
+            # Postgres
+            {{ if .Values.postgres.enabled }}
+            - name: DATABASE_URL
+              value: "postgres://{{ .Values.postgres.username }}:{{ .Values.postgres.password }}@{{ .Release.Name }}-postgres:5432/{{ .Values.postgres.database }}"
+            {{ else }}
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-postgres-external-secret" .Release.Name) .Values.postgres.external.existingSecret }}
+                  key: {{ default "DATABASE_URL" .Values.postgres.external.databaseUrlKey }}
+            {{ end }}
+
+            # Redis
+            {{ if .Values.redis.enabled }}
+            - name: REDIS_URL
+              value: "redis://{{ .Release.Name }}-redis:6379"
+            {{ else }}
+            - name: REDIS_URL
+              value: "redis://{{ .Values.redis.external.host }}:{{ .Values.redis.external.port }}"
+            {{ end }}
+
+            # Azure AD (conditionally injected)
+            {{ if .Values.azure.enabled }}
+            - name: AZURE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-outline-secret" .Release.Name) .Values.outline.existingSecret }}
+                  key: azureClientId
+
+            - name: AZURE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-outline-secret" .Release.Name) .Values.outline.existingSecret }}
+                  key: azureClientSecret
+
+            - name: AZURE_RESOURCE_APP_ID
+              value: {{ .Values.azure.resourceAppId | quote }}
+
+            - name: AZURE_TENANT_ID
+              value: {{ .Values.azure.tenantId | quote }}
+            {{ end }}
+
+          resources:
+            {{- toYaml .Values.outline.resources | nindent 12 }}
+
+          readinessProbe:
+            {{- toYaml .Values.outline.readinessProbe | nindent 12 }}
+
+          livenessProbe:
+            {{- toYaml .Values.outline.livenessProbe | nindent 12 }}
+
+          volumeMounts:
+            {{ if .Values.persistence.enabled }}
+            - name: outline-data
+              mountPath: {{ .Values.outline.fileStorageLocalRootDir }}
+            {{ end }}
+
+      volumes:
+        {{ if .Values.persistence.enabled }}
+        - name: outline-data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-outline-pvc
+        {{ end }}
