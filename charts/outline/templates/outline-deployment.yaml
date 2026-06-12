@@ -33,6 +33,7 @@ spec:
           imagePullPolicy: {{ .Values.outline.imagePullPolicy | default "IfNotPresent" }}
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop:
                 - ALL
@@ -103,6 +104,10 @@ spec:
               value: "redis://{{ .Values.redis.external.host }}:{{ .Values.redis.external.port }}"
             {{ end }}
 
+            # Collaboration (required when replicas > 1 for real-time doc sync)
+            - name: REDIS_COLLABORATION_URL
+              value: {{ if .Values.redis.enabled }}"redis://{{ .Release.Name }}-redis:6379"{{ else }}"redis://{{ .Values.redis.external.host }}:{{ .Values.redis.external.port }}"{{ end }}
+
             # Azure AD (conditionally injected)
             {{ if .Values.azure.enabled }}
             - name: AZURE_CLIENT_ID
@@ -134,12 +139,18 @@ spec:
             {{- toYaml .Values.outline.livenessProbe | nindent 12 }}
 
           volumeMounts:
+            # Writable tmp dir (readOnlyRootFilesystem requires this)
+            - name: tmp
+              mountPath: /tmp
             {{ if .Values.persistence.enabled }}
             - name: outline-data
               mountPath: {{ .Values.outline.fileStorageLocalRootDir }}
             {{ end }}
 
       volumes:
+        # Temporary directory for Node.js runtime (required with readOnlyRootFilesystem)
+        - name: tmp
+          emptyDir: {}
         {{ if .Values.persistence.enabled }}
         - name: outline-data
           persistentVolumeClaim:
