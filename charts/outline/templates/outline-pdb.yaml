@@ -1,0 +1,11 @@
+{{- if .Values.outline.replicas }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Release.Name }}-outline-pdb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: outline
+{{- end }}
