@@ -82,12 +82,12 @@ harbor:
     replicas: ${NGINX_REPLICAS}
     resources:
       requests:
-        memory: "32Mi"
-        cpu: "20m"
+        memory: "128Mi"
+        cpu: "100m"
         ephemeral-storage: "256Mi"   # NEWLY ADDED
       limits:
-        memory: "64Mi"
-        cpu: "50m"
+        memory: "256Mi"
+        cpu: "300m"
         ephemeral-storage: "512Mi"   # NEWLY ADDED
 
   trivy:
