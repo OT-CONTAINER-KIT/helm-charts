@@ -51,11 +51,10 @@ outline:
   utilsSecret: ""
 
 azure:
-  enabled: true
+  enabled: false
   clientId: ""
   clientSecret: ""
   resourceAppId: ""
-  tenantId: ""
 
 postgres:
   enabled: false

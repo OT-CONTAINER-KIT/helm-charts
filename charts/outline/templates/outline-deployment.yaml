@@ -13,10 +13,29 @@ spec:
         app: outline
     spec:
       terminationGracePeriodSeconds: {{ .Values.outline.terminationGracePeriodSeconds }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: outline
       containers:
         - name: outline
           image: {{ .Values.outline.image }}
           imagePullPolicy: {{ .Values.outline.imagePullPolicy | default "IfNotPresent" }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
 
           ports:
             - containerPort: {{ .Values.outline.port }}
