@@ -91,7 +91,7 @@ autoscaling:
   memory: 80
 
 backup:
-  enabled: true
+  enabled: false
   schedule: "0 2 * * *"
   suspend: false
   image:
