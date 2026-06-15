@@ -58,8 +58,7 @@
                                                                                                                                                                                                                    
  ────────────────────────────────────────────────────────────────────────────────                                                                                                                                  
                                                                                                                                                                                                                    
- ### Method B: In-Place Overwrite (faster setup, longer downtime)                                                                                                                                                  
-                                                                                                                                                                                                                   
+ ### Method B: In-Place Overwrite (faster setup, longer downtime)
  Use this when you don't care about brief downtime or the DB is small.                                                                                                                                             
                                                                                                                                                                                                                    
  #### Step 1 — Stop Outline completely                                                                                                                                                                             
