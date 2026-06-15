@@ -90,29 +90,29 @@ autoscaling:
   cpu: 60
   memory: 80
 
-# backup:
-#   enabled: true
-#   schedule: "0 2 * * *"
-#   suspend: false
-#   image:
-#     repository: minio/mc
-#     tag: latest
-#     pullPolicy: IfNotPresent
-#   retention:
-#     days: 14
-#   minio:
-#     endpoint: "http://192.168.8.18:9000"
-#     bucket: "docs"
-#     pathPrefix: "outline-backups"
-#     existingSecret: ""
-#     accessKey: ""
-#     secretKey: ""
-#     accessKeyKey: "accessKey"
-#     secretKeyKey: "secretKey"
-#   resources:
-#     requests:
-#       cpu: "100m"
-#       memory: "128Mi"
-#     limits:
-#       cpu: "500m"
-#       memory: "256Mi"
+backup:
+  enabled: false
+  schedule: "0 2 * * *"
+  suspend: false
+  image:
+    repository: minio/mc
+    tag: latest
+    pullPolicy: IfNotPresent
+  retention:
+    days: 14
+  minio:
+    endpoint: "http://192.168.8.18:9000"
+    bucket: "docs"
+    pathPrefix: "outline-backups"
+    existingSecret: ""
+    accessKey: ""
+    secretKey: ""
+    accessKeyKey: "accessKey"
+    secretKeyKey: "secretKey"
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
