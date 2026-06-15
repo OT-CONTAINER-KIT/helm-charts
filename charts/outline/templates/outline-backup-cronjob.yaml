@@ -1,78 +1,78 @@
-{{- if .Values.backup.enabled }}
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: {{ .Release.Name }}-outline-backup
-  labels:
-    app: outline
-    component: backup
-spec:
-  schedule: {{ .Values.backup.schedule | quote }}
-  suspend: {{ .Values.backup.suspend }}
-  concurrencyPolicy: Forbid
-  successfulJobsHistoryLimit: 3
-  failedJobsHistoryLimit: 3
-  jobTemplate:
-    spec:
-      activeDeadlineSeconds: 3600
-      template:
-        spec:
-          restartPolicy: OnFailure
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 1001
-            runAsGroup: 1001
-            fsGroup: 1001
-            seccompProfile:
-              type: RuntimeDefault
-          containers:
-            - name: backup
-              image: "{{ .Values.backup.image.repository }}:{{ .Values.backup.image.tag }}"
-              imagePullPolicy: {{ .Values.backup.image.pullPolicy | default "IfNotPresent" }}
-              command:
-                - /bin/sh
-                - -ceu
-                - |
-                  # Configure mc alias
-                  mc alias set minio \
-                    "$MINIO_ENDPOINT" \
-                    "$MINIO_ACCESS_KEY" \
-                    "$MINIO_SECRET_KEY"
+# {{- if .Values.backup.enabled }}
+# apiVersion: batch/v1
+# kind: CronJob
+# metadata:
+#   name: {{ .Release.Name }}-outline-backup
+#   labels:
+#     app: outline
+#     component: backup
+# spec:
+#   schedule: {{ .Values.backup.schedule | quote }}
+#   suspend: {{ .Values.backup.suspend }}
+#   concurrencyPolicy: Forbid
+#   successfulJobsHistoryLimit: 3
+#   failedJobsHistoryLimit: 3
+#   jobTemplate:
+#     spec:
+#       activeDeadlineSeconds: 3600
+#       template:
+#         spec:
+#           restartPolicy: OnFailure
+#           securityContext:
+#             runAsNonRoot: true
+#             runAsUser: 1001
+#             runAsGroup: 1001
+#             fsGroup: 1001
+#             seccompProfile:
+#               type: RuntimeDefault
+#           containers:
+#             - name: backup
+#               image: "{{ .Values.backup.image.repository }}:{{ .Values.backup.image.tag }}"
+#               imagePullPolicy: {{ .Values.backup.image.pullPolicy | default "IfNotPresent" }}
+#               command:
+#                 - /bin/sh
+#                 - -ceu
+#                 - |
+#                   # Configure mc alias
+#                   mc alias set minio \
+#                     "$MINIO_ENDPOINT" \
+#                     "$MINIO_ACCESS_KEY" \
+#                     "$MINIO_SECRET_KEY"
 
-                  # Create timestamped tarball from the mounted PVC volume
-                  BACKUP_FILE="/tmp/outline-backup-$(date +%Y%m%d-%H%M%S).tgz"
-                  tar czf "$BACKUP_FILE" -C {{ .Values.outline.fileStorageLocalRootDir }} .
+#                   # Create timestamped tarball from the mounted PVC volume
+#                   BACKUP_FILE="/tmp/outline-backup-$(date +%Y%m%d-%H%M%S).tgz"
+#                   tar czf "$BACKUP_FILE" -C {{ .Values.outline.fileStorageLocalRootDir }} .
 
-                  # Upload tarball to MinIO
-                  mc cp "$BACKUP_FILE" \
-                    "minio/{{ .Values.backup.minio.bucket }}/{{ .Values.backup.minio.pathPrefix }}/"
+#                   # Upload tarball to MinIO
+#                   mc cp "$BACKUP_FILE" \
+#                     "minio/{{ .Values.backup.minio.bucket }}/{{ .Values.backup.minio.pathPrefix }}/"
 
-                  # Remove backups older than retention period
-                  mc rm --force --recursive --older-than {{ .Values.backup.retention.days }}d \
-                    "minio/{{ .Values.backup.minio.bucket }}/{{ .Values.backup.minio.pathPrefix }}/"
+#                   # Remove backups older than retention period
+#                   mc rm --force --recursive --older-than {{ .Values.backup.retention.days }}d \
+#                     "minio/{{ .Values.backup.minio.bucket }}/{{ .Values.backup.minio.pathPrefix }}/"
 
-                  # Clean up local tarball
-                  rm -f "$BACKUP_FILE"
-              env:
-                - name: MINIO_ENDPOINT
-                  value: {{ .Values.backup.minio.endpoint | quote }}
-                - name: MINIO_ACCESS_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ if .Values.backup.minio.existingSecret }}{{ .Values.backup.minio.existingSecret }}{{ else }}{{ .Release.Name }}-outline-backup-secret{{ end }}
-                      key: {{ .Values.backup.minio.accessKeyKey }}
-                - name: MINIO_SECRET_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ if .Values.backup.minio.existingSecret }}{{ .Values.backup.minio.existingSecret }}{{ else }}{{ .Release.Name }}-outline-backup-secret{{ end }}
-                      key: {{ .Values.backup.minio.secretKeyKey }}
-              resources:
-                {{- toYaml .Values.backup.resources | nindent 16 }}
-              volumeMounts:
-                - name: outline-data
-                  mountPath: {{ .Values.outline.fileStorageLocalRootDir }}
-          volumes:
-            - name: outline-data
-              persistentVolumeClaim:
-                claimName: {{ .Release.Name }}-outline-pvc
-{{- end }}
+#                   # Clean up local tarball
+#                   rm -f "$BACKUP_FILE"
+#               env:
+#                 - name: MINIO_ENDPOINT
+#                   value: {{ .Values.backup.minio.endpoint | quote }}
+#                 - name: MINIO_ACCESS_KEY
+#                   valueFrom:
+#                     secretKeyRef:
+#                       name: {{ if .Values.backup.minio.existingSecret }}{{ .Values.backup.minio.existingSecret }}{{ else }}{{ .Release.Name }}-outline-backup-secret{{ end }}
+#                       key: {{ .Values.backup.minio.accessKeyKey }}
+#                 - name: MINIO_SECRET_KEY
+#                   valueFrom:
+#                     secretKeyRef:
+#                       name: {{ if .Values.backup.minio.existingSecret }}{{ .Values.backup.minio.existingSecret }}{{ else }}{{ .Release.Name }}-outline-backup-secret{{ end }}
+#                       key: {{ .Values.backup.minio.secretKeyKey }}
+#               resources:
+#                 {{- toYaml .Values.backup.resources | nindent 16 }}
+#               volumeMounts:
+#                 - name: outline-data
+#                   mountPath: {{ .Values.outline.fileStorageLocalRootDir }}
+#           volumes:
+#             - name: outline-data
+#               persistentVolumeClaim:
+#                 claimName: {{ .Release.Name }}-outline-pvc
+# {{- end }}
