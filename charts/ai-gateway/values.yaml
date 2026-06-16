@@ -28,6 +28,16 @@ litellm:
   terminationGracePeriodSeconds: 620
   maxRequestsBeforeRestart: 10000
 
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+
+  pdb:
+    enabled: true
+    minAvailable: 1
+
   extraEnv:
     - name: LITELLM_LOG
       value: "ERROR"
@@ -44,9 +54,33 @@ litellm:
     geminiApiKey: ""
     openaiApiKey: ""
     anthropicApiKey: ""
+    openrouterApiKey: ""
 
   config:
-    model_list: []
+    model_list:
+      # 1. NVIDIA Nemotron 3 Ultra 550B (Frontier agentic & reasoning model)
+      - model_name: nemotron-3-ultra-free
+        litellm_params:
+          model: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free
+          api_key: "os.environ/OPENROUTER_API_KEY"
+
+      # 2. OpenAI GPT-OSS 120B (High-reasoning, agentic open-weight model)
+      - model_name: gpt-oss-120b-free
+        litellm_params:
+          model: openrouter/openai/gpt-oss-120b:free
+          api_key: "os.environ/OPENROUTER_API_KEY"
+
+      # 3. Google Gemma 4 31B Instruct (Dense multimodal model with thinking tokens)
+      - model_name: gemma-4-31b-free
+        litellm_params:
+          model: openrouter/google/gemma-4-31b-it:free
+          api_key: "os.environ/OPENROUTER_API_KEY"
+
+      # 4. NVIDIA Nemotron 3 Super 120B (Efficient hybrid Mamba-Transformer MoE)
+      - model_name: nemotron-3-super-free
+        litellm_params:
+          model: openrouter/nvidia/nemotron-3-super-120b-a12b:free
+          api_key: "os.environ/OPENROUTER_API_KEY"
 
     router_settings:
       routing_strategy: simple-shuffle
