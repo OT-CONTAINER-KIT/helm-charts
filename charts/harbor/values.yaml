@@ -1,4 +1,4 @@
-namespace: "harbor"
+namespace: harbor
 
 fullnameOverride: "stateless-app-harbor"
 
