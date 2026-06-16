@@ -90,18 +90,21 @@ litellm:
       cooldown_time: 30
 
     litellm_settings:
+      request_timeout: 600
+      stream_timeout: 300
       cache: true
       cache_params:
         type: redis
         host: "192.168.8.78"
         port: 6379
-        ttl: 600        
+        ttl: 600
       drop_params: true
       set_verbose: false
 
     general_settings:
       master_key: os.environ/LITELLM_MASTER_KEY
       store_model_in_db: true
+      pass_through_request_timeout: 600
 
 postgres:
   enabled: false
