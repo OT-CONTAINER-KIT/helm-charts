@@ -1,0 +1,21 @@
+ ### 4. Update workflow (copy this)                                                                                                                                                                                
+                                                                                                                                                                                                                   
+ When a new LiteLLM version is released:                                                                                                                                                                           
+                                                                                                                                                                                                                   
+ ```bash                                                                                                                                                                                                           
+   # 1. Check available tags                                                                                                                                                                                       
+   curl -s https://api.github.com/repos/BerriAI/litellm/releases/latest | jq -r '.tag_name'                                                                                                                        
+                                                                                                                                                                                                                   
+   # 2. Update your chart                                                                                                                                                                                          
+   # Edit values.yaml:                                                                                                                                                                                             
+   image: ghcr.io/berriai/litellm:v1.88.0                                                                                                                                                                          
+   imagePullPolicy: Always                                                                                                                                                                                         
+                                                                                                                                                                                                                   
+   # 3. Bump the chart version too (Chart.yaml)                                                                                                                                                                    
+   version: 0.2.1  # or whatever                                                                                                                                                                                   
+                                                                                                                                                                                                                   
+   # 4. Commit                                                                                                                                                                                                     
+   git add values.yaml Chart.yaml                                                                                                                                                                                  
+   git commit -m "bump litellm to v1.88.0"                                                                                                                                                                         
+                                                                                                                                                                                                                   
+   # 5. Deploy via BuildPiper      

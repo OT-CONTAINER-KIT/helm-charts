@@ -5,6 +5,11 @@ metadata:
   # namespace: {{ .Values.namespace }}
 spec:
   replicas: {{ .Values.litellm.replicas }}
+  strategy:
+    type: {{ .Values.litellm.strategy.type }}
+    rollingUpdate:
+      maxUnavailable: {{ .Values.litellm.strategy.rollingUpdate.maxUnavailable }}
+      maxSurge: {{ .Values.litellm.strategy.rollingUpdate.maxSurge }}
   selector:
     matchLabels:
       app: litellm
@@ -67,12 +72,19 @@ spec:
             {{ end }}
 
             # Provider API keys (only set if non-empty)
-            {{ if .Values.litellm.providers.geminiApiKey }}
-            - name: GEMINI_API_KEY
+            # {{ if .Values.litellm.providers.geminiApiKey }}
+            # - name: GEMINI_API_KEY
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
+            #       key: geminiApiKey
+            # {{ end }}
+            {{ if .Values.litellm.providers.openrouterApiKey }}
+            - name: OPENROUTER_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
-                  key: geminiApiKey
+                  key: openrouterApiKey
             {{ end }}
             # {{ if .Values.litellm.providers.openaiApiKey }}
             # - name: OPENAI_API_KEY

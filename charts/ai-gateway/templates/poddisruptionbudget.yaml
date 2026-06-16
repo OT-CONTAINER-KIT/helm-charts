@@ -1,0 +1,12 @@
+{{- if .Values.litellm.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Release.Name }}-litellm
+  # namespace: {{ .Values.namespace }}
+spec:
+  minAvailable: {{ .Values.litellm.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      app: litellm
+{{- end }}
