@@ -5,11 +5,11 @@ commonLabels:
 
 harbor:
   internalURL: http://stateless-app-harbor-core.harbor.svc.cluster.local:80
-  secretKey: "stateless-harbor-master-key-32ch" 
+  secretKey: ${HARBOR_SECRET}
     
   core:
     replicas: ${CORE_REPLICAS}
-    secret: "opstree-harbor-shared-secret"
+    secret: ${CORE_SECRET}
     resources:
       requests:
         memory: "256Mi"
@@ -27,7 +27,7 @@ harbor:
       
   jobservice:
     replicas: ${JOBSERVICE_REPLICAS}
-    secret: "opstree-harbor-shared-secret"
+    secret: ${JOBSERVICE_SECRET}
     jobLoggers:
       - database
     resources:
@@ -42,7 +42,7 @@ harbor:
 
   registry:
     replicas: 2
-    secret: "opstree-harbor-shared-secret"
+    secret: ${REGISTRY_SECRET}
 
     registry:
       resources:
