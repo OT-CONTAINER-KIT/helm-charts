@@ -149,6 +149,24 @@ service:
   type: ClusterIP
   port: 80
 
+# =============================================================================
+# SSO / OIDC (Keycloak) — Configure via BuildPiper key-value at runtime
+# =============================================================================
+sso:
+  enabled: false
+  # Use existingSecret for production (create Secret manually via kubectl).
+  # If empty, chart creates RELEASE_NAME-sso-secret from clientId/clientSecret.
+  existingSecret: ""
+
+  # BuildPiper runtime overrides go here:
+  clientId: ""
+  clientSecret: ""
+  authorizationEndpoint: ""
+  tokenEndpoint: ""
+  userinfoEndpoint: ""
+  scope: "openid email profile"
+  proxyBaseUrl: ""
+
 autoscaling:
   enabled: true
   minReplicas: 2
