@@ -31,6 +31,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- define "flagd-config-chart-dr.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "flagd-config-chart-dr.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: operator
 {{- end }}
 
 {{- define "flagd-config-chart-dr.serviceAccountName" -}}
