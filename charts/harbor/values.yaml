@@ -142,7 +142,7 @@ harbor:
     type: external
     external:
       host: "${DB_HOST}"
-      port: 5432
+      port: 5000
       username: "${DB_USER}"
       password: "${DB_PASSWORD}"
       coreDatabase: "${DB_NAME}"
