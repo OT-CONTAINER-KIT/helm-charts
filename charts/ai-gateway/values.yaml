@@ -44,7 +44,7 @@ litellm:
     - name: LITELLM_MODE
       value: "PRODUCTION"
     - name: DISABLE_SCHEMA_UPDATE
-      value: "false"
+      value: "true"
 
   existingSecret: ""
   masterKey: ""
