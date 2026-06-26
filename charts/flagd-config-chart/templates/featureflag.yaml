@@ -1,0 +1,18 @@
+apiVersion: core.openfeature.dev/v1beta1
+kind: FeatureFlag
+metadata:
+  name: {{ include "flagd.name" . }}-flags
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "flagd.labels" . | nindent 4 }}
+spec:
+  flagSpec:
+    flags:
+      {{- range $flagName, $flag := .Values.flags }}
+      {{ $flagName }}:
+        state: {{ $flag.state }}
+        variants:
+          "on": {{ index $flag "variants" "on" }}
+          "off": {{ index $flag "variants" "off" }}
+        defaultVariant: "{{ $flag.defaultVariant }}"
+      {{- end }}

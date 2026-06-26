@@ -1,0 +1,100 @@
+{{- if .Values.restore.enabled -}}
+{{- /*
+  Resolve minio connection: restore.minio.* overrides backup.minio.* for DR scenarios.
+  This lets you point the restore at a completely different minio instance/bucket.
+*/}}
+{{- $minioUrl    := .Values.restore.minio.url    | default .Values.backup.minio.url    }}
+{{- $minioBucket := .Values.restore.minio.bucket | default .Values.backup.minio.bucket }}
+{{- $useRestoreCreds := and .Values.restore.minio.accessKey (ne .Values.restore.minio.accessKey "") }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "flagd-config-chart-dr.fullname" . }}-restore-{{ now | unixEpoch }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "flagd-config-chart-dr.labels" . | nindent 4 }}
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ include "flagd-config-chart-dr.serviceAccountName" . }}
+      restartPolicy: OnFailure
+      initContainers:
+        - name: download
+          image: {{ .Values.restore.image | default "minio/mc:latest" }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              BUCKET="{{ $minioBucket }}"
+
+              echo "Installing MinIO client (mc)..."
+              if ! command -v mc >/dev/null 2>&1; then
+                wget -q https://dl.min.io/client/mc/release/linux-amd64/mc -O /usr/local/bin/mc
+                chmod +x /usr/local/bin/mc
+              fi
+
+              echo "Configuring MinIO client for restore..."
+              mc alias set restore {{ $minioUrl }} $MINIO_ACCESS_KEY $MINIO_SECRET_KEY --api S3v4 --insecure
+
+              if [ -n "$FILE_NAME" ]; then
+                echo "Restoring specific file: ${FILE_NAME}"
+                REMOTE_FILE="${FILE_NAME}"
+              else
+                echo "No filename specified – auto-selecting latest backup from ${BUCKET}..."
+                REMOTE_FILE=$(mc ls restore/${BUCKET} --no-color --insecure 2>/dev/null \
+                  | awk '{print $NF}' \
+                  | grep '\.yaml$' \
+                  | sort \
+                  | tail -n 1)
+                if [ -z "$REMOTE_FILE" ]; then
+                  echo "ERROR: No backup files found in bucket ${BUCKET}!"
+                  exit 1
+                fi
+                echo "Latest backup found: ${REMOTE_FILE}"
+              fi
+
+              echo "Downloading restore/${BUCKET}/${REMOTE_FILE} to /data/restore.yaml..."
+              mc cp "restore/${BUCKET}/${REMOTE_FILE}" /data/restore.yaml --insecure
+              echo "Download complete."
+          env:
+            - name: FILE_NAME
+              value: {{ .Values.restore.fileName | quote }}
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backup.minio.existingSecret | default (printf "%s-backup-creds" (include "flagd-config-chart-dr.fullname" .)) }}
+                  {{- if $useRestoreCreds }}
+                  key: restoreAccessKey
+                  {{- else }}
+                  key: accessKey
+                  {{- end }}
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backup.minio.existingSecret | default (printf "%s-backup-creds" (include "flagd-config-chart-dr.fullname" .)) }}
+                  {{- if $useRestoreCreds }}
+                  key: restoreSecretKey
+                  {{- else }}
+                  key: secretKey
+                  {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      containers:
+        - name: restore
+          image: alpine/k8s:1.30.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Restoring OpenFeature resources from /data/restore.yaml..."
+              kubectl apply -f /data/restore.yaml
+              echo "Restore completed successfully."
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}
+{{- end }}
