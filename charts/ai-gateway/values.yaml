@@ -104,9 +104,10 @@ litellm:
     general_settings:
       master_key: os.environ/LITELLM_MASTER_KEY
       store_model_in_db: true
-      pass_through_request_timeout: 600
+      pass_through_request_timeout: 600 
 
-postgres:
+
+postgres: 
   enabled: false
   external:
     host: "192.168.8.39"
