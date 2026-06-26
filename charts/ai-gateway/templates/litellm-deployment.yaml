@@ -52,31 +52,31 @@ spec:
             - name: STORE_MODEL_IN_DB
               value: "True"
 
-            {{- if .Values.sso.enabled }}
-            # ========== Generic OIDC / Keycloak SSO ==========
-            - name: GENERIC_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ default (printf "%s-sso-secret" .Release.Name) .Values.sso.existingSecret }}
-                  key: GENERIC_CLIENT_ID
-            - name: GENERIC_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ default (printf "%s-sso-secret" .Release.Name) .Values.sso.existingSecret }}
-                  key: GENERIC_CLIENT_SECRET
-            - name: GENERIC_AUTHORIZATION_ENDPOINT
-              value: {{ .Values.sso.authorizationEndpoint | quote }}
-            - name: GENERIC_TOKEN_ENDPOINT
-              value: {{ .Values.sso.tokenEndpoint | quote }}
-            - name: GENERIC_USERINFO_ENDPOINT
-              value: {{ .Values.sso.userinfoEndpoint | quote }}
-            - name: GENERIC_SCOPE
-              value: {{ default "openid email profile" .Values.sso.scope | quote }}
-            {{- if .Values.sso.proxyBaseUrl }}
-            - name: PROXY_BASE_URL
-              value: {{ .Values.sso.proxyBaseUrl | quote }}
-            {{- end }}
-            {{- end }}
+            {{ if .Values.sso.enabled }}
+            - name: GENERIC_CLIENT_ID                                                                                                                                                                           
+              valueFrom:                                                                                                                                                                                        
+                secretKeyRef:                                                                                                                                                                                   
+                  name: {{ default (printf "%s-sso-secret" .Release.Name) .Values.sso.existingSecret }}                                                                                                         
+                  key: GENERIC_CLIENT_ID                                                                                                                                                                        
+            - name: GENERIC_CLIENT_SECRET                                                                                                                                                                       
+              valueFrom:                                                                                                                                                                                        
+                secretKeyRef:                                                                                                                                                                                   
+                  name: {{ default (printf "%s-sso-secret" .Release.Name) .Values.sso.existingSecret }}                                                                                                         
+                  key: GENERIC_CLIENT_SECRET                                                                                                                                                                    
+            - name: GENERIC_AUTHORIZATION_ENDPOINT                                                                                                                                                              
+              value: {{ .Values.sso.authorizationEndpoint | quote }}                                                                                                                                            
+            - name: GENERIC_TOKEN_ENDPOINT                                                                                                                                                                      
+              value: {{ .Values.sso.tokenEndpoint | quote }}                                                                                                                                                    
+            - name: GENERIC_USERINFO_ENDPOINT                                                                                                                                                                   
+              value: {{ .Values.sso.userinfoEndpoint | quote }}                                                                                                                                                 
+            - name: GENERIC_SCOPE                                                                                                                                                                               
+              value: {{ default "openid email profile" .Values.sso.scope | quote }}                                                                                                                             
+            {{ if .Values.sso.proxyBaseUrl }}                                                                                                                                                                  
+            - name: PROXY_BASE_URL                                                                                                                                                                              
+              value: {{ .Values.sso.proxyBaseUrl | quote }}                                                                                                                                                     
+            {{ end }}                                                                                                                                                                                          
+            {{ end }}                                                                                                                                                                                          
+
 
             {{ if .Values.postgres.enabled }}
             - name: DATABASE_URL
