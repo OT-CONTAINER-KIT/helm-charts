@@ -139,3 +139,10 @@ ui:
       url: "https://vault.opstree.dev/v1/secret/data/feature-flags"
       secretName: "vault-token-secret"
       secretKey: "token"
+flags:
+  sample-flag:
+    state: ENABLED
+    defaultVariant: "on"
+    variants:
+      on: true
+      off: false
