@@ -9,11 +9,11 @@ metadata:
 spec:
   flagSpec:
     flags:
-      {{- range $flagName, $flag := .Values.flags }}
+{{- range $flagName, $flag := .Values.flags }}
       {{ $flagName }}:
         state: {{ $flag.state }}
         variants:
           on: {{ index $flag.variants "on" }}
           off: {{ index $flag.variants "off" }}
         defaultVariant: "{{ $flag.defaultVariant }}"
-      {{- end }}
+{{- end }}
