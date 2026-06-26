@@ -105,6 +105,7 @@ litellm:
       master_key: os.environ/LITELLM_MASTER_KEY
       store_model_in_db: true
       pass_through_request_timeout: 600
+      store_audit_logs: true
 
 
 
