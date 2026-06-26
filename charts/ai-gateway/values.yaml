@@ -105,6 +105,8 @@ litellm:
       master_key: os.environ/LITELLM_MASTER_KEY
       store_model_in_db: true
       pass_through_request_timeout: 600
+      store_audit_logs: true
+
 
 postgres:
   enabled: false
@@ -123,6 +125,24 @@ redis:
     existingSecret: ""
     passwordKey: REDIS_PASSWORD
     password: ""
+
+   # =============================================================================                                                                                                                                 
+   # SSO / OIDC (Keycloak) — Configure via BuildPiper key-value at runtime                                                                                                                                         
+   # =============================================================================                                                                                                                                 
+  sso:                                                                                                                                                                                                            
+    enabled: false                                                                                                                                                                                                
+    # Use existingSecret for production (create Secret manually via kubectl).                                                                                                                                     
+    # If empty, chart creates RELEASE_NAME-sso-secret from clientId/clientSecret.                                                                                                                                 
+    existingSecret: ""                                                                                                                                                                                            
+                                                                                                                                                                                                                  
+    # BuildPiper runtime overrides go here:                                                                                                                                                                       
+    clientId: ""                                                                                                                                                                                                  
+    clientSecret: ""                                                                                                                                                                                              
+    authorizationEndpoint: ""                                                                                                                                                                                     
+    tokenEndpoint: ""                                                                                                                                                                                             
+    userinfoEndpoint: ""                                                                                                                                                                                          
+    scope: "openid email profile"                                                                                                                                                                                 
+    proxyBaseUrl: ""          
 
 ingress:
   enabled: false
@@ -148,24 +168,6 @@ tls:
 service:
   type: ClusterIP
   port: 80
-
-# =============================================================================
-# SSO / OIDC (Keycloak) — Configure via BuildPiper key-value at runtime
-# =============================================================================
-sso:
-  enabled: false
-  # Use existingSecret for production (create Secret manually via kubectl).
-  # If empty, chart creates RELEASE_NAME-sso-secret from clientId/clientSecret.
-  existingSecret: ""
-
-  # BuildPiper runtime overrides go here:
-  clientId: ""
-  clientSecret: ""
-  authorizationEndpoint: ""
-  tokenEndpoint: ""
-  userinfoEndpoint: ""
-  scope: "openid email profile"
-  proxyBaseUrl: ""
 
 autoscaling:
   enabled: true
