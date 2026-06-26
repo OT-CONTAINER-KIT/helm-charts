@@ -59,11 +59,11 @@ azure:
 postgres:
   enabled: false
   external:
-    host: "192.168.8.39"
-    port: 5432
+    host: "postgres-central.opstree.dev"
+    port: 5000
     existingSecret: ""
     databaseUrlKey: DATABASE_URL
-    databaseUrl: ""
+    databaseUrl: ""           # set via Buildpiper KV
 
 redis:
   enabled: false
