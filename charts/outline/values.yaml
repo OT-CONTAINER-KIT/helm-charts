@@ -41,7 +41,7 @@ outline:
   nodeEnv: "production"
   forceHttps: "false"
   trustProxy: "true"
-  # pgsslmode: "prefer"
+  pgsslmode: "disable"
   fileStorage: "local"
   fileStorageLocalRootDir: "/var/lib/outline/data"
 
