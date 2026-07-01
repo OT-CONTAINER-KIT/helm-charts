@@ -61,8 +61,8 @@ spec:
             - name: COLLABORATION_URL
               value: {{ .Values.outline.collaborationUrl | quote }}
 
-            # - name: PGSSLMODE
-            #   value: {{ .Values.outline.pgsslmode | quote }}
+            - name: PGSSLMODE
+              value: {{ .Values.outline.pgsslmode | quote }}
 
             - name: FILE_STORAGE
               value: {{ .Values.outline.fileStorage | quote }}
