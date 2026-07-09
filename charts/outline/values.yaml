@@ -56,6 +56,16 @@ azure:
   clientSecret: ""
   resourceAppId: ""
 
+smtp:
+  enabled: false
+  host: "smtp-relay.brevo.com"
+  port: 587
+  username: ""
+  password: ""
+  fromEmail: ""
+  tlsCiphers: "TLSv1.2"
+  secure: "false"
+
 postgres:
   enabled: false
   external:

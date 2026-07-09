@@ -129,6 +129,30 @@ spec:
               value: {{ .Values.azure.tenantId | quote }}
             {{ end }}
 
+            # SMTP Configuration
+            {{- if .Values.smtp.enabled }}
+            - name: SMTP_HOST
+              value: {{ .Values.smtp.host | quote }}
+            - name: SMTP_PORT
+              value: {{ .Values.smtp.port | quote }}
+            - name: SMTP_FROM_EMAIL
+              value: {{ .Values.smtp.fromEmail | quote }}
+            - name: SMTP_TLS_CIPHERS
+              value: {{ .Values.smtp.tlsCiphers | quote }}
+            - name: SMTP_SECURE
+              value: {{ .Values.smtp.secure | quote }}
+            - name: SMTP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-outline-secret" .Release.Name) .Values.outline.existingSecret }}
+                  key: smtpUsername
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-outline-secret" .Release.Name) .Values.outline.existingSecret }}
+                  key: smtpPassword
+            {{- end }}
+
           resources:
             {{- toYaml .Values.outline.resources | nindent 12 }}
 
