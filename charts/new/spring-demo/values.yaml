@@ -1,0 +1,75 @@
+app:
+  replicaCount: 1
+
+  image:
+    repository: ajitesh70/spring-demo
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
+  service:
+    port: 8080
+
+  resources:
+    limits:
+      cpu: "1"
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  probes:
+    liveness:
+      path: /actuator/health/liveness
+      initialDelaySeconds: 40
+      periodSeconds: 15
+      timeoutSeconds: 3
+      failureThreshold: 3
+    readiness:
+      path: /actuator/health/readiness
+      initialDelaySeconds: 20
+      periodSeconds: 15
+      timeoutSeconds: 3
+      failureThreshold: 5
+
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 999
+    runAsGroup: 999
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+nginx:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    repository: nginx
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+      add:
+        - NET_BIND_SERVICE
+        - CHOWN
+        - SETUID
+        - SETGID

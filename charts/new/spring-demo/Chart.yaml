@@ -1,0 +1,6 @@
+apiVersion: v2
+name: spring-demo
+description: Spring Boot demo app served behind an nginx reverse proxy
+type: application
+version: 0.1.0
+appVersion: "0.0.1-SNAPSHOT"
