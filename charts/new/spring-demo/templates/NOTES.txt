@@ -1,0 +1,21 @@
+spring-demo has been deployed.
+
+{{- if .Values.nginx.enabled }}
+Nginx is exposed via a {{ .Values.nginx.service.type }} Service named {{ include "spring-demo.fullname" . }}-nginx on port {{ .Values.nginx.service.port }}.
+
+{{- if eq .Values.nginx.service.type "ClusterIP" }}
+To access it locally:
+  kubectl port-forward svc/{{ include "spring-demo.fullname" . }}-nginx {{ .Values.nginx.service.port }}:{{ .Values.nginx.service.port }} -n {{ .Release.Namespace }}
+  then open http://localhost:{{ .Values.nginx.service.port }}
+{{- else if eq .Values.nginx.service.type "NodePort" }}
+Get the node port:
+  kubectl get svc {{ include "spring-demo.fullname" . }}-nginx -n {{ .Release.Namespace }} -o jsonpath='{.spec.ports[0].nodePort}'
+{{- else if eq .Values.nginx.service.type "LoadBalancer" }}
+Get the external IP (may take a few minutes to provision):
+  kubectl get svc {{ include "spring-demo.fullname" . }}-nginx -n {{ .Release.Namespace }} -w
+{{- end }}
+{{- else }}
+Nginx is disabled; the app Service {{ include "spring-demo.fullname" . }}-app is only reachable inside the cluster on port {{ .Values.app.service.port }}.
+To access it locally:
+  kubectl port-forward svc/{{ include "spring-demo.fullname" . }}-app {{ .Values.app.service.port }}:{{ .Values.app.service.port }} -n {{ .Release.Namespace }}
+{{- end }}
