@@ -68,13 +68,13 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "pmm.fullname" . }}-secret
-                  key: clickhouse_username
+                  key: PMM_CLICKHOUSE_USERNAME
 
             - name: PMM_CLICKHOUSE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "pmm.fullname" . }}-secret
-                  key: clickhouse_password
+                  key: PMM_CLICKHOUSE_PASSWORD
 {{- end }}
 
           volumeMounts:
