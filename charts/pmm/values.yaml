@@ -38,7 +38,7 @@ persistence:
 
   storageClass: ""
 
-  size: 5Gi
+  size: 30Gi
 
 
 externalClickHouse:
@@ -67,6 +67,11 @@ resources:
     cpu: 2
 
     memory: 4Gi
+
+
+podSecurityContext:
+
+  fsGroup: 0
 
 
 networkPolicy:
