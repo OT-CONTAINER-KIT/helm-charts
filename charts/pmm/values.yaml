@@ -38,7 +38,7 @@ persistence:
 
   storageClass: ""
 
-  size: 25Gi
+  size: 15Gi
 
 
 externalClickHouse:
