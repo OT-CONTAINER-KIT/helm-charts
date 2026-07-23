@@ -1,0 +1,38 @@
+{{- if and .Values.autoscaling .Values.autoscaling.enabled }}
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+
+metadata:
+
+  name: {{ include "pmm.fullname" . }}
+
+spec:
+
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+
+  scaleTargetRef:
+
+    apiVersion: apps/v1
+
+    kind: Deployment
+
+    name: {{ include "pmm.fullname" . }}
+
+  metrics:
+
+  - type: Resource
+
+    resource:
+
+      name: cpu
+
+      target:
+
+        type: Utilization
+
+        averageUtilization: {{ .Values.autoscaling.cpu }}
+
+{{- end }}

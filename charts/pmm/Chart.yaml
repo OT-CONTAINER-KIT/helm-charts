@@ -1,0 +1,17 @@
+apiVersion: v2
+name: pmm
+description: Production PMM Helm Chart with External ClickHouse
+icon: https://www.percona.com/favicon.ico
+type: application
+
+version: 1.0.0
+appVersion: "3"
+
+keywords:
+  - pmm
+  - monitoring
+  - percona
+  - clickhouse
+
+maintainers:
+  - name: OpsTree Platform Team

@@ -1,0 +1,23 @@
+{{- if .Values.tls.certManager.enabled }}
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+
+metadata:
+  name: {{ include "pmm.fullname" . }}
+
+spec:
+
+  secretName: {{ .Values.ingress.tls.secretName }}
+
+  dnsNames:
+
+    - {{ .Values.ingress.host }}
+
+  issuerRef:
+
+    name: {{ .Values.tls.certManager.issuerRef.name }}
+
+    kind: {{ .Values.tls.certManager.issuerRef.kind }}
+
+{{- end }}

@@ -1,0 +1,100 @@
+pmm:
+
+  image:
+    repository: percona/pmm-server
+    tag: "3"
+    pullPolicy: IfNotPresent
+
+  replicaCount: 1
+
+
+service:
+
+  type: ClusterIP
+
+  port: 443
+
+  targetPort: 8443
+
+
+ingress:
+
+  enabled: false
+
+  className: nginx
+
+  host: ""
+
+  tls:
+
+    enabled: false
+
+    secretName: pmm-tls
+
+
+persistence:
+
+  enabled: true
+
+  storageClass: ""
+
+  size: 100Gi
+
+
+externalClickHouse:
+
+  enabled: true
+
+  host: ""
+
+  port: 9000
+
+
+resources:
+
+  requests:
+
+    cpu: 1
+
+    memory: 4Gi
+
+  limits:
+
+    cpu: 4
+
+    memory: 8Gi
+
+
+networkPolicy:
+
+  enabled: true
+
+
+serviceMonitor:
+
+  enabled: true
+
+
+tls:
+
+  certManager:
+
+    enabled: false
+
+    issuerRef:
+
+      kind: ClusterIssuer
+
+      name: letsencrypt-prod
+
+
+backup:
+
+  enabled: false
+
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: {{ include "pmm.fullname" . }}
+  labels:
+{{ include "pmm.labels" . | nindent 4 }}
+
+spec:
+  replicas: {{ .Values.pmm.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: {{ include "pmm.name" . }}
+
+  template:
+    metadata:
+      labels:
+        app: {{ include "pmm.name" . }}
+
+    spec:
+      serviceAccountName: {{ include "pmm.fullname" . }}
+
+{{- with .Values.podSecurityContext }}
+      securityContext:
+{{ toYaml . | nindent 8 }}
+{{- end }}
+
+      containers:
+        - name: pmm-server
+          image: "{{ .Values.pmm.image.repository }}:{{ .Values.pmm.image.tag }}"
+          imagePullPolicy: {{ .Values.pmm.image.pullPolicy }}
+
+          ports:
+            - name: https
+              containerPort: 8443
+
+          env:
+            - name: PMM_DISABLE_BUILTIN_CLICKHOUSE
+              value: "1"
+
+            - name: PMM_CLICKHOUSE_HOST
+              value: "{{ .Values.externalClickHouse.host }}"
+
+            - name: PMM_CLICKHOUSE_PORT
+              value: {{ .Values.externalClickHouse.port | quote }}
+
+          volumeMounts:
+            - name: pmm-data
+              mountPath: /srv
+
+          resources:
+{{ toYaml .Values.resources | nindent 12 }}
+
+          readinessProbe:
+            tcpSocket:
+              port: 8443
+            initialDelaySeconds: 60
+            periodSeconds: 10
+
+          livenessProbe:
+            tcpSocket:
+              port: 8443
+            initialDelaySeconds: 120
+            periodSeconds: 20
+
+      volumes:
+        - name: pmm-data
+          persistentVolumeClaim:
+            claimName: {{ include "pmm.fullname" . }}
+
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | nindent 8 }}
+
+      tolerations:
+{{ toYaml .Values.tolerations | nindent 8 }}
+
+      affinity:
+{{ toYaml .Values.affinity | nindent 8 }}
