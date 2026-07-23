@@ -36,6 +36,8 @@ spec:
               containerPort: 8443
 
           env:
+{{- if .Values.externalClickHouse.enabled }}
+
             - name: PMM_DISABLE_BUILTIN_CLICKHOUSE
               value: "1"
 
@@ -43,7 +45,9 @@ spec:
               value: "{{ .Values.externalClickHouse.host }}"
 
             - name: PMM_CLICKHOUSE_PORT
-              value: {{ .Values.externalClickHouse.port | quote }}
+              value: "{{ .Values.externalClickHouse.port }}"
+
+{{- end }}
 
           volumeMounts:
             - name: pmm-data
