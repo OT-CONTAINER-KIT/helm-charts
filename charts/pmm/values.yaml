@@ -45,7 +45,7 @@ externalClickHouse:
 
   enabled: true
 
-  host: ""
+  host: clickhouse.opstree.dev
 
   port: 9000
 
