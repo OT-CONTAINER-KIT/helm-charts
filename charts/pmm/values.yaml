@@ -35,9 +35,11 @@ resources:
   requests:
     cpu: 100m
     memory: 512Mi
+    ephemeral-storage: 1Gi
   limits:
     cpu: 2
     memory: 4Gi
+    ephemeral-storage: 5Gi
 
 podSecurityContext:
   fsGroup: 0
