@@ -49,6 +49,10 @@ externalClickHouse:
 
   port: 9000
 
+  username: pmm_user
+
+  password: pmmadmin@321
+
 
 resources:
 
