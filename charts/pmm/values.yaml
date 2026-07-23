@@ -54,15 +54,15 @@ resources:
 
   requests:
 
-    cpu: 1
+    cpu: 250m
 
-    memory: 4Gi
+    memory: 1Gi
 
   limits:
 
-    cpu: 4
+    cpu: 2
 
-    memory: 8Gi
+    memory: 4Gi
 
 
 networkPolicy:
