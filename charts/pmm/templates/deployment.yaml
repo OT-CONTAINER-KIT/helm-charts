@@ -57,6 +57,9 @@ spec:
 {{- if .Values.externalClickHouse.enabled }}
             - name: PMM_DISABLE_BUILTIN_CLICKHOUSE
               value: "1"
+              
+              name: PMM_CLICKHOUSE_ADDR
+              value: "{{ .Values.externalClickHouse.host }}:{{ .Values.externalClickHouse.port }}"
 
             - name: PMM_CLICKHOUSE_HOST
               value: "{{ .Values.externalClickHouse.host }}"
