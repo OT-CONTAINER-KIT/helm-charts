@@ -33,13 +33,13 @@ externalClickHouse:
 
 resources:
   requests:
-    cpu: 500m
-    memory: 2Gi
-    ephemeral-storage: 10Gi
+    cpu: 100m
+    memory: 512Mi
+    ephemeral-storage: 1Gi
   limits:
     cpu: 2
-    memory: 6Gi
-    ephemeral-storage: 20Gi
+    memory: 4Gi
+    ephemeral-storage: 5Gi
 
 podSecurityContext:
   fsGroup: 0
