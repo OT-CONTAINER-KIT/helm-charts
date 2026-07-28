@@ -1,0 +1,153 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: outline-backup
+  namespace: docs
+  labels:
+    app: outline-backup
+    purpose: backup
+spec:
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: outline-backup
+        spec:
+          containers:
+          - name: backup
+            image: alpine:latest
+            command: ["/bin/sh", "/scripts/backup-script.sh"]
+            env:
+            - name: MINIO_ENDPOINT
+              value: "https://minio.ldc.opstree.dev:9000"
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-backup-secret
+                  key: access-key
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-backup-secret
+                  key: secret-key
+            - name: MINIO_BUCKET
+              value: "outline-pvc-backup"
+            volumeMounts:
+            - name: outline-data
+              mountPath: /outline-data
+              readOnly: true
+            - name: backup-scripts
+              mountPath: /scripts
+            - name: backup-storage
+              mountPath: /backup
+          volumes:
+          - name: outline-data
+            persistentVolumeClaim:
+              claimName: outline-outline-pvc
+          - name: backup-scripts
+            configMap:
+              name: outline-backup-script
+              defaultMode: 0755
+          - name: backup-storage
+            emptyDir: {}
+          restartPolicy: OnFailure
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-backup-secret
+  namespace: docs
+type: Opaque
+stringData:
+  access-key: "UZ86MT0IVFGNP8QDXWBK"  # Paste your access key here
+  secret-key: "N71EsHvz1MAy32UMNEMPiAEa+jAoa0qu7TryycwE"  # Paste your secret key here
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: outline-backup-script
+  namespace: docs
+data:
+  backup-script.sh: |
+    #!/bin/sh
+
+    # Outline PVC Backup Script
+    set -e
+
+    # Configuration
+    BACKUP_DIR="/backup"
+    PVC_MOUNT="/outline-data"
+    TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+    BACKUP_FILENAME="outline_${TIMESTAMP}.tar.gz"
+    RETENTION_DAYS=7
+
+    # MinIO Configuration (from environment variables)
+    MINIO_ENDPOINT="${MINIO_ENDPOINT}"
+    MINIO_ACCESS_KEY="${MINIO_ACCESS_KEY}"
+    MINIO_SECRET_KEY="${MINIO_SECRET_KEY}"
+    MINIO_BUCKET="${MINIO_BUCKET}"
+
+    log() {
+        echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1"
+    }
+
+    # Install required packages
+    log "Installing required packages..."
+    apk add --no-cache curl jq tar
+
+    # Install mc
+    log "Installing MinIO Client..."
+    curl -sL https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc
+    chmod +x /usr/local/bin/mc
+
+    # Configure mc
+    log "Configuring MinIO Client..."
+    mc alias set minio-backup $MINIO_ENDPOINT $MINIO_ACCESS_KEY $MINIO_SECRET_KEY --api S3v4
+
+    # Create backup
+    log "Creating backup: $BACKUP_FILENAME"
+    mkdir -p $BACKUP_DIR
+    tar -czf $BACKUP_DIR/$BACKUP_FILENAME -C $PVC_MOUNT .
+    BACKUP_SIZE=$(du -h $BACKUP_DIR/$BACKUP_FILENAME | cut -f1)
+    log "Backup created: $BACKUP_FILENAME ($BACKUP_SIZE)"
+
+    # Upload to MinIO
+    log "Uploading to MinIO..."
+    mc cp $BACKUP_DIR/$BACKUP_FILENAME minio-backup/$MINIO_BUCKET/$BACKUP_FILENAME
+    log "Uploaded to: $MINIO_ENDPOINT/$MINIO_BUCKET/$BACKUP_FILENAME"
+
+    # Cleanup old backups (older than 7 days)
+    log "Cleaning up backups older than $RETENTION_DAYS days..."
+    mc ls minio-backup/$MINIO_BUCKET/outline_*.tar.gz --json 2>/dev/null | \
+        while IFS= read -r line; do
+            filename=$(echo "$line" | jq -r '.key')
+            last_modified=$(echo "$line" | jq -r '.lastModified')
+
+            if [ -n "$filename" ] && [ -n "$last_modified" ]; then
+                backup_date=$(date -d "$last_modified" +%s 2>/dev/null || echo "0")
+                current_date=$(date +%s)
+
+                if [ "$backup_date" != "0" ]; then
+                    age_days=$(( (current_date - backup_date) / 86400 ))
+
+                    if [ $age_days -gt $RETENTION_DAYS ]; then
+                        log "Deleting old backup: $filename ($age_days days old)"
+                        mc rm minio-backup/$MINIO_BUCKET/$filename
+                    fi
+                fi
+            fi
+        done
+
+    log "Cleanup completed"
+
+    # Cleanup local
+    log "Cleaning up local backup files..."
+    rm -f $BACKUP_DIR/$BACKUP_FILENAME
+
+    log "=========================================="
+    log "✅ Backup completed successfully!"
+    log "=========================================="
