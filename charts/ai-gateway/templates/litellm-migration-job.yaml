@@ -39,6 +39,10 @@ spec:
             - "-c"
             - "litellm --run_database_migrations || echo 'Database migrations applied or up to date'"
           env:
+            - name: HOME
+              value: "/tmp"
+            - name: TMPDIR
+              value: "/tmp"
             - name: DATABASE_URL
               {{- if .Values.postgres.enabled }}
               value: "postgresql://{{ .Values.postgres.username }}:{{ .Values.postgres.password }}@{{ .Release.Name }}-postgres:5432/{{ .Values.postgres.database }}"
@@ -57,4 +61,10 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
 {{- end }}

@@ -71,6 +71,12 @@ spec:
             {{- end }}
 
           env:
+            # Set HOME to /tmp for non-root user write access to cache & Prisma query engine
+            - name: HOME
+              value: "/tmp"
+            - name: TMPDIR
+              value: "/tmp"
+
             - name: LITELLM_MASTER_KEY
               valueFrom:
                 secretKeyRef:
@@ -190,6 +196,8 @@ spec:
               mountPath: /app/config.yaml
               subPath: config.yaml
               readOnly: true
+            - name: tmp
+              mountPath: /tmp
             {{- if .Values.litellm.extraVolumeMounts }}
             {{- toYaml .Values.litellm.extraVolumeMounts | nindent 12 }}
             {{- end }}
@@ -198,6 +206,8 @@ spec:
         - name: config
           configMap:
             name: {{ .Release.Name }}-litellm-config
+        - name: tmp
+          emptyDir: {}
         {{- if .Values.litellm.extraVolumes }}
         {{- toYaml .Values.litellm.extraVolumes | nindent 8 }}
         {{- end }}
