@@ -54,18 +54,9 @@ litellm:
     enabled: true
     minAvailable: 1
 
-  # Security Context (Complies with Restricted Pod Security Standards)
-  podSecurityContext:
-    runAsNonRoot: true
-    runAsUser: 10001
-    fsGroup: 10001
-
-  securityContext:
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
-    readOnlyRootFilesystem: false
+  # Security Context (Default root execution for full permission access)
+  podSecurityContext: {}
+  securityContext: {}
 
   # High Availability: Spread pods across distinct worker nodes
   affinity:

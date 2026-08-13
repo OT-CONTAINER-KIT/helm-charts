@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-litellm-migration-{{ .Release.Revision }}
+  name: {{ .Release.Name }}-litellm-migration-{{ randAlphaNum 6 | lower }}
   labels:
     app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -12,6 +12,7 @@ metadata:
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
     helm.sh/hook-weight: "1"
 spec:
+  ttlSecondsAfterFinished: 60
   backoffLimit: 3
   template:
     metadata:
