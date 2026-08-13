@@ -1,33 +1,32 @@
-AI API GATEWAY (LiteLLM) DEPLOYED
+=============================================================================
+LITELLM AI GATEWAY DEPLOYED (PRODUCTION READY)
+=============================================================================
 
-Proxy URL (NodePort, only when service.type=NodePort):
-  http://<NODE_IP>:{{ .Values.service.proxyNodePort }}
+1. Architecture Overview:
+   • Pods: LiteLLM proxy with HPA ({{ .Values.autoscaling.minReplicas }}-{{ .Values.autoscaling.maxReplicas }} replicas) & PDB (minAvailable: {{ .Values.litellm.pdb.minAvailable }})
+   • Traffic Entrypoint: Gateway API / Kong API Gateway routes to Service:
+       http://{{ .Release.Name }}-litellm-proxy.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
+   • Database: External PostgreSQL ({{ .Values.postgres.external.host }}:{{ .Values.postgres.external.port }})
+   • Cache / Rate Limit: External Redis ({{ .Values.redis.external.host }}:{{ .Values.redis.external.port }})
 
-Proxy Ingress:
-  http://{{ .Values.ingress.hosts.proxy }}
+2. Service & Port Details:
+   • Internal Kubernetes Service: {{ .Release.Name }}-litellm-proxy
+   • Service Port: {{ .Values.service.port }} (TargetPort: {{ .Values.litellm.port }})
 
-Admin UI Ingress:
-  http://{{ .Values.ingress.hosts.ui }}/ui
+3. Observability & Health Probes:
+   • Liveness Check:
+       curl http://<POD_IP>:{{ .Values.litellm.port }}/health/liveliness
+   • Readiness Check:
+       curl http://<POD_IP>:{{ .Values.litellm.port }}/health/readiness
+   • Prometheus Metrics:
+       curl http://<POD_IP>:{{ .Values.litellm.port }}/metrics
 
-Health check:
-  curl http://<NODE_IP>:{{ .Values.service.proxyNodePort }}/health/liveliness
+4. Secret & Credential Management:
+   • Master Key Secret: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
+   • Database Secret: {{ default (printf "%s-postgres-external-secret" .Release.Name) .Values.postgres.external.existingSecret }}
+   • Redis Secret: {{ default (printf "%s-redis-external-secret" .Release.Name) .Values.redis.external.existingSecret }}
 
-Database:
-  PostgreSQL in-chart enabled: {{ .Values.postgres.enabled }}
-  External secret: {{ .Values.postgres.external.existingSecret }}
-
-Cache + rate-limit counters:
-  Redis in-chart enabled: {{ .Values.redis.enabled }}
-  Redis host: {{ .Values.redis.external.host }}:{{ .Values.redis.external.port }}
-  Redis secret: {{ .Values.redis.external.existingSecret }}
-
-Master key (admin):
-  Stored in Secret: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}  (key: masterKey)
-  Retrieve with:
-    kubectl get secret {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }} -o jsonpath='{.data.masterKey}' | base64 -d ; echo
-
-Check pods:
-  kubectl get pods -l app=litellm
-
-Logs:
-  kubectl logs -f -l app=litellm
+5. Quick Verification Commands:
+   kubectl get pods -n {{ .Release.Namespace }} -l app=litellm
+   kubectl logs -n {{ .Release.Namespace }} -l app=litellm -f
+=============================================================================

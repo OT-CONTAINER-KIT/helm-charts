@@ -2,9 +2,16 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-litellm
-  # namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app: litellm
 spec:
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.litellm.replicas }}
+  {{- end }}
   strategy:
     type: {{ .Values.litellm.strategy.type }}
     rollingUpdate:
@@ -15,14 +22,41 @@ spec:
       app: litellm
   template:
     metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/litellm-config.yaml") . | sha256sum }}
+        {{- with .Values.litellm.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
         app: litellm
     spec:
       terminationGracePeriodSeconds: {{ .Values.litellm.terminationGracePeriodSeconds }}
+      {{- if .Values.litellm.podSecurityContext }}
+      securityContext:
+        {{- toYaml .Values.litellm.podSecurityContext | nindent 8 }}
+      {{- end }}
+      {{- if .Values.litellm.affinity }}
+      affinity:
+        {{- toYaml .Values.litellm.affinity | nindent 8 }}
+      {{- end }}
+      {{- if .Values.litellm.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.litellm.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.litellm.tolerations }}
+      tolerations:
+        {{- toYaml .Values.litellm.tolerations | nindent 8 }}
+      {{- end }}
       containers:
         - name: litellm
           image: {{ .Values.litellm.image }}
           imagePullPolicy: {{ .Values.litellm.imagePullPolicy | default "IfNotPresent" }}
+          {{- if .Values.litellm.securityContext }}
+          securityContext:
+            {{- toYaml .Values.litellm.securityContext | nindent 12 }}
+          {{- end }}
 
           args:
             - "--config"
@@ -52,93 +86,100 @@ spec:
             - name: STORE_MODEL_IN_DB
               value: "True"
 
-            {{ if .Values.sso.enabled }}
-            - name: GENERIC_CLIENT_ID                                                                                                                                                                           
-              valueFrom:                                                                                                                                                                                        
-                secretKeyRef:                                                                                                                                                                                   
-                  name: {{ default (printf "%s-sso-secret" .Release.Name) .Values.sso.existingSecret }}                                                                                                         
-                  key: GENERIC_CLIENT_ID                                                                                                                                                                        
-            - name: GENERIC_CLIENT_SECRET                                                                                                                                                                       
-              valueFrom:                                                                                                                                                                                        
-                secretKeyRef:                                                                                                                                                                                   
-                  name: {{ default (printf "%s-sso-secret" .Release.Name) .Values.sso.existingSecret }}                                                                                                         
-                  key: GENERIC_CLIENT_SECRET                                                                                                                                                                    
-            - name: GENERIC_AUTHORIZATION_ENDPOINT                                                                                                                                                              
-              value: {{ .Values.sso.authorizationEndpoint | quote }}                                                                                                                                            
-            - name: GENERIC_TOKEN_ENDPOINT                                                                                                                                                                      
-              value: {{ .Values.sso.tokenEndpoint | quote }}                                                                                                                                                    
-            - name: GENERIC_USERINFO_ENDPOINT                                                                                                                                                                   
-              value: {{ .Values.sso.userinfoEndpoint | quote }}                                                                                                                                                 
-            - name: GENERIC_SCOPE                                                                                                                                                                               
-              value: {{ default "openid email profile" .Values.sso.scope | quote }}                                                                                                                             
-            {{ if .Values.sso.proxyBaseUrl }}                                                                                                                                                                  
-            - name: PROXY_BASE_URL                                                                                                                                                                              
-              value: {{ .Values.sso.proxyBaseUrl | quote }}                                                                                                                                                     
-            {{ end }}                                                                                                                                                                                          
-            {{ end }}                                                                                                                                                                                          
+            {{- if and .Values.sso.enabled (ne (toString .Values.sso.enabled) "false") }}
+            - name: GENERIC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-sso-secret" .Release.Name) .Values.sso.existingSecret }}
+                  key: GENERIC_CLIENT_ID
+            - name: GENERIC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-sso-secret" .Release.Name) .Values.sso.existingSecret }}
+                  key: GENERIC_CLIENT_SECRET
+            - name: GENERIC_AUTHORIZATION_ENDPOINT
+              value: {{ .Values.sso.authorizationEndpoint | quote }}
+            - name: GENERIC_TOKEN_ENDPOINT
+              value: {{ .Values.sso.tokenEndpoint | quote }}
+            - name: GENERIC_USERINFO_ENDPOINT
+              value: {{ .Values.sso.userinfoEndpoint | quote }}
+            - name: GENERIC_SCOPE
+              value: {{ default "openid email profile" .Values.sso.scope | quote }}
+            {{- if .Values.sso.proxyBaseUrl }}
+            - name: PROXY_BASE_URL
+              value: {{ .Values.sso.proxyBaseUrl | quote }}
+            {{- end }}
+            {{- end }}
 
-
-            {{ if .Values.postgres.enabled }}
+            {{- if .Values.postgres.enabled }}
             - name: DATABASE_URL
               value: "postgresql://{{ .Values.postgres.username }}:{{ .Values.postgres.password }}@{{ .Release.Name }}-postgres:5432/{{ .Values.postgres.database }}"
-            {{ else }}
+            {{- else }}
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: {{ default (printf "%s-postgres-external-secret" .Release.Name) .Values.postgres.external.existingSecret }}
                   key: {{ default "DATABASE_URL" .Values.postgres.external.databaseUrlKey }}
-            {{ end }}
+            {{- end }}
 
-            {{ if and (not .Values.redis.enabled) (or .Values.redis.external.existingSecret .Values.redis.external.password) }}
+            {{- if and (not .Values.redis.enabled) (or .Values.redis.external.existingSecret .Values.redis.external.password) }}
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ default (printf "%s-redis-external-secret" .Release.Name) .Values.redis.external.existingSecret }}
                   key: {{ default "REDIS_PASSWORD" .Values.redis.external.passwordKey }}
-            {{ end }}
+            {{- end }}
 
-            # Provider API keys (only set if non-empty)
-            # {{ if .Values.litellm.providers.geminiApiKey }}
-            # - name: GEMINI_API_KEY
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
-            #       key: geminiApiKey
-            # {{ end }}
-            {{ if .Values.litellm.providers.openrouterApiKey }}
+            # Provider API Keys (mounted from existingSecret or chart secret)
+            {{- if or .Values.litellm.providers.openrouterApiKey .Values.litellm.existingSecret }}
             - name: OPENROUTER_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
                   key: openrouterApiKey
-            {{ end }}
-            # {{ if .Values.litellm.providers.openaiApiKey }}
-            # - name: OPENAI_API_KEY
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
-            #       key: openaiApiKey
-            # {{ end }}
-            # {{ if .Values.litellm.providers.anthropicApiKey }}
-            # - name: ANTHROPIC_API_KEY
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
-            #       key: anthropicApiKey
-            # {{ end }}
+            {{- end }}
+            {{- if or .Values.litellm.providers.geminiApiKey (and .Values.litellm.existingSecret (eq .Values.litellm.providers.geminiApiKey "enable")) }}
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
+                  key: geminiApiKey
+            {{- end }}
+            {{- if or .Values.litellm.providers.openaiApiKey (and .Values.litellm.existingSecret (eq .Values.litellm.providers.openaiApiKey "enable")) }}
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
+                  key: openaiApiKey
+            {{- end }}
+            {{- if or .Values.litellm.providers.anthropicApiKey (and .Values.litellm.existingSecret (eq .Values.litellm.providers.anthropicApiKey "enable")) }}
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-litellm-secret" .Release.Name) .Values.litellm.existingSecret }}
+                  key: anthropicApiKey
+            {{- end }}
 
             {{- if .Values.litellm.extraEnv }}
             {{- toYaml .Values.litellm.extraEnv | nindent 12 }}
             {{- end }}
 
           ports:
-            - containerPort: {{ .Values.litellm.port }}
+            - name: proxy
+              containerPort: {{ .Values.litellm.port }}
+              protocol: TCP
 
           resources:
             {{- toYaml .Values.litellm.resources | nindent 12 }}
 
           readinessProbe:
             {{- toYaml .Values.litellm.readinessProbe | nindent 12 }}
+
+          {{- if .Values.litellm.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.litellm.livenessProbe | nindent 12 }}
+          {{- end }}
+
           lifecycle:
             preStop:
               exec:
@@ -149,8 +190,14 @@ spec:
               mountPath: /app/config.yaml
               subPath: config.yaml
               readOnly: true
+            {{- if .Values.litellm.extraVolumeMounts }}
+            {{- toYaml .Values.litellm.extraVolumeMounts | nindent 12 }}
+            {{- end }}
 
       volumes:
         - name: config
           configMap:
             name: {{ .Release.Name }}-litellm-config
+        {{- if .Values.litellm.extraVolumes }}
+        {{- toYaml .Values.litellm.extraVolumes | nindent 8 }}
+        {{- end }}

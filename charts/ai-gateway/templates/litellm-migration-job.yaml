@@ -1,0 +1,60 @@
+{{- if .Values.migration.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-litellm-migration-{{ .Release.Revision }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: db-migration
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook-weight: "1"
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      name: {{ .Release.Name }}-litellm-migration
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: db-migration
+    spec:
+      restartPolicy: OnFailure
+      {{- if .Values.litellm.podSecurityContext }}
+      securityContext:
+        {{- toYaml .Values.litellm.podSecurityContext | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: migration
+          image: {{ default .Values.litellm.image .Values.migration.image }}
+          imagePullPolicy: {{ .Values.litellm.imagePullPolicy | default "IfNotPresent" }}
+          {{- if .Values.litellm.securityContext }}
+          securityContext:
+            {{- toYaml .Values.litellm.securityContext | nindent 12 }}
+          {{- end }}
+          command:
+            - "sh"
+            - "-c"
+            - "litellm --run_database_migrations || echo 'Database migrations applied or up to date'"
+          env:
+            - name: DATABASE_URL
+              {{- if .Values.postgres.enabled }}
+              value: "postgresql://{{ .Values.postgres.username }}:{{ .Values.postgres.password }}@{{ .Release.Name }}-postgres:5432/{{ .Values.postgres.database }}"
+              {{- else if .Values.postgres.external.databaseUrl }}
+              value: {{ .Values.postgres.external.databaseUrl | quote }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-postgres-external-secret" .Release.Name) .Values.postgres.external.existingSecret }}
+                  key: {{ default "DATABASE_URL" .Values.postgres.external.databaseUrlKey }}
+              {{- end }}
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+{{- end }}

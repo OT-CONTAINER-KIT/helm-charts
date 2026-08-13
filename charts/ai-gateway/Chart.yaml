@@ -1,17 +1,17 @@
 apiVersion: v2
-name: buildpiper-helm
-description: LiteLLM AI Gateway Helm Chart for BuildPiper using external Postgres and Redis
+name: ai-gateway
+description: Production-Ready LiteLLM AI Gateway Helm Chart for BuildPiper behind Gateway API / Kong
 type: application
 
-version: 1.1.0
+version: 1.2.0
 appVersion: "1.87.1"
 
 keywords:
   - litellm
   - ai-gateway
   - llm
-  - openai
   - kubernetes
+  - buildpiper
 
 maintainers:
   - name: platform-team

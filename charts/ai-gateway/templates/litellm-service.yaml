@@ -2,15 +2,28 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Release.Name }}-litellm-proxy
-  # namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app: litellm
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "{{ .Values.litellm.port }}"
+    prometheus.io/path: "/metrics"
+    {{- with .Values.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   type: {{ .Values.service.type }}
   selector:
     app: litellm
   ports:
-    - name:  proxy
+    - name: proxy
       port: {{ .Values.service.port | default .Values.litellm.port }}
       targetPort: {{ .Values.litellm.port }}
+      protocol: TCP
       {{- if eq .Values.service.type "NodePort" }}
       nodePort: {{ .Values.service.proxyNodePort }}
       {{- end }}

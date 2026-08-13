@@ -1,12 +1,16 @@
-# buildpiper-helm — values.yaml
-# namespace: ai-gateway
+# =============================================================================
+# BuildPiper LiteLLM AI Gateway Helm Chart — Production values.yaml
+# Architecture: External PostgreSQL + External Redis + Gateway API / Kong Ingress
+# =============================================================================
+
 litellm:
   image: ghcr.io/berriai/litellm@sha256:75543fa1d73989b7aefba49c910989f7886f63210520e30b39dbbc580a41826f
-  imagePullPolicy: Always
+  imagePullPolicy: IfNotPresent
   replicas: 2
   workers: 1
   port: 4000
 
+  # Production Resource Allocation (Guaranteed QoS)
   resources:
     requests:
       cpu: "1"
@@ -15,6 +19,7 @@ litellm:
       cpu: "1"
       memory: "4Gi"
 
+  # Health & Liveness Probes
   readinessProbe:
     httpGet:
       path: /health/readiness
@@ -25,6 +30,16 @@ litellm:
     failureThreshold: 3
     successThreshold: 1
 
+  livenessProbe:
+    httpGet:
+      path: /health/liveliness
+      port: 4000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  # Zero-Downtime Rolling Update & LLM Stream Protection
   terminationGracePeriodSeconds: 620
   maxRequestsBeforeRestart: 10000
 
@@ -34,10 +49,43 @@ litellm:
       maxUnavailable: 0
       maxSurge: 1
 
+  # High-Availability Pod Disruption Budget
   pdb:
     enabled: true
     minAvailable: 1
 
+  # Security Context (Complies with Restricted Pod Security Standards)
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    fsGroup: 10001
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: false
+
+  # High Availability: Spread pods across distinct worker nodes
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                    - litellm
+            topologyKey: "kubernetes.io/hostname"
+
+  nodeSelector: {}
+  tolerations: []
+  podAnnotations: {}
+
+  # Runtime Environment
   extraEnv:
     - name: LITELLM_LOG
       value: "ERROR"
@@ -46,6 +94,11 @@ litellm:
     - name: DISABLE_SCHEMA_UPDATE
       value: "true"
 
+  # ===========================================================================
+  # BuildPiper Secret Integration:
+  # Option A (Recommended): Set existingSecret to a pre-created K8s secret name.
+  # Option B: Leave existingSecret empty ("") and provide values via BuildPiper KV.
+  # ===========================================================================
   existingSecret: ""
   masterKey: ""
   saltKey: ""
@@ -56,27 +109,28 @@ litellm:
     anthropicApiKey: ""
     openrouterApiKey: ""
 
+  # LiteLLM Proxy Configuration (Mounted to /app/config.yaml)
   config:
     model_list:
-      # 1. NVIDIA Nemotron 3 Ultra 550B (Frontier agentic & reasoning model)
+      # 1. NVIDIA Nemotron 3 Ultra 550B (Frontier reasoning model)
       - model_name: nemotron-3-ultra-free
         litellm_params:
           model: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free
           api_key: "os.environ/OPENROUTER_API_KEY"
 
-      # 2. OpenAI GPT-OSS 120B (High-reasoning, agentic open-weight model)
+      # 2. OpenAI GPT-OSS 120B (High-reasoning agentic model)
       - model_name: gpt-oss-120b-free
         litellm_params:
           model: openrouter/openai/gpt-oss-120b:free
           api_key: "os.environ/OPENROUTER_API_KEY"
 
-      # 3. Google Gemma 4 31B Instruct (Dense multimodal model with thinking tokens)
+      # 3. Google Gemma 4 31B Instruct (Dense multimodal model)
       - model_name: gemma-4-31b-free
         litellm_params:
           model: openrouter/google/gemma-4-31b-it:free
           api_key: "os.environ/OPENROUTER_API_KEY"
 
-      # 4. NVIDIA Nemotron 3 Super 120B (Efficient hybrid Mamba-Transformer MoE)
+      # 4. NVIDIA Nemotron 3 Super 120B (Efficient hybrid MoE)
       - model_name: nemotron-3-super-free
         litellm_params:
           model: openrouter/nvidia/nemotron-3-super-120b-a12b:free
@@ -97,28 +151,42 @@ litellm:
         type: redis
         host: "192.168.8.78"
         port: 6379
+        password: "os.environ/REDIS_PASSWORD"
         ttl: 600
       drop_params: true
       set_verbose: false
 
     general_settings:
-      master_key: os.environ/LITELLM_MASTER_KEY
+      master_key: "os.environ/LITELLM_MASTER_KEY"
       store_model_in_db: true
       pass_through_request_timeout: 600
       store_audit_logs: true
 
+# =============================================================================
+# Automated DB Migration Hook (Runs once before deployment rollout)
+# =============================================================================
+migration:
+  enabled: true
+  image: ""
 
-
+# =============================================================================
+# External PostgreSQL (Shared Central DB)
+# Note: For HA under high load, ensure connection_limit=5 is in DATABASE_URL
+# =============================================================================
 postgres:
   enabled: false
+  username: "ai-db-user"
+  database: "ai-gateway-db"
   external:
-    host: "postgres-central.opstree.dev"
-    port: 5000
+    host: "192.168.8.39"
+    port: 5432
     existingSecret: ""
     databaseUrlKey: DATABASE_URL
-    databaseUrl: ""           # set via Buildpiper KV
+    databaseUrl: ""           # Injected via BuildPiper KV or pre-created secret
 
-
+# =============================================================================
+# External Redis (Shared Central Cache & Rate Limiter)
+# =============================================================================
 redis:
   enabled: false
   external:
@@ -126,51 +194,37 @@ redis:
     port: 6379
     existingSecret: ""
     passwordKey: REDIS_PASSWORD
-    password: ""
+    password: ""              # Injected via BuildPiper KV or pre-created secret
 
-   # =============================================================================                                                                                                                                 
-   # SSO / OIDC (Keycloak) — Configure via BuildPiper key-value at runtime                                                                                                                                         
-   # =============================================================================                                                                                                                                 
-  sso:                                                                                                                                                                                                            
-    enabled: false                                                                                                                                                                                                
-    # Use existingSecret for production (create Secret manually via kubectl).                                                                                                                                     
-    # If empty, chart creates RELEASE_NAME-sso-secret from clientId/clientSecret.                                                                                                                                 
-    existingSecret: ""                                                                                                                                                                                            
-                                                                                                                                                                                                                  
-    # BuildPiper runtime overrides go here:                                                                                                                                                                       
-    clientId: ""                                                                                                                                                                                                  
-    clientSecret: ""                                                                                                                                                                                              
-    authorizationEndpoint: ""                                                                                                                                                                                     
-    tokenEndpoint: ""                                                                                                                                                                                             
-    userinfoEndpoint: ""                                                                                                                                                                                          
-    scope: "openid email profile"                                                                                                                                                                                 
-    proxyBaseUrl: ""          
-
-ingress:
+# =============================================================================
+# SSO / OIDC (Keycloak) Configuration
+# =============================================================================
+sso:
   enabled: false
-  className: nginx
-  hosts:
-    proxy: ai-gateway.example.internal
-    ui: ai-gateway-ui.example.internal
+  existingSecret: ""
+  clientId: ""
+  clientSecret: ""
+  authorizationEndpoint: ""
+  tokenEndpoint: ""
+  userinfoEndpoint: ""
+  scope: "openid email profile"
+  proxyBaseUrl: ""
 
-gatewayApi:
-  enabled: false
-  hostname: ai-gateway.opstree.dev
-  parentRef:
-    # Ask the Envoy Gateway/platform team for these two values.
-    name: ""
-    namespace: ""
-  pathPrefix: /
-
-tls:
-  enabled: false
-  crt: ""
-  key: ""
-
+# =============================================================================
+# Internal Kubernetes Service (Target for Gateway API / Kong HTTPRoute)
+# =============================================================================
 service:
   type: ClusterIP
   port: 80
+  proxyNodePort: 30000
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "4000"
+    prometheus.io/path: "/metrics"
 
+# =============================================================================
+# Horizontal Pod Autoscaler (HPA)
+# =============================================================================
 autoscaling:
   enabled: true
   minReplicas: 2
