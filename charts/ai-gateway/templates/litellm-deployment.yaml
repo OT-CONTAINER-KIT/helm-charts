@@ -170,6 +170,35 @@ spec:
             {{- toYaml .Values.litellm.extraEnv | nindent 12 }}
             {{- end }}
 
+            {{- if and .Values.langfuse (and .Values.langfuse.enabled (ne (toString .Values.langfuse.enabled) "false")) }}
+            {{- if or .Values.langfuse.host .Values.langfuse.existingSecret }}
+            - name: LANGFUSE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-langfuse-secret" .Release.Name) .Values.langfuse.existingSecret }}
+                  key: {{ default "LANGFUSE_HOST" .Values.langfuse.hostKey }}
+            - name: LANGFUSE_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-langfuse-secret" .Release.Name) .Values.langfuse.existingSecret }}
+                  key: {{ default "LANGFUSE_HOST" .Values.langfuse.hostKey }}
+            {{- end }}
+            {{- if or .Values.langfuse.publicKey .Values.langfuse.existingSecret }}
+            - name: LANGFUSE_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-langfuse-secret" .Release.Name) .Values.langfuse.existingSecret }}
+                  key: {{ default "LANGFUSE_PUBLIC_KEY" .Values.langfuse.publicKeyKey }}
+            {{- end }}
+            {{- if or .Values.langfuse.secretKey .Values.langfuse.existingSecret }}
+            - name: LANGFUSE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-langfuse-secret" .Release.Name) .Values.langfuse.existingSecret }}
+                  key: {{ default "LANGFUSE_SECRET_KEY" .Values.langfuse.secretKeyKey }}
+            {{- end }}
+            {{- end }}
+
           ports:
             - name: proxy
               containerPort: {{ .Values.litellm.port }}

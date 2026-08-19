@@ -146,12 +146,16 @@ litellm:
         ttl: 600
       drop_params: true
       set_verbose: false
+      success_callback:
+        - "langfuse"
+      failure_callback:
+        - "langfuse"
 
     general_settings:
       master_key: "os.environ/LITELLM_MASTER_KEY"
       store_model_in_db: true
       pass_through_request_timeout: 600
-      store_audit_logs: true
+      store_audit_logs: false
 
 # =============================================================================
 # Automated DB Migration Hook (Runs once before deployment rollout)
@@ -186,6 +190,16 @@ redis:
     existingSecret: ""
     passwordKey: REDIS_PASSWORD
     password: ""              # Injected via BuildPiper KV or pre-created secret
+
+# =============================================================================
+# Langfuse Cloud Observability (BuildPiper Integration)
+# =============================================================================
+langfuse:
+  enabled: true
+  host: ""                              # Injected via BuildPiper UI (e.g. https://us.cloud.langfuse.com)
+  existingSecret: ""                    # Leave empty if using BuildPiper KV
+  publicKey: ""                         # Injected via BuildPiper UI
+  secretKey: ""                         # Injected via BuildPiper UI
 
 # =============================================================================
 # SSO / OIDC (Keycloak) Configuration
