@@ -5,7 +5,7 @@ base:
   image:
     pullPolicy: "Always"
     command: []
-    repository: registry.ldc.opstree.dev/coe/sentryfuse-api
+    repository: harbor.ldc.opstree.dev/coe/sentryfuse-api
     tag: latest
     pullSecrets: "reg-ldc-coe-regcred"
   config:
