@@ -5,7 +5,7 @@ base:
   image:
     pullPolicy: "Always"
     args: [events]
-    repository: registry.ldc.opstree.dev/coe/sentryfuse-consumer
+    repository: harbor.ldc.opstree.dev/coe/sentryfuse-consumer
     tag: latest
     pullSecrets: "reg-ldc-coe-regcred"
   existingSecret: sentryfuse-consumer
