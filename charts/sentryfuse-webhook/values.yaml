@@ -4,7 +4,7 @@ component: webhook
 base:
   image:
     pullPolicy: "Always"
-    repository: registry.ldc.opstree.dev/coe/sentryfuse-webhook
+    repository: harbor.ldc.opstree.dev/coe/sentryfuse-webhook
     tag: latest
     pullSecrets: "reg-ldc-coe-regcred"
   existingSecret: sentryfuse-webhook
