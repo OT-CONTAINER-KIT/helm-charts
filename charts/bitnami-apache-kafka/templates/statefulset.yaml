@@ -46,6 +46,10 @@ spec:
               value: "CONTROLLER"
             - name: KAFKA_INTER_BROKER_LISTENER_NAME
               value: "PLAINTEXT"
+            - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+              value: "1"
+            - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+              value: "true"
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           livenessProbe:
