@@ -68,7 +68,7 @@ volumes:
               entropy: 4.06
 
             - regex: |-
-                (?i)aws(.{0,20})?(?-i)['\"][0-9a-zA-Z\/+]{40}['\"]
+                (?i)aws(.{0,40})?(?-i)['\"]?[0-9a-zA-Z\/+]{40}['\"]?
               description: "AWS Secret Key"
               tags: ["key", "AWS"]
               severity: high
@@ -89,7 +89,7 @@ volumes:
               severity: high
 
             - regex: |-
-                ghp_[A-Za-z0-9_]{36}
+                (gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{20,255})
               description: "GitHub Personal Access Token"
               tags: ["key", "github"]
               entropy: 4.06
