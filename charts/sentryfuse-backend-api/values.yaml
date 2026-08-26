@@ -1,6 +1,21 @@
 name: sentryfuse-api
 component: api
 
+podAnnotations:
+  instrumentation.opentelemetry.io/inject-go: observability/otel-instrumentation
+  rems.owner/cto: sandeep
+  rems.owner/dev: samyak
+  rems.owner/devops: prashant
+  rems.owner/manager: abhishek.dubey
+  rems.owner/qa: shwetabh.vats
+  rems.service/category: application
+  rems.service/environment: prod
+  rems.service/group: sentryfuse
+  rems.service/layer: backend
+  rems.service/name: sentryfuse-api
+  rems.service/severity: critical
+  rems.service/technology: golang
+
 base:
   image:
     pullPolicy: "Always"
