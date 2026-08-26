@@ -1,0 +1,64 @@
+replicaCount: 1
+
+image:
+  registry: 552171489163.dkr.ecr.ap-south-1.amazonaws.com
+  repository: kubelift/kafka
+  tag: "latest"
+  pullPolicy: Always
+  pullSecrets: "sr-stage-aws-ecr-regcred"
+
+
+resources:
+  requests:
+    memory: "1Gi"
+    cpu: "500m"
+  limits:
+    memory: "4Gi"
+    cpu: "2"
+
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+  storageClass: "gp3"
+
+zookeeper:
+  enabled: false
+  replicaCount: 1
+  image:
+    registry: 552171489163.dkr.ecr.ap-south-1.amazonaws.com
+    repository: kubelift/zookeeper
+    tag: "latest"
+    pullPolicy: Always
+    pullSecrets: "sr-stage-aws-ecr-regcred"
+  persistence:
+    enabled: true
+    accessModes:
+      - ReadWriteOnce
+    size: 5Gi
+    storageClass: "gp3"
+
+tolerations:
+  - operator: "Exists"
+
+consumerGroups:
+  - name: standard-group
+
+topics:
+  - name: upgrade.events
+    partitions: 12
+    replicationFactor: 1
+    config: {}
+  - name: precheck.tasks
+    partitions: 12
+    replicationFactor: 1
+    config: {}
+  - name: execution.logs
+    partitions: 6
+    replicationFactor: 1
+    config: {}
+  - name: system.events
+    partitions: 6
+    replicationFactor: 1
+    config: {}

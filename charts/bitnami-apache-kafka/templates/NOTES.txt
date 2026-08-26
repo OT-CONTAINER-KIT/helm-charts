@@ -1,0 +1,36 @@
+Apache Kafka Helm Chart
+======================
+
+**Kafka Broker:**
+- Service: `{{ include "kafka.fullname" . }}` on port 9092
+- StatefulSet: `{{ include "kafka.fullname" . }}`
+- PVC: `{{ include "kafka.fullname" . }}-data` ({{ .Values.persistence.size }})
+
+**Zookeeper:**
+- Service: `{{ include "kafka.fullname" . }}-zookeeper` on port 2181
+- StatefulSet: `{{ include "kafka.fullname" . }}-zookeeper`
+- PVC: `{{ include "kafka.fullname" . }}-zookeeper-data` ({{ .Values.zookeeper.persistence.size }})
+
+**Default Consumer Group:**
+- {{- range .Values.consumerGroups }}
+  - {{ .name }}
+  {{- end }}
+
+**Topics:**
+- Define topics in `values.yaml` under `topics:`
+- Example:
+  ```yaml
+  topics:
+    - name: my-topic
+      partitions: 3
+      replicationFactor: 1
+      config: {}
+  ```
+
+**Connect to Kafka:**
+- Use the service DNS: `{{ include "kafka.fullname" . }}:9092`
+
+**Note:**
+- Both Kafka and Zookeeper have persistent storage.
+- Liveness and readiness probes are enabled.
+- Topic creation is automated if `topics` are defined in `values.yaml`.
