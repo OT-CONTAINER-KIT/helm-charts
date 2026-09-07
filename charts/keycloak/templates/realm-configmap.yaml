@@ -9,6 +9,12 @@ metadata:
   labels:
     {{- include "keycloak.labels" . | nindent 4 }}
 data:
+  {{- /* realm JSON files bundled in the chart under realms/*.json */}}
+  {{- range $path, $_ := .Files.Glob "realms/*.json" }}
+  {{ base $path }}: |
+    {{- $.Files.Get $path | nindent 4 }}
+  {{- end }}
+  {{- /* plus any realm JSON passed inline via realmImport.files */}}
   {{- range $name, $content := .Values.realmImport.files }}
   {{ $name }}: |
     {{- $content | nindent 4 }}

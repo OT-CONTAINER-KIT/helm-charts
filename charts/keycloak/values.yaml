@@ -94,8 +94,11 @@ extraEnv: []
 #  - name: KC_LOG_LEVEL
 #    value: INFO
 
-## Optional realm import. Create-only: existing realms are skipped on import.
-## Mounts *.json at /opt/keycloak/data/import and adds --import-realm to the start command.
+## Optional realm import. Create-only: an existing realm is skipped on every boot.
+## Adds `--import-realm` to the start command and mounts the realm JSON(s) at
+## /opt/keycloak/data/import. Source the JSON either way (both are merged):
+##   - drop files in the chart at  realms/*.json   (bundled, versioned with the chart)
+##   - or pass them inline via  realmImport.files
 realmImport:
   enabled: false
   existingConfigMap: ""         # use this ConfigMap of *.json instead of a chart-managed one

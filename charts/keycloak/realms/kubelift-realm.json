@@ -1,0 +1,76 @@
+{
+  "realm": "kubelift",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "clients": [
+    {
+      "clientId": "kubelift",
+      "name": "KubeLift Frontend (SPA)",
+      "rootUrl": "https://sr-kubelift.shiprocket.in",
+      "baseUrl": "/",
+      "enabled": true,
+      "redirectUris": [
+        "https://sr-kubelift.shiprocket.in/*",
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "https://sr-kubelift.shiprocket.in",
+        "http://localhost:3000"
+      ],
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "publicClient": true,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "realm_client": "false",
+        "post.logout.redirect.uris": "+",
+        "pkce.code.challenge.method": "S256"
+      },
+      "fullScopeAllowed": true,
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "profile",
+        "roles",
+        "basic",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "organization",
+        "microprofile-jwt"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "kubelift",
+      "enabled": true,
+      "email": "kubelift@shiprocket.in",
+      "emailVerified": true,
+      "firstName": "KubeLift",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "kubelift",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

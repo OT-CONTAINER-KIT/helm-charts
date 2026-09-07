@@ -70,11 +70,11 @@ existingSecretKeys:
   dbPassword: db-password
   adminPassword: admin-password
 
-# A kubelift realm (realm "kubelift" + public SPA client "kubelift", PKCE S256) is created
-# by hand in the admin console for this deploy. To bootstrap it on first start instead,
-# flip enabled: true and paste the realm JSON under files:
+# Bootstrap the "kubelift" realm + public SPA client "kubelift" (PKCE S256) + user
+# "kubelift"/"kubelift" from charts/keycloak/realms/kubelift-realm.json on first start.
+# Create-only: a redeploy against the existing DB just logs "realm exists, skipped".
 realmImport:
-  enabled: false
+  enabled: true
   existingConfigMap: ""
   files: {}
 
