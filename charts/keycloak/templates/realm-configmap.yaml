@@ -1,0 +1,13 @@
+{{- if and .Values.realmImport.enabled (not .Values.realmImport.existingConfigMap) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-realm" (include "keycloak.fullname" .) }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+data:
+  {{- range $name, $content := .Values.realmImport.files }}
+  {{ $name }}: |
+    {{- $content | nindent 4 }}
+  {{- end }}
+{{- end }}

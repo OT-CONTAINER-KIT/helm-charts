@@ -1,0 +1,193 @@
+{{- include "keycloak.validate" . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "keycloak.fullname" . }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  {{- with .Values.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "keycloak.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "keycloak.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- if or (not .Values.existingSecret) (and .Values.realmImport.enabled (not .Values.realmImport.existingConfigMap)) .Values.podAnnotations }}
+      annotations:
+        {{- if not .Values.existingSecret }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- end }}
+        {{- if and .Values.realmImport.enabled (not .Values.realmImport.existingConfigMap) }}
+        checksum/realm: {{ include (print $.Template.BasePath "/realm-configmap.yaml") . | sha256sum }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+    spec:
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- if kindIs "string" . }}
+        - name: {{ . }}
+        {{- else }}
+        {{- range . }}
+        - name: {{ . }}
+        {{- end }}
+        {{- end }}
+      {{- end }}
+      serviceAccountName: {{ include "keycloak.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: keycloak
+          image: {{ include "keycloak.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          args:
+            {{- if .Values.args }}
+            {{- toYaml .Values.args | nindent 12 }}
+            {{- else }}
+            - {{ ternary "start-dev" "start" (eq .Values.mode "dev") }}
+            {{- if .Values.realmImport.enabled }}
+            - --import-realm
+            {{- end }}
+            {{- end }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: KC_DB
+              value: {{ .Values.db.vendor | default "postgres" | quote }}
+            - name: KC_DB_URL
+              value: {{ include "keycloak.dbUrl" . | quote }}
+            - name: KC_DB_USERNAME
+              value: {{ required "db.user is required" .Values.db.user | quote }}
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "keycloak.secretName" . }}
+                  key: {{ include "keycloak.dbPasswordKey" . }}
+            {{- with .Values.db.schema }}
+            - name: KC_DB_SCHEMA
+              value: {{ . | quote }}
+            {{- end }}
+            - name: KC_HTTP_ENABLED
+              value: {{ .Values.http.enabled | quote }}
+            - name: KC_HTTP_PORT
+              value: {{ .Values.http.port | quote }}
+            - name: KC_HTTP_MANAGEMENT_PORT
+              value: {{ .Values.http.managementPort | quote }}
+            {{- with .Values.http.relativePath }}
+            - name: KC_HTTP_RELATIVE_PATH
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.proxy }}
+            - name: KC_PROXY_HEADERS
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.hostname }}
+            - name: KC_HOSTNAME
+              value: {{ . | quote }}
+            {{- end }}
+            - name: KC_HOSTNAME_STRICT
+              value: {{ .Values.hostnameStrict | quote }}
+            {{- if .Values.health.enabled }}
+            - name: KC_HEALTH_ENABLED
+              value: "true"
+            {{- end }}
+            {{- if .Values.metrics.enabled }}
+            - name: KC_METRICS_ENABLED
+              value: "true"
+            {{- end }}
+            {{- with .Values.cache }}
+            - name: KC_CACHE
+              value: {{ . | quote }}
+            {{- end }}
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              value: {{ .Values.auth.adminUser | quote }}
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "keycloak.secretName" . }}
+                  key: {{ include "keycloak.adminPasswordKey" . }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.http.port }}
+              protocol: TCP
+            - name: management
+              containerPort: {{ .Values.http.managementPort }}
+              protocol: TCP
+          {{- if .Values.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: /health/started
+              port: management
+            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: management
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: management
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.realmImport.enabled }}
+          volumeMounts:
+            - name: realm-import
+              mountPath: /opt/keycloak/data/import
+              readOnly: true
+          {{- end }}
+      {{- if .Values.realmImport.enabled }}
+      volumes:
+        - name: realm-import
+          configMap:
+            name: {{ .Values.realmImport.existingConfigMap | default (printf "%s-realm" (include "keycloak.fullname" .)) }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

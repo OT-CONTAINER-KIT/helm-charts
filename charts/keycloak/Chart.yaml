@@ -1,0 +1,17 @@
+apiVersion: v2
+name: keycloak
+description: Hand-written Helm chart for self-hosted Keycloak using the official quay.io/keycloak/keycloak image, backed by an external PostgreSQL database.
+version: 0.1.0
+appVersion: "26.3.3"
+keywords:
+  - keycloak
+  - iam
+  - sso
+  - oidc
+home: https://www.keycloak.org/
+sources:
+  - https://github.com/keycloak/keycloak
+maintainers:
+  - name: Samyak Jain
+    email: samyak.jain@opstree.com
+    url: https://github.com/samyakjain1908

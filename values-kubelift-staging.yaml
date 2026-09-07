@@ -1,0 +1,118 @@
+# values-kubelift-staging.yaml — Keycloak for the kubelift namespace on sr-staging-eks-cluster.
+#
+# Deploy (Helm):
+#   export KUBECONFIG=/home/buildpiper/.kube/sr-staging-eks-cluster/config
+#   helm upgrade --install keycloak ./charts/keycloak -n kubelift \
+#     -f values-kubelift-staging.yaml --wait --timeout 10m
+#
+# Deploy (BuildPiper / GitOps):
+#   helm template keycloak ./charts/keycloak -n kubelift -f values-kubelift-staging.yaml \
+#     | kubectl apply -n kubelift -f -
+#
+# Release name MUST be "keycloak" -> objects are named "keycloak" (Service, Deployment).
+# In-cluster URL: http://keycloak.kubelift.svc.cluster.local
+#
+# Pre-req in the namespace (created out-of-band, NOT by this chart):
+#   Secret  keycloak-secret  (Opaque)  keys: db-password=keycloak, admin-password=admin
+#   DB      keycloak / role keycloak / password keycloak  on the shared Postgres
+
+replicaCount: 1
+
+image:
+  registry: 552171489163.dkr.ecr.ap-south-1.amazonaws.com
+  repository: kubelift/keycloak            # official quay.io/keycloak/keycloak mirrored to ECR
+  tag: "26.3.3"
+  pullPolicy: Always
+  pullSecrets: sr-stage-aws-ecr-regcred    # string form
+
+mode: production                           # kc.sh start (auto-build on boot)
+
+http:
+  enabled: true
+  port: 8080
+  managementPort: 9000
+
+proxy: "xforwarded"                        # ALB terminates TLS upstream
+hostname: ""                               # Phase 1: derive from request
+hostnameStrict: false                      # Phase 2: set hostname + hostnameStrict: true
+
+health:
+  enabled: true
+metrics:
+  enabled: false
+
+cache: "local"                             # single replica
+
+db:
+  vendor: postgres
+  host: stateless-app-postgresql-helm-chart.kubelift.svc.cluster.local
+  port: 5432
+  name: keycloak
+  schema: public
+  user: keycloak
+  extraParams: "sslmode=disable"
+  password: ""                             # unused — existingSecret below
+  url: ""
+
+auth:
+  adminUser: admin
+  adminPassword: ""                        # unused — existingSecret below
+
+existingSecret: keycloak-secret
+existingSecretKeys:
+  dbPassword: db-password
+  adminPassword: admin-password
+
+# A kubelift realm (realm "kubelift" + public SPA client "kubelift", PKCE S256) is created
+# by hand in the admin console for this deploy. To bootstrap it on first start instead,
+# flip enabled: true and paste the realm JSON under files:
+realmImport:
+  enabled: false
+  existingConfigMap: ""
+  files: {}
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  requests: { cpu: 300m, memory: 1Gi }
+  limits:   { cpu: "2",  memory: 2Gi }
+
+startupProbe:
+  enabled: true
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 30        # ~5 min budget for first-boot Liquibase on the empty DB
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 10
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 60
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 6
+
+podLabels:
+  admission.datadoghq.com/enabled: "false"   # opt out of the cluster Datadog admission webhook
+
+podAnnotations: {}
+
+serviceAccount:
+  create: false
+
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: "100%"
+    maxUnavailable: "50%"
+
+# Image is multi-arch (amd64+arm64) — no arch nodeSelector needed.
+nodeSelector: {}
+affinity: {}
+tolerations: []

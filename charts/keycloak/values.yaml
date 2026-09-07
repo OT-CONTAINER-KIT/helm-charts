@@ -1,0 +1,150 @@
+# charts/keycloak/values.yaml
+# Self-hosted Keycloak (official quay.io/keycloak/keycloak image) + external PostgreSQL.
+# Generic defaults. Override per environment. Keys marked "REQUIRED" MUST be set.
+
+## Keycloak pod count. Keep at 1 unless you configure a distributed cache
+## (cache: ispn + JGroups discovery + RBAC — NOT shipped by this chart).
+replicaCount: 1
+
+image:
+  ## Leave registry "" to pull the bare repository. The image helper omits the
+  ## "<registry>/" prefix when this is blank.
+  registry: ""
+  ## REQUIRED. Official image: quay.io/keycloak/keycloak
+  ##   -> registry: "quay.io", repository: "keycloak/keycloak"
+  repository: keycloak/keycloak
+  tag: ""                       # empty => .Chart.AppVersion ("26.3.3")
+  pullPolicy: IfNotPresent
+  ## String OR list. Rendered only when non-empty.
+  pullSecrets: ""               # e.g. "my-ecr-regcred"  or  [secret-a, secret-b]
+
+## Entrypoint / args overrides. Empty => image default (/opt/keycloak/bin/kc.sh) with
+## args derived from `mode` (+ `--import-realm` when realmImport.enabled).
+command: []
+args: []
+
+## production => `kc.sh start`      (auto-build on boot; honours KC_* build options)
+## dev        => `kc.sh start-dev`
+## For `start --optimized` set  args: ["start","--optimized"]  AND use a pre-built image.
+mode: production
+
+http:
+  enabled: true                 # KC_HTTP_ENABLED — REQUIRED true behind a TLS-terminating proxy
+  port: 8080                     # KC_HTTP_PORT / container port "http"
+  managementPort: 9000           # KC_HTTP_MANAGEMENT_PORT — health & metrics live here
+  relativePath: ""               # KC_HTTP_RELATIVE_PATH, e.g. "/auth"
+
+## KC_PROXY_HEADERS: "" | "xforwarded" | "forwarded". Set when an LB/proxy terminates TLS.
+proxy: "xforwarded"
+
+## KC_HOSTNAME.
+## Phase 1 (in-cluster / no ingress): leave "" and hostnameStrict: false.
+## Phase 2 (public URL):              "https://keycloak.example.com" + hostnameStrict: true.
+hostname: ""
+hostnameStrict: false            # KC_HOSTNAME_STRICT
+
+health:
+  enabled: true                 # KC_HEALTH_ENABLED — MUST stay true while any probe is enabled
+metrics:
+  enabled: false                # KC_METRICS_ENABLED
+
+## KC_CACHE. "local" for a single replica. "ispn" needs JGroups discovery + RBAC (not shipped).
+cache: "local"
+
+db:
+  vendor: postgres              # KC_DB  (postgres|mariadb|mysql|mssql|oracle)
+  host: ""                      # REQUIRED — e.g. my-postgres.my-ns.svc.cluster.local
+  port: 5432
+  name: keycloak                # REQUIRED — database name (must already exist)
+  schema: ""                    # KC_DB_SCHEMA, e.g. "public" (optional)
+  user: keycloak                # REQUIRED — KC_DB_USERNAME
+  extraParams: ""               # appended to JDBC URL as "?<extraParams>", e.g. "sslmode=disable"
+  url: ""                       # advanced: full KC_DB_URL override (tpl-evaluated); wins over the above
+  ## Plaintext DB password — used ONLY when existingSecret is empty (chart self-creates a Secret).
+  password: ""                  # REQUIRED unless existingSecret is set
+
+auth:
+  adminUser: admin              # KC_BOOTSTRAP_ADMIN_USERNAME (first start against an empty DB only)
+  ## Plaintext admin password — used ONLY when existingSecret is empty.
+  adminPassword: ""             # REQUIRED unless existingSecret is set
+
+## Consume a pre-created Opaque Secret instead of self-creating one.
+## When set: the chart creates NO Secret and reads BOTH passwords from this one.
+existingSecret: ""
+existingSecretKeys:
+  dbPassword: db-password
+  adminPassword: admin-password
+
+## Extra raw env entries, appended verbatim (list of {name, value|valueFrom}).
+extraEnv: []
+#  - name: KC_LOG_LEVEL
+#    value: INFO
+
+## Optional realm import. Create-only: existing realms are skipped on import.
+## Mounts *.json at /opt/keycloak/data/import and adds --import-realm to the start command.
+realmImport:
+  enabled: false
+  existingConfigMap: ""         # use this ConfigMap of *.json instead of a chart-managed one
+  files: {}                     # map:  <filename.json>  ->  <raw JSON string>
+#    myrealm.json: |
+#      { "realm": "myrealm", "enabled": true }
+
+service:
+  type: ClusterIP
+  port: 80                      # Service port -> targetPort "http" (8080). In-cluster: http://<svc>.<ns>.svc
+  nodePort: ""                  # only when type: NodePort
+  annotations: {}
+
+resources: {}
+#  requests: { cpu: 500m, memory: 1Gi }
+#  limits:   { cpu: "2",  memory: 2Gi }
+
+## Probes hit the management port (9000) and REQUIRE health.enabled: true.
+## First boot on an EMPTY db runs Liquibase (~10-40s) + Quarkus augmentation — allow ~5 min.
+startupProbe:
+  enabled: true
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 30
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 10
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 60
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 6
+
+## Pod-level metadata. If a cluster-wide Datadog admission webhook injects init-containers
+## you don't want, add here:   admission.datadoghq.com/enabled: "false"
+podLabels: {}
+podAnnotations: {}
+
+## uid 1000 / gid 0 are already baked into the upstream image; leave empty unless your
+## PodSecurity policy needs explicit values.
+podSecurityContext: {}
+containerSecurityContext: {}
+
+serviceAccount:
+  create: false
+  name: ""
+  annotations: {}
+
+## Deployment rollout strategy.
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0
+
+affinity: {}
+nodeSelector: {}
+tolerations: []
+
+nameOverride: ""
+fullnameOverride: ""

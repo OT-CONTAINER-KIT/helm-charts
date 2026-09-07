@@ -1,0 +1,25 @@
+Keycloak {{ .Chart.AppVersion }} — release "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
+
+In-cluster URL:
+  http://{{ include "keycloak.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
+
+Admin console (port-forward):
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "keycloak.fullname" . }} 8080:{{ .Values.service.port }}
+  open http://localhost:8080/
+
+Admin user: {{ .Values.auth.adminUser }}
+Admin password:
+  kubectl -n {{ .Release.Namespace }} get secret {{ include "keycloak.secretName" . }} -o jsonpath="{.data.{{ include "keycloak.adminPasswordKey" . }}}" | base64 -d ; echo
+  (the bootstrap admin is created ONLY on the first start against an empty database)
+
+Health & metrics are on the management port ({{ .Values.http.managementPort }}) and are NOT exposed by the Service:
+  kubectl -n {{ .Release.Namespace }} port-forward deploy/{{ include "keycloak.fullname" . }} {{ .Values.http.managementPort }}:{{ .Values.http.managementPort }}
+  curl -s http://localhost:{{ .Values.http.managementPort }}/health/ready
+
+Database: {{ include "keycloak.dbUrl" . }}  (user {{ .Values.db.user }})
+{{ if .Values.realmImport.enabled }}
+Realm import is ENABLED (kc.sh start --import-realm, create-only) from
+{{- if .Values.realmImport.existingConfigMap }} ConfigMap "{{ .Values.realmImport.existingConfigMap }}".
+{{- else }} chart-managed ConfigMap "{{ include "keycloak.fullname" . }}-realm".
+{{- end }}
+{{- end }}
