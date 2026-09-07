@@ -1,12 +1,13 @@
-# values-kubelift-staging.yaml — Keycloak for the kubelift namespace on sr-staging-eks-cluster.
+# keycloak-values.yaml — Keycloak for the kubelift namespace on sr-staging-eks-cluster.
+# (BuildPiper expects this exact filename: keycloak-values.yaml)
 #
 # Deploy (Helm):
 #   export KUBECONFIG=/home/buildpiper/.kube/sr-staging-eks-cluster/config
 #   helm upgrade --install keycloak ./charts/keycloak -n kubelift \
-#     -f values-kubelift-staging.yaml --wait --timeout 10m
+#     -f keycloak-values.yaml --wait --timeout 10m
 #
 # Deploy (BuildPiper / GitOps):
-#   helm template keycloak ./charts/keycloak -n kubelift -f values-kubelift-staging.yaml \
+#   helm template keycloak ./charts/keycloak -n kubelift -f keycloak-values.yaml \
 #     | kubectl apply -n kubelift -f -
 #
 # Release name MUST be "keycloak" -> objects are named "keycloak" (Service, Deployment).
