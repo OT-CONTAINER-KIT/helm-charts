@@ -25,8 +25,17 @@ args: []
 
 ## production => `kc.sh start`      (auto-build on boot; honours KC_* build options)
 ## dev        => `kc.sh start-dev`
-## For `start --optimized` set  args: ["start","--optimized"]  AND use a pre-built image.
 mode: production
+
+## true  => `kc.sh start --optimized` (no per-boot build) AND the chart stops emitting the
+##          build-time env vars (KC_DB, KC_HEALTH_ENABLED, KC_METRICS_ENABLED,
+##          KC_HTTP_RELATIVE_PATH) — those MUST be baked into the image via `kc.sh build`
+##          (see the chart Dockerfile). db.vendor / health.enabled / metrics.enabled /
+##          http.relativePath below then only document what the image was built with.
+##          Run-time options (db URL/schema/creds, cache, hostname, proxy, http) are
+##          still applied from values. Use with a pre-optimized image only.
+## false => plain `kc.sh start`; the build-time options come from the env vars below.
+optimized: false
 
 http:
   enabled: true                 # KC_HTTP_ENABLED — REQUIRED true behind a TLS-terminating proxy

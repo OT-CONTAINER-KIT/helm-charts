@@ -62,6 +62,9 @@ spec:
             {{- toYaml .Values.args | nindent 12 }}
             {{- else }}
             - {{ ternary "start-dev" "start" (eq .Values.mode "dev") }}
+            {{- if and .Values.optimized (ne .Values.mode "dev") }}
+            - --optimized
+            {{- end }}
             {{- if .Values.realmImport.enabled }}
             - --import-realm
             {{- end }}
@@ -71,8 +74,24 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           env:
+            {{- /* build-time options (kc.sh build) — omitted when optimized: baked into the image */}}
+            {{- if not .Values.optimized }}
             - name: KC_DB
               value: {{ .Values.db.vendor | default "postgres" | quote }}
+            {{- with .Values.http.relativePath }}
+            - name: KC_HTTP_RELATIVE_PATH
+              value: {{ . | quote }}
+            {{- end }}
+            {{- if .Values.health.enabled }}
+            - name: KC_HEALTH_ENABLED
+              value: "true"
+            {{- end }}
+            {{- if .Values.metrics.enabled }}
+            - name: KC_METRICS_ENABLED
+              value: "true"
+            {{- end }}
+            {{- end }}
+            {{- /* run-time options — always set */}}
             - name: KC_DB_URL
               value: {{ include "keycloak.dbUrl" . | quote }}
             - name: KC_DB_USERNAME
@@ -86,16 +105,16 @@ spec:
             - name: KC_DB_SCHEMA
               value: {{ . | quote }}
             {{- end }}
+            {{- with .Values.cache }}
+            - name: KC_CACHE
+              value: {{ . | quote }}
+            {{- end }}
             - name: KC_HTTP_ENABLED
               value: {{ .Values.http.enabled | quote }}
             - name: KC_HTTP_PORT
               value: {{ .Values.http.port | quote }}
             - name: KC_HTTP_MANAGEMENT_PORT
               value: {{ .Values.http.managementPort | quote }}
-            {{- with .Values.http.relativePath }}
-            - name: KC_HTTP_RELATIVE_PATH
-              value: {{ . | quote }}
-            {{- end }}
             {{- with .Values.proxy }}
             - name: KC_PROXY_HEADERS
               value: {{ . | quote }}
@@ -106,18 +125,6 @@ spec:
             {{- end }}
             - name: KC_HOSTNAME_STRICT
               value: {{ .Values.hostnameStrict | quote }}
-            {{- if .Values.health.enabled }}
-            - name: KC_HEALTH_ENABLED
-              value: "true"
-            {{- end }}
-            {{- if .Values.metrics.enabled }}
-            - name: KC_METRICS_ENABLED
-              value: "true"
-            {{- end }}
-            {{- with .Values.cache }}
-            - name: KC_CACHE
-              value: {{ . | quote }}
-            {{- end }}
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
               value: {{ .Values.auth.adminUser | quote }}
             - name: KC_BOOTSTRAP_ADMIN_PASSWORD

@@ -20,12 +20,14 @@ replicaCount: 1
 
 image:
   registry: 552171489163.dkr.ecr.ap-south-1.amazonaws.com
-  repository: kubelift/keycloak            # official quay.io/keycloak/keycloak mirrored to ECR
-  tag: "26.3.3"
+  repository: kubelift/keycloak            # pre-optimized image, built by BuildPiper from charts/keycloak/Dockerfile
+  tag: "26.3.3"                            # set to whatever tag BuildPiper pushes (or let BP inject it)
   pullPolicy: Always
   pullSecrets: sr-stage-aws-ecr-regcred    # string form
 
-mode: production                           # kc.sh start (auto-build on boot)
+mode: production
+optimized: true                            # image is pre-built (kc.sh build) -> start --optimized
+                                           # db/health/cache/schema are baked in the Dockerfile
 
 http:
   enabled: true
@@ -112,7 +114,8 @@ strategy:
     maxSurge: "100%"
     maxUnavailable: "50%"
 
-# Image is multi-arch (amd64+arm64) — no arch nodeSelector needed.
-nodeSelector: {}
+# The BuildPiper-built image is amd64-only (like kubelift/postgres); pin to amd64 nodes.
+nodeSelector:
+  kubernetes.io/arch: amd64
 affinity: {}
 tolerations: []

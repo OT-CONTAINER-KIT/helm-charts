@@ -1,4 +1,5 @@
 # Patterns to ignore when building packages.
+Dockerfile
 .DS_Store
 .git/
 .gitignore
