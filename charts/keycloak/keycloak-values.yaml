@@ -17,6 +17,10 @@
 #   Secret  keycloak-secret  (Opaque)  keys: db-password=keycloak, admin-password=admin
 #   DB      keycloak / role keycloak / password keycloak  on the shared Postgres
 
+namespace: kubelift                        # stamp kubelift on every object (BuildPiper defaults to "default" otherwise)
+fullnameOverride: keycloak                 # objects are always "keycloak" regardless of the BP release name
+                                           # -> in-cluster URL: http://keycloak.kubelift.svc.cluster.local
+
 replicaCount: 1
 
 image:

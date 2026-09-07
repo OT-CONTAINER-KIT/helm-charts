@@ -2,6 +2,11 @@
 # Self-hosted Keycloak (official quay.io/keycloak/keycloak image) + external PostgreSQL.
 # Generic defaults. Override per environment. Keys marked "REQUIRED" MUST be set.
 
+## Namespace to stamp on every object's metadata. Leave "" to inherit the release /
+## `kubectl apply` namespace. Set it when your deploy tool does not pass a namespace
+## reliably (e.g. BuildPiper defaulting to "default").
+namespace: ""
+
 ## Keycloak pod count. Keep at 1 unless you configure a distributed cache
 ## (cache: ispn + JGroups discovery + RBAC — NOT shipped by this chart).
 replicaCount: 1
