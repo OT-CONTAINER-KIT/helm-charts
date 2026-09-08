@@ -39,9 +39,9 @@ http:
   port: 8080
   managementPort: 9000
 
-proxy: "xforwarded"                        # ALB terminates TLS upstream
-hostname: ""                               # Phase 1: derive from request
-hostnameStrict: false                      # Phase 2: set hostname + hostnameStrict: true
+proxy: "xforwarded"                                  # ALB terminates TLS upstream
+hostname: "https://sr-kubelift-auth.shiprocket.in"   # public Keycloak URL (via kubelift-istio-gateway)
+hostnameStrict: true                                 # only serve that host; issuer/redirects fixed to it
 
 health:
   enabled: true
