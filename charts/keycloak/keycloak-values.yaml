@@ -41,7 +41,10 @@ http:
 
 proxy: "xforwarded"                                  # ALB terminates TLS upstream
 hostname: "https://sr-kubelift-auth.shiprocket.in"   # public Keycloak URL (via kubelift-istio-gateway)
-hostnameStrict: true                                 # only serve that host; issuer/redirects fixed to it
+                                                     # -> fixes issuer / redirect / OIDC-metadata URLs
+hostnameStrict: false                                # keep false until the host is live + stable, then
+                                                     # flip true (rejects any other Host header). false
+                                                     # still lets kubectl port-forward reach the console.
 
 health:
   enabled: true
