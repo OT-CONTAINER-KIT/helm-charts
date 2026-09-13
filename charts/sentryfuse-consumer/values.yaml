@@ -68,7 +68,7 @@ volumes:
               entropy: 4.06
 
             - regex: |-
-                (?i)aws(.{0,40})?(?-i)['\"]?[0-9a-zA-Z\/+]{40}['\"]?
+                (?i)(aws|secret)(.{0,40})?(?-i)['\"]?[0-9a-zA-Z\/+]{40}['\"]?
               description: "AWS Secret Key"
               tags: ["key", "AWS"]
               severity: high
@@ -113,7 +113,21 @@ volumes:
                 -----BEGIN [A-Z ]*PRIVATE KEY-----
               description: "SSH / PGP / Private keys"
               tags: ["key", "ssh"]
-              entropy: 4.06
+              entropy: 0
+              severity: medium
+
+            - regex: |-
+                sk_live_[0-9a-zA-Z]{24,}
+              description: "Stripe Live Secret Key"
+              tags: ["key", "Stripe"]
+              entropy: 3.5
+              severity: high
+
+            - regex: |-
+                (?i)(secret|token|api[_-]?key|passwd|password)['\"]?\s*[:=]\s*['\"][A-Za-z0-9+/_=\-]{16,}['\"]
+              description: "Generic Secret Assignment"
+              tags: ["key", "Generic"]
+              entropy: 3.5
               severity: medium
 
 livenessProbe: {}
