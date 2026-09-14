@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "backstage.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "backstage.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.backstage.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "backstage.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "backstage.selectorLabels" . | nindent 8 }}
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              {{- include "backstage.selectorLabels" . | nindent 14 }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    {{- include "backstage.selectorLabels" . | nindent 22 }}
+                topologyKey: kubernetes.io/hostname
+      {{- with .Values.backstage.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: backstage
+          image: "{{ .Values.backstage.image.repository }}:{{ .Values.backstage.image.tag }}"
+          imagePullPolicy: {{ .Values.backstage.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 7007
+          envFrom:
+            - secretRef:
+                name: {{ .Release.Name }}-postgres-secrets
+            - secretRef:
+                name: {{ .Values.secrets.name }}
+          env:
+            - name: APP_BASE_URL
+              value: "https://{{ .Values.domain }}"
+            - name: BACKEND_BASE_URL
+              value: "https://{{ .Values.domain }}"
+            - name: POSTGRES_USER
+              value: {{ .Values.postgres.user | quote }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.postgres.password | quote }}
+            - name: POSTGRES_HOST
+              value: {{ .Values.postgres.host | quote }}
+            - name: POSTGRES_PORT
+              value: {{ .Values.postgres.port | quote }}
+            - name: POSTGRES_DATABASE
+              value: {{ .Values.postgres.database | quote }}
+            - name: POSTGRES_SSL
+              value: {{ .Values.postgres.ssl | quote }}
+            - name: BACKEND_SECRET
+              value: {{ .Values.secrets.backendSecret | quote }}
+            - name: KEYCLOAK_CLIENT_ID
+              value: {{ .Values.secrets.keycloakClientId | quote }}
+            - name: KEYCLOAK_CLIENT_SECRET
+              value: {{ .Values.secrets.keycloakClientSecret | quote }}
+            - name: KEYCLOAK_METADATA_URL
+              value: {{ .Values.secrets.keycloakMetadataUrl | quote }}
+            - name: KEYCLOAK_IDP_HINT
+              value: {{ .Values.secrets.keycloakIdpHint | default "oidc" | quote }}
+            - name: GITHUB_TOKEN
+              value: {{ .Values.secrets.githubToken | quote }}
+            - name: NODE_OPTIONS
+              value: "--dns-result-order=ipv4first"
+            - name: UV_THREADPOOL_SIZE
+              value: "64"
+          {{- if and .Values.backstage.probes .Values.backstage.probes.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.backstage.probes.readiness.path }}
+              port: 7007
+            initialDelaySeconds: {{ .Values.backstage.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.backstage.probes.readiness.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.backstage.probes.liveness.path }}
+              port: 7007
+            initialDelaySeconds: {{ .Values.backstage.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.backstage.probes.liveness.periodSeconds }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.backstage.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "backstage.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "backstage.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.backstage.service.type }}
+  selector:
+    {{- include "backstage.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ .Values.backstage.service.port }}
+      targetPort: {{ .Values.backstage.service.targetPort }}

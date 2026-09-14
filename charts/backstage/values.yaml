@@ -1,0 +1,67 @@
+# Production Domain Configuration
+domain: backstage.opstree.dev
+
+# Backstage Application Configuration
+backstage:
+  replicaCount: 2
+  image:
+    repository: harbor.ldc.opstree.dev/backstage/portal
+    tag: latest
+    pullPolicy: Always
+  imagePullSecrets:
+    - name: harbor-secret
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 7007
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  probes:
+    enabled: false
+    liveness:
+      path: /.well-known/healthcheck
+      initialDelaySeconds: 60
+      periodSeconds: 15
+    readiness:
+      path: /.well-known/healthcheck
+      initialDelaySeconds: 30
+      periodSeconds: 10
+
+# AWS RDS PostgreSQL Database Configuration
+postgres:
+  createSecret: true # Generates backstage-postgres-secrets containing USER & PASSWORD
+  host: "database-1.c18yy20qm0j9.ap-south-1.rds.amazonaws.com"
+  port: 5432
+  user: postgres
+  password: "YOUR_POSTGRES_PASSWORD"
+  database: postgres
+  ssl: true
+
+# HPA Configuration
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# TLS Configuration
+tls:
+  enabled: false
+  secretName: backstage-tls
+
+# Application Secrets Management
+secrets:
+  create: true
+  name: backstage-secrets
+  githubToken: "YOUR_GITHUB_PAT"
+  backendSecret: "YOUR_BACKEND_SECRET_KEY"
+  keycloakClientId: "backstage"
+  keycloakClientSecret: "YOUR_KEYCLOAK_CLIENT_SECRET"
+  keycloakMetadataUrl: "https://keycloak.opstree.dev/realms/master/.well-known/openid-configuration"
+  keycloakIdpHint: "azure"
