@@ -5,7 +5,7 @@ domain: backstage.opstree.dev
 backstage:
   replicaCount: 2
   image:
-    repository: harbor.ldc.opstree.dev/backstage/portal
+    repository: harbor.ldc.opstree.dev/coe/backstage-portal
     tag: latest
     pullPolicy: Always
   imagePullSecrets:
@@ -32,21 +32,21 @@ backstage:
       initialDelaySeconds: 30
       periodSeconds: 10
 
-# AWS RDS PostgreSQL Database Configuration
+# Standalone LDC PostgreSQL Database Configuration (Passed dynamically via BuildPiper)
 postgres:
   createSecret: true # Generates backstage-postgres-secrets containing USER & PASSWORD
-  host: "database-1.c18yy20qm0j9.ap-south-1.rds.amazonaws.com"
+  host: "YOUR_POSTGRES_HOST"
   port: 5432
-  user: postgres
+  user: "YOUR_POSTGRES_USER"
   password: "YOUR_POSTGRES_PASSWORD"
-  database: postgres
-  ssl: true
+  database: "backstage"
+  ssl: false
 
 # HPA Configuration
 hpa:
   enabled: true
   minReplicas: 2
-  maxReplicas: 4
+  maxReplicas: 2
   targetCPUUtilizationPercentage: 80
   targetMemoryUtilizationPercentage: 80
 
