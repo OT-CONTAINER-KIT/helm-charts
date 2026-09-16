@@ -12,6 +12,8 @@ spec:
       {{- include "backstage.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+      annotations:
+        helm.sh/restartedAt: {{ now | quote }}
       labels:
         {{- include "backstage.selectorLabels" . | nindent 8 }}
     spec:
