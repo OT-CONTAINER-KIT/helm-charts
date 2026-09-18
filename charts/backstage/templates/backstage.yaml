@@ -78,6 +78,8 @@ spec:
               value: {{ .Values.secrets.keycloakIdpHint | default "oidc" | quote }}
             - name: GITHUB_TOKEN
               value: {{ .Values.secrets.githubToken | quote }}
+            - name: GITLAB_TOKEN
+              value: {{ .Values.secrets.gitlabToken | quote }}
             - name: NODE_OPTIONS
               value: "--dns-result-order=ipv4first"
             - name: UV_THREADPOOL_SIZE

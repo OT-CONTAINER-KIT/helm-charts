@@ -60,6 +60,7 @@ secrets:
   create: true
   name: backstage-secrets
   githubToken: "YOUR_GITHUB_PAT"
+  gitlabToken: "YOUR_GITLAB_PAT"
   backendSecret: "YOUR_BACKEND_SECRET_KEY"
   keycloakClientId: "backstage"
   keycloakClientSecret: "YOUR_KEYCLOAK_CLIENT_SECRET"
