@@ -1,0 +1,293 @@
+# =============================================================================
+# Outline Postgres backup — live production manifests (namespace: docs)
+# =============================================================================
+# WHAT RUNS IN THE CLUSTER (4 objects, `kubectl apply -f` this file):
+#   1. CronJob/outline-db-backup-daily    schedule "30 2 * * *"  -> daily/   keep 7d
+#   2. CronJob/outline-db-backup-monthly  schedule "30 3 1 * *"  -> monthly/ keep 365d
+#   3. CronJob/outline-db-backup-yearly   schedule "30 4 1 1 *"  -> yearly/  keep 1095d (3y)
+#   4. ConfigMap/outline-db-backup-script (db-backup-script.sh, shared by all three)
+#
+# NO new Secret: DB credentials come read-only from the existing
+# Secret/outline-postgres-external-secret (key DATABASE_URL — same one the
+# Outline Deployment uses), MinIO creds from Secret/minio-backup-secret.
+# If your release name differs, adjust the DB secret name below.
+#
+# DUMP FORMAT: plain SQL (-Fp) gzipped -> outline-db_<ts>.sql.gz into
+# s3://outline-db-backup/<daily|monthly|yearly>/ on
+# https://minio.ldc.opstree.dev:9000. Plain SQL is deliberate: it restores
+# with any psql >= the dump version, so a DBA upgrade (e.g. 14 -> 18) never
+# breaks restores. See README.md (".sql vs .dump") for the full reasoning.
+# Schedules sit 30 min after the file backups and use concurrencyPolicy:
+# Forbid so two dumps never run at once.
+# =============================================================================
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: outline-db-backup-daily
+  namespace: docs
+  labels:
+    app: outline-db-backup
+    tier: daily
+spec:
+  schedule: "30 2 * * *"  # Daily at 2:30 AM
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: outline-db-backup
+            tier: daily
+        spec:
+          containers:
+          - name: backup
+            image: postgres:17
+            command: ["/bin/sh", "/scripts/db-backup-script.sh"]
+            env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: outline-postgres-external-secret
+                  key: DATABASE_URL
+            - name: MINIO_ENDPOINT
+              value: "https://minio.ldc.opstree.dev:9000"
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-backup-secret
+                  key: access-key
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-backup-secret
+                  key: secret-key
+            - name: MINIO_BUCKET
+              value: "outline-db-backup"
+            - name: BACKUP_PREFIX
+              value: "daily"
+            - name: RETENTION_DAYS
+              value: "7"
+            volumeMounts:
+            - name: backup-scripts
+              mountPath: /scripts
+            - name: backup-storage
+              mountPath: /backup
+          volumes:
+          - name: backup-scripts
+            configMap:
+              name: outline-db-backup-script
+              defaultMode: 0755
+          - name: backup-storage
+            emptyDir: {}
+          restartPolicy: OnFailure
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: outline-db-backup-monthly
+  namespace: docs
+  labels:
+    app: outline-db-backup
+    tier: monthly
+spec:
+  schedule: "30 3 1 * *"  # 1st of every month at 3:30 AM
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: outline-db-backup
+            tier: monthly
+        spec:
+          containers:
+          - name: backup
+            image: postgres:17
+            command: ["/bin/sh", "/scripts/db-backup-script.sh"]
+            env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: outline-postgres-external-secret
+                  key: DATABASE_URL
+            - name: MINIO_ENDPOINT
+              value: "https://minio.ldc.opstree.dev:9000"
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-backup-secret
+                  key: access-key
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-backup-secret
+                  key: secret-key
+            - name: MINIO_BUCKET
+              value: "outline-db-backup"
+            - name: BACKUP_PREFIX
+              value: "monthly"
+            - name: RETENTION_DAYS
+              value: "365"
+            volumeMounts:
+            - name: backup-scripts
+              mountPath: /scripts
+            - name: backup-storage
+              mountPath: /backup
+          volumes:
+          - name: backup-scripts
+            configMap:
+              name: outline-db-backup-script
+              defaultMode: 0755
+          - name: backup-storage
+            emptyDir: {}
+          restartPolicy: OnFailure
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: outline-db-backup-yearly
+  namespace: docs
+  labels:
+    app: outline-db-backup
+    tier: yearly
+spec:
+  schedule: "30 4 1 1 *"  # Jan 1st at 4:30 AM
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: outline-db-backup
+            tier: yearly
+        spec:
+          containers:
+          - name: backup
+            image: postgres:17
+            command: ["/bin/sh", "/scripts/db-backup-script.sh"]
+            env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: outline-postgres-external-secret
+                  key: DATABASE_URL
+            - name: MINIO_ENDPOINT
+              value: "https://minio.ldc.opstree.dev:9000"
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-backup-secret
+                  key: access-key
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-backup-secret
+                  key: secret-key
+            - name: MINIO_BUCKET
+              value: "outline-db-backup"
+            - name: BACKUP_PREFIX
+              value: "yearly"
+            - name: RETENTION_DAYS
+              value: "1095"
+            volumeMounts:
+            - name: backup-scripts
+              mountPath: /scripts
+            - name: backup-storage
+              mountPath: /backup
+          volumes:
+          - name: backup-scripts
+            configMap:
+              name: outline-db-backup-script
+              defaultMode: 0755
+          - name: backup-storage
+            emptyDir: {}
+          restartPolicy: OnFailure
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: outline-db-backup-script
+  namespace: docs
+data:
+  db-backup-script.sh: |
+    #!/bin/sh
+
+    # Outline Postgres backup script (shared by daily/monthly/yearly CronJobs)
+    set -e
+    set -o pipefail
+
+    # Configuration (BACKUP_PREFIX and RETENTION_DAYS come from CronJob env)
+    BACKUP_DIR="/backup"
+    BACKUP_PREFIX="${BACKUP_PREFIX:-daily}"
+    RETENTION_DAYS="${RETENTION_DAYS:-7}"
+    TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+    BACKUP_FILENAME="outline-db_${TIMESTAMP}.sql.gz"
+
+    # From environment (DATABASE_URL read-only from outline-postgres-external-secret)
+    DATABASE_URL="${DATABASE_URL:?DATABASE_URL env must be set}"
+    MINIO_ENDPOINT="${MINIO_ENDPOINT}"
+    MINIO_ACCESS_KEY="${MINIO_ACCESS_KEY}"
+    MINIO_SECRET_KEY="${MINIO_SECRET_KEY}"
+    MINIO_BUCKET="${MINIO_BUCKET}"
+
+    log() {
+        echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1"
+    }
+
+    log "DB backup tier: $BACKUP_PREFIX (retention: $RETENTION_DAYS days)"
+    log "pg_dump version: $(pg_dump --version)"
+    log "Server version: $(psql "$DATABASE_URL" -tAc 'SELECT version();')"
+
+    # Install mc (NOTE: old /client/mc path is retired by MinIO -> HTTP 410;
+    # current path is /aistor/mc. -f fails fast instead of saving HTML.)
+    if ! command -v curl >/dev/null 2>&1; then
+        log "Installing curl..."
+        apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
+    fi
+    log "Installing MinIO Client..."
+    curl -fsSL https://dl.min.io/aistor/mc/release/linux-amd64/mc -o /usr/local/bin/mc
+    chmod +x /usr/local/bin/mc
+    mc --version
+
+    # Configure mc
+    log "Configuring MinIO Client..."
+    mc alias set minio-backup $MINIO_ENDPOINT $MINIO_ACCESS_KEY $MINIO_SECRET_KEY --api S3v4
+
+    # Dump (plain SQL, gzipped — restores on this or any newer PG via psql)
+    log "Dumping database to $BACKUP_PREFIX/$BACKUP_FILENAME ..."
+    mkdir -p $BACKUP_DIR
+    pg_dump -Fp -d "$DATABASE_URL" | gzip > $BACKUP_DIR/$BACKUP_FILENAME
+    BACKUP_SIZE=$(du -h $BACKUP_DIR/$BACKUP_FILENAME | cut -f1)
+    log "Dump created: $BACKUP_FILENAME ($BACKUP_SIZE)"
+
+    # Sanity: a dump that is suspiciously small is likely an empty/error dump
+    BACKUP_BYTES=$(wc -c < $BACKUP_DIR/$BACKUP_FILENAME)
+    if [ "$BACKUP_BYTES" -lt 10240 ]; then
+        log "ERROR: dump is only $BACKUP_BYTES bytes, refusing to upload"
+        exit 1
+    fi
+
+    # Upload to MinIO
+    log "Uploading to MinIO..."
+    mc cp $BACKUP_DIR/$BACKUP_FILENAME minio-backup/$MINIO_BUCKET/$BACKUP_PREFIX/$BACKUP_FILENAME
+    log "Uploaded to: $MINIO_ENDPOINT/$MINIO_BUCKET/$BACKUP_PREFIX/$BACKUP_FILENAME"
+
+    # Cleanup old dumps in this tier's prefix (native mc age filter)
+    log "Cleaning up $BACKUP_PREFIX dumps older than $RETENTION_DAYS days..."
+    mc rm --force --recursive --older-than ${RETENTION_DAYS}d "minio-backup/$MINIO_BUCKET/$BACKUP_PREFIX/" || true
+
+    log "Cleanup completed"
+
+    # Cleanup local
+    log "Cleaning up local dump file..."
+    rm -f $BACKUP_DIR/$BACKUP_FILENAME
+
+    log "=========================================="
+    log "✅ DB backup completed successfully!"
+    log "=========================================="

@@ -104,15 +104,15 @@ verify_deployment() {
 }
 
 trigger_first_backup() {
-    log "Triggering first backup..."
+    log "Triggering first backup (daily tier)..."
 
     # Create a one-time job for immediate backup
-    kubectl create job outline-backup-manual-$(date +%s) \
-        --from=cronjob/outline-backup \
+    kubectl create job outline-backup-daily-manual-$(date +%s) \
+        --from=cronjob/outline-backup-daily \
         -n $NAMESPACE
 
     log "First backup triggered. Check logs with:"
-    echo "  kubectl logs -n $NAMESPACE -l app=outline-backup --tail=100 -f"
+    echo "  kubectl logs -n $NAMESPACE -l app=outline-backup,tier=daily --tail=100 -f"
 }
 
 print_instructions() {
@@ -122,12 +122,13 @@ print_instructions() {
     echo ""
     echo "📋 What was created:"
     echo "  1. Secret: minio-backup-secret (MinIO credentials)"
-    echo "  2. ConfigMap: outline-backup-script (backup script)"
-    echo "  3. CronJob: outline-backup (daily at 2 AM)"
+    echo "  2. ConfigMap: outline-backup-script (shared backup script)"
+    echo "  3. CronJob: outline-backup-daily (daily at 2 AM -> daily/, keep 7d)"
+    echo "  4. CronJob: outline-backup-monthly (1st of month 3 AM -> monthly/, keep 365d)"
+    echo "  5. CronJob: outline-backup-yearly (Jan 1st 4 AM -> yearly/, keep 1095d)"
     echo ""
-    echo "📊 Backup Schedule: Daily at 2 AM"
-    echo "💾 Retention: 7 days"
-    echo "📦 Bucket: outline-pvc-backup"
+    echo "📊 Schedules: daily 0 2 * * * | monthly 0 3 1 * * | yearly 0 4 1 1 *"
+    echo "📦 Bucket: outline-pvc-backup (prefixes: daily/ monthly/ yearly/)"
     echo ""
     echo "🔧 Useful Commands:"
     echo ""
@@ -140,12 +141,14 @@ print_instructions() {
     echo "  # View backup logs:"
     echo "  kubectl logs -n $NAMESPACE -l app=outline-backup --tail=100 -f"
     echo ""
-    echo "  # Trigger manual backup:"
-    echo "  kubectl create job outline-backup-manual-\\\$(date +%s) \\"
-    echo "    --from=cronjob/outline-backup -n $NAMESPACE"
+    echo "  # Trigger manual backup (pick a tier):"
+    echo "  kubectl create job outline-backup-daily-manual-\\\$(date +%s) \\"
+    echo "    --from=cronjob/outline-backup-daily -n $NAMESPACE"
     echo ""
     echo "  # List backups in MinIO:"
-    echo "  mc ls outline-minio/outline-pvc-backup/"
+    echo "  mc ls outline-minio/outline-pvc-backup/daily/"
+    echo "  mc ls outline-minio/outline-pvc-backup/monthly/"
+    echo "  mc ls outline-minio/outline-pvc-backup/yearly/"
     echo ""
     echo "=========================================="
 }
@@ -155,11 +158,11 @@ print_instructions() {
 # ===========================================
 
 echo "=========================================="
-echo "Deploy Outline Backup CronJob"
+echo "Deploy Outline Backup CronJobs (daily/monthly/yearly)"
 echo "=========================================="
 echo ""
-echo "This will create a daily backup of your Outline PVC"
-echo "and push it to MinIO bucket: outline-pvc-backup"
+echo "This will create daily, monthly and yearly backups of your Outline PVC"
+echo "and push them to MinIO bucket: outline-pvc-backup (daily/ monthly/ yearly/)"
 echo ""
 echo "=========================================="
 

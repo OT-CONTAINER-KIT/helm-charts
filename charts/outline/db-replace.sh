@@ -31,7 +31,7 @@ DATE=$(date +%Y%m%d-%H%M%S)
 
 if [ ! -f "$DUMP_FILE" ]; then
   echo "ERROR: Dump file not found at $DUMP_FILE"
-  echo "Expected a PLAIN SQL dump (create it with: docker exec ... pg_dump -Fp ...)"
+  echo "Expected a PLAIN SQL dump (cfix-mc-installation.sh setup-minio-access-keys.shreate it with: docker exec ... pg_dump -Fp ...)"
   exit 1
 fi
 

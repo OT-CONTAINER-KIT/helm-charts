@@ -1,0 +1,31 @@
+# PVC-deleted disaster recovery for Outline (`docs` namespace)
+#
+# SCENARIO: someone/something deleted PVC `outline-outline-pvc`.
+# Your PV uses reclaimPolicy: Retain, so the Longhorn volume and its data
+# SURVIVE as a Released PV — this folder gets you back online either by
+# re-attaching that PV or by rebuilding from a MinIO backup.
+#
+# FILES:
+#   pvc.yaml          – standalone copy of the chart PVC (templates/outline-pvc.yaml)
+#   restore-job.yaml  – ConfigMap (restore script) + Job that pulls a backup
+#                       from MinIO and extracts it into the PVC.
+#                       ✏️  Set BACKUP_KEY env before applying (see README).
+#   restore.sh        – guided runbook script (wraps the README steps).
+#   README.md         – full procedure. READ IT FIRST in a real incident.
+#
+# NOTHING HERE is applied automatically. Run restore.sh (or the README steps)
+# only when you actually need to recover.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: outline-outline-pvc
+  namespace: docs
+  labels:
+    app: outline
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: vcluster-longhorn-restricted-x-coe-dev-x-coe-dev-vcluster
+  resources:
+    requests:
+      storage: 5Gi

@@ -1,0 +1,275 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: outline-backup-daily
+  namespace: docs
+  labels:
+    app: outline-backup
+    tier: daily
+spec:
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: outline-backup
+            tier: daily
+        spec:
+          containers:
+          - name: backup
+            image: alpine:latest
+            command: ["/bin/sh", "/scripts/backup-script.sh"]
+            env:
+            - name: MINIO_ENDPOINT
+              value: "https://minio.ldc.opstree.dev:9000"
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-backup-secret
+                  key: access-key
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-backup-secret
+                  key: secret-key
+            - name: MINIO_BUCKET
+              value: "outline-pvc-backup"
+            - name: BACKUP_PREFIX
+              value: "daily"
+            - name: RETENTION_DAYS
+              value: "7"
+            volumeMounts:
+            - name: outline-data
+              mountPath: /outline-data
+              readOnly: true
+            - name: backup-scripts
+              mountPath: /scripts
+            - name: backup-storage
+              mountPath: /backup
+          volumes:
+          - name: outline-data
+            persistentVolumeClaim:
+              claimName: outline-outline-pvc
+          - name: backup-scripts
+            configMap:
+              name: outline-backup-script
+              defaultMode: 0755
+          - name: backup-storage
+            emptyDir: {}
+          restartPolicy: OnFailure
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: outline-backup-monthly
+  namespace: docs
+  labels:
+    app: outline-backup
+    tier: monthly
+spec:
+  schedule: "0 3 1 * *"  # 1st of every month at 3 AM
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: outline-backup
+            tier: monthly
+        spec:
+          containers:
+          - name: backup
+            image: alpine:latest
+            command: ["/bin/sh", "/scripts/backup-script.sh"]
+            env:
+            - name: MINIO_ENDPOINT
+              value: "https://minio.ldc.opstree.dev:9000"
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-backup-secret
+                  key: access-key
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-backup-secret
+                  key: secret-key
+            - name: MINIO_BUCKET
+              value: "outline-pvc-backup"
+            - name: BACKUP_PREFIX
+              value: "monthly"
+            - name: RETENTION_DAYS
+              value: "365"
+            volumeMounts:
+            - name: outline-data
+              mountPath: /outline-data
+              readOnly: true
+            - name: backup-scripts
+              mountPath: /scripts
+            - name: backup-storage
+              mountPath: /backup
+          volumes:
+          - name: outline-data
+            persistentVolumeClaim:
+              claimName: outline-outline-pvc
+          - name: backup-scripts
+            configMap:
+              name: outline-backup-script
+              defaultMode: 0755
+          - name: backup-storage
+            emptyDir: {}
+          restartPolicy: OnFailure
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: outline-backup-yearly
+  namespace: docs
+  labels:
+    app: outline-backup
+    tier: yearly
+spec:
+  schedule: "0 4 1 1 *"  # Jan 1st at 4 AM
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: outline-backup
+            tier: yearly
+        spec:
+          containers:
+          - name: backup
+            image: alpine:latest
+            command: ["/bin/sh", "/scripts/backup-script.sh"]
+            env:
+            - name: MINIO_ENDPOINT
+              value: "https://minio.ldc.opstree.dev:9000"
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-backup-secret
+                  key: access-key
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-backup-secret
+                  key: secret-key
+            - name: MINIO_BUCKET
+              value: "outline-pvc-backup"
+            - name: BACKUP_PREFIX
+              value: "yearly"
+            - name: RETENTION_DAYS
+              value: "1095"
+            volumeMounts:
+            - name: outline-data
+              mountPath: /outline-data
+              readOnly: true
+            - name: backup-scripts
+              mountPath: /scripts
+            - name: backup-storage
+              mountPath: /backup
+          volumes:
+          - name: outline-data
+            persistentVolumeClaim:
+              claimName: outline-outline-pvc
+          - name: backup-scripts
+            configMap:
+              name: outline-backup-script
+              defaultMode: 0755
+          - name: backup-storage
+            emptyDir: {}
+          restartPolicy: OnFailure
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-backup-secret
+  namespace: docs
+type: Opaque
+stringData:
+  access-key: "UZ86MT0IVFGNP8QDXWBK"  # Paste your access key here
+  secret-key: "N71EsHvz1MAy32UMNEMPiAEa+jAoa0qu7TryycwE"  # Paste your secret key here
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: outline-backup-script
+  namespace: docs
+data:
+  backup-script.sh: |
+    #!/bin/sh
+
+    # Outline PVC Backup Script (shared by daily/monthly/yearly CronJobs)
+    set -e
+
+    # Configuration (BACKUP_PREFIX and RETENTION_DAYS come from CronJob env)
+    BACKUP_DIR="/backup"
+    PVC_MOUNT="/outline-data"
+    BACKUP_PREFIX="${BACKUP_PREFIX:-daily}"
+    RETENTION_DAYS="${RETENTION_DAYS:-7}"
+    TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+    BACKUP_FILENAME="outline_${TIMESTAMP}.tar.gz"
+
+    # MinIO Configuration (from environment variables)
+    MINIO_ENDPOINT="${MINIO_ENDPOINT}"
+    MINIO_ACCESS_KEY="${MINIO_ACCESS_KEY}"
+    MINIO_SECRET_KEY="${MINIO_SECRET_KEY}"
+    MINIO_BUCKET="${MINIO_BUCKET}"
+
+    log() {
+        echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1"
+    }
+
+    log "Backup tier: $BACKUP_PREFIX (retention: $RETENTION_DAYS days)"
+
+    # Install required packages
+    log "Installing required packages..."
+    apk add --no-cache curl tar
+
+    # Install mc (NOTE: old /client/mc path is retired by MinIO -> HTTP 410;
+    # current path is /aistor/mc. -f makes curl fail fast on HTTP errors.)
+    log "Installing MinIO Client..."
+    curl -fsSL https://dl.min.io/aistor/mc/release/linux-amd64/mc -o /usr/local/bin/mc
+    chmod +x /usr/local/bin/mc
+    mc --version
+
+    # Configure mc
+    log "Configuring MinIO Client..."
+    mc alias set minio-backup $MINIO_ENDPOINT $MINIO_ACCESS_KEY $MINIO_SECRET_KEY --api S3v4
+
+    # Create backup
+    log "Creating backup: $BACKUP_PREFIX/$BACKUP_FILENAME"
+    mkdir -p $BACKUP_DIR
+    tar -czf $BACKUP_DIR/$BACKUP_FILENAME -C $PVC_MOUNT .
+    BACKUP_SIZE=$(du -h $BACKUP_DIR/$BACKUP_FILENAME | cut -f1)
+    log "Backup created: $BACKUP_FILENAME ($BACKUP_SIZE)"
+
+    # Upload to MinIO
+    log "Uploading to MinIO..."
+    mc cp $BACKUP_DIR/$BACKUP_FILENAME minio-backup/$MINIO_BUCKET/$BACKUP_PREFIX/$BACKUP_FILENAME
+    log "Uploaded to: $MINIO_ENDPOINT/$MINIO_BUCKET/$BACKUP_PREFIX/$BACKUP_FILENAME"
+
+    # Cleanup old backups in this tier's prefix (native mc age filter;
+    # NOTE: --older-than needs a bucket/prefix path, not a shell wildcard)
+    log "Cleaning up $BACKUP_PREFIX backups older than $RETENTION_DAYS days..."
+    mc rm --force --recursive --older-than ${RETENTION_DAYS}d "minio-backup/$MINIO_BUCKET/$BACKUP_PREFIX/" || true
+
+    log "Cleanup completed"
+
+    # Cleanup local
+    log "Cleaning up local backup files..."
+    rm -f $BACKUP_DIR/$BACKUP_FILENAME
+
+    log "=========================================="
+    log "✅ Backup completed successfully!"
+    log "=========================================="

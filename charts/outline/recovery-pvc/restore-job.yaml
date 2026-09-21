@@ -1,0 +1,137 @@
+# =============================================================================
+# Outline file restore Job — fills an empty (or wiped) PVC from a MinIO backup
+# =============================================================================
+# BEFORE APPLYING: set BACKUP_KEY below to the object you want back, e.g.
+#   daily/outline_20260921_093248.tar.gz
+#   monthly/outline_20260921_094838.tar.gz
+# List candidates with:
+#   mc alias set minio-backup https://minio.ldc.opstree.dev:9000 <KEY> <SECRET> --api S3v4
+#   mc ls --recursive minio-backup/outline-pvc-backup/
+#
+# The Job mounts outline-outline-pvc at /restore-data, downloads the tarball,
+# wipes the volume (except lost+found), extracts, and chowns to 1001:1001
+# (the nodejs user Outline runs as). Scale the deployment to 0 first —
+# restore.sh does this for you.
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: outline-restore-script
+  namespace: docs
+data:
+  restore-script.sh: |
+    #!/bin/sh
+    set -e
+
+    DATA_DIR="/restore-data"
+    WORK_DIR="/tmp-work"
+    BACKUP_KEY="${BACKUP_KEY:?BACKUP_KEY env must be set, e.g. daily/outline_20260921_093248.tar.gz}"
+
+    MINIO_ENDPOINT="${MINIO_ENDPOINT}"
+    MINIO_ACCESS_KEY="${MINIO_ACCESS_KEY}"
+    MINIO_SECRET_KEY="${MINIO_SECRET_KEY}"
+    MINIO_BUCKET="${MINIO_BUCKET}"
+
+    log() {
+        echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1"
+    }
+
+    log "Restore requested: $BACKUP_KEY"
+
+    log "Installing required packages..."
+    apk add --no-cache curl tar
+
+    # Install mc (NOTE: old /client/mc path is retired by MinIO -> HTTP 410;
+    # current path is /aistor/mc. -f fails fast instead of saving HTML.)
+    log "Installing MinIO Client..."
+    curl -fsSL https://dl.min.io/aistor/mc/release/linux-amd64/mc -o /usr/local/bin/mc
+    chmod +x /usr/local/bin/mc
+    mc --version
+
+    log "Configuring MinIO Client..."
+    mc alias set minio-backup $MINIO_ENDPOINT $MINIO_ACCESS_KEY $MINIO_SECRET_KEY --api S3v4
+
+    # Fail fast if the key is wrong (before touching the volume)
+    log "Checking backup exists..."
+    mc stat "minio-backup/$MINIO_BUCKET/$BACKUP_KEY"
+
+    log "Downloading backup..."
+    mkdir -p $WORK_DIR
+    mc cp "minio-backup/$MINIO_BUCKET/$BACKUP_KEY" "$WORK_DIR/restore.tar.gz"
+    du -h "$WORK_DIR/restore.tar.gz"
+
+    log "Wiping volume (keeping lost+found)..."
+    cd "$DATA_DIR" && find . -mindepth 1 -not -name "lost+found" -exec rm -rf {} + 2>/dev/null || true
+
+    log "Extracting backup..."
+    tar -xzf "$WORK_DIR/restore.tar.gz" -C "$DATA_DIR"
+
+    log "Fixing ownership to 1001:1001 (Outline nodejs user)..."
+    chown -R 1001:1001 "$DATA_DIR"
+
+    log "Verifying restored data..."
+    ls -la "$DATA_DIR"
+    FILE_COUNT=$(find "$DATA_DIR" -type f | wc -l)
+    log "Restored file count: $FILE_COUNT"
+    du -sh "$DATA_DIR"
+
+    rm -f "$WORK_DIR/restore.tar.gz"
+
+    log "=========================================="
+    log "✅ Restore completed successfully!"
+    log "=========================================="
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: outline-restore
+  namespace: docs
+  labels:
+    app: outline-restore
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 1800
+  template:
+    metadata:
+      labels:
+        app: outline-restore
+    spec:
+      containers:
+      - name: restore
+        image: alpine:latest
+        command: ["/bin/sh", "/scripts/restore-script.sh"]
+        env:
+        - name: MINIO_ENDPOINT
+          value: "https://minio.ldc.opstree.dev:9000"
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-backup-secret
+              key: access-key
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-backup-secret
+              key: secret-key
+        - name: MINIO_BUCKET
+          value: "outline-pvc-backup"
+        - name: BACKUP_KEY
+          value: "REPLACE_ME_e.g_daily/outline_20260921_093248.tar.gz"
+        volumeMounts:
+        - name: outline-data
+          mountPath: /restore-data
+        - name: restore-scripts
+          mountPath: /scripts
+        - name: restore-work
+          mountPath: /tmp-work
+      volumes:
+      - name: outline-data
+        persistentVolumeClaim:
+          claimName: outline-outline-pvc
+      - name: restore-scripts
+        configMap:
+          name: outline-restore-script
+          defaultMode: 0755
+      - name: restore-work
+        emptyDir: {}
+      restartPolicy: OnFailure
