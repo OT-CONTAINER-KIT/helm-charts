@@ -1,0 +1,12 @@
+apiVersion: v2
+name: keycloak
+description: Production-grade Keycloak Helm Chart for Kubernetes (Quarkus engine)
+type: application
+version: 1.0.0
+appVersion: "26.3.3"
+keywords:
+  - keycloak
+  - sso
+  - oidc
+  - security
+  - identity

@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "keycloak.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+spec:
+  type: {{ default "ClusterIP" (or .Values.keycloak.service.type .Values.service.type) }}
+  ports:
+    - name: http
+      port: {{ default 80 (or .Values.keycloak.service.port .Values.service.httpPort) }}
+      targetPort: 8080
+      {{- if and (eq (default "ClusterIP" (or .Values.keycloak.service.type .Values.service.type)) "NodePort") (or .Values.keycloak.service.nodePort .Values.service.nodePort) }}
+      nodePort: {{ or .Values.keycloak.service.nodePort .Values.service.nodePort }}
+      {{- end }}
+      protocol: TCP
+    - name: management
+      port: 9000
+      targetPort: 9000
+      protocol: TCP
+  selector:
+    {{- include "keycloak.selectorLabels" . | nindent 4 }}
+---
+# Headless Service for Infinispan JGroups Node Discovery
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "keycloak.fullname" . }}-headless
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  ports:
+    - name: jgroups
+      port: 7800
+      targetPort: 7800
+      protocol: TCP
+  selector:
+    {{- include "keycloak.selectorLabels" . | nindent 4 }}

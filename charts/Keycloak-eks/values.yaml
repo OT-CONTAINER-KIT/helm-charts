@@ -1,0 +1,112 @@
+# Enterprise AWS EKS Production Keycloak Helm Values
+# Usage: helm upgrade --install keycloak ./chart --namespace keycloak --create-namespace
+
+# Top-level Domain & TLS Configuration
+domain: keycloak.tyagi.fun
+
+tls:
+  enabled: true
+  secretName: keycloak-tls-secret
+
+# Multi-pod High Availability Replication across AWS EKS Availability Zones
+replicaCount: 2
+
+image:
+  repository: quay.io/keycloak/keycloak
+  tag: 26.3.3
+  pullPolicy: IfNotPresent
+
+# Admin Credentials (Zero Hardcoded Secrets: Managed via AWS Secrets Manager & ESO)
+admin:
+  createSecret: false
+  existingSecret: "keycloak-db-secret"
+  username: admin
+  password: ""
+
+# Keycloak Quarkus Runtime Configuration
+hostname: "keycloak.tyagi.fun"
+hostnameStrict: true
+proxyHeaders: "xforwarded"
+httpEnabled: true
+metricsEnabled: true
+healthEnabled: true
+logLevel: "INFO"
+
+# Database Configuration (Amazon RDS PostgreSQL Multi-AZ HA - Zero Hardcoded Secrets via ESO)
+database:
+  vendor: postgres
+  host: "" # Dynamically pulled from AWS Secrets Manager property db-host via ESO
+  port: 5432
+  name: "keycloak"
+  username: "keycloak"
+  createSecret: false
+  existingSecret: "keycloak-db-secret"
+  password: ""
+
+# External Secrets Operator (ESO) - AWS Secrets Manager Integration via EKS IRSA
+externalSecrets:
+  enabled: true
+  awsRegion: "ap-south-1"
+  awsSecretName: "production/keycloak/credentials"
+
+# NetworkPolicy Internal Pod Firewall Hardening (Amazon VPC CNI eBPF Controller)
+networkPolicy:
+  enabled: true
+
+# Infinispan User Session Clustering for Multi-Pod HA
+cache:
+  enabled: true
+  stack: kubernetes
+
+# Production Resource Allocations
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1024Mi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+# Production Health Probes
+livenessProbe:
+  initialDelaySeconds: 120
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Keycloak Service Configuration (ClusterIP for Production Ingress)
+keycloak:
+  service:
+    type: ClusterIP
+    port: 80
+
+# Horizontal Pod Autoscaler (Auto-scales from 2 to 5 pods under heavy load)
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 75
+  targetMemoryUtilizationPercentage: 80
+
+# Pod Disruption Budget (Guarantees zero downtime during node maintenance)
+pdb:
+  enabled: true
+  minAvailable: 1
+
+# Service Account & EKS IRSA IAM Role Binding
+serviceAccount:
+  create: true
+  name: keycloak-service-account
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::184430802476:role/KeycloakSecretsManagerRole"
+
+# High Availability Pod Anti-Affinity (Spreads pods across different nodes/AZs)
+podAntiAffinity:
+  enabled: true
+  type: soft

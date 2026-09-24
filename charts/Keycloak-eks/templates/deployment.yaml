@@ -1,0 +1,160 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "keycloak.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      {{- include "keycloak.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "keycloak.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "keycloak.serviceAccountName" . }}
+      {{- if .Values.podAntiAffinity.enabled }}
+      affinity:
+        podAntiAffinity:
+          {{- if eq .Values.podAntiAffinity.type "hard" }}
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                      - {{ include "keycloak.name" . }}
+              topologyKey: "kubernetes.io/hostname"
+          {{- else }}
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app.kubernetes.io/name
+                      operator: In
+                      values:
+                        - {{ include "keycloak.name" . }}
+                topologyKey: "kubernetes.io/hostname"
+          {{- end }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: keycloak
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /opt/keycloak/bin/kc.sh
+            - start
+          env:
+            # Database Configuration
+            - name: KC_DB
+              value: {{ .Values.database.vendor | quote }}
+            {{- if .Values.database.host }}
+            - name: KC_DB_URL
+              value: "jdbc:postgresql://{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
+            {{- else }}
+            - name: KC_DB_URL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "keycloak.dbSecretName" . }}
+                  key: db-host
+            - name: KC_DB_URL
+              value: "jdbc:postgresql://$(KC_DB_URL_HOST):{{ .Values.database.port }}/{{ .Values.database.name }}"
+            {{- end }}
+            - name: KC_DB_USERNAME
+              value: {{ .Values.database.username | quote }}
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "keycloak.dbSecretName" . }}
+                  key: password
+
+            # Admin Credentials
+            - name: KEYCLOAK_ADMIN
+              value: {{ default "admin" .Values.admin.username | quote }}
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "keycloak.adminSecretName" . }}
+                  key: admin-password
+
+            # Hostname & Proxy Settings
+            - name: KC_HOSTNAME
+              value: {{ .Values.hostname | quote }}
+            {{- if .Values.hostnameAdmin }}
+            - name: KC_HOSTNAME_ADMIN
+              value: {{ .Values.hostnameAdmin | quote }}
+            {{- end }}
+            - name: KC_HOSTNAME_STRICT
+              value: {{ default "false" .Values.hostnameStrict | quote }}
+            - name: KC_HTTP_ENABLED
+              value: {{ .Values.httpEnabled | quote }}
+            - name: KC_PROXY_HEADERS
+              value: {{ .Values.proxyHeaders | quote }}
+
+            # Metrics & Health Probes
+            - name: KC_HEALTH_ENABLED
+              value: {{ .Values.healthEnabled | quote }}
+            - name: KC_METRICS_ENABLED
+              value: {{ .Values.metricsEnabled | quote }}
+            - name: KC_LOG_LEVEL
+              value: {{ .Values.logLevel | quote }}
+
+            # High Availability Infinispan Cache Discovery
+            {{- if .Values.cache.enabled }}
+            - name: KC_CACHE_STACK
+              value: {{ .Values.cache.stack | quote }}
+            - name: JAVA_OPTS_APPEND
+              value: "-Djgroups.dns.query={{ include "keycloak.fullname" . }}-headless.{{ .Release.Namespace }}.svc.cluster.local"
+            {{- end }}
+
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: management
+              containerPort: 9000
+              protocol: TCP
+            - name: jgroups
+              containerPort: 7800
+              protocol: TCP
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 9000
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 9000
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
