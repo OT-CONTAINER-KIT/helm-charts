@@ -1,4 +1,4 @@
-# Keycloak 26.x Enterprise Production Helm Chart on AWS EKS
+# Keycloak Enterprise Production Helm Chart on AWS EKS
 
 Production-ready, zero-trust Helm chart for deploying Keycloak 26.x (Quarkus distribution) on AWS EKS with Amazon RDS PostgreSQL Multi-AZ, AWS Secrets Manager, and Infinispan High Availability Session Clustering.
 
@@ -44,7 +44,7 @@ graph TD
 
 Before deploying the Helm chart, ensure the following infrastructure is provisioned:
 
-1. **Amazon RDS PostgreSQL (Multi-AZ):** Running in your EKS VPC (`keycloak-postgres-ha.czkkku2mw6m8.ap-south-1.rds.amazonaws.com`).
+1. **Amazon RDS PostgreSQL (Multi-AZ):** Running in your EKS VPC.
 2. **AWS Secrets Manager Secret:** Secret `production/keycloak/credentials` in `ap-south-1` containing keys `db-host`, `db-password`, and `admin-password`.
 3. **AWS EKS IRSA IAM Role:** IAM Role `KeycloakSecretsManagerRole` attached to `keycloak:keycloak-service-account` with `SecretsManagerReadWrite` policy.
 4. **ZeroSSL TLS Secret:** Created in namespace `keycloak`:
