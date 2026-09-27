@@ -1,0 +1,47 @@
+{{- if .Values.engine.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: refresh-days
+  labels:
+    {{- include "spendsmart.labels" . | nindent 4 }}
+    app: refresh-days
+spec:
+  schedule: {{ .Values.engine.schedule | quote }}
+  concurrencyPolicy: {{ .Values.engine.concurrencyPolicy }}
+  successfulJobsHistoryLimit: {{ .Values.engine.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.engine.failedJobsHistoryLimit }}
+  suspend: {{ .Values.engine.suspend }}
+
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "spendsmart.labels" . | nindent 12 }}
+            app: refresh-days
+        spec:
+          serviceAccountName: {{ .Values.engine.serviceAccount.name }}
+
+          restartPolicy: OnFailure
+
+          imagePullSecrets:
+            {{- toYaml .Values.imagePullSecrets | nindent 12 }}
+
+          containers:
+            - name: engine
+              image: "{{ .Values.engine.image.repository }}:{{ .Values.engine.image.tag }}"
+              imagePullPolicy: {{ .Values.engine.image.pullPolicy }}
+
+              command:
+                {{- toYaml .Values.engine.command | nindent 16 }}
+
+              args:
+                {{- toYaml .Values.engine.args | nindent 16 }}
+
+              envFrom:
+                {{- toYaml .Values.engine.envFrom | nindent 16 }}
+
+              resources:
+                {{- toYaml .Values.engine.resources | nindent 16 }}
+{{- end }}

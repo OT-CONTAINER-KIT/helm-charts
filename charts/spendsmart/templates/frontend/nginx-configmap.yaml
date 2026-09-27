@@ -1,0 +1,44 @@
+{{- if .Values.frontend.nginx.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.frontend.nginx.configMap.name }}
+  labels:
+    {{- include "spendsmart.labels" . | nindent 4 }}
+data:
+  default.conf: |
+    server {
+        listen 80;
+        listen [::]:80;
+        server_name _;
+        root /usr/share/nginx/html;
+        index index.html;
+
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header Content-Security-Policy "default-src 'self' https: wss: 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src {{ join " " .Values.frontend.nginx.csp.connectSrc }};" always;
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+        location / {
+            add_header X-Frame-Options "SAMEORIGIN" always;
+            add_header X-Content-Type-Options "nosniff" always;
+            add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+            add_header Content-Security-Policy "default-src 'self' https: wss: 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src {{ join " " .Values.frontend.nginx.csp.connectSrc }};" always;
+            add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+            try_files $uri /index.html;
+        }
+
+        location /assets/ {
+            expires 1y;
+            add_header Cache-Control "public";
+            add_header X-Frame-Options "SAMEORIGIN" always;
+            add_header X-Content-Type-Options "nosniff" always;
+            add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+            add_header Content-Security-Policy "default-src 'self' https: wss: 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src {{ join " " .Values.frontend.nginx.csp.connectSrc }};" always;
+            add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+        }
+
+        error_page 404 /index.html;
+    }
+{{- end }}

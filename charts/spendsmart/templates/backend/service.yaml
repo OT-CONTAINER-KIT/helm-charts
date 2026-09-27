@@ -1,0 +1,18 @@
+{{- if .Values.backend.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "spendsmart.backend.fullname" . }}
+  labels:
+    {{- include "spendsmart.labels" . | nindent 4 }}
+    app: {{ include "spendsmart.backend.fullname" . }}
+spec:
+  type: {{ .Values.backend.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.backend.service.port }}
+      targetPort: {{ .Values.backend.service.targetPort }}
+      protocol: TCP
+  selector:
+    app: {{ include "spendsmart.backend.fullname" . }}
+{{- end }}

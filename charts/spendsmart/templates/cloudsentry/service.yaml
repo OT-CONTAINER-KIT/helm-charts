@@ -1,0 +1,19 @@
+{{- if .Values.cloudsentry.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "spendsmart.cloudsentry.fullname" . }}
+  labels:
+    {{- include "spendsmart.labels" . | nindent 4 }}
+    app: {{ include "spendsmart.cloudsentry.fullname" . }}
+spec:
+  type: {{ .Values.cloudsentry.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.cloudsentry.service.port }}
+      targetPort: {{ .Values.cloudsentry.service.targetPort }}
+      protocol: TCP
+  selector:
+    app: {{ include "spendsmart.cloudsentry.fullname" . }}
+    version: v0
+{{- end }}
