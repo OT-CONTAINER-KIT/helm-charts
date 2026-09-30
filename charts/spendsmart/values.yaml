@@ -1,0 +1,185 @@
+nameOverride: ""
+fullnameOverride: ""
+
+imagePullSecrets:
+  - name: harbor-ldc-coe-regcred
+
+backend:
+  enabled: true
+
+  image:
+    repository: harbor.ldc.opstree.dev/coe/uniteconpro-backend-dev
+    tag: "39"
+    pullPolicy: Always
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8000
+
+  serviceAccount:
+    name: uniteconpro-backend
+
+  envFrom:
+    - secretRef:
+        name: encryption-key
+    - secretRef:
+        name: clickhouse
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+
+  annotations:
+    instrumentation.opentelemetry.io/inject-python: observability/otel-instrumentation
+
+  probes:
+    liveness:
+      httpGet:
+        path: /api/v1/healthz
+        port: 8000
+      initialDelaySeconds: 15
+      periodSeconds: 20
+      timeoutSeconds: 5
+      failureThreshold: 3
+
+    readiness:
+      httpGet:
+        path: /api/v1/readyz
+        port: 8000
+      initialDelaySeconds: 20
+      periodSeconds: 15
+      timeoutSeconds: 5
+      failureThreshold: 3
+
+engine:
+  enabled: true
+
+  schedule: "5 11,23 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  suspend: false
+
+  image:
+    repository: harbor.ldc.opstree.dev/coe/uniteconpro-engine-dev
+    tag: "latest"
+    pullPolicy: Always
+
+  serviceAccount:
+    name: uniteconpro-sa
+
+  command:
+    - python
+    - app.py
+
+  args:
+    - --mode
+    - refresh_days
+    - --cloud
+    - aws
+    - --service
+    - all
+    - --days
+    - "2"
+
+  envFrom:
+    - secretRef:
+        name: clickhouse-db
+    - secretRef:
+        name: encryption-key
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+frontend:
+  enabled: true
+
+  image:
+    repository: harbor.ldc.opstree.dev/coe/uniteconpro-frontend-dev
+    tag: "39"
+    pullPolicy: Always
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 80
+
+  serviceAccount:
+    name: uniteconpro-frontend
+
+  configMap:
+    name: uniteconpro-frontend
+    data:
+      VITE_API_BASE_URL: ""
+      VITE_CLOUD_SENTRY_API_BASE_URL: ""
+      VITE_KEYCLOAK_CLIENT_ID: ""
+      VITE_KEYCLOAK_REALM: ""
+      VITE_KEYCLOAK_URL: ""
+
+  nginx:
+    enabled: true
+
+    configMap:
+      name: spendsmart-frontend-nginx
+
+    csp:
+      connectSrc:
+        - "'self'"
+        - "https://keycloak.opstree.dev"
+        - "https://cloud-sentry-api.opstree.dev"
+        - "wss:"
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 50Mi
+    limits:
+      cpu: 200m
+      memory: 200Mi
+
+  annotations:
+    instrumentation.opentelemetry.io/inject-nodejs: observability/otel-instrumentation
+
+cloudsentry:
+  enabled: true
+
+  image:
+    repository: harbor.ldc.opstree.dev/coe/cloud-sentry-dev
+    tag: "10"
+    pullPolicy: Always
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8000
+
+  serviceAccount:
+    name: cloud-sentry
+
+  envFrom:
+    - secretRef:
+        name: aws-access
+    - secretRef:
+        name: base-url
+    - secretRef:
+        name: gemini-key
+    - secretRef:
+        name: postgres-config
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi

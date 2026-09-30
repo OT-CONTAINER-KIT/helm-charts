@@ -1,0 +1,48 @@
+{{- if .Values.backend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "spendsmart.backend.fullname" . }}
+  labels:
+    {{- include "spendsmart.labels" . | nindent 4 }}
+    app: {{ include "spendsmart.backend.fullname" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "spendsmart.backend.fullname" . }}
+  template:
+    metadata:
+      labels:
+        {{- include "spendsmart.labels" . | nindent 8 }}
+        app: {{ include "spendsmart.backend.fullname" . }}
+      annotations:
+        {{- toYaml .Values.backend.annotations | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Values.backend.serviceAccount.name }}
+
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+
+      containers:
+        - name: backend
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+
+          ports:
+            - name: uniteconpro
+              containerPort: 8000
+              protocol: TCP
+
+          envFrom:
+            {{- toYaml .Values.backend.envFrom | nindent 12 }}
+
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
+
+          livenessProbe:
+            {{- toYaml .Values.backend.probes.liveness | nindent 12 }}
+
+          readinessProbe:
+            {{- toYaml .Values.backend.probes.readiness | nindent 12 }}
+{{- end }}

@@ -1,0 +1,42 @@
+{{- if .Values.cloudsentry.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "spendsmart.cloudsentry.fullname" . }}
+  labels:
+    {{- include "spendsmart.labels" . | nindent 4 }}
+    app: {{ include "spendsmart.cloudsentry.fullname" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "spendsmart.cloudsentry.fullname" . }}
+      version: v0
+  template:
+    metadata:
+      labels:
+        {{- include "spendsmart.labels" . | nindent 8 }}
+        app: {{ include "spendsmart.cloudsentry.fullname" . }}
+        version: v0
+    spec:
+      serviceAccountName: {{ .Values.cloudsentry.serviceAccount.name }}
+
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+
+      containers:
+        - name: cloud-sentry
+          image: "{{ .Values.cloudsentry.image.repository }}:{{ .Values.cloudsentry.image.tag }}"
+          imagePullPolicy: {{ .Values.cloudsentry.image.pullPolicy }}
+
+          ports:
+            - name: cloud-sentry
+              containerPort: 8000
+              protocol: TCP
+
+          envFrom:
+            {{- toYaml .Values.cloudsentry.envFrom | nindent 12 }}
+
+          resources:
+            {{- toYaml .Values.cloudsentry.resources | nindent 12 }}
+{{- end }}
