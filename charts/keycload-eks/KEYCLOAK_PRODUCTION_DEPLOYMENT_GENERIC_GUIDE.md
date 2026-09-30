@@ -1,14 +1,4 @@
-```mermaid
-flowchart TD
-    S1["Step 1: Create Admin Secret in AWS Secrets Manager"] --> S2["Step 2: Upload SSL Cert & Create Namespace"]
-    S2 --> S3["Step 3: Create 'keycloak' Database on RDS"]
-    S3 --> S4["Step 4: Install Controllers (NGINX & ESO)"]
-    S4 --> S5["Step 5: Create EKS IAM IRSA Role"]
-    S5 --> S6["Step 6: Deploy Keycloak via Helm"]
-    S6 --> S7["Step 7: Verify & Point DNS CNAME"]
-```
-
-# Keycloak 26.x Production Deployment Guide (Generic EKS & RDS Blueprint)
+# Keycloak Production Deployment Guide (Generic EKS & RDS Blueprint)
 
 This guide provides an end-to-end, step-by-step blueprint to deploy **Keycloak 26.x (Quarkus distribution)** on any **AWS EKS cluster** and **Amazon RDS PostgreSQL database** with tainted node pools (e.g. `dedicated=application:NoSchedule`).
 
