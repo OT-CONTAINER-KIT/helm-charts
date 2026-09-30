@@ -1,0 +1,55 @@
+{{- if .Values.gitlabConsumer.enabled }}
+---
+# Second consumer process (`gitlab-events`) from the same image: scans pushes
+# from GitLab webhooks (gitlab.events topic). Without it GitLab webhooks queue
+# messages that nothing reads. Shares the secret and config of the main consumer.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.gitlabConsumer.name }}
+  namespace: sentryfuse
+  labels:
+    {{- include "sentryfuse.gitlab.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.gitlabConsumer.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "sentryfuse.gitlab.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "sentryfuse.gitlab.labels" . | nindent 8 }}
+      {{- with merge (dict "rems.service/name" .Values.gitlabConsumer.name) (.Values.podAnnotations | default dict) }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.base.image.pullSecrets }}
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: {{ .Values.gitlabConsumer.name }}
+          image: "{{ .Values.base.image.repository }}:{{ .Values.base.image.tag }}"
+          imagePullPolicy: {{ .Values.base.image.pullPolicy | default "IfNotPresent" }}
+          args: ["gitlab-events"]
+          resources:
+            {{- toYaml (.Values.gitlabConsumer.resources | default .Values.resources) | nindent 12 }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.base.existingSecret }}
+          {{- if and .Values.volumes .Values.volumes.configMaps }}
+          volumeMounts:
+            {{- range $conf := .Values.volumes.configMaps }}
+            - mountPath: {{ $conf.mountPath }}
+              name: {{ $conf.name }}-volume
+            {{- end }}
+          {{- end }}
+      {{- if and .Values.volumes .Values.volumes.configMaps }}
+      volumes:
+        {{- range $conf := .Values.volumes.configMaps }}
+        - name: {{ $conf.name }}-volume
+          configMap:
+            name: {{ $conf.name }}
+        {{- end }}
+      {{- end }}
+{{- end }}

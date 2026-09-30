@@ -7,3 +7,9 @@ app.kubernetes.io/name: {{ .Values.name }}
 app.kubernetes.io/component: {{ .Values.component }}
 app.kubernetes.io/part-of: sentryfuse
 {{- end }}
+
+{{- define "sentryfuse.gitlab.labels" -}}
+app.kubernetes.io/name: {{ .Values.gitlabConsumer.name }}
+app.kubernetes.io/component: consumer-gitlab
+app.kubernetes.io/part-of: sentryfuse
+{{- end }}

@@ -27,6 +27,24 @@ base:
 
 replicaCount: 1
 
+# GitLab push consumer: a second Deployment running `gitlab-events` from the same
+# image, secret and config. Required for GitLab projects (manual webhook or
+# "Connect GitLab"): their webhooks publish to the gitlab.events topic.
+#
+# The `existingSecret` above must also contain, for the GitLab connect flow
+# (the `events` consumer refreshes tokens too):
+#   CREDENTIAL_ENC_KEY          base64 32 bytes, identical to sentryfuse-api's
+#   GITLAB_OAUTH_CLIENT_ID      OAuth application on the GitLab instance
+#   GITLAB_OAUTH_CLIENT_SECRET
+#   GITLAB_OAUTH_REDIRECT_URI   https://<api-host>/api/v1/gitlab/oauth/callback
+#   GITLAB_OAUTH_INSTANCES      optional JSON for self-managed instances
+# Projects not connected via OAuth keep using GITLAB_TOKEN when present.
+gitlabConsumer:
+  enabled: true
+  name: sentryfuse-consumer-gitlab
+  replicaCount: 1
+  resources: {}
+
 healthcheck:
   enabled: false
   statusPath: /health

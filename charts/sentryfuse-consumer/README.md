@@ -1,6 +1,6 @@
 # Web Deployment Helm Chart
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 
 A deployment helm chart which will be used to deploy any type of stateless application
 
@@ -21,6 +21,21 @@ A deployment helm chart which will be used to deploy any type of stateless appli
 | Repository                                     | Name | Version |
 |------------------------------------------------|------|---------|
 | https://ot-container-kit.github.io/helm-charts | base | 0.1.0   |
+
+## GitLab consumer
+
+`gitlabConsumer.enabled` (default `true`) adds a second Deployment, `sentryfuse-consumer-gitlab`, that runs
+`gitlab-events` from the same image, secret (`base.existingSecret`) and config volume. It scans pushes that GitLab
+webhooks publish to the `gitlab.events` topic. The secret needs `CREDENTIAL_ENC_KEY`, `GITLAB_OAUTH_CLIENT_ID`,
+`GITLAB_OAUTH_CLIENT_SECRET` and `GITLAB_OAUTH_REDIRECT_URI` (plus optional `GITLAB_OAUTH_INSTANCES`) for the
+self-serve "Connect GitLab" flow; see `docs/onboarding/gitlab-integration.md` in the SentryFuse repository.
+
+| Key                            | Type   | Default                        | Description                                     |
+|--------------------------------|--------|--------------------------------|-------------------------------------------------|
+| gitlabConsumer.enabled         | bool   | `true`                         | Render the `gitlab-events` Deployment           |
+| gitlabConsumer.name            | string | `"sentryfuse-consumer-gitlab"` | Deployment name and `app.kubernetes.io/name`    |
+| gitlabConsumer.replicaCount    | int    | `1`                            | Replicas                                        |
+| gitlabConsumer.resources       | object | `{}` (falls back to `resources`) | Requests and limits                          |
 
 ## Values
 
