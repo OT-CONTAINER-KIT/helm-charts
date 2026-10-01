@@ -90,7 +90,7 @@ volumes:
               severity: "high"
 
             - regex: |-
-                (?i)(aws|secret)[a-z_]{0,20}['\"]?\s*[:=]\s*(?-i:['\"]?[0-9a-zA-Z\/+]{40}['\"]?)
+                (?i)(aws[a-z_]{1,20}|secret[a-z_]{0,20})['\"]?\s*[:=]\s*(?-i:['\"]?[0-9a-zA-Z\/+]{40}['\"]?)
               description: "AWS Secret Key"
               tags: ["key", "AWS"]
               entropy: 4.06
