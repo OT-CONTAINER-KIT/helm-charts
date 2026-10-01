@@ -177,56 +177,56 @@ volumes:
               severity: "high"
 
             - regex: |-
-                sk-(proj-)?[A-Za-z0-9_\-]{20,}
+                \bsk-(proj-)?[A-Za-z0-9_\-]{20,}
               description: "OpenAI API Key"
               tags: ["key", "openai", "ai"]
               entropy: 3.5
               severity: "high"
 
             - regex: |-
-                sk-ant-(api\d{2}-)?[A-Za-z0-9_\-]{20,}
+                \bsk-ant-(api\d{2}-)?[A-Za-z0-9_\-]{20,}
               description: "Anthropic API Key"
               tags: ["key", "anthropic", "ai"]
               entropy: 3.5
               severity: "high"
 
             - regex: |-
-                hf_[A-Za-z0-9]{34}
+                \bhf_[A-Za-z0-9]{34}
               description: "Hugging Face Token"
               tags: ["key", "huggingface", "ai"]
               entropy: 3.5
               severity: "high"
 
             - regex: |-
-                r8_[A-Za-z0-9]{37}
+                \br8_[A-Za-z0-9]{37}
               description: "Replicate API Token"
               tags: ["key", "replicate", "ai"]
               entropy: 3.5
               severity: "high"
 
             - regex: |-
-                gsk_[A-Za-z0-9]{20,}
+                \bgsk_[A-Za-z0-9]{20,}
               description: "Groq API Key"
               tags: ["key", "groq", "ai"]
               entropy: 3.5
               severity: "high"
 
             - regex: |-
-                pplx-[A-Za-z0-9]{40,}
+                \bpplx-[A-Za-z0-9]{40,}
               description: "Perplexity API Key"
               tags: ["key", "perplexity", "ai"]
               entropy: 3.5
               severity: "high"
 
             - regex: |-
-                sk-or-v1-[A-Za-z0-9]{40,}
+                \bsk-or-v1-[A-Za-z0-9]{40,}
               description: "OpenRouter API Key"
               tags: ["key", "openrouter", "ai"]
               entropy: 3.5
               severity: "high"
 
             - regex: |-
-                dop_v1_[a-f0-9]{64}
+                \bdop_v1_[a-f0-9]{64}
               description: "DigitalOcean PAT"
               tags: ["key", "digitalocean", "cloud"]
               entropy: 3.5
