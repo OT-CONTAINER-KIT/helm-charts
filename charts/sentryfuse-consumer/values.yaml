@@ -72,10 +72,27 @@ volumes:
 
           pagerduty:
             enabled: true
+            # Only leaks at or above this severity page (low | medium | high). Omit to page
+            # for everything. Lower-severity leaks still go to Slack.
+            # min_severity: high
 
           slack:
             enabled: true
+            # Default channel: secret-detection alerts and anything no route below matches.
             channel: C095VP1JLJ0
+            # Optional routing (needs the image with alert routing). First matching route wins;
+            # every condition in a route must hold; within a condition any value matches.
+            # Conditions: repo (owner/name globs), severity, visibility (public|private|internal),
+            # provider (github|gitlab). Applies to push alerts and PR reports (a PR has no
+            # severity, so only repo/visibility/provider routes can match it).
+            # routes:
+            #   - channel: C0XXXXXXXXX          # urgent: high-severity leaks in public repos
+            #     match:
+            #       severity: [high]
+            #       visibility: [public]
+            #   - channel: C0YYYYYYYYY          # one team's repos
+            #     match:
+            #       repo: ["OT-COE/payments-*"]
 
           ai_pr_reviewer:
             max_lines: 5500
