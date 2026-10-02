@@ -43,6 +43,14 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
+          {{- $objectStore := list }}
+          {{- range $k, $v := .Values.objectStore }}
+          {{- if $v }}{{- $objectStore = append $objectStore (dict "name" $k "value" ($v | toString)) }}{{- end }}
+          {{- end }}
+          {{- if $objectStore }}
+          env:
+            {{- toYaml $objectStore | nindent 12 }}
+          {{- end }}
           envFrom:
             - secretRef:
                 name: {{ .Values.base.existingSecret }}
