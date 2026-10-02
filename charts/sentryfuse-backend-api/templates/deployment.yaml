@@ -64,6 +64,12 @@ spec:
             - name: {{ $key }}
               value: "{{ $value }}"
             {{- end }}
+            {{- range $key, $value := .Values.objectStore }}
+            {{- if $value }}
+            - name: {{ $key }}
+              value: {{ $value | toString | quote }}
+            {{- end }}
+            {{- end }}
           {{- if .Values.base.existingSecrets }}
           envFrom:
           {{- range .Values.base.existingSecrets }}

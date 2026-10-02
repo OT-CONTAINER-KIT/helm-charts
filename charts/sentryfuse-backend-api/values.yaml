@@ -59,6 +59,18 @@ resources:
   limits:
     memory: 512Mi
 
+# Object storage the API reads PR diffs and patches from; it must match the consumer
+# (docs/onboarding/object-storage.md in the SentryFuse repo). Blank values are not
+# rendered, so nothing is overridden and the Postgres store (or any OBJECT_STORE_*/MINIO_*
+# already in the existingSecrets) keeps working. For AWS S3 set provider: s3 plus bucket
+# and region, and give the pod an IAM role (IRSA); credentials never go in this file.
+objectStore:
+  OBJECT_STORE_PROVIDER: ""   # minio | s3 | postgres (blank = MinIO when an endpoint is set, else Postgres)
+  OBJECT_STORE_BUCKET: ""     # e.g. sentryfuse-pr-blobs
+  OBJECT_STORE_REGION: ""     # e.g. ap-south-1
+  OBJECT_STORE_ENDPOINT: ""   # only for MinIO or an S3-compatible service
+  OBJECT_STORE_USE_SSL: ""    # "true" for https with a custom endpoint
+
 replicaCount: 1
 
 volumes:
