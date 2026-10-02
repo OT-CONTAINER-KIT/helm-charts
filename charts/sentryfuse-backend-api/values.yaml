@@ -1,0 +1,105 @@
+name: sentryfuse-api
+component: api
+
+podAnnotations:
+  instrumentation.opentelemetry.io/inject-go: observability/otel-instrumentation
+  rems.owner/cto: sandeep
+  rems.owner/dev: samyak
+  rems.owner/devops: prashant
+  rems.owner/manager: abhishek.dubey
+  rems.owner/qa: shwetabh.vats
+  rems.service/category: application
+  rems.service/environment: prod
+  rems.service/group: sentryfuse
+  rems.service/layer: backend
+  rems.service/name: sentryfuse-api
+  rems.service/severity: critical
+  rems.service/technology: golang
+
+base:
+  image:
+    pullPolicy: "Always"
+    command: []
+    repository: harbor.ldc.opstree.dev/coe/sentryfuse-api
+    tag: latest
+    pullSecrets: "reg-ldc-coe-regcred"
+  config:
+    POSTGRES_ADDR: "192.168.10.52:5432"
+    POSTGRES_USER: "postgres"
+    POSTGRES_PASSWORD: "password"
+  existingSecrets:
+    - sentryfuse-api
+
+healthcheck:
+  enabled: true
+  statusPath: /api/v1/healthz
+
+autoscaling:
+  enabled: false
+  targetCPUUtilizationPercentage: 65
+  targetMemoryUtilizationPercentage: 65
+  minReplicas: 10
+  maxReplicas: 50
+
+service:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+
+# Requests follow the measured idle use (2026-10-03 `kubectl top`: api 27Mi, 2m CPU). The
+# memory limit leaves room for reading PR diffs and file contents; no CPU limit, so
+# requests are not throttled. Raise the limit if the pod is OOMKilled.
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 512Mi
+
+# Object storage the API reads PR diffs and patches from; it must match the consumer
+# (docs/onboarding/object-storage.md in the SentryFuse repo). Blank values are not
+# rendered, so nothing is overridden and the Postgres store (or any OBJECT_STORE_*/MINIO_*
+# already in the existingSecrets) keeps working. For AWS S3 set provider: s3 plus bucket
+# and region, and give the pod an IAM role (IRSA); credentials never go in this file.
+objectStore:
+  OBJECT_STORE_PROVIDER: ""   # minio | s3 | postgres (blank = MinIO when an endpoint is set, else Postgres)
+  OBJECT_STORE_BUCKET: ""     # e.g. sentryfuse-pr-blobs
+  OBJECT_STORE_REGION: ""     # e.g. ap-south-1
+  OBJECT_STORE_ENDPOINT: ""   # only for MinIO or an S3-compatible service
+  OBJECT_STORE_USE_SSL: ""    # "true" for https with a custom endpoint
+
+replicaCount: 1
+
+volumes:
+  configMaps:
+    - name: sentryfuse-api-config
+      mountPath: /etc/sentryfuse/
+      data:
+        config.yaml: |
+          kafka:
+            brokers: ["192.168.10.52:9092"]
+
+          postgres:
+            addr: "192.168.10.52:5432"
+            user: "postgres"
+            password: "password"
+            dbname: "git_guard"
+
+web:
+  enabled: false
+
+ingress:
+  enabled: false
+  class: nginx
+  annotations:
+    ingress.gcp.kubernetes.io/pre-shared-cert: global-sign-opstree-com-2024
+    kubernetes.io/ingress.allow-http: "false"
+
+internalIngress:
+  enabled: false
+  class: nginx-internal
+  annotations:
+    kubernetes.io/ingress.allow-http: "true"
