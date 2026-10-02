@@ -136,7 +136,7 @@ volumes:
                 (A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}
               description: "AWS Access Key"
               tags: ["key", "AWS"]
-              entropy: 4.06
+              entropy: 3.0
               severity: "high"
 
             - regex: |-
@@ -210,10 +210,10 @@ volumes:
               severity: "high"
 
             - regex: |-
-                \bsk-(proj-)?[A-Za-z0-9_\-]{20,}
+                \bsk-(?:(?:proj|svcacct|admin)-[A-Za-z0-9_\-]{40,}|[A-Za-z0-9]{32,})
               description: "OpenAI API Key"
               tags: ["key", "openai", "ai"]
-              entropy: 3.5
+              entropy: 4.0
               severity: "high"
 
             - regex: |-
