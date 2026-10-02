@@ -49,7 +49,15 @@ service:
       targetPort: 8080
       protocol: TCP
 
-resources: {}
+# Requests follow the measured idle use (2026-10-03 `kubectl top`: api 27Mi, 2m CPU). The
+# memory limit leaves room for reading PR diffs and file contents; no CPU limit, so
+# requests are not throttled. Raise the limit if the pod is OOMKilled.
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 512Mi
 
 replicaCount: 1
 
