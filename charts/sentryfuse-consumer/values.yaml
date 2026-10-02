@@ -46,9 +46,9 @@ gitlabConsumer:
   # Push scans clone shallow, so this runs lighter than the events consumer.
   resources:
     requests:
-      cpu: 100m
-      memory: 256Mi
-      ephemeral-storage: 1Gi
+      cpu: 50m
+      memory: 64Mi
+      ephemeral-storage: 512Mi
     limits:
       memory: 1Gi
       ephemeral-storage: 5Gi
@@ -63,13 +63,15 @@ service:
 
 # Full scans clone whole repositories into /tmp (up to SCAN_WORKERS=5 at a time) and
 # scan files as a stream, so memory stays flat; disk is what grows. There is no CPU
-# limit on purpose: regex scanning would be throttled. Starting values, to be checked
-# against `kubectl top pods -n sentryfuse` and raised if the pod is OOMKilled or evicted.
+# limit on purpose: regex scanning would be throttled. Requests follow the measured idle use
+# (2026-10-03 `kubectl top`: events 28Mi, pr 16Mi, gitlab 8Mi); the limits leave room for
+# scan bursts. Peak use during a full scan is not measured yet: raise the limits if a pod
+# is OOMKilled or evicted.
 resources:
   requests:
-    cpu: 250m
-    memory: 512Mi
-    ephemeral-storage: 2Gi
+    cpu: 100m
+    memory: 128Mi
+    ephemeral-storage: 1Gi
   limits:
     memory: 2Gi
     ephemeral-storage: 10Gi
