@@ -26,8 +26,8 @@ base:
   existingSecret: sentryfuse-consumer
 
 # github.events and github.scan have 12 partitions on prod (raised 2026-10-04), so up to 12
-# pods share the work; each pod runs its own worker pool (capacity below). 3 pods run 15
-# full scans at once. More than 12 would leave pods idle.
+# pods share the work; each pod runs its own worker pool (capacity below). Only used when
+# autoscaling is off; otherwise the autoscaler below decides (1 to 3 pods).
 replicaCount: 3
 
 # Concurrency and Postgres connections per events pod. Blank keeps the image default.
@@ -89,7 +89,7 @@ service:
 # is OOMKilled or evicted.
 resources:
   requests:
-    cpu: 100m
+    cpu: 500m
     memory: 128Mi
     ephemeral-storage: 1Gi
   limits:
@@ -437,5 +437,22 @@ ingress:
 internalIngress:
   enabled: false
 
+# Scale the events consumer on CPU: a scan is CPU-bound (inflate + regex), memory is not a
+# usable signal (the Go heap only shrinks when the GC decides, see GOMEMLIMIT). The
+# percentage is of the CPU request below, so 70% of 500m = 350m per pod. Max 3 keeps the
+# Postgres budget in `capacity` (88 of 100 connections); each extra pod needs 15 more, so
+# raise max only together with a bigger max_connections or a pooler. 12 is the ceiling
+# (partitions). Scale-down waits 10 min and removes one pod at a time, so a pod is not
+# taken away in the middle of a long scan (that scan would restart on another pod).
 autoscaling:
-  enabled: false
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 600
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 300
