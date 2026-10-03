@@ -28,7 +28,7 @@ base:
 # github.events and github.scan have 12 partitions on prod (raised 2026-10-04), so up to 12
 # pods share the work; each pod runs its own worker pool (capacity below). Only used when
 # autoscaling is off; otherwise the autoscaler below decides (1 to 3 pods).
-replicaCount: 3
+replicaCount: 1
 
 # Concurrency and Postgres connections per events pod. Blank keeps the image default.
 # Postgres allows 100 connections in total (max_connections), shared by every pod and by
