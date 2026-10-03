@@ -38,6 +38,10 @@ capacity:
   EVENTS_WORKERS: ""   # push scans at once (default 8)
   SCAN_WORKERS: ""     # full-repo scans at once (default 5); each clones into /tmp, so disk = this x repo size
   DB_POOL_SIZE: "15"   # default 20
+  # Soft heap cap, 75% of the memory limit. Load test 1.7: 5 parallel scans of large repos
+  # (3 x 40 MB dumps, 20 branches) peaked at 2.97 GB RSS without it, over the 2Gi limit;
+  # with 1500MiB the peak was 1.5 GB and the scans took 11% longer.
+  GOMEMLIMIT: "1500MiB"
 
 # GitLab push consumer: a second Deployment running `gitlab-events` from the same
 # image, secret and config. Required for GitLab projects (manual webhook or
@@ -58,6 +62,7 @@ gitlabConsumer:
   capacity:
     GITLAB_EVENTS_WORKERS: ""  # default 8
     DB_POOL_SIZE: "8"
+    GOMEMLIMIT: "750MiB"   # 75% of the 1Gi limit
   # Push scans clone shallow, so this runs lighter than the events consumer.
   resources:
     requests:
