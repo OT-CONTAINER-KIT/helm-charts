@@ -135,6 +135,7 @@ volumes:
             - regex: |-
                 (A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}
               description: "AWS Access Key"
+              keywords: ["a3t", "akia", "agpa", "aida", "aroa", "aipa", "anpa", "anva", "asia"]
               tags: ["key", "AWS"]
               entropy: 3.0
               severity: "high"
@@ -142,6 +143,7 @@ volumes:
             - regex: |-
                 (?i)(aws[a-z_]{1,20}|secret[a-z_]{0,20})['\"]?\s*[:=]\s*(?-i:['\"]?[0-9a-zA-Z\/+]{40}['\"]?)
               description: "AWS Secret Key"
+              keywords: ["aws", "secret"]
               tags: ["key", "AWS"]
               entropy: 4.06
               severity: "high"
@@ -149,6 +151,7 @@ volumes:
             - regex: |-
                 AIza[0-9A-Za-z\-_]{35}
               description: "Google API Key"
+              keywords: ["aiza"]
               tags: ["key", "google"]
               entropy: 4.06
               severity: "high"
@@ -156,6 +159,7 @@ volumes:
             - regex: |-
                 eyJ[A-Za-z0-9_-]{30,}\.[A-Za-z0-9_-]{30,}\.[A-Za-z0-9_-]{10,}
               description: "Google OAuth 2.0"
+              keywords: ["eyj"]
               tags: ["key", "google"]
               entropy: 4.06
               severity: "high"
@@ -163,6 +167,7 @@ volumes:
             - regex: |-
                 (gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{20,255})
               description: "GitHub Personal Access Token"
+              keywords: ["ghp_", "gho_", "ghu_", "ghs_", "ghr_", "github_pat_"]
               tags: ["key", "github"]
               entropy: 3.5
               severity: "high"
@@ -170,6 +175,7 @@ volumes:
             - regex: |-
                 (xox[pboar]-[A-Za-z0-9-]+)
               description: "Slack tokens"
+              keywords: ["xox"]
               tags: ["key", "slack"]
               entropy: 3
               severity: "medium"
@@ -177,6 +183,7 @@ volumes:
             - regex: |-
                 (?i)(authorization:\s*bearer\s+|access_token["']\s*:\s*")[A-Za-z0-9\-\._~\+\/]+=*
               description: "OAuth Bearer"
+              keywords: ["bearer", "access_token"]
               tags: ["key", "oauth2"]
               entropy: 4.06
               severity: "medium"
@@ -184,6 +191,7 @@ volumes:
             - regex: |-
                 -----BEGIN [A-Z ]*PRIVATE KEY-----
               description: "SSH / PGP / Private keys"
+              keywords: ["private key"]
               tags: ["key", "ssh"]
               entropy: 0
               severity: "medium"
@@ -191,6 +199,7 @@ volumes:
             - regex: |-
                 sk_live_[0-9a-zA-Z]{24,}
               description: "Stripe Live Secret Key"
+              keywords: ["sk_live_"]
               tags: ["key", "Stripe"]
               entropy: 3.5
               severity: "high"
@@ -198,6 +207,7 @@ volumes:
             - regex: |-
                 (?i)(secret|token|api[_-]?key|passwd|password)['\"]?\s*[:=]\s*['\"][A-Za-z0-9+/_=\-]{16,}['\"]
               description: "Generic Secret Assignment"
+              keywords: ["secret", "token", "api_key", "api-key", "apikey", "passwd", "password"]
               tags: ["key", "Generic"]
               entropy: 3.5
               severity: "medium"
@@ -205,6 +215,7 @@ volumes:
             - regex: |-
                 gl(pat|rt|ptt|imt)-[A-Za-z0-9_\-]{20,}
               description: "GitLab Token"
+              keywords: ["glpat-", "glrt-", "glptt-", "glimt-"]
               tags: ["key", "gitlab"]
               entropy: 3.5
               severity: "high"
@@ -212,6 +223,7 @@ volumes:
             - regex: |-
                 \bsk-(?:(?:proj|svcacct|admin)-[A-Za-z0-9_\-]{40,}|[A-Za-z0-9]{32,})
               description: "OpenAI API Key"
+              keywords: ["sk-"]
               tags: ["key", "openai", "ai"]
               entropy: 4.0
               severity: "high"
@@ -219,6 +231,7 @@ volumes:
             - regex: |-
                 \bsk-ant-(api\d{2}-)?[A-Za-z0-9_\-]{20,}
               description: "Anthropic API Key"
+              keywords: ["sk-ant-"]
               tags: ["key", "anthropic", "ai"]
               entropy: 3.5
               severity: "high"
@@ -226,6 +239,7 @@ volumes:
             - regex: |-
                 \bhf_[A-Za-z0-9]{34}
               description: "Hugging Face Token"
+              keywords: ["hf_"]
               tags: ["key", "huggingface", "ai"]
               entropy: 3.5
               severity: "high"
@@ -233,6 +247,7 @@ volumes:
             - regex: |-
                 \br8_[A-Za-z0-9]{37}
               description: "Replicate API Token"
+              keywords: ["r8_"]
               tags: ["key", "replicate", "ai"]
               entropy: 3.5
               severity: "high"
@@ -240,6 +255,7 @@ volumes:
             - regex: |-
                 \bgsk_[A-Za-z0-9]{20,}
               description: "Groq API Key"
+              keywords: ["gsk_"]
               tags: ["key", "groq", "ai"]
               entropy: 3.5
               severity: "high"
@@ -247,6 +263,7 @@ volumes:
             - regex: |-
                 \bpplx-[A-Za-z0-9]{40,}
               description: "Perplexity API Key"
+              keywords: ["pplx-"]
               tags: ["key", "perplexity", "ai"]
               entropy: 3.5
               severity: "high"
@@ -254,6 +271,7 @@ volumes:
             - regex: |-
                 \bsk-or-v1-[A-Za-z0-9]{40,}
               description: "OpenRouter API Key"
+              keywords: ["sk-or-v1-"]
               tags: ["key", "openrouter", "ai"]
               entropy: 3.5
               severity: "high"
@@ -261,6 +279,7 @@ volumes:
             - regex: |-
                 \bdop_v1_[a-f0-9]{64}
               description: "DigitalOcean PAT"
+              keywords: ["dop_v1_"]
               tags: ["key", "digitalocean", "cloud"]
               entropy: 3.5
               severity: "high"
@@ -268,6 +287,7 @@ volumes:
             - regex: |-
                 LTAI[A-Za-z0-9]{12,20}
               description: "Alibaba Cloud AccessKey"
+              keywords: ["ltai"]
               tags: ["key", "alibaba", "cloud"]
               entropy: 3.5
               severity: "high"
@@ -289,6 +309,7 @@ volumes:
             - regex: |-
                 SG\.[A-Za-z0-9_\-]{22}\.[A-Za-z0-9_\-]{43}
               description: "SendGrid API Key"
+              keywords: ["sg."]
               tags: ["key", "sendgrid"]
               entropy: 3.5
               severity: "high"
@@ -296,6 +317,7 @@ volumes:
             - regex: |-
                 key-[a-f0-9]{32}
               description: "Mailgun API Key"
+              keywords: ["key-"]
               tags: ["key", "mailgun"]
               entropy: 3
               severity: "medium"
@@ -303,6 +325,7 @@ volumes:
             - regex: |-
                 npm_[A-Za-z0-9]{36}
               description: "npm Token"
+              keywords: ["npm_"]
               tags: ["key", "npm"]
               entropy: 3.5
               severity: "high"
@@ -310,6 +333,7 @@ volumes:
             - regex: |-
                 pypi-AgEIcHlwaS5vcmc[A-Za-z0-9_\-]{50,}
               description: "PyPI Token"
+              keywords: ["pypi-"]
               tags: ["key", "pypi"]
               entropy: 3.5
               severity: "high"
@@ -317,6 +341,7 @@ volumes:
             - regex: |-
                 dckr_pat_[A-Za-z0-9_\-]{27}
               description: "Docker Hub PAT"
+              keywords: ["dckr_pat_"]
               tags: ["key", "docker"]
               entropy: 3.5
               severity: "high"
@@ -324,6 +349,7 @@ volumes:
             - regex: |-
                 [A-Za-z0-9]{14}\.atlasv1\.[A-Za-z0-9_\-]{60,}
               description: "Terraform Cloud Token"
+              keywords: [".atlasv1."]
               tags: ["key", "terraform"]
               entropy: 3.5
               severity: "high"
@@ -331,6 +357,7 @@ volumes:
             - regex: |-
                 "private_key_id":\s*"[a-f0-9]{40}"
               description: "GCP Service Account JSON"
+              keywords: ["private_key_id"]
               tags: ["key", "gcp", "cloud"]
               entropy: 0
               severity: "high"
@@ -338,6 +365,7 @@ volumes:
             - regex: |-
                 (?i)(postgres(ql)?|mysql|mongodb(\+srv)?|redis|amqp):\/\/[^:\s]*:[^@\s]+@
               description: "Database Connection String with Password"
+              keywords: ["postgres", "mysql", "mongodb", "redis", "amqp"]
               tags: ["key", "database", "generic"]
               entropy: 0
               severity: "high"
@@ -351,6 +379,7 @@ volumes:
             - regex: |-
                 ATATT3[A-Za-z0-9_\-=]{40,}
               description: "Atlassian API Token"
+              keywords: ["atatt3"]
               tags: ["key", "atlassian", "bitbucket"]
               entropy: 3.5
               severity: "high"
@@ -358,6 +387,7 @@ volumes:
             - regex: |-
                 ATBB[A-Za-z0-9]{20,}
               description: "Bitbucket App Password"
+              keywords: ["atbb"]
               tags: ["key", "bitbucket"]
               entropy: 3.5
               severity: "high"
@@ -365,6 +395,7 @@ volumes:
             - regex: |-
                 ATCTT3[A-Za-z0-9_\-=]{40,}
               description: "Bitbucket Access Token"
+              keywords: ["atctt3"]
               tags: ["key", "bitbucket"]
               entropy: 3.5
               severity: "high"
@@ -372,6 +403,7 @@ volumes:
             - regex: |-
                 (?i)sv=\d{4}-\d{2}-\d{2}[^\s]{0,200}?sig=[A-Za-z0-9%]{20,}
               description: "Azure Storage SAS Token"
+              keywords: ["sv="]
               tags: ["key", "azure", "cloud"]
               entropy: 0
               severity: "high"
