@@ -34,6 +34,14 @@ spec:
           args: ["gitlab-events"]
           resources:
             {{- toYaml (.Values.gitlabConsumer.resources | default .Values.resources) | nindent 12 }}
+          {{- $env := list }}
+          {{- range $k, $v := .Values.gitlabConsumer.capacity }}
+          {{- if $v }}{{- $env = append $env (dict "name" $k "value" ($v | toString)) }}{{- end }}
+          {{- end }}
+          {{- if $env }}
+          env:
+            {{- toYaml $env | nindent 12 }}
+          {{- end }}
           envFrom:
             - secretRef:
                 name: {{ .Values.base.existingSecret }}

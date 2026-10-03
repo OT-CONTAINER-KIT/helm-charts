@@ -25,7 +25,19 @@ base:
     pullSecrets: "reg-ldc-coe-regcred"
   existingSecret: sentryfuse-consumer
 
-replicaCount: 1
+# github.events and github.scan have 12 partitions on prod (raised 2026-10-04), so up to 12
+# pods share the work; each pod runs its own worker pool (capacity below). 3 pods run 15
+# full scans at once. More than 12 would leave pods idle.
+replicaCount: 3
+
+# Concurrency and Postgres connections per events pod. Blank keeps the image default.
+# Postgres allows 100 connections in total (max_connections), shared by every pod and by
+# the api and webhook; the budget with 3 events pods is 3x15 + pr 15 + gitlab 8 + api 10 +
+# webhook 10 = 88. Raise a pool only after lowering another or raising max_connections.
+capacity:
+  EVENTS_WORKERS: ""   # push scans at once (default 8)
+  SCAN_WORKERS: ""     # full-repo scans at once (default 5); each clones into /tmp, so disk = this x repo size
+  DB_POOL_SIZE: "15"   # default 20
 
 # GitLab push consumer: a second Deployment running `gitlab-events` from the same
 # image, secret and config. Required for GitLab projects (manual webhook or
@@ -43,6 +55,9 @@ gitlabConsumer:
   enabled: true
   name: sentryfuse-consumer-gitlab
   replicaCount: 1
+  capacity:
+    GITLAB_EVENTS_WORKERS: ""  # default 8
+    DB_POOL_SIZE: "8"
   # Push scans clone shallow, so this runs lighter than the events consumer.
   resources:
     requests:

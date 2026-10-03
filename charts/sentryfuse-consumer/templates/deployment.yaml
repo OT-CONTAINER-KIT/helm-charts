@@ -47,6 +47,9 @@ spec:
           {{- range $k, $v := .Values.objectStore }}
           {{- if $v }}{{- $objectStore = append $objectStore (dict "name" $k "value" ($v | toString)) }}{{- end }}
           {{- end }}
+          {{- range $k, $v := .Values.capacity }}
+          {{- if $v }}{{- $objectStore = append $objectStore (dict "name" $k "value" ($v | toString)) }}{{- end }}
+          {{- end }}
           {{- if $objectStore }}
           env:
             {{- toYaml $objectStore | nindent 12 }}
