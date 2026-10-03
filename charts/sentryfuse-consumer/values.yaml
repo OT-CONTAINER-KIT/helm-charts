@@ -1,0 +1,421 @@
+name: sentryfuse-consumer
+component: consumer
+
+podAnnotations:
+  instrumentation.opentelemetry.io/inject-go: observability/otel-instrumentation
+  rems.owner/cto: sandeep
+  rems.owner/dev: samyak
+  rems.owner/devops: prashant
+  rems.owner/manager: abhishek.dubey
+  rems.owner/qa: shwetabh.vats
+  rems.service/category: application
+  rems.service/environment: prod
+  rems.service/group: sentryfuse
+  rems.service/layer: backend
+  rems.service/name: sentryfuse-consumer
+  rems.service/severity: critical
+  rems.service/technology: golang
+
+base:
+  image:
+    pullPolicy: "Always"
+    args: [events]
+    repository: harbor.ldc.opstree.dev/coe/sentryfuse-consumer
+    tag: latest
+    pullSecrets: "reg-ldc-coe-regcred"
+  existingSecret: sentryfuse-consumer
+
+replicaCount: 1
+
+# GitLab push consumer: a second Deployment running `gitlab-events` from the same
+# image, secret and config. Required for GitLab projects (manual webhook or
+# "Connect GitLab"): their webhooks publish to the gitlab.events topic.
+#
+# The `existingSecret` above must also contain, for the GitLab connect flow
+# (the `events` consumer refreshes tokens too):
+#   CREDENTIAL_ENC_KEY          base64 32 bytes, identical to sentryfuse-api's
+#   GITLAB_OAUTH_CLIENT_ID      OAuth application on the GitLab instance
+#   GITLAB_OAUTH_CLIENT_SECRET
+#   GITLAB_OAUTH_REDIRECT_URI   https://<api-host>/api/v1/gitlab/oauth/callback
+#   GITLAB_OAUTH_INSTANCES      optional JSON for self-managed instances
+# Projects not connected via OAuth keep using GITLAB_TOKEN when present.
+gitlabConsumer:
+  enabled: true
+  name: sentryfuse-consumer-gitlab
+  replicaCount: 1
+  # Push scans clone shallow, so this runs lighter than the events consumer.
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+      ephemeral-storage: 512Mi
+    limits:
+      memory: 1Gi
+      ephemeral-storage: 5Gi
+
+healthcheck:
+  enabled: false
+  statusPath: /health
+
+service:
+  type: ClusterIP
+  port: 8080
+
+# Full scans clone whole repositories into /tmp (up to SCAN_WORKERS=5 at a time) and
+# scan files as a stream, so memory stays flat; disk is what grows. There is no CPU
+# limit on purpose: regex scanning would be throttled. Requests follow the measured idle use
+# (2026-10-03 `kubectl top`: events 28Mi, pr 16Mi, gitlab 8Mi); the limits leave room for
+# scan bursts. Peak use during a full scan is not measured yet: raise the limits if a pod
+# is OOMKilled or evicted.
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+    ephemeral-storage: 1Gi
+  limits:
+    memory: 2Gi
+    ephemeral-storage: 10Gi
+
+# Object storage for PR diffs and patches (docs/onboarding/object-storage.md in the
+# SentryFuse repo). Blank values are not rendered, so nothing is overridden and the
+# Postgres store (or any OBJECT_STORE_*/MINIO_* already in the existingSecret) keeps
+# working. To use AWS S3 set provider: s3 plus bucket and region; give the pod an IAM role
+# (IRSA) instead of keys. Credentials never go in this file.
+objectStore:
+  OBJECT_STORE_PROVIDER: ""   # minio | s3 | postgres (blank = MinIO when an endpoint is set, else Postgres)
+  OBJECT_STORE_BUCKET: ""     # e.g. sentryfuse-pr-blobs; the bucket must already exist for s3
+  OBJECT_STORE_REGION: ""     # e.g. ap-south-1
+  OBJECT_STORE_ENDPOINT: ""   # only for MinIO or an S3-compatible service
+  OBJECT_STORE_USE_SSL: ""    # "true" for https with a custom endpoint
+
+volumes:
+  configMaps:
+    - name: sentryfuse-consumer-config
+      mountPath: /etc/sentryfuse/
+      data:
+        config.yaml: |
+          kafka:
+            brokers: ["192.168.10.52:9092"]
+
+          postgres:
+            addr: "192.168.10.52:5432"
+            user: "postgres"
+            password: "password"
+            dbname: "git_guard"
+
+          pagerduty:
+            enabled: true
+            # Only leaks at or above this severity page (low | medium | high). Omit to page
+            # for everything. Lower-severity leaks still go to Slack.
+            # min_severity: high
+
+          slack:
+            enabled: true
+            # Default channel: secret-detection alerts and anything no route below matches.
+            channel: C095VP1JLJ0
+            # Optional routing (needs the image with alert routing). First matching route wins;
+            # every condition in a route must hold; within a condition any value matches.
+            # Conditions: repo (owner/name globs), severity, visibility (public|private|internal),
+            # provider (github|gitlab). Applies to push alerts and PR reports (a PR has no
+            # severity, so only repo/visibility/provider routes can match it).
+            # routes:
+            #   - channel: C0XXXXXXXXX          # urgent: high-severity leaks in public repos
+            #     match:
+            #       severity: [high]
+            #       visibility: [public]
+            #   - channel: C0YYYYYYYYY          # one team's repos
+            #     match:
+            #       repo: ["OT-COE/payments-*"]
+
+          ai_pr_reviewer:
+            max_lines: 5500
+            max_files: 80
+
+          rules:
+            - regex: |-
+                (A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}
+              description: "AWS Access Key"
+              keywords: ["a3t", "akia", "agpa", "aida", "aroa", "aipa", "anpa", "anva", "asia"]
+              tags: ["key", "AWS"]
+              entropy: 3.0
+              severity: "high"
+
+            - regex: |-
+                (?i)(aws[a-z_]{1,20}|secret[a-z_]{0,20})['\"]?\s*[:=]\s*(?-i:['\"]?[0-9a-zA-Z\/+]{40}['\"]?)
+              description: "AWS Secret Key"
+              keywords: ["aws", "secret"]
+              tags: ["key", "AWS"]
+              entropy: 4.06
+              severity: "high"
+
+            - regex: |-
+                AIza[0-9A-Za-z\-_]{35}
+              description: "Google API Key"
+              keywords: ["aiza"]
+              tags: ["key", "google"]
+              entropy: 4.06
+              severity: "high"
+
+            - regex: |-
+                eyJ[A-Za-z0-9_-]{30,}\.[A-Za-z0-9_-]{30,}\.[A-Za-z0-9_-]{10,}
+              description: "Google OAuth 2.0"
+              keywords: ["eyj"]
+              tags: ["key", "google"]
+              entropy: 4.06
+              severity: "high"
+
+            - regex: |-
+                (gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{20,255})
+              description: "GitHub Personal Access Token"
+              keywords: ["ghp_", "gho_", "ghu_", "ghs_", "ghr_", "github_pat_"]
+              tags: ["key", "github"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                (xox[pboar]-[A-Za-z0-9-]+)
+              description: "Slack tokens"
+              keywords: ["xox"]
+              tags: ["key", "slack"]
+              entropy: 3
+              severity: "medium"
+
+            - regex: |-
+                (?i)(authorization:\s*bearer\s+|access_token["']\s*:\s*")[A-Za-z0-9\-\._~\+\/]+=*
+              description: "OAuth Bearer"
+              keywords: ["bearer", "access_token"]
+              tags: ["key", "oauth2"]
+              entropy: 4.06
+              severity: "medium"
+
+            - regex: |-
+                -----BEGIN [A-Z ]*PRIVATE KEY-----
+              description: "SSH / PGP / Private keys"
+              keywords: ["private key"]
+              tags: ["key", "ssh"]
+              entropy: 0
+              severity: "medium"
+
+            - regex: |-
+                sk_live_[0-9a-zA-Z]{24,}
+              description: "Stripe Live Secret Key"
+              keywords: ["sk_live_"]
+              tags: ["key", "Stripe"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                (?i)(secret|token|api[_-]?key|passwd|password)['\"]?\s*[:=]\s*['\"][A-Za-z0-9+/_=\-]{16,}['\"]
+              description: "Generic Secret Assignment"
+              keywords: ["secret", "token", "api_key", "api-key", "apikey", "passwd", "password"]
+              tags: ["key", "Generic"]
+              entropy: 3.5
+              severity: "medium"
+
+            - regex: |-
+                gl(pat|rt|ptt|imt)-[A-Za-z0-9_\-]{20,}
+              description: "GitLab Token"
+              keywords: ["glpat-", "glrt-", "glptt-", "glimt-"]
+              tags: ["key", "gitlab"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                \bsk-(?:(?:proj|svcacct|admin)-[A-Za-z0-9_\-]{40,}|[A-Za-z0-9]{32,})
+              description: "OpenAI API Key"
+              keywords: ["sk-"]
+              tags: ["key", "openai", "ai"]
+              entropy: 4.0
+              severity: "high"
+
+            - regex: |-
+                \bsk-ant-(api\d{2}-)?[A-Za-z0-9_\-]{20,}
+              description: "Anthropic API Key"
+              keywords: ["sk-ant-"]
+              tags: ["key", "anthropic", "ai"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                \bhf_[A-Za-z0-9]{34}
+              description: "Hugging Face Token"
+              keywords: ["hf_"]
+              tags: ["key", "huggingface", "ai"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                \br8_[A-Za-z0-9]{37}
+              description: "Replicate API Token"
+              keywords: ["r8_"]
+              tags: ["key", "replicate", "ai"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                \bgsk_[A-Za-z0-9]{20,}
+              description: "Groq API Key"
+              keywords: ["gsk_"]
+              tags: ["key", "groq", "ai"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                \bpplx-[A-Za-z0-9]{40,}
+              description: "Perplexity API Key"
+              keywords: ["pplx-"]
+              tags: ["key", "perplexity", "ai"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                \bsk-or-v1-[A-Za-z0-9]{40,}
+              description: "OpenRouter API Key"
+              keywords: ["sk-or-v1-"]
+              tags: ["key", "openrouter", "ai"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                \bdop_v1_[a-f0-9]{64}
+              description: "DigitalOcean PAT"
+              keywords: ["dop_v1_"]
+              tags: ["key", "digitalocean", "cloud"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                LTAI[A-Za-z0-9]{12,20}
+              description: "Alibaba Cloud AccessKey"
+              keywords: ["ltai"]
+              tags: ["key", "alibaba", "cloud"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                AC[a-f0-9]{32}
+              description: "Twilio Account SID"
+              tags: ["key", "twilio"]
+              entropy: 3
+              severity: "medium"
+
+            - regex: |-
+                SK[a-f0-9]{32}
+              description: "Twilio API Key"
+              tags: ["key", "twilio"]
+              entropy: 3
+              severity: "high"
+
+            - regex: |-
+                SG\.[A-Za-z0-9_\-]{22}\.[A-Za-z0-9_\-]{43}
+              description: "SendGrid API Key"
+              keywords: ["sg."]
+              tags: ["key", "sendgrid"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                key-[a-f0-9]{32}
+              description: "Mailgun API Key"
+              keywords: ["key-"]
+              tags: ["key", "mailgun"]
+              entropy: 3
+              severity: "medium"
+
+            - regex: |-
+                npm_[A-Za-z0-9]{36}
+              description: "npm Token"
+              keywords: ["npm_"]
+              tags: ["key", "npm"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                pypi-AgEIcHlwaS5vcmc[A-Za-z0-9_\-]{50,}
+              description: "PyPI Token"
+              keywords: ["pypi-"]
+              tags: ["key", "pypi"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                dckr_pat_[A-Za-z0-9_\-]{27}
+              description: "Docker Hub PAT"
+              keywords: ["dckr_pat_"]
+              tags: ["key", "docker"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                [A-Za-z0-9]{14}\.atlasv1\.[A-Za-z0-9_\-]{60,}
+              description: "Terraform Cloud Token"
+              keywords: [".atlasv1."]
+              tags: ["key", "terraform"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                "private_key_id":\s*"[a-f0-9]{40}"
+              description: "GCP Service Account JSON"
+              keywords: ["private_key_id"]
+              tags: ["key", "gcp", "cloud"]
+              entropy: 0
+              severity: "high"
+
+            - regex: |-
+                (?i)(postgres(ql)?|mysql|mongodb(\+srv)?|redis|amqp):\/\/[^:\s]*:[^@\s]+@
+              description: "Database Connection String with Password"
+              keywords: ["postgres", "mysql", "mongodb", "redis", "amqp"]
+              tags: ["key", "database", "generic"]
+              entropy: 0
+              severity: "high"
+
+            # Bitbucket/Atlassian prefixes confirmed against Atlassian's own community
+            # docs + GitGuardian's detector (ATATT3 API tokens, ATBB app passwords,
+            # ATCTT3 repo/project/workspace access tokens) - not guessed. Azure AD app
+            # client secrets have no documented fixed format (Microsoft: "up to 40
+            # characters", no anchor), so - same as Cohere/Mistral/IBM/OCI - no rule
+            # for those; a regex with nothing to anchor on would just be noise.
+            - regex: |-
+                ATATT3[A-Za-z0-9_\-=]{40,}
+              description: "Atlassian API Token"
+              keywords: ["atatt3"]
+              tags: ["key", "atlassian", "bitbucket"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                ATBB[A-Za-z0-9]{20,}
+              description: "Bitbucket App Password"
+              keywords: ["atbb"]
+              tags: ["key", "bitbucket"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                ATCTT3[A-Za-z0-9_\-=]{40,}
+              description: "Bitbucket Access Token"
+              keywords: ["atctt3"]
+              tags: ["key", "bitbucket"]
+              entropy: 3.5
+              severity: "high"
+
+            - regex: |-
+                (?i)sv=\d{4}-\d{2}-\d{2}[^\s]{0,200}?sig=[A-Za-z0-9%]{20,}
+              description: "Azure Storage SAS Token"
+              keywords: ["sv="]
+              tags: ["key", "azure", "cloud"]
+              entropy: 0
+              severity: "high"
+
+livenessProbe: {}
+readinessProbe: {}
+
+ingress:
+  enabled: false
+
+internalIngress:
+  enabled: false
+
+autoscaling:
+  enabled: false
