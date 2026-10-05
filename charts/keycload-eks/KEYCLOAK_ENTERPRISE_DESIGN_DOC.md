@@ -2,7 +2,7 @@
 
 ---
 
-## 🏛️ Part 1: High-Level Design (HLD)
+##  Part 1: High-Level Design (HLD)
 
 ### 1.1 Executive Overview & Architectural Objectives
 This document details the High-Level Design (HLD) and Low-Level Design (LLD) for deploying **Keycloak 26.x (Quarkus distribution)** in a high-availability, zero-trust enterprise production environment on **AWS EKS** in region `ap-south-1`.
