@@ -14,7 +14,7 @@ metadata:
     {{- include "sentryfuse.labels" $ctx | nindent 4 }}
 spec:
   {{- if not $as.enabled }}
-  replicas: {{ $svc.replicaCount | default 1 }}
+  replicas: {{ ternary $svc.replicaCount 1 (hasKey $svc "replicaCount") }}
   {{- end }}
   {{- with $svc.strategy }}
   strategy:
