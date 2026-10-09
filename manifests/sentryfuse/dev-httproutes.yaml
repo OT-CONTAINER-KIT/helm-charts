@@ -84,7 +84,7 @@ spec:
     kind: Gateway
     name: web-gateway
   hostnames:
-  - sentryfuse-pr-review.opstree.dev
+  - sentryfuse-pr-reviewer.opstree.dev
   rules:
   - matches:
     - path:
