@@ -21,6 +21,7 @@ global:
 #   existingSecrets         list of Secrets used as envFrom
 #   configMaps              list of {name, mountPath, data: {file: content}} created and mounted
 #   mountConfigMaps         list of {name, mountPath} mounted only (ConfigMap made by another service)
+#   mountSecrets            list of {name, mountPath}: an existing Secret mounted as files (keeps credentials out of values)
 #   healthcheck.enabled/path/initialDelaySeconds/periodSeconds
 #   serviceAccount          {} creates and uses a ServiceAccount named after the service
 #   autoscaling             {enabled, minReplicas, maxReplicas, targetCPUUtilizationPercentage,

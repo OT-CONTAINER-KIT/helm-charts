@@ -90,19 +90,24 @@ spec:
             timeoutSeconds: 1
             failureThreshold: 3
           {{- end }}
-          {{- if or $svc.configMaps $svc.mountConfigMaps }}
+          {{- if or $svc.configMaps $svc.mountConfigMaps $svc.mountSecrets }}
           volumeMounts:
-            {{- range (concat ($svc.configMaps | default list) ($svc.mountConfigMaps | default list)) }}
+            {{- range (concat ($svc.configMaps | default list) ($svc.mountConfigMaps | default list) ($svc.mountSecrets | default list)) }}
             - name: {{ .name }}-volume
               mountPath: {{ .mountPath }}
             {{- end }}
           {{- end }}
-      {{- if or $svc.configMaps $svc.mountConfigMaps }}
+      {{- if or $svc.configMaps $svc.mountConfigMaps $svc.mountSecrets }}
       volumes:
         {{- range (concat ($svc.configMaps | default list) ($svc.mountConfigMaps | default list)) }}
         - name: {{ .name }}-volume
           configMap:
             name: {{ .name }}
+        {{- end }}
+        {{- range $svc.mountSecrets }}
+        - name: {{ .name }}-volume
+          secret:
+            secretName: {{ .name }}
         {{- end }}
       {{- end }}
 {{- end }}
