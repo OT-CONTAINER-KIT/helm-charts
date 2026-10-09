@@ -1,0 +1,18 @@
+---
+apiVersion: v2
+name: sentryfuse
+description: Unified chart for the SentryFuse services (consumers, api, webhook, frontend, pr-reviewer)
+version: 0.1.0
+appVersion: "0.1.0"
+maintainers:
+  - name: iamabhishek-dubey
+    email: "abhishek.dubey@opstree.com"
+    url: https://github.com/iamabhishek-dubey
+sources:
+  - https://github.com/ot-container-kit/helm-charts
+home: https://github.com/ot-container-kit/helm-charts
+keywords:
+  - sentryfuse
+  - microservice
+  - kubernetes
+icon: https://raw.githubusercontent.com/OT-CONTAINER-KIT/helm-charts/main/static/helm-chart-logo.svg

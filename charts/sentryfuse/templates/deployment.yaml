@@ -1,0 +1,109 @@
+{{- range $key, $svc := .Values.services }}
+{{- if $svc.enabled }}
+{{- $ctx := dict "root" $ "key" $key "svc" $svc }}
+{{- $as := $svc.autoscaling | default dict }}
+{{- $hc := $svc.healthcheck | default dict }}
+{{- $ann := include "sentryfuse.podAnnotations" $ctx }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sentryfuse.name" $ctx }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "sentryfuse.labels" $ctx | nindent 4 }}
+spec:
+  {{- if not $as.enabled }}
+  replicas: {{ $svc.replicaCount | default 1 }}
+  {{- end }}
+  {{- with $svc.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "sentryfuse.selectorLabels" $ctx | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "sentryfuse.labels" $ctx | nindent 8 }}
+      {{- if $ann }}
+      annotations:
+        {{- $ann | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with $.Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range . }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      {{- if hasKey $svc "serviceAccount" }}
+      serviceAccountName: {{ ($svc.serviceAccount | default dict).name | default (include "sentryfuse.name" $ctx) }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ $svc.terminationGracePeriodSeconds | default 30 }}
+      containers:
+        - name: {{ include "sentryfuse.name" $ctx }}
+          image: "{{ $svc.image.repository }}:{{ $svc.image.tag }}"
+          imagePullPolicy: {{ $svc.image.pullPolicy | default "IfNotPresent" }}
+          {{- with $svc.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $svc.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if $svc.port }}
+          ports:
+            - name: http
+              containerPort: {{ $svc.port }}
+              protocol: TCP
+          {{- end }}
+          {{- with $svc.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- include "sentryfuse.env" ($svc.env | default dict) | nindent 10 }}
+          {{- with $svc.existingSecrets }}
+          envFrom:
+            {{- range . }}
+            - secretRef:
+                name: {{ . }}
+            {{- end }}
+          {{- end }}
+          {{- if and $hc.enabled $svc.port }}
+          livenessProbe:
+            httpGet:
+              path: {{ $hc.path }}
+              port: http
+            initialDelaySeconds: {{ $hc.initialDelaySeconds | default 30 }}
+            periodSeconds: {{ $hc.periodSeconds | default 60 }}
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: {{ $hc.path }}
+              port: http
+            initialDelaySeconds: {{ $hc.initialDelaySeconds | default 30 }}
+            periodSeconds: {{ $hc.periodSeconds | default 60 }}
+            timeoutSeconds: 1
+            failureThreshold: 3
+          {{- end }}
+          {{- if or $svc.configMaps $svc.mountConfigMaps }}
+          volumeMounts:
+            {{- range (concat ($svc.configMaps | default list) ($svc.mountConfigMaps | default list)) }}
+            - name: {{ .name }}-volume
+              mountPath: {{ .mountPath }}
+            {{- end }}
+          {{- end }}
+      {{- if or $svc.configMaps $svc.mountConfigMaps }}
+      volumes:
+        {{- range (concat ($svc.configMaps | default list) ($svc.mountConfigMaps | default list)) }}
+        - name: {{ .name }}-volume
+          configMap:
+            name: {{ .name }}
+        {{- end }}
+      {{- end }}
+{{- end }}
+{{- end }}

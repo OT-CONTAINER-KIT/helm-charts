@@ -1,0 +1,35 @@
+{{- range $key, $svc := .Values.services }}
+{{- $ing := $svc.ingress | default dict }}
+{{- if and $svc.enabled $ing.enabled }}
+{{- $ctx := dict "root" $ "key" $key "svc" $svc }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "sentryfuse.name" $ctx }}
+  namespace: {{ $.Release.Namespace }}
+  {{- with $ing.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- include "sentryfuse.labels" $ctx | nindent 4 }}
+spec:
+  ingressClassName: {{ $ing.class }}
+  rules:
+    {{- range $rule := $ing.rules }}
+    - host: {{ $rule.hostname }}
+      http:
+        paths:
+          {{- range (ternary $rule.path (list $rule.path) (kindIs "slice" $rule.path)) }}
+          - path: {{ . }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "sentryfuse.name" $ctx }}
+                port:
+                  number: {{ $svc.port }}
+          {{- end }}
+    {{- end }}
+{{- end }}
+{{- end }}

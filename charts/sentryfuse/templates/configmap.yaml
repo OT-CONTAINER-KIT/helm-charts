@@ -1,0 +1,20 @@
+{{- range $key, $svc := .Values.services }}
+{{- if $svc.enabled }}
+{{- $ctx := dict "root" $ "key" $key "svc" $svc }}
+{{- range $cm := $svc.configMaps }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $cm.name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "sentryfuse.labels" $ctx | nindent 4 }}
+data:
+  {{- range $filename, $content := $cm.data }}
+  {{ $filename }}: |-
+{{ $content | toString | indent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

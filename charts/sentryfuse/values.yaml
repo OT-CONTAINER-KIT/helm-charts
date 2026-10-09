@@ -1,0 +1,33 @@
+# Unified SentryFuse chart. Every workload is an entry under `services`, rendered by the
+# shared templates. Keep environment specifics (DB, Slack, hosts, image tags, credentials)
+# in a per-environment values file, not here.
+global:
+  # Pull secrets added to every pod.
+  imagePullSecrets: []
+  # Annotations added to every pod (OTel injection, REMS ownership); a service's own
+  # podAnnotations win on a key clash.
+  podAnnotations: {}
+
+# Per service (all optional unless noted):
+#   enabled                 render this service (default off)
+#   name                    object name, default <release>-<key>
+#   image.repository/tag/pullPolicy
+#   command, args           container command / args
+#   port                    container port; also creates the Service. Omit for no Service
+#   service.type/annotations
+#   replicaCount            ignored when autoscaling.enabled
+#   resources
+#   env                     map of env vars; blank values are not rendered
+#   existingSecrets         list of Secrets used as envFrom
+#   configMaps              list of {name, mountPath, data: {file: content}} created and mounted
+#   mountConfigMaps         list of {name, mountPath} mounted only (ConfigMap made by another service)
+#   healthcheck.enabled/path/initialDelaySeconds/periodSeconds
+#   serviceAccount          {} creates and uses a ServiceAccount named after the service
+#   autoscaling             {enabled, minReplicas, maxReplicas, targetCPUUtilizationPercentage,
+#                           targetMemoryUtilizationPercentage, behavior}
+#   ingress                 {enabled, class, annotations, rules: [{hostname, path}]}
+#   strategy                Deployment strategy
+#   terminationGracePeriodSeconds, labels, podAnnotations
+#
+# Keys: consumer, consumer-gitlab, consumer-pr, api, webhook, frontend, pr-reviewer.
+services: {}

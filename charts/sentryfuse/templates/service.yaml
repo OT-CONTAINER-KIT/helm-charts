@@ -1,0 +1,27 @@
+{{- range $key, $svc := .Values.services }}
+{{- if and $svc.enabled $svc.port }}
+{{- $ctx := dict "root" $ "key" $key "svc" $svc }}
+{{- $s := $svc.service | default dict }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "sentryfuse.name" $ctx }}
+  namespace: {{ $.Release.Namespace }}
+  {{- with $s.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- include "sentryfuse.labels" $ctx | nindent 4 }}
+spec:
+  type: {{ $s.type | default "ClusterIP" }}
+  ports:
+    - port: {{ $svc.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "sentryfuse.selectorLabels" $ctx | nindent 4 }}
+{{- end }}
+{{- end }}

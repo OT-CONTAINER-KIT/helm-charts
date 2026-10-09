@@ -1,0 +1,42 @@
+{{- range $key, $svc := .Values.services }}
+{{- $as := $svc.autoscaling | default dict }}
+{{- if and $svc.enabled $as.enabled }}
+{{- $ctx := dict "root" $ "key" $key "svc" $svc }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "sentryfuse.name" $ctx }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "sentryfuse.labels" $ctx | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "sentryfuse.name" $ctx }}
+  minReplicas: {{ $as.minReplicas | default 1 }}
+  maxReplicas: {{ $as.maxReplicas | default 3 }}
+  metrics:
+    {{- if $as.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ $as.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if $as.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ $as.targetMemoryUtilizationPercentage }}
+    {{- end }}
+  {{- with $as.behavior }}
+  behavior:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}
