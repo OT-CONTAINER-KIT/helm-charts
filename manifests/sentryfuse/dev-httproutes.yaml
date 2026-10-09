@@ -72,28 +72,3 @@ spec:
       namespace: coe-dev
       port: 8080
       weight: 1
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: sentryfuse-pr-reviewer-dev
-  namespace: envoy-gateway-system
-spec:
-  parentRefs:
-  - group: gateway.networking.k8s.io
-    kind: Gateway
-    name: web-gateway
-  hostnames:
-  - sentryfuse-pr-reviewer.opstree.dev
-  rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /
-    backendRefs:
-    - group: ""
-      kind: Service
-      name: sentryfuse-pr-reviewer-x-sentryfuse-x-coe-dev-vcluster
-      namespace: coe-dev
-      port: 8000
-      weight: 1
