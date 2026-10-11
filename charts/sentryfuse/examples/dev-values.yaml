@@ -485,7 +485,7 @@ services:
     enabled: true
     image:
       repository: harbor.ldc.opstree.dev/coe/sentryfuse-dev/frontend
-      tag: '1'
+      tag: latest
       pullPolicy: Always
     port: 80
     existingSecrets:
