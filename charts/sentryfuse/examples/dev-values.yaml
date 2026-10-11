@@ -486,6 +486,7 @@ services:
     image:
       repository: harbor.ldc.opstree.dev/coe/sentryfuse-dev/frontend
       tag: '1'
+      pullPolicy: Always
     port: 80
     existingSecrets:
     - sentryfuse-ui-config
@@ -502,6 +503,7 @@ services:
     image:
       repository: harbor.ldc.opstree.dev/coe/sentryfuse-dev/pr-reviewer
       tag: latest
+      pullPolicy: Always
     port: 8000
     existingSecrets:
     - sentryfuse-pr-reviewer
