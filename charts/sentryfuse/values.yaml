@@ -30,5 +30,5 @@ global:
 #   strategy                Deployment strategy
 #   terminationGracePeriodSeconds, labels, podAnnotations
 #
-# Keys: consumer, consumer-gitlab, consumer-pr, api, webhook, frontend, pr-reviewer.
+# Keys: consumer, consumer-gitlab, consumer-pr, api, webhook, frontend, pr-reviewer, slack-agent.
 services: {}

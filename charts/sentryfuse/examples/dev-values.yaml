@@ -513,3 +513,24 @@ services:
       limits:
         cpu: 500m
         memory: 500Mi
+  # Slack chat agent (Socket Mode, outbound only: no port, Service or route). Off until the
+  # Slack app exists. Needs SLACK_BOT_TOKEN and SLACK_APP_TOKEN in the sentryfuse-slack-agent
+  # Secret, and SLACK_TRIAGE_USERS there or in env. Run one replica: thread memory is in-process.
+  slack-agent:
+    enabled: false
+    image:
+      repository: harbor.ldc.opstree.dev/coe/sentryfuse-dev/pr-reviewer
+      tag: latest
+    command: ["python", "-m", "ai_pr.slack_agent"]
+    existingSecrets:
+    - sentryfuse-pr-reviewer
+    - sentryfuse-slack-agent
+    env:
+      SLACK_AGENT_ENABLED: "true"
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 300m
+        memory: 400Mi

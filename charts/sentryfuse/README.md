@@ -1,7 +1,7 @@
 # sentryfuse
 
 One chart for all SentryFuse services. Each workload is an entry under `services` in values
-(`consumer`, `consumer-gitlab`, `consumer-pr`, `api`, `webhook`, `frontend`, `pr-reviewer`);
+(`consumer`, `consumer-gitlab`, `consumer-pr`, `api`, `webhook`, `frontend`, `pr-reviewer`, `slack-agent`);
 shared templates render a Deployment, Service, ConfigMap, HPA, Ingress and ServiceAccount per
 enabled entry. See the comment block in `values.yaml` for the per-service fields.
 
