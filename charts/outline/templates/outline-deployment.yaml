@@ -4,6 +4,12 @@ metadata:
   name: {{ .Release.Name }}-outline
 spec:
   replicas: {{ .Values.outline.replicas }}
+  # Recreate for the 0.82.x -> 1.11.0 jump: old pods are fully stopped before
+  # new pods start, so 0.82.0 and 1.11.0 pods never serve traffic at the same
+  # time against a half-migrated schema. Expect 3-5 minutes of downtime.
+  # You may switch back to RollingUpdate for routine minor upgrades afterwards.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: outline
@@ -27,6 +33,50 @@ spec:
           labelSelector:
             matchLabels:
               app: outline
+      initContainers:
+        # Runs pending DB migrations BEFORE any app container starts.
+        # The app also auto-migrates on boot (backstop); this makes the
+        # ordering explicit and keeps slow migrations outside the
+        # liveness-probe window. Migrations are idempotent (SequelizeMeta
+        # table), so re-runs on pod restarts are safe.
+        - name: db-migrate
+          image: {{ .Values.outline.image }}
+          imagePullPolicy: {{ .Values.outline.imagePullPolicy | default "IfNotPresent" }}
+          command:
+            - /opt/outline/node_modules/.bin/sequelize
+            - db:migrate
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          env:
+            - name: NODE_ENV
+              value: {{ .Values.outline.nodeEnv | quote }}
+            - name: PGSSLMODE
+              value: {{ .Values.outline.pgsslmode | quote }}
+            # Postgres (mirrors the app container's DATABASE_URL wiring)
+            {{ if .Values.postgres.enabled }}
+            - name: DATABASE_URL
+              value: "postgres://{{ .Values.postgres.username }}:{{ .Values.postgres.password }}@{{ .Release.Name }}-postgres:5432/{{ .Values.postgres.database }}"
+            {{ else }}
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-postgres-external-secret" .Release.Name) .Values.postgres.external.existingSecret }}
+                  key: {{ default "DATABASE_URL" .Values.postgres.external.databaseUrlKey }}
+            {{ end }}
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
       containers:
         - name: outline
           image: {{ .Values.outline.image }}
@@ -37,52 +87,39 @@ spec:
             capabilities:
               drop:
                 - ALL
-
           ports:
             - containerPort: {{ .Values.outline.port }}
-
           env:
             # Non-sensitive inline / ConfigMap env vars
             - name: PORT
               value: {{ .Values.outline.port | quote }}
-
             - name: NODE_ENV
               value: {{ .Values.outline.nodeEnv | quote }}
-
             - name: URL
               value: {{ .Values.outline.url | quote }}
-
             - name: FORCE_HTTPS
               value: {{ .Values.outline.forceHttps | quote }}
-
             - name: TRUST_PROXY
               value: {{ .Values.outline.trustProxy | quote }}
-
             - name: COLLABORATION_URL
               value: {{ .Values.outline.collaborationUrl | quote }}
-
             - name: PGSSLMODE
               value: {{ .Values.outline.pgsslmode | quote }}
-
             - name: FILE_STORAGE
               value: {{ .Values.outline.fileStorage | quote }}
-
             - name: FILE_STORAGE_LOCAL_ROOT_DIR
               value: {{ .Values.outline.fileStorageLocalRootDir | quote }}
-
             # Sensitive env vars from Secrets
             - name: SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ default (printf "%s-outline-secret" .Release.Name) .Values.outline.existingSecret }}
                   key: secretKey
-
             - name: UTILS_SECRET
               valueFrom:
                 secretKeyRef:
                   name: {{ default (printf "%s-outline-secret" .Release.Name) .Values.outline.existingSecret }}
                   key: utilsSecret
-
             # Postgres
             {{ if .Values.postgres.enabled }}
             - name: DATABASE_URL
@@ -115,16 +152,13 @@ spec:
                 secretKeyRef:
                   name: {{ default (printf "%s-outline-secret" .Release.Name) .Values.outline.existingSecret }}
                   key: azureClientId
-
             - name: AZURE_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: {{ default (printf "%s-outline-secret" .Release.Name) .Values.outline.existingSecret }}
                   key: azureClientSecret
-
             - name: AZURE_RESOURCE_APP_ID
               value: {{ .Values.azure.resourceAppId | quote }}
-
             - name: AZURE_TENANT_ID
               value: {{ .Values.azure.tenantId | quote }}
             {{ end }}
@@ -155,13 +189,10 @@ spec:
 
           resources:
             {{- toYaml .Values.outline.resources | nindent 12 }}
-
           readinessProbe:
             {{- toYaml .Values.outline.readinessProbe | nindent 12 }}
-
           livenessProbe:
             {{- toYaml .Values.outline.livenessProbe | nindent 12 }}
-
           volumeMounts:
             # Writable tmp dir (readOnlyRootFilesystem requires this)
             - name: tmp
@@ -170,7 +201,6 @@ spec:
             - name: outline-data
               mountPath: {{ .Values.outline.fileStorageLocalRootDir }}
             {{ end }}
-
       volumes:
         # Temporary directory for Node.js runtime (required with readOnlyRootFilesystem)
         - name: tmp
