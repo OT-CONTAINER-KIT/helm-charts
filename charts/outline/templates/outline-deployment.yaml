@@ -33,50 +33,11 @@ spec:
           labelSelector:
             matchLabels:
               app: outline
-      initContainers:
-        # Runs pending DB migrations BEFORE any app container starts.
-        # The app also auto-migrates on boot (backstop); this makes the
-        # ordering explicit and keeps slow migrations outside the
-        # liveness-probe window. Migrations are idempotent (SequelizeMeta
-        # table), so re-runs on pod restarts are safe.
-        - name: db-migrate
-          image: {{ .Values.outline.image }}
-          imagePullPolicy: {{ .Values.outline.imagePullPolicy | default "IfNotPresent" }}
-          command:
-            - /opt/outline/node_modules/.bin/sequelize
-            - db:migrate
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            capabilities:
-              drop:
-                - ALL
-          env:
-            - name: NODE_ENV
-              value: {{ .Values.outline.nodeEnv | quote }}
-            - name: PGSSLMODE
-              value: {{ .Values.outline.pgsslmode | quote }}
-            # Postgres (mirrors the app container's DATABASE_URL wiring)
-            {{ if .Values.postgres.enabled }}
-            - name: DATABASE_URL
-              value: "postgres://{{ .Values.postgres.username }}:{{ .Values.postgres.password }}@{{ .Release.Name }}-postgres:5432/{{ .Values.postgres.database }}"
-            {{ else }}
-            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: {{ default (printf "%s-postgres-external-secret" .Release.Name) .Values.postgres.external.existingSecret }}
-                  key: {{ default "DATABASE_URL" .Values.postgres.external.databaseUrlKey }}
-            {{ end }}
-          resources:
-            requests:
-              cpu: "250m"
-              memory: "512Mi"
-            limits:
-              cpu: "1"
-              memory: "2Gi"
-          volumeMounts:
-            - name: tmp
-              mountPath: /tmp
+      # No init container on purpose: the app runs pending migrations itself at
+      # boot (server/utils/startup.ts -> checkMigrations.ts) under a
+      # distributed "migrations" lock, so concurrent pods are serialized
+      # safely. It also honors PGSSLMODE natively (server/storage/database.ts),
+      # unlike the sequelize-cli path which needs --env production-ssl-disabled.
       containers:
         - name: outline
           image: {{ .Values.outline.image }}
