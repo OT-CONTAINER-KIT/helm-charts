@@ -1,7 +1,7 @@
 # outline — values.yaml
 
 outline:
-  image: outlinewiki/outline:0.82.0
+  image: outlinewiki/outline:1.11.0
   imagePullPolicy: IfNotPresent
   replicas: 2
   port: 3000
