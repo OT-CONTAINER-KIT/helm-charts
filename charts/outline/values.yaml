@@ -98,7 +98,7 @@ autoscaling:
   minReplicas: 2
   maxReplicas: 10
   cpu: 60
-  memory: 80
+  memory: 150
 
 backup:
   enabled: false
