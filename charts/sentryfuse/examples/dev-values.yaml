@@ -507,6 +507,15 @@ services:
     port: 8000
     existingSecrets:
     - sentryfuse-pr-reviewer
+    # AI review models on Amazon Bedrock (us-east-1): Qwen3-Coder-30B for most roles, Claude Haiku 4.5
+    # for security and the judge. These win over the same names in the Secret. AWS_ACCESS_KEY_ID and
+    # AWS_SECRET_ACCESS_KEY must be in the sentryfuse-pr-reviewer Secret (never in values or git).
+    env:
+      AI_PR_AGENTS_PROVIDER: bedrock
+      AI_PR_AGENTS_BEDROCK_REGION: us-east-1
+      AI_PR_AGENTS_MODEL: bedrock:qwen.qwen3-coder-30b-a3b-v1:0
+      AI_PR_AGENTS_SECURITY_MODEL: bedrock:us.anthropic.claude-haiku-4-5-20251001-v1:0
+      AI_PR_AGENTS_JUDGE_MODEL: bedrock:us.anthropic.claude-haiku-4-5-20251001-v1:0
     serviceAccount: {}
     resources:
       requests:
