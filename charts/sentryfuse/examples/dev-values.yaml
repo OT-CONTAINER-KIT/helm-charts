@@ -435,6 +435,7 @@ services:
       KAFKA_TOPIC_PREFIX: dev.
       # PRs above this many changed lines are not sent to the AI review (default 1500).
       AI_PR_REVIEWER_MAX_LINES: "5500"
+      AI_PR_REVIEWER_MAX_FILES: "200"
   api:
     enabled: true
     image:
